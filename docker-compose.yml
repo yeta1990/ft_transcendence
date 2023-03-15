@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+   node-app:
+        image: ft_transcendence
+        container_name: ft_transcendence
+        build: ./
+        ports:
+            - 3000:3000
+        restart: on-failure
+          #command: npm run start
+        volumes:
+            - trans_volume:/usr/src/app
+            - /usr/src/app/node_modules
+        tty: true
+
+volumes:
+    trans_volume:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: "${PWD}/srcs"
