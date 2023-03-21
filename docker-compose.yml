@@ -1,23 +1,52 @@
 version: "3"
 
 services:
-   node-app:
-        image: ft_transcendence
-        container_name: ft_transcendence
+    tx_nest:
+        image: tx_nest
+        container_name: tx_next
         build: ./
         ports:
             - 3000:3000
         restart: on-failure
-        command: npm run start
+        depends_on:
+            - tx_postgres
         volumes:
-            - trans_volume:/usr/src/app
-            - /usr/src/app/node_modules
+            - tx_nest_volume:/usr/src/app
         tty: true
+        networks:
+            - ft_transcendence
+
+    tx_postgres:
+         image: tx_postgres
+         container_name: tx_postgres
+         build: ./postgres
+         environment:
+           POSTGRES_PASSWORD: 1234
+           POSTGRES_USER: postgres
+           PGDATA: /var/lib/postgresql/data/database
+         ports:
+           - "5432:5432"
+         tty: true
+         volumes:
+           - tx_postgres_volume:/var/lib/postgresql/data
+         networks:
+           - ft_transcendence
 
 volumes:
-    trans_volume:
+    tx_nest_volume:
         driver: local
         driver_opts:
             type: none
             o: bind
             device: "${PWD}/srcs"
+    tx_postgres_volume:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: "${PWD}/postgres/"
+
+networks:
+  ft_transcendence:
+    name: ft_transcendence
+    driver: bridge
