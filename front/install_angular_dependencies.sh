@@ -8,12 +8,9 @@ echo 'N' | npm install -g @angular/cli
 ng analytics off
 if [ ! -d ./my-app ]
 then
-	echo "yeee"
 	ng new my-app --defaults
 fi
 
 cd my-app
 
-ng serve --host 0.0.0.0 --port 4200 -y
-
-tail -f /dev/null
+ng serve --host 0.0.0.0 --port 4200

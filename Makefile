@@ -22,8 +22,6 @@ clean:
 
 fclean:	clean
 	@rm -rf postgres/data/*
-	@docker image rm postgres 
-	@docker image rm tx_nest
 
 
 prune:

@@ -1,9 +1,25 @@
 version: "3"
 
 services:
+    tx_front:
+        image: tx_front
+        container_name: tx_front
+        build: ./front
+        ports:
+            - 4200:4200
+        depends_on:
+            - tx_nest
+        environment:
+            - NG_CLI_ANALYTICS="false"
+        restart: on-failure
+        volumes:
+            - tx_front_volume:/usr/src/app
+        tty: true
+        networks:
+            - ft_transcendence
     tx_nest:
         image: tx_nest
-        container_name: tx_next
+        container_name: tx_nest
         build: ./
         ports:
             - 3000:3000
@@ -45,6 +61,12 @@ volumes:
             type: none
             o: bind
             device: "${PWD}/postgres/"
+    tx_front_volume:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: "${PWD}/front"
 
 networks:
   ft_transcendence:
