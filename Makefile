@@ -22,7 +22,11 @@ clean:
 
 fclean:	clean
 	@rm -rf postgres/data/*
-
+	@rm -rf front/srcs/node_modules
+	@rm -rf front/srcs/.angular
+	@rm -rf front/srcs/package-lock.json
+	@rm -rf srcs/node_modules
+	@rm -rf srcs/package-lock.json
 
 prune:
 	@docker system prune -af

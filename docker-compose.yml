@@ -21,6 +21,8 @@ services:
         image: tx_nest
         container_name: tx_nest
         build: ./
+        env_file:
+            'srcs/.env'
         ports:
             - 3000:3000
         restart: on-failure
