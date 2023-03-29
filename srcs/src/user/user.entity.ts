@@ -6,22 +6,9 @@ export class User {
   id: number;
 
   @Column()
-  firstName: string;
-
-  @Column()
-  lastName: string;
-
-  @Column()
-  login: string;
+  nick: string;
 
   @Column()
   email: string;
-
-  @Column()
-  image: string;
-
-
-  @Column({ default: true })
-  isActive: boolean;
 }
 
