@@ -10,8 +10,7 @@ export class UserController {
 	findOne(@Param() params){
 		return {
 			id: params.id,
-			name: "pepe"	
+			name: "pepe"
 		}
 	}
-
 }
