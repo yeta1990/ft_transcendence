@@ -5,6 +5,7 @@ services:
         image: tx_front
         container_name: tx_front
         build: ./front
+        working_dir: /usr/src/app
         ports:
             - 4200:4200
         depends_on:
@@ -15,6 +16,7 @@ services:
         volumes:
             - tx_front_volume:/usr/src/app
         tty: true
+        user: "${UID}:${GID}"
         networks:
             - ft_transcendence
     tx_nest:

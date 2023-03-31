@@ -1,3 +1,6 @@
+export GID = $(shell id -g)
+export GID = $(shell id -g)
+
 all: clean build
 	@docker-compose up -d
 
@@ -35,5 +38,10 @@ space:
 	@docker system df
 
 re: fclean build
+
+front:
+	@docker-compose build --no-cache tx_front
+	@docker-compose up -d tx_front
+
 
 .PHONY:		all build up down logs clean fclean re space mariadb wordpress nginx
