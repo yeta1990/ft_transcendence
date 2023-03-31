@@ -1,1 +1,18 @@
-<p>form works!</p>
+
+
+<form #signupForm = "ngForm">
+  <br />
+  <label for="name">Nick </label>
+  <input id="name" [(ngModel)]="name" name = "name" placeholder="name">
+  <br />
+  <br />
+  <label for="email">Email</label>
+  <input id="email" name="email" [(ngModel)]="email" placeholder="email">
+</form>
+  <br />
+  <br />
+<button> Submit</button>
+
+<p>{{name}}</p>
+<p>{{email}}</p>
+<p>{{ signupForm.value | json }}</p>
