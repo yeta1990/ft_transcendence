@@ -1,18 +1,19 @@
 
 
-<form #signupForm = "ngForm">
-  <br />
-  <label for="name">Nick </label>
-  <input id="name" [(ngModel)]="name" name = "name" placeholder="name">
-  <br />
-  <br />
-  <label for="email">Email</label>
-  <input id="email" name="email" [(ngModel)]="email" placeholder="email">
+<form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+	<br />
+	<label for="name">Nick </label>
+	<input id="name" type="text" formControlName="name" placeholder="name">
+	<br />
+	<br />
+	<label for="email">Email</label>
+	<input id="email" type="text" formControlName="email" placeholder="email">
+	<br />
+	<br />
+	<button class="button" type="submit"> Submit</button>
 </form>
-  <br />
-  <br />
-<button> Submit</button>
 
-<p>{{name}}</p>
-<p>{{email}}</p>
+
+<p>{{ signupForm.value.name }}</p>
+<p>{{ signupForm.value.email }}</p>
 <p>{{ signupForm.value | json }}</p>
