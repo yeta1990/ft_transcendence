@@ -1,6 +1,5 @@
-
-<h1>Signup</h1>
-<form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+<h1>Login</h1>
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
 	<br />
 	<label for="nick">Nick </label>
 	<input id="nick" type="text" formControlName="nick" placeholder="nick">
@@ -14,7 +13,7 @@
 </form>
 
 
-<p>{{ signupForm.value.nick }}</p>
-<p>{{ signupForm.value.email }}</p>
-<p>{{ signupForm.value | json }}</p>
+<p>{{ loginForm.value.nick }}</p>
+<p>{{ loginForm.value.email }}</p>
+<p>{{ loginForm.value | json }}</p>
 <router-outlet></router-outlet>

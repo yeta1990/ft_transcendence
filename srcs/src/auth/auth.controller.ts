@@ -19,7 +19,7 @@ export class AuthController {
  * solicitud para verificar si el usuario es válido y, si es así, 
  * añade la información del usuario al objeto Request.
  */
-	@UseGuards(AuthGuard)
+	@UseGuards(AuthGuard) //restringimos el acceso a este endpoint si el usuario no tiene un token válido
 	@Get('profile')
 	getProfile(@Request() req) {
 		return req.user;
