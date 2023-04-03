@@ -11,6 +11,7 @@ import { User } from './user/user.entity'
 import { UserController } from './user/user.controller';
 import { UserService } from './user/user.service';
 import { UserModule } from './user/user.module';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { UserModule } from './user/user.module';
 		entities: [User],
 		synchronize: true, // creo que esto hay que cambiarlo para subirlo a producción
 	}),
+	HttpModule,
   ],
   controllers: [AppController, UserController],
   providers: [AppService]

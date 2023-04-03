@@ -13,8 +13,19 @@ export class AuthService {
 
 	constructor(private http: HttpClient) { }
 
+/*
+ *  old login function
+ *
 	login(nick: string, email: string){
 		return this.http.post<User>('http://localhost:3000/auth/login', {nick, email})
+			.pipe(tap((res: any) => this.setSession(res)))
+			.pipe(shareReplay())
+			//We are calling shareReplay to prevent the receiver of this Observable from accidentally triggering multiple POST requests due to multiple subscriptions.
+	}
+	*/
+
+	login(code: string){
+		return this.http.post<User>('http://localhost:3000/auth/login', {code})
 			.pipe(tap((res: any) => this.setSession(res)))
 			.pipe(shareReplay())
 			//We are calling shareReplay to prevent the receiver of this Observable from accidentally triggering multiple POST requests due to multiple subscriptions.

@@ -3,15 +3,25 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { User } from '../user/user.entity';
 
+interface LoginBody{
+	code: string;
+}
+
 @Controller('auth')
 export class AuthController {
 	constructor(private authService: AuthService) {}
 
 	@HttpCode(HttpStatus.OK)
 	@Post('login')
+	login(@Body() body: LoginBody)
+	{
+		return this.authService.signIn(body.code);
+	}
+	/*
 	signIn(@Body() signInDto: User) {
 		return this.authService.signIn(signInDto.nick, signInDto.email);
 	}
+	*/
 
 /*
  * El objeto Request "req" tiene un campo user que contiene el usuario autenticado. 

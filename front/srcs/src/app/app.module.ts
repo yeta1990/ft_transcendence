@@ -8,13 +8,15 @@ import { FormComponent } from './form/form.component';
 import { MyProfileComponent } from './my-profile/my-profile.component';
 import { LoginComponent } from './login/login.component';
 import {AuthInterceptor } from './auth.interceptor';
+import { CallbackComponent } from './callback/callback.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     FormComponent,
     MyProfileComponent,
-    LoginComponent
+    LoginComponent,
+    CallbackComponent
   ],
   imports: [
     FormsModule,
