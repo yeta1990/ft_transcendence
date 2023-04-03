@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotAcceptableException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './user.dto';
@@ -25,9 +25,12 @@ export class UserService {
     	})
 	}
 
-	public createUser(body: CreateUserDto): Promise<User>{
-		const user: User = new User();
+	public async createUser(body: CreateUserDto): Promise<User>{
+		const alreadyRegisteredUser: User = await this.getUserByNick(body.nick);
+		if (alreadyRegisteredUser)
+			throw new NotAcceptableException('User already registered', {cause: new Error(), description: 'User already registered'});
 
+		const user: User = new User();
 		user.nick = body.nick;
 		user.email = body.email;
 		return this.repository.save(user);
