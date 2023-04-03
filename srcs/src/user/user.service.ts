@@ -30,8 +30,11 @@ export class UserService {
 	}
 
 	public async createUser(body: CreateUserDto): Promise<User>{
-//		const alreadyRegisteredUser: User = await this.getUserByNick(body.nick);
-//		if (alreadyRegisteredUser)
+		const alreadyRegisteredUser: User = await this.getUserByNick(body.nick);
+		console.log("ye");
+		if (alreadyRegisteredUser)
+			return (alreadyRegisteredUser)
+
 //			throw new NotAcceptableException('User already registered', {cause: new Error(), description: 'User already registered'});
 
 //		const user: User = new User();

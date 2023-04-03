@@ -25,18 +25,4 @@ export class LoginComponent {
 
 	) {}
 
-	onSubmit(): void{
-		const val = this.loginForm.value;
-/*
-        if (val.email && val.nick) {
-            this.authService.login(val.nick, val.email)
-                .subscribe(
-                    () => {
-                        console.log("User is logged in");
-                        this.router.navigateByUrl('/my-profile');
-                    }
-                );
-        }
-        */
-	}
 }
