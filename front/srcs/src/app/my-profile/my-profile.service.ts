@@ -11,6 +11,6 @@ export class MyProfileService {
 	constructor(private httpClient: HttpClient) {}
 
 	getUserDetails(): Observable<User> {
-		return this.httpClient.get<User>('http://localhost:3000/auth/profile')
+		return this.httpClient.get<User>('http://localhost:3000/user')
 	}
 }

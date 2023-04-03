@@ -50,9 +50,6 @@ export class AuthService {
 			data = await this.confirmAuthFrom42(code);
 //			console.log(data);
 
-
-
-
 		}
 		catch(error){
 			throw new UnauthorizedException();
@@ -82,5 +79,10 @@ export class AuthService {
 			access_token: access_token,
 			expires_at: decoded.exp * 1000, //ms
 		};
+	}
+
+	getIdFromJwt(token: string): number{
+		const decoded: JwtPayload = this.jwtService.decode(token) as JwtPayload;
+		return parseInt(decoded.id)
 	}
 }
