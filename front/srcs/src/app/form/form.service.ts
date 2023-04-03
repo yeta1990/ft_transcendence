@@ -26,5 +26,6 @@ export class FormService {
 	addUser(user: User): Observable<User>{
 		return this.http.post<any>("http://localhost:3000/user", user)
 	}
-  constructor(private http: HttpClient) { }
+
+	constructor(private http: HttpClient) { }
 }

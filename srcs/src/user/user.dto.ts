@@ -1,10 +1,10 @@
 
 export class CreateUserDto{
-  id: number;
-  nick: string;
-  firstName: string;
-  lastName: string;
-  login: string;
-  email: string;
-  image: string;
+//  id: number;
+	nick: string;
+	email: string;
+	firstName: string;
+	lastName: string;
+	login: string;
+	image: string;
 }
