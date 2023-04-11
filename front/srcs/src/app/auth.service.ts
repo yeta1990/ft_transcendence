@@ -4,6 +4,7 @@ import { User } from './user';
 import { Observable } from "rxjs";
 import { tap, shareReplay } from "rxjs/operators";
 import * as moment from "moment";
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +26,7 @@ export class AuthService {
 	*/
 
 	login(code: string){
-		return this.http.post<User>('http://localhost:3000/auth/login', {code})
+		return this.http.post<User>(environment.apiUrl + '/auth/login', {code})
 			.pipe(tap((res: any) => this.setSession(res)))
 			.pipe(shareReplay())
 			//We are calling shareReplay to prevent the receiver of this Observable from accidentally triggering multiple POST requests due to multiple subscriptions.

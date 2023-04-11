@@ -31,7 +31,7 @@ export class UserService {
 
 	public async createUser(body: CreateUserDto): Promise<User>{
 		const alreadyRegisteredUser: User = await this.getUserByNick(body.nick);
-		console.log("ye");
+//		console.log("ye");
 		if (alreadyRegisteredUser)
 			return (alreadyRegisteredUser)
 

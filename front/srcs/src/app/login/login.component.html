@@ -1,6 +1,6 @@
 <h1>Login</h1>
 
-<button onclick="location.href='https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8a6f2fa2b390840637041ee38b7e930881c496975d8123b200f71aac854c7c02&redirect_uri=http%3A%2F%2Flocalhost%3A4200%2Fcallback&response_type=code'" type="button">
+<button (click)="goTo42Oauth()" type="button">
          Sign in with 42</button>
 
 <router-outlet></router-outlet>

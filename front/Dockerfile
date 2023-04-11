@@ -3,7 +3,6 @@ FROM node:18.10
 RUN npm install -g npm@9.6.2
 RUN npm install -g @angular/cli
 
-
 RUN mkdir /usr/src/app
 RUN chown -Rh $USER:$USER /usr/src/app
 

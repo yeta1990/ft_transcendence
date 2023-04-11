@@ -9,4 +9,5 @@ ng analytics off
 
 cd srcs
 npm install
-ng serve --host 0.0.0.0 --port 4200
+npm run start
+#ng serve --host 0.0.0.0 --port 4200
