@@ -10,8 +10,8 @@ services:
             - 4200:4200
         depends_on:
             - tx_nest
-        environment:
-            - NG_CLI_ANALYTICS="false"
+        env_file:
+            'front/.env'
         restart: on-failure
         volumes:
             - tx_front_volume:/usr/src/app

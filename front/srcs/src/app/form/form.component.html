@@ -1,9 +1,9 @@
 
-
+<h1>Signup</h1>
 <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
 	<br />
-	<label for="name">Nick </label>
-	<input id="name" type="text" formControlName="name" placeholder="name">
+	<label for="nick">Nick </label>
+	<input id="nick" type="text" formControlName="nick" placeholder="nick">
 	<br />
 	<br />
 	<label for="email">Email</label>
@@ -14,7 +14,9 @@
 </form>
 
 
-<p>{{ signupForm.value.name }}</p>
+
+
+<p>{{ signupForm.value.nick }}</p>
 <p>{{ signupForm.value.email }}</p>
 <p>{{ signupForm.value | json }}</p>
 <router-outlet></router-outlet>
