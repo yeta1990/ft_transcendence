@@ -8,6 +8,7 @@ const envConfigFile = `export const environment = {
    apiBaseUrl: '${process.env.BACKEND_IP}',
    apiUrl: '${process.env.BACKEND_IP}',
    frontendUrl: '${process.env.FRONTEND_URL}',
+   clientId42: '${process.env.CLIENT_ID_42}'
 };
 `;
 //console.log('The file `environment.ts` will be written with the following content: \n');
