@@ -28,8 +28,8 @@ export class UserController {
 	}
 
 	@Get('all')
-	public findAll(): string{
-		return "All users"
+	public findAll(): Promise<User[]> {
+		return this.service.getAllUsers();
 	}
 
 	@Get(':id')

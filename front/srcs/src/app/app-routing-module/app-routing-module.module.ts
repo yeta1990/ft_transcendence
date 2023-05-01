@@ -5,6 +5,7 @@ import { FormComponent } from '../form/form.component'
 import { LoginComponent } from '../login/login.component';
 import { CallbackComponent } from '../callback/callback.component';
 import { AuthGuardService as AuthGuard } from '../auth-guard.service';
+import { AllUsersComponent } from '../all-users/all-users.component'
 
 const routes: Routes = [
 	{	path: '', component: FormComponent } ,
@@ -14,7 +15,12 @@ const routes: Routes = [
 		canActivate: [AuthGuard] 
 	},
 	{	path: 'login', component: LoginComponent },
-	{	path: 'callback', component: CallbackComponent }
+	{	path: 'callback', component: CallbackComponent },
+	{	
+		path: 'all-users', 
+		component: AllUsersComponent, 
+		canActivate: [AuthGuard] 
+	}
 ];
 
 @NgModule({

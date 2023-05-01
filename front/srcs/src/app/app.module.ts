@@ -9,6 +9,7 @@ import { MyProfileComponent } from './my-profile/my-profile.component';
 import { LoginComponent } from './login/login.component';
 import {AuthInterceptor } from './auth.interceptor';
 import { CallbackComponent } from './callback/callback.component';
+import { AllUsersComponent } from './all-users/all-users.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { CallbackComponent } from './callback/callback.component';
     FormComponent,
     MyProfileComponent,
     LoginComponent,
-    CallbackComponent
+    CallbackComponent,
+    AllUsersComponent
   ],
   imports: [
     FormsModule,

@@ -32,4 +32,8 @@ export class MyProfileComponent implements OnInit {
 	ngOnInit(): void {	
 
 	}
+	allUsers(): void {
+		console.log("All users login list:");
+		this.router.navigateByUrl('/all-users');
+	}
 }
