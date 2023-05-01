@@ -14,7 +14,7 @@ import { AuthService } from '../auth.service';
 export class AllUsersComponent {
 
 	users: User[] | undefined;
-	userList: string[] | undefined;
+
 	constructor(
 		private profileService: AllUsersService,
 		private authService: AuthService,
@@ -26,4 +26,10 @@ export class AllUsersComponent {
 			});
 	}
 
+	getId(id: number): any {
+		console.log("Id: " + id);
+		this.router.navigateByUrl('/user-profile/' + id);
+		return id;
+	}
 }
+

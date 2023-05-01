@@ -6,6 +6,8 @@ import { LoginComponent } from '../login/login.component';
 import { CallbackComponent } from '../callback/callback.component';
 import { AuthGuardService as AuthGuard } from '../auth-guard.service';
 import { AllUsersComponent } from '../all-users/all-users.component'
+import { UserProfileComponent } from '../user-profile/user-profile.component'
+
 
 const routes: Routes = [
 	{	path: '', component: FormComponent } ,
@@ -19,6 +21,11 @@ const routes: Routes = [
 	{	
 		path: 'all-users', 
 		component: AllUsersComponent, 
+		canActivate: [AuthGuard] 
+	},
+	{	
+		path: 'user-profile/:id', 
+		component: UserProfileComponent, 
 		canActivate: [AuthGuard] 
 	}
 ];
