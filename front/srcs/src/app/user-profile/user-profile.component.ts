@@ -3,6 +3,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { User } from '../user';
 import { UserProfileService } from './user-profile.service';
 import { AuthService } from '../auth.service';
+import { environment } from '../../environments/environment';
+
 
 @Component({
   selector: 'app-user-profile',
@@ -17,7 +19,7 @@ export class UserProfileComponent {
 		private profileService: UserProfileService,
 		private authService: AuthService,
 		private router: Router,
-    private activateroute: ActivatedRoute
+    	private activateroute: ActivatedRoute,
 	){
 		this.profileService.getUserProfile(parseInt(this.activateroute.snapshot.paramMap.get('id') || '0'))
 			.subscribe((response: User) => {
