@@ -5,7 +5,6 @@ import { AllUsersService } from './all-users.service';
 import { AuthService } from '../auth.service';
 
 
-
 @Component({
   selector: 'app-all-users',
   templateUrl: './all-users.component.html',
@@ -25,11 +24,14 @@ export class AllUsersComponent {
 				this.users = response;
 			});
 	}
-
 	getId(id: number): any {
 		console.log("Id: " + id);
 		this.router.navigateByUrl('/user-profile/' + id);
 		return id;
 	}
+	goHome(): void{
+		console.log("Home");
+			this.router.navigateByUrl('');
+	  }
 }
 
