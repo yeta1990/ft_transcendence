@@ -1,8 +1,8 @@
+<button class="button" (click)="allUsers()"> Users</button>
 <h1>{{user?.nick}}</h1>
 <div>User ID: {{user?.id}} </div>
 <div>Nick: {{user?.nick}} </div>
 <div>First name: {{user?.firstName}} </div>
 <div>Last name: {{user?.lastName}} </div>
 <div><img src={{user?.image}} /></div>
-<a href="http://localhost:4200/all-users">back</a>
 <router-outlet>

@@ -27,4 +27,8 @@ export class UserProfileComponent {
         console.log(this.user.nick);
 			});
 	}
+	allUsers(): void {
+		console.log("All users login list:");
+		this.router.navigateByUrl('/all-users');
+	}
 }
