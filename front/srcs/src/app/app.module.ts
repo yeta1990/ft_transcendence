@@ -11,6 +11,7 @@ import {AuthInterceptor } from './auth.interceptor';
 import { CallbackComponent } from './callback/callback.component';
 import { AllUsersComponent } from './all-users/all-users.component';
 import { UserProfileComponent } from './user-profile/user-profile.component';
+import { HomeComponent } from './home/home.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { UserProfileComponent } from './user-profile/user-profile.component';
     LoginComponent,
     CallbackComponent,
     AllUsersComponent,
-    UserProfileComponent
+    UserProfileComponent,
+    HomeComponent
   ],
   imports: [
     FormsModule,

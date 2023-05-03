@@ -7,10 +7,12 @@ import { CallbackComponent } from '../callback/callback.component';
 import { AuthGuardService as AuthGuard } from '../auth-guard.service';
 import { AllUsersComponent } from '../all-users/all-users.component'
 import { UserProfileComponent } from '../user-profile/user-profile.component'
+import { HomeComponent } from '../home/home.component';
 
 
 const routes: Routes = [
-	{	path: '', component: FormComponent } ,
+	{	path: '',  component: HomeComponent},
+	{	path: 'form', component: FormComponent } ,
 	{	
 		path: 'my-profile', 
 		component: MyProfileComponent, 
