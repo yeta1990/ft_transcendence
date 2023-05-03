@@ -5,7 +5,6 @@
 ########################### Vars ###########################
 
 export GID = $(shell id -g)
-export GID = $(shell id -g) # ¿Repetido?
 NAME = ft_trasncendence
 
 ########################## Colors ##########################
@@ -24,8 +23,7 @@ END = \033[0m
 ########################## Rules ##########################
 
 
-all: clean build ## Builds and starts FT_TRASCENDENCE.
-	$(MAKE) composeup
+all: clean build composeup ## Builds and starts FT_TRASCENDENCE.
 
 build: ## Builds images before starting containers.
 	@echo "\n$(GR)[$(B)'$(NAME)': $(GR)Building Docker-Compose. Please wait...          ]${END}"
