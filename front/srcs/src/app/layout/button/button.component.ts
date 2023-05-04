@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../auth.service';
 
 @Component({
   selector: 'app-button',
@@ -8,11 +9,21 @@ import { Router } from '@angular/router';
 })
 export class ButtonComponent {
 
+  @Input() dir: string = '';
+  @Input() value: string = '';
+  @Input() clas: string = '';
+
   constructor(
+    private authService: AuthService,
 		private router: Router
 	){}
-   goTo(dir: string): void{
-    console.log("Go to: " + dir);
-		this.router.navigateByUrl(dir);
+   goTo(): void{
+    console.log("Go to: " + this.dir);
+		this.router.navigateByUrl(this.dir);
   }
+  logout(): void {
+		console.log("log out");
+		this.authService.logout();
+		this.router.navigateByUrl('/login');
+	}
 }

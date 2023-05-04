@@ -17,7 +17,8 @@ import { AppComponent } from '../app.component';
     CommonModule
   ],
   exports: [
-    ButtonComponent
+    ButtonComponent,
+    NavBarComponent
   ],
   providers: [
     {

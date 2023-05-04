@@ -1,0 +1,22 @@
+/* Add a black background color to the top navigation */
+.topnav {
+    background-color: #333;
+    overflow: hidden;
+}
+
+.normal{
+   /* float: left;*/
+    color: #2614e4;
+    text-align: center;
+    padding: 20px 10px;
+    text-decoration: none;
+    font-size: 17px;
+}
+.right{
+     float: right;
+     color: #2614e4;
+     text-align: center;
+     /*padding: 20px 1px;*/
+     text-decoration: none;
+     font-size: 17px;
+ }
