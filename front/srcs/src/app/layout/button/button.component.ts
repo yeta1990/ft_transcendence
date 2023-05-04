@@ -11,7 +11,7 @@ export class ButtonComponent {
 
   @Input() dir: string = '';
   @Input() value: string = '';
-  @Input() clas: string = '';
+  @Input() clss: string = '';
 
   constructor(
     private authService: AuthService,
