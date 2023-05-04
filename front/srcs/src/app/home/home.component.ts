@@ -15,10 +15,6 @@ export class HomeComponent {
 		private authService: AuthService,
 		private router: Router
 	){}
-  goHome(): void{
-    console.log("Home");
-		this.router.navigateByUrl('');
-  }
   allUsers(): void {
 		console.log("All users login list:");
 		this.router.navigateByUrl('/all-users');

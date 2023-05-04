@@ -12,6 +12,7 @@ import { CallbackComponent } from './callback/callback.component';
 import { AllUsersComponent } from './all-users/all-users.component';
 import { UserProfileComponent } from './user-profile/user-profile.component';
 import { HomeComponent } from './home/home.component';
+import { LayoutModule } from './layout/layout.module';
 
 @NgModule({
   declarations: [
@@ -22,14 +23,15 @@ import { HomeComponent } from './home/home.component';
     CallbackComponent,
     AllUsersComponent,
     UserProfileComponent,
-    HomeComponent
+    HomeComponent,
   ],
   imports: [
     FormsModule,
     BrowserModule,
     HttpClientModule,
     ReactiveFormsModule,
-    AppRoutingModule
+    AppRoutingModule,
+    LayoutModule
   ],
   providers: [
   {
