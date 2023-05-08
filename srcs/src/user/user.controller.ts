@@ -26,7 +26,7 @@ export class UserController {
 	public whoAmI(@UserId() id: number): Promise<User>{
 		return this.getUser(id);
 	}
-
+ 
 	@Get('all')
 	public findAll(): Promise<User[]> {
 		return this.service.getAllUsers();

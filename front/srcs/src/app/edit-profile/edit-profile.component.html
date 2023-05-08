@@ -3,7 +3,7 @@
 <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
 	<br />
     <label class="tab" for="name">Name :</label>
-	<input id="name" type="text" formControlName="name" placeholder={{user?.firstName}}>
+	<input id="name" type="text" formControlName="firstName" placeholder={{user?.firstName}}>
 	<br />
 	<br />
     <label class="tab" for="lastName">Last Name :</label>
@@ -19,4 +19,4 @@
 	<br />
 	<br />
 	<button class="button" type="submit">Submit</button>
-</form>
+</form> 
