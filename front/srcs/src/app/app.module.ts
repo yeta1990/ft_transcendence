@@ -13,6 +13,7 @@ import { AllUsersComponent } from './all-users/all-users.component';
 import { UserProfileComponent } from './user-profile/user-profile.component';
 import { HomeComponent } from './home/home.component';
 import { LayoutModule } from './layout/layout.module';
+import { EditProfileComponent } from './edit-profile/edit-profile.component';
 
 @NgModule({
   declarations: [
@@ -24,6 +25,7 @@ import { LayoutModule } from './layout/layout.module';
     AllUsersComponent,
     UserProfileComponent,
     HomeComponent,
+    EditProfileComponent,
   ],
   imports: [
     FormsModule,

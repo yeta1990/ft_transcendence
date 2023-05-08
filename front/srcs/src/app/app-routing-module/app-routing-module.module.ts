@@ -8,6 +8,7 @@ import { AuthGuardService as AuthGuard } from '../auth-guard.service';
 import { AllUsersComponent } from '../all-users/all-users.component'
 import { UserProfileComponent } from '../user-profile/user-profile.component'
 import { HomeComponent } from '../home/home.component';
+import { EditProfileComponent } from '../edit-profile/edit-profile.component';
 
 
 const routes: Routes = [
@@ -30,7 +31,12 @@ const routes: Routes = [
 		path: 'user-profile/:id', 
 		component: UserProfileComponent, 
 		canActivate: [AuthGuard] 
-	}
+	},
+	{	
+		path: 'my-profile/edit', 
+		component: EditProfileComponent, 
+		canActivate: [AuthGuard] 
+	},
 ];
 
 @NgModule({
