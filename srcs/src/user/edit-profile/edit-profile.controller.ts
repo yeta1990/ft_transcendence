@@ -12,7 +12,6 @@ export class EditProfileController {
 	@UseGuards(AuthGuard)
     @Post('user/edit')
     public edit(@Body() user: User, @UserId() id: number): Promise<User> {
-        console.log(user);
         return(this.service.editProfile(user, id));
     } 
 }

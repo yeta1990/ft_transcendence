@@ -41,15 +41,17 @@ export class EditProfileComponent implements  OnInit {
   }
 
   onSubmit(): void {
-    console.log(this.editForm.get('name')?.value);
-    console.log(environment.apiUrl + '/edit-profile/user/edit');
-    //this.router.navigateByUrl('/my-profile');
-    //this.httpClient.post<User>(environment.apiUrl + '/edit-profile/user/edit', JSON.stringify(this.user))
-    this.httpClient.post<User>(environment.apiUrl + '/edit-profile/user/edit', Object.assign(JSON.stringify(this.user), this.editForm.value))
-
-   // this.httpClient.get<User>(environment.apiUrl + '/edit-profile/user/edit')
-    .subscribe((response: User) =>console.log(response))//,
-      //error => console.log(error));
+    this.newUser = this.user;
+    if (this.newUser) {
+      this.newUser.firstName = this.editForm.get('firstName')?.value!;
+      this.newUser.lastName = this.editForm.get('lastName')?.value!;
+      this.newUser.nick = this.editForm.get('nick')?.value!;
+      this.newUser.email = this.editForm.get('email')?.value!;
+    }
+    this.httpClient.post<User>(environment.apiUrl + '/edit-profile/user/edit', this.newUser)
+    .subscribe((response: User) =>console.log(response))
+    console.log(this.newUser);
+    this.router.navigateByUrl('/my-profile');
   }
 
   async ngOnInit(): Promise<void> {
@@ -60,7 +62,6 @@ export class EditProfileComponent implements  OnInit {
           this.editForm.controls['lastName'].setValue(this.user!.lastName);
           this.editForm.controls['nick'].setValue(this.user!.nick);
           this.editForm.controls['email'].setValue(this.user!.email);
-         // console.log(this.user.firstName);
         });
   }
 }
