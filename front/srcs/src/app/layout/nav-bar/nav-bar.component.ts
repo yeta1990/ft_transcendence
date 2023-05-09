@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { LoginComponent } from 'src/app/login/login.component';
 
 @Component({
   selector: 'app-nav-bar',
@@ -7,4 +8,10 @@ import { Component, Input } from '@angular/core';
 })
 export class NavBarComponent {
 
+  //@Input() public isUserLoggedIn: boolean = false;
+  //constructor(
+  //  private login: LoginComponent
+  //){
+   // this.isUserLoggedIn = login.isUserLoggedIn;
+  //}
 }
