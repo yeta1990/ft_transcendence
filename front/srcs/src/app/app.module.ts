@@ -14,6 +14,7 @@ import { UserProfileComponent } from './user-profile/user-profile.component';
 import { HomeComponent } from './home/home.component';
 import { LayoutModule } from './layout/layout.module';
 import { EditProfileComponent } from './edit-profile/edit-profile.component';
+import { LogoutComponent } from './logout/logout.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { EditProfileComponent } from './edit-profile/edit-profile.component';
     UserProfileComponent,
     HomeComponent,
     EditProfileComponent,
+    LogoutComponent,
   ],
   imports: [
     FormsModule,

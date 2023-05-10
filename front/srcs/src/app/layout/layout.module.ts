@@ -5,7 +5,7 @@ import { NavBarComponent } from './nav-bar/nav-bar.component';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import {AuthInterceptor } from '../auth.interceptor';
 import { AppComponent } from '../app.component';
-
+import { LoginComponent } from '../login/login.component';
 
 
 @NgModule({
@@ -24,9 +24,11 @@ import { AppComponent } from '../app.component';
     {
     provide: HTTP_INTERCEPTORS,
     useClass: AuthInterceptor,
-    multi: true
+    multi: true,
     },
+    LoginComponent
     ],
     bootstrap: [AppComponent]
+
 })
 export class LayoutModule { }

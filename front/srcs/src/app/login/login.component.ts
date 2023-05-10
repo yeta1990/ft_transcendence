@@ -13,7 +13,7 @@ import { environment } from '../../environments/environment';
 })
 export class LoginComponent {
 
-	//@Input() public isUserLoggedIn: boolean = false;
+	@Input() public isUserLoggedIn: boolean = false;
 
 	loginForm = this.formBuilder.group({
 		nick: '',
@@ -28,7 +28,14 @@ export class LoginComponent {
 	) {}
 
 	goTo42Oauth(): void{
+		this.isUserLoggedIn = true;
+		console.log("1--> " + this.isUserLoggedIn);
 		window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id='+ environment.clientId42 +'&redirect_uri=' + environment.frontendUrl + '/callback&response_type=code';
+		//this.isUserLoggedIn = true;
+		// if (window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id='+ environment.clientId42 +'&redirect_uri=' + environment.frontendUrl + '/callback&response_type=code'){
+		// 	this.isUserLoggedIn = true;
+		//console.log("1--> " + this.isUserLoggedIn);
+		// }
 	}
 
 

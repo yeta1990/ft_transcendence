@@ -8,10 +8,11 @@ import { LoginComponent } from 'src/app/login/login.component';
 })
 export class NavBarComponent {
 
-  //@Input() public isUserLoggedIn: boolean = false;
-  //constructor(
-  //  private login: LoginComponent
-  //){
-   // this.isUserLoggedIn = login.isUserLoggedIn;
-  //}
+  @Input() public isUserLogged: boolean;
+   constructor(
+       private log: LoginComponent
+   ){
+    this.isUserLogged = log.isUserLoggedIn;
+    console.log(this.isUserLogged);
+  }
 }
