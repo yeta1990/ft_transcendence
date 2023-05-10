@@ -4,17 +4,18 @@ services:
     tx_front:
         image: tx_front
         container_name: tx_front
-        build: ./front
+        build: ./frontend
         working_dir: /usr/src/app
         ports:
             - 4200:4200
         depends_on:
             - tx_nest
         env_file:
-            'front/.env'
+            'frontend/.env'
         restart: on-failure
         volumes:
             - tx_front_volume:/usr/src/app
+            - tx_shared_volume:/usr/src/app/shared
         tty: true
         user: "${UID}:${GID}"
         networks:
@@ -24,14 +25,16 @@ services:
         container_name: tx_nest
         build: ./
         env_file:
-            'srcs/.env'
+            'backend/.env'
         ports:
             - 3000:3000
         restart: on-failure
         depends_on:
             - tx_postgres
+            - tx_shared
         volumes:
             - tx_nest_volume:/usr/src/app
+            - tx_shared_volume:/usr/src/app/shared
         tty: true
         networks:
             - ft_transcendence
@@ -39,7 +42,7 @@ services:
     tx_postgres:
          image: tx_postgres
          container_name: tx_postgres
-         build: ./postgres
+         build: ./database
          environment:
            POSTGRES_PASSWORD: 1234
            POSTGRES_USER: postgres
@@ -52,25 +55,44 @@ services:
          networks:
            - ft_transcendence
 
+    tx_shared:
+          image: tx_shared
+          container_name: tx_shared
+          build: ./shared
+          working_dir: /usr/src/app/shared
+          ports:
+            - "4000:4000"
+          tty: true
+          volumes:
+            - tx_shared_volume:/usr/src/app/shared
+          networks:
+            - ft_transcendence
+
 volumes:
     tx_nest_volume:
         driver: local
         driver_opts:
             type: none
             o: bind
-            device: "${PWD}/srcs"
+            device: "${PWD}/backend"
     tx_postgres_volume:
         driver: local
         driver_opts:
             type: none
             o: bind
-            device: "${PWD}/postgres/"
+            device: "${PWD}/database/"
     tx_front_volume:
         driver: local
         driver_opts:
             type: none
             o: bind
-            device: "${PWD}/front"
+            device: "${PWD}/frontend"
+    tx_shared_volume:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: "${PWD}/shared"
 
 networks:
   ft_transcendence:
