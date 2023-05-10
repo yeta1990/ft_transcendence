@@ -16,9 +16,15 @@
    </style>
 <app-nav-bar/>
 <p>Users:</p>
-<ul>
-   <li *ngFor="let u of users">
-        <button class="button button1" (click)="getId(u.id)">{{u.nick}}</button>
-   </li>
-</ul>
+<frame class="frame">
+   <div class="column_picture">
+         
+   </div>
+   <ul>
+      <li *ngFor="let u of users">
+         <button class="button button1" (click)="getId(u.id)">{{u.nick}}</button>
+      </li>
+   </ul>
+   
+</frame>
 <router-outlet>
