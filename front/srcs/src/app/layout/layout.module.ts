@@ -5,7 +5,7 @@ import { NavBarComponent } from './nav-bar/nav-bar.component';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import {AuthInterceptor } from '../auth.interceptor';
 import { AppComponent } from '../app.component';
-import { LoginComponent } from '../login/login.component';
+import { AuthService } from '../auth.service';
 
 
 @NgModule({
@@ -26,7 +26,7 @@ import { LoginComponent } from '../login/login.component';
     useClass: AuthInterceptor,
     multi: true,
     },
-    LoginComponent
+    AuthService
     ],
     bootstrap: [AppComponent]
 

@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { LoginComponent } from 'src/app/login/login.component';
+import { AuthService } from 'src/app/auth.service';
 
 @Component({
   selector: 'app-nav-bar',
@@ -10,9 +10,11 @@ export class NavBarComponent {
 
   @Input() public isUserLogged: boolean;
    constructor(
-       private log: LoginComponent
-   ){
-    this.isUserLogged = log.isUserLoggedIn;
-    console.log(this.isUserLogged);
+       private authservice: AuthService
+    ) {
+      this.isUserLogged = authservice.isLoggedIn();
+    }
+  logout() {
+    this.authservice.logout();
   }
 }

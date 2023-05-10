@@ -17,13 +17,11 @@
 <app-nav-bar/>
 <p>Users:</p>
 <frame class="frame">
-   <div class="column_picture">
-         
-   </div>
    <ul>
-      <li *ngFor="let u of users">
-         <button class="button button1" (click)="getId(u.id)">{{u.nick}}</button>
-      </li>
+      <li *ngFor="let u of users"><div (click)="getId(u.id)">
+         <img class="rect avatar" src={{u?.image}} alt=''/>
+         <button class="user" (click)="getId(u.id)">{{u.nick}}</button>
+      </div></li>
    </ul>
    
 </frame>

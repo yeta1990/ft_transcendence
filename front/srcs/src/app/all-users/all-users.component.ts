@@ -29,9 +29,5 @@ export class AllUsersComponent {
 		this.router.navigateByUrl('/user-profile/' + id);
 		return id;
 	}
-	goHome(): void{
-		console.log("Home");
-			this.router.navigateByUrl('');
-	  }
 }
 

@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule ,ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -14,8 +14,8 @@ import { UserProfileComponent } from './user-profile/user-profile.component';
 import { HomeComponent } from './home/home.component';
 import { LayoutModule } from './layout/layout.module';
 import { EditProfileComponent } from './edit-profile/edit-profile.component';
-import { LogoutComponent } from './logout/logout.component';
 import { ErrorInterceptor } from './error-interception/error.interceptor';
+import { GlobalErrorHandler } from './error-interception/global-error-handler.service';
 
 @NgModule({
   declarations: [
@@ -27,8 +27,7 @@ import { ErrorInterceptor } from './error-interception/error.interceptor';
     AllUsersComponent,
     UserProfileComponent,
     HomeComponent,
-    EditProfileComponent,
-    LogoutComponent,
+    EditProfileComponent
   ],
   imports: [
     FormsModule,
@@ -39,6 +38,7 @@ import { ErrorInterceptor } from './error-interception/error.interceptor';
     LayoutModule
   ],
   providers: [
+  { provide: ErrorHandler, useClass: GlobalErrorHandler },
   {
 	provide: HTTP_INTERCEPTORS,
 	useClass: AuthInterceptor,
