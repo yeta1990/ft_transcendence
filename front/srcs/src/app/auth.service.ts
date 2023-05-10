@@ -5,6 +5,7 @@ import { Observable } from "rxjs";
 import { tap, shareReplay } from "rxjs/operators";
 import * as moment from "moment";
 import { environment } from '../environments/environment';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,9 @@ import { environment } from '../environments/environment';
 
 export class AuthService {
 
-	constructor(private http: HttpClient) { }
+	constructor(
+        private http: HttpClient,
+        private router: Router,) { }
 
 /*
  *  old login function
@@ -35,6 +38,7 @@ export class AuthService {
 	logout() {
         localStorage.removeItem("access_token");
         localStorage.removeItem("expires_at");
+        this.router.navigateByUrl('/login');
     }
 
 	private setSession(authResult: any) {
