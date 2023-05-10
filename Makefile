@@ -64,10 +64,10 @@ clean: ## Stop containers. Remove containers. Remove data folders. Remove all un
 
 fclean:	clean ## Cleans and removes development folders and files.
 	@echo "\n$(GR)[Cleaning $(B)'Develop Folders'$(GR). Please wait...                  ]${END}"
-	@rm -rf postgres/data/*
-	@rm -rf front/srcs/node_modules
-	@rm -rf front/srcs/.angular
-	@rm -rf front/srcs/package-lock.json
+	@rm -rf database/data/*
+	@rm -rf frontend/srcs/node_modules
+	@rm -rf frontend/srcs/.angular
+	@rm -rf frontend/srcs/package-lock.json
 	@rm -rf srcs/node_modules
 	@rm -rf srcs/package-lock.json
 	@echo "$(G)[Removed $(B) Folders $(G)successfully                                   ]$(END)\n"

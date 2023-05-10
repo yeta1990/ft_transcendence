@@ -10,7 +10,7 @@ RUN chown -Rh $USER:$USER /usr/src/app
 USER $USER
 WORKDIR /usr/src/app
 ARG NG_CLI_ANALYTICS="false"
-COPY ./srcs/package.json .
+COPY ./src/package.json .
 #RUN ng new angulardockerproject
 COPY ./install_angular_dependencies.sh /
 EXPOSE 4200
