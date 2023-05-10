@@ -15,6 +15,7 @@ import { HomeComponent } from './home/home.component';
 import { LayoutModule } from './layout/layout.module';
 import { EditProfileComponent } from './edit-profile/edit-profile.component';
 import { LogoutComponent } from './logout/logout.component';
+import { ErrorInterceptor } from './error-interception/error.interceptor';
 
 @NgModule({
   declarations: [
@@ -43,6 +44,11 @@ import { LogoutComponent } from './logout/logout.component';
 	useClass: AuthInterceptor,
 	multi: true
   },
+  {
+    provide: HTTP_INTERCEPTORS,
+    useClass: ErrorInterceptor,
+    multi: true
+    },
   ],
   bootstrap: [AppComponent]
 })
