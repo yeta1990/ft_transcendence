@@ -31,7 +31,6 @@ services:
         restart: on-failure
         depends_on:
             - tx_postgres
-            - tx_shared
         volumes:
             - tx_nest_volume:/usr/src/app
             - tx_shared_volume:/usr/src/app/shared
@@ -54,19 +53,6 @@ services:
            - tx_postgres_volume:/var/lib/postgresql/data
          networks:
            - ft_transcendence
-
-    tx_shared:
-          image: tx_shared
-          container_name: tx_shared
-          build: ./shared
-          working_dir: /usr/src/app/shared
-          ports:
-            - "4000:4000"
-          tty: true
-          volumes:
-            - tx_shared_volume:/usr/src/app/shared
-          networks:
-            - ft_transcendence
 
 volumes:
     tx_nest_volume:
