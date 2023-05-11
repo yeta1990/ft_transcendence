@@ -1,0 +1,15 @@
+{
+	"name": "shared",
+	"version": "1.0.0",
+	"description": "A package with shared resources",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+	  "build": "tsc"
+	},
+	"dependencies": {},
+	"devDependencies": {
+	  "typescript": "^4.7.4"
+	}
+  }
+  

@@ -1,4 +1,4 @@
-import { Component, OnInit, } from '@angular/core';
+import { Component, OnInit, } from '@angular/core'; 
 import { FormBuilder } from '@angular/forms';
 import { EditProfileService } from './edit-profile.service';
 import { Router } from '@angular/router';
@@ -7,7 +7,6 @@ import { User } from '../user';
 import { MyProfileService } from '../my-profile/my-profile.service';
 import { HttpHeaders, HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-
 
 @Component({
   selector: 'app-edit-profile',

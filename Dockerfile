@@ -6,7 +6,7 @@ RUN chown -Rh $user:$user /usr/src/app
 USER $user
 
 WORKDIR /usr/src/app
-COPY ./srcs/package.json /usr/src/app
+COPY ./backend/package.json /usr/src/app
 
 RUN npm install -g npm@9.6.2
 RUN npm i -g @nestjs/cli

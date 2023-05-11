@@ -1,19 +1,29 @@
+export enum UserStatus {
+	OFFLINE,
+	ONLINE,
+	LOBBY,
+	PLAYING,
+	SPECTATING
+}
+
 export class User {
 	id: number;
 	nick: string;
 	firstName: string;
 	lastName: string;
-	email: string;
-	image: string;
 	login: string;
+	image: string;
+	status: UserStatus;
+	email: string;
 
 	constructor(model: User) {
 		this.id = model && model.id;
+		this.nick = model && model.nick;
 		this.firstName = model && model.firstName;
 		this.lastName = model && model.lastName;
-		this.nick = model && model.nick;
-		this.email = model && model.email;
-		this.image = model && model.image;
 		this.login = model && model.login;
+		this.image = model && model.image;
+		this.status = model && model.status;
+		this.email = model && model.email;
 	}
 }
