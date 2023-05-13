@@ -19,14 +19,15 @@
     "@angular/platform-browser": "^15.2.0",
     "@angular/platform-browser-dynamic": "^15.2.0",
     "@angular/router": "^15.2.0",
+    "colors": "^1.1.2",
+    "dotenv": "^5.0.0",
+    "jwt-decode": "^3.1.2",
     "moment": "^2.29.4",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0",
-    "zone.js": "~0.12.0",
-    "colors": "^1.1.2",
-    "dotenv":"^5.0.0",
+    "shared": "file:/shared",
     "ts-node": "~5.0.1",
-    "shared": "file:/shared"
+    "tslib": "^2.3.0",
+    "zone.js": "~0.12.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^15.2.4",
