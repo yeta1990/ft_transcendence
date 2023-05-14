@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule, CanActivate } from '@angular/router';
+import { Routes, RouterModule } from '@angular/router';
 import { MyProfileComponent } from '../my-profile/my-profile.component'
 import { FormComponent } from '../form/form.component'
 import { LoginComponent } from '../login/login.component';
 import { CallbackComponent } from '../callback/callback.component';
+import { ChatComponent } from '../chat/chat.component';
 import { AuthGuardService as AuthGuard } from '../auth-guard.service';
 
 //routes are doubly protected:
@@ -18,6 +19,11 @@ import { AuthGuardService as AuthGuard } from '../auth-guard.service';
 // the user will be redirected to login page
 const routes: Routes = [
 	{	path: '', component: FormComponent } ,
+	{	
+		path: 'chat', 
+		component: ChatComponent, 
+		canActivate: [AuthGuard] 
+	},
 	{	path: 'login', component: LoginComponent },
 	{
 		path: 'my-profile',
