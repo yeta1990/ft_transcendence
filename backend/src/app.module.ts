@@ -12,6 +12,7 @@ import { UserController } from './user/user.controller';
 import { UserService } from './user/user.service';
 import { UserModule } from './user/user.module';
 import { HttpModule } from '@nestjs/axios';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { HttpModule } from '@nestjs/axios';
 		synchronize: true, // creo que esto hay que cambiarlo para subirlo a producción
 	}),
 	HttpModule,
+	EventsModule,
   ],
   controllers: [AppController, UserController],
   providers: [AppService]
