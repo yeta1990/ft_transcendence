@@ -11,11 +11,9 @@ import { LoginComponent } from './login/login.component';
 import { CallbackComponent } from './callback/callback.component';
 import { interceptorProviders } from './app.interceptors';
 import { ChatComponent } from './chat/chat.component';
-import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 
 import { environment } from '../environments/environment'
 
-const socketConfig: SocketIoConfig = { url: environment.apiUrl, options: {} };
 
 @NgModule({
   declarations: [
@@ -32,7 +30,6 @@ const socketConfig: SocketIoConfig = { url: environment.apiUrl, options: {} };
     HttpClientModule,
     ReactiveFormsModule,
     AppRoutingModule,
-    SocketIoModule.forRoot(socketConfig)
   ],
   providers: [
 	interceptorProviders
