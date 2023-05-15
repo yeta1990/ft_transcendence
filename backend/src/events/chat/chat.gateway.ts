@@ -3,6 +3,7 @@ import { Server } from 'socket.io';
 import { map } from 'rxjs/operators';
 import { from, Observable } from 'rxjs';
 
+//@WebSocketGateway({ cors: { origin: [process.env.FRONTEND_IP, 'http://localhost:3000', 'http://localhost:4200']}}
 @WebSocketGateway({ namespace: '/chat', cors: { origin: [process.env.FRONTEND_IP, 'http://localhost:3000', 'http://localhost:4200']}}
 )
 //https://github.com/nestjs/nest/blob/master/sample/02-gateways/src/events/events.gateway.ts
@@ -12,10 +13,8 @@ export class ChatGateway {
   server: Server;
 
   @SubscribeMessage('message')
-  handleMessage(client: any, payload: any): string {
-  	  console.log("mensaje recibido")
-  	  console.log(payload)
-    return 'Hello world!';
+  handleMessage(client: any, payload: any): any {
+    return { event: 'message', data: payload};
   }
  
   @SubscribeMessage('events')
