@@ -18,3 +18,5 @@ frontend/src/node_modules
 postgres/*
 front/*
 srcs/*
+*swp
+tty
