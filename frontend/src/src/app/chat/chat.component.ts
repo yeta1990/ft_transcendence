@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { SocketService } from '../socket.service';
+//import { SocketService } from '../socket.service';
 import { ChatService } from './chat.service';
+import { FormBuilder } from '@angular/forms';
  
 @Component({
   selector: 'app-chat',
@@ -12,22 +13,45 @@ export class ChatComponent implements OnInit {
 
 	newMessage: string = '';
 	messageList: string[] = [];
-	private socketService: SocketService = new SocketService("/chat");
+	currentRoom: string;
+//	private chatService: SocketService = new SocketService("/chat");
 
-	constructor() {}
+//	private chatService: ChatService;
+
+	messageToChat = this.formBuilder.group({
+		newMessage: ''
+	});
+	constructor(
+		private chatService: ChatService, 
+		private formBuilder: FormBuilder,
+   ) {
+		this.currentRoom = "default";
+   }
 
 	//subscription to all events from the service
 	ngOnInit(): void {
-		this.socketService
+		this.chatService
 			.getMessage()
 			.subscribe((message: string) => {
 				this.messageList.push(message);
 			})
 	}
 
-	sendMessage(): void{
-		this.socketService.sendMessage("message", "destination: hello to everyone");
-		this.socketService.sendMessage("join", "#channel");
+	processMessage(): void {
+		const messageToSend: string = this.messageToChat.get('newMessage')!.value || "";
+		if (messageToSend && messageToSend[0] === '/'){
+			console.log("let's parse this");
+		}
+		else if (messageToSend){
+			this.sendMessage("message", this.currentRoom, messageToSend);
+			this.messageToChat.get('newMessage')!.setValue('');
+		}
+	}
+
+	sendMessage(event: string, destination:string, message: string): void{
+//		const messageToSend = this.messageToChat.get('newMessage')!.value;
+		if (message)
+			this.chatService.sendMessage("message", destination, message);
 	}
  
 }

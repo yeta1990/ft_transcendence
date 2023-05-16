@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Subject, from } from  'rxjs';
+import { Subject, from, Observable } from  'rxjs';
 import { io } from "socket.io-client";
 import { environment } from '../environments/environment'
+import { ChatMessage } from '@shared/types';
 
 export class SocketService {
 //https://auth0.com/blog/real-time-charts-using-angular-d3-and-socket-io/
@@ -20,15 +21,15 @@ export class SocketService {
   // - message
   //the backend will handle each message depending on its category
   // (see the chat.gateway, for insance)
-  sendMessage(type: string, msg: string) {
-	this.socket.emit(type, msg);
+  sendMessage(type: string, payload: ChatMessage) {
+	this.socket.emit(type, payload);
   }
  
   //subscription to all the kind of messages from the same listener
   // the first parameter of "on" is defined by the "event" attribute
   // in the response object of the chat.gateway
-  getMessage(){
-	let messageObservable = from(this.message);
+  getMessage(): Observable<string>{
+	let messageObservable: Observable<string> = from(this.message);
 	this.socket
 		.on('message', (data: any) => {
 			console.log("message: " + data);
