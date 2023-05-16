@@ -1,3 +1,4 @@
+<app-nav-bar/>
 <p>Welcome</p>
 <div>User ID: {{user?.id}} </div>
 <div>Nick: {{user?.nick}} </div>
@@ -5,5 +6,5 @@
 <div>Last name: {{user?.lastName}} </div>
 <div>Login: {{user?.login}} </div>
 <div><img src={{user?.image}} /></div>
-<button class="button" (click)="logout()"> Logout</button>
+<app-button dir="/my-profile/edit" value='Edit'></app-button>
 <router-outlet>

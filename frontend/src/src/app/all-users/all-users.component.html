@@ -1,0 +1,32 @@
+<style>
+   .button {
+     border: none;
+     color: white;
+     padding: 15px 32px;
+     text-align: center;
+     text-decoration: none;
+     display: inline-block;
+     font-size: 16px;
+     margin: 4px 2px;
+     cursor: pointer;
+   }
+   
+   .button1 {background-color: #4CAF50;} /* Green */
+   .button2 {background-color: #008CBA;} /* Blue */
+   </style>
+<app-nav-bar/>
+<p>Users:</p>
+<frame class="frame">
+   <ul>
+      <ul *ngFor="let u of users"><div (click)="getId(u.id)">
+         <div class="avatar_column">
+            <img class="rect avatar" src={{u?.image}} alt=''/>
+         </div>
+         <div class ="nick_column">
+            <button class="user" (click)="getId(u.id)">{{u.nick}}</button>
+         </div>
+      </div></ul>
+   </ul>
+   
+</frame>
+<router-outlet>
