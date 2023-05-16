@@ -10,6 +10,7 @@ export class GlobalErrorHandler implements ErrorHandler {
   //catch all kind of errors
   handleError(error: Error | HttpErrorResponse) {
 	console.log("Error catched by the global error handler:\n" + error);
+
   }
 }
 

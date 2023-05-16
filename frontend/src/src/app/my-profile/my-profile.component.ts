@@ -20,9 +20,15 @@ export class MyProfileComponent implements OnInit {
 		private router: Router
 	){
 		this.profileService.getUserDetails() //this returns an Observable<User>, not a <User>
-			.subscribe((response: User) => { //so subscribe waits for the async call to the backend
+			.subscribe(
+				(response: User) => { //so subscribe waits for the async call to the backend
 				this.user = response;
-			});
+				//console.log(response);
+			},
+			(error) => {
+				console.log(error);
+			}
+			);
 	}
 	logout(): void {
 		console.log("log out");
@@ -31,5 +37,9 @@ export class MyProfileComponent implements OnInit {
 	}
 	ngOnInit(): void {	
 
+	}
+	allUsers(): void {
+		console.log("All users login list:");
+		this.router.navigateByUrl('/all-users');
 	}
 }
