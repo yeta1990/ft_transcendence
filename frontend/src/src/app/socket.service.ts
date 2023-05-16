@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { Subject, from, Observable } from  'rxjs';
 import { io } from "socket.io-client";
 import { environment } from '../environments/environment'
-import { ChatMessage } from '@shared/types';
+import { ChatMessage, SocketPayload } from '@shared/types';
 
 export class SocketService {
 //https://auth0.com/blog/real-time-charts-using-angular-d3-and-socket-io/
 
 	private socket: any;
-	private message = new Subject<string>();
+	private message = new Subject<SocketPayload>();
 
 	constructor(namespace: string = "") {
   		this.socket = io(environment.apiUrl + namespace, 
@@ -21,24 +21,39 @@ export class SocketService {
   // - message
   //the backend will handle each message depending on its category
   // (see the chat.gateway, for insance)
-  sendMessage(type: string, payload: ChatMessage) {
+  sendMessageToChat(type: string, payload: ChatMessage) {
 	this.socket.emit(type, payload);
   }
  
+  sendMessage(type: string, payload: string) {
+	this.socket.emit(type, payload);
+  }
+  
   //subscription to all the kind of messages from the same listener
   // the first parameter of "on" is defined by the "event" attribute
   // in the response object of the chat.gateway
-  getMessage(): Observable<string>{
-	let messageObservable: Observable<string> = from(this.message);
+  getMessage(): Observable<SocketPayload>{
+	let messageObservable: Observable<SocketPayload> = from(this.message);
 	this.socket
-		.on('message', (data: any) => {
-			console.log("message: " + data);
+	/*
+		.onAny((event: any, data: ChatMessage) => {
+			console.log(`got: ${event}`);
 			this.message.next(data);
+		})
+		*/
+		.on('message', (data: any) => {
+			console.log("message received: " + data);
+			this.message.next({event: 'message', data});
 		})
 		.on('join', (data: any) => {
 			console.log("join: " + data);
-			this.message.next(data);
+			this.message.next({event: 'join', data});
 		})
+		.on('listRooms', (data: any) => {
+			console.log("listRooms received: " + data);
+			this.message.next({event: 'listRooms', data});
+		})
+		
 	return messageObservable;
   }
 }

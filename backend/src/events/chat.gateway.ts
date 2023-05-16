@@ -27,5 +27,13 @@ export class ChatGateway extends BaseGateway {
 	  this.broadCastToRoom(room, 'join', "new user joined room");
 	  return { event: 'join', data: room};
   }
+
+  @SubscribeMessage('listRooms')
+  listRooms(client: Socket): WsResponse<unknown>{
+//	  this.joinUserToRoom(client.id, room); 
+//	  this.broadCastToRoom(room, 'join', "new user joined room");
+	  console.log("rooms " + Array.from(client.rooms));
+	  return { event: 'listRooms', data: Array.from(client.rooms)};
+  }
  
 }

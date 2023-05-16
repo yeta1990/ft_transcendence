@@ -3,7 +3,7 @@ import { Subject, from, Observable } from  'rxjs';
 import { io } from "socket.io-client";
 import { environment } from '../../environments/environment'
 import { SocketService } from '../socket.service';
-import { ChatMessage } from '@shared/types';
+import { ChatMessage, SocketPayload } from '@shared/types';
 
 @Injectable({
   providedIn: 'root'
@@ -14,13 +14,17 @@ export class ChatService {
 	private socketService: SocketService = new SocketService("/chat");
 	constructor() {}
 
-	getMessage(): Observable<string>{
+	getMessage(): Observable<SocketPayload>{
 		return this.socketService.getMessage();
 	}
 
-	sendMessage(type: string, room: string, message: string) {
+	sendMessageToChat(type: string, room: string, message: string) {
 		const payloadToSend: ChatMessage = { room, message }
-		this.socketService.sendMessage(type, payloadToSend);
+		this.socketService.sendMessageToChat(type, payloadToSend);
+	}
+
+	getRoomList(){
+		this.socketService.sendMessage("listRooms", "");
 	}
 
 

@@ -1,5 +1,6 @@
 <p>chat</p>
-<form [formGroup]="messageToChat" (ngSubmit)="processMessage()">
+<div *ngFor="let room of availableRoomsList">{{room}}</div>
+<form [formGroup]="messageToChat" (ngSubmit)="processMessageToSend()">
 	<br />
 	<input id="" type="text" formControlName="newMessage" placeholder="Send new message...">
 	<button class="button" type="submit"> Submit</button>
