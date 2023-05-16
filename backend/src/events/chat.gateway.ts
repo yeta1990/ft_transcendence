@@ -1,5 +1,6 @@
-import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import { SubscribeMessage, WebSocketGateway, WsResponse } from '@nestjs/websockets';
 import { BaseGateway } from './base.gateway';
+import { Socket } from 'socket.io';
 
 //https://stackoverflow.com/questions/69435506/how-to-pass-a-dynamic-port-to-the-websockets-gateway-in-nestjs
 @WebSocketGateway({ namespace: '/chat', cors: true } )
@@ -13,15 +14,15 @@ export class ChatGateway extends BaseGateway {
   // - event: type of event that the client will be listening to
   // - data: the content
   @SubscribeMessage('message')
-  handleMessage(client: any, payload: any): any {
-  	  console.log("ha llegado un mensaje");
+  handleMessage(client: Socket, payload: any): WsResponse<unknown>{
     return { event: 'message', data: payload};
   }
 
   @SubscribeMessage('join')
-  handleJoin(client: any, payload: any): any {
-  	  console.log("ha llegado un mensaje join");
-    return { event: 'join', data: payload};
+  handleJoinRoom(client: Socket, room: string): WsResponse<unknown>{
+	  this.joinUserToRoom(client.id, room); 
+	  this.broadCastToRoom(room, 'join', "new user joined room");
+	  return { event: 'join', data: room};
   }
  
 }
