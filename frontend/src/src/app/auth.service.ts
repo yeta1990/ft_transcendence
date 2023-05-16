@@ -81,4 +81,14 @@ export class AuthService {
 		}
         return moment(expiration);
     }
+
+	getUserToken() {
+		try { 
+			return localStorage.getItem("access_token") || "{}"
+		} catch (Error) {
+			
+		}
+		return ;
+	}
+
 }
