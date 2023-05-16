@@ -6,6 +6,11 @@ import { LoginComponent } from '../login/login.component';
 import { CallbackComponent } from '../callback/callback.component';
 import { ChatComponent } from '../chat/chat.component';
 import { AuthGuardService as AuthGuard } from '../auth-guard.service';
+import { AllUsersComponent } from '../all-users/all-users.component'
+import { UserProfileComponent } from '../user-profile/user-profile.component'
+import { HomeComponent } from '../home/home.component';
+import { EditProfileComponent } from '../edit-profile/edit-profile.component';
+
 
 //routes are doubly protected:
 // - the canActivate property runs the AuthGuard in the front and checks for a token that seems valid, but without checking the signature
@@ -18,19 +23,36 @@ import { AuthGuardService as AuthGuard } from '../auth-guard.service';
 // - With an unauthorized error (401) response from the backend, 
 // the user will be redirected to login page
 const routes: Routes = [
-	{	path: '', component: FormComponent } ,
+	{	path: '',  component: HomeComponent},
+	{	path: 'home',  component: HomeComponent},
+	{	path: 'form', component: FormComponent } ,
 	{	
 		path: 'chat', 
 		component: ChatComponent, 
 		canActivate: [AuthGuard] 
 	},
 	{	path: 'login', component: LoginComponent },
-	{
-		path: 'my-profile',
-		canActivate: [AuthGuard],
-		component: MyProfileComponent,
+	{	path: 'callback', component: CallbackComponent },
+	{	
+		path: 'all-users', 
+		component: AllUsersComponent, 
+		canActivate: [AuthGuard] 
 	},
-	{	path: 'callback', component: CallbackComponent }
+	{	
+		path: 'user-profile/:id', 
+		component: UserProfileComponent, 
+		canActivate: [AuthGuard] 
+	},
+	{	
+		path: 'my-profile', 
+		component: MyProfileComponent, 
+		canActivate: [AuthGuard] 
+	},
+	{	
+		path: 'my-profile/edit', 
+		component: EditProfileComponent, 
+		canActivate: [AuthGuard] 
+	},
 ];
 
 @NgModule({

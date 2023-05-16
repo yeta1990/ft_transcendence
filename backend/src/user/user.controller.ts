@@ -26,10 +26,10 @@ export class UserController {
 	public whoAmI(@UserId() id: number): Promise<User>{
 		return this.getUser(id);
 	}
-
+ 
 	@Get('all')
-	public findAll(): string{
-		return "All users"
+	public findAll(): Promise<User[]> {
+		return this.service.getAllUsers();
 	}
 
 	@Get(':id')
