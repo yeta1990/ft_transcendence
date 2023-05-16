@@ -17,7 +17,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   private readonly logger; 
   gatewayName: string;
   users: string[] = [];
-  rooms: string[] = ["default"];
+  rooms: string[] = ["default", "room1"];
 
   @Inject(AuthService)
   private authService: AuthService;
@@ -29,6 +29,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   afterInit(): void {
 	this.logger.log(this.gatewayName + ' initialized');
+//	this.logger.log(this.server.rooms); 
   }
 
   // about auth during client connection

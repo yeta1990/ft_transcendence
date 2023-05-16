@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-//import { SocketService } from '../socket.service';
 import { ChatService } from './chat.service';
 import { FormBuilder } from '@angular/forms';
+import { ChatMessage, SocketPayload } from '@shared/types';
  
 @Component({
   selector: 'app-chat',
@@ -12,11 +12,11 @@ import { FormBuilder } from '@angular/forms';
 export class ChatComponent implements OnInit {
 
 	newMessage: string = '';
-	messageList: string[] = [];
+	messageList: any[] = [];
+//	messageList: string[] = [];
 	currentRoom: string;
-//	private chatService: SocketService = new SocketService("/chat");
-
-//	private chatService: ChatService;
+	roomList: string[] = ["default"];
+	availableRoomsList: string[] = [];
 
 	messageToChat = this.formBuilder.group({
 		newMessage: ''
@@ -32,12 +32,22 @@ export class ChatComponent implements OnInit {
 	ngOnInit(): void {
 		this.chatService
 			.getMessage()
-			.subscribe((message: string) => {
-				this.messageList.push(message);
+			.subscribe((payload: SocketPayload) => {
+				console.log("received payload :" + payload.data);
+				if (payload.event === 'message'){
+					this.messageList.push(payload.data);
+				}
+				else if (payload.event === 'listRooms'){
+//					this.messageList.push("list rooms received", Array.from(payload.data));
+					this.availableRoomsList = Array.from(payload.data);
+				}
+
+//				this.messageList.push(payload);
 			})
+		this.chatService.getRoomList();
 	}
 
-	processMessage(): void {
+	processMessageToSend(): void {
 		const messageToSend: string = this.messageToChat.get('newMessage')!.value || "";
 		if (messageToSend && messageToSend[0] === '/'){
 			console.log("let's parse this");
@@ -51,7 +61,7 @@ export class ChatComponent implements OnInit {
 	sendMessage(event: string, destination:string, message: string): void{
 //		const messageToSend = this.messageToChat.get('newMessage')!.value;
 		if (message)
-			this.chatService.sendMessage("message", destination, message);
+			this.chatService.sendMessageToChat("message", destination, message);
 	}
  
 }
