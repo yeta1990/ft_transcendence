@@ -11,7 +11,6 @@ import { LoginComponent } from './login/login.component';
 import { CallbackComponent } from './callback/callback.component';
 import { interceptorProviders } from './app.interceptors';
 import { ChatComponent } from './chat/chat.component';
-
 import { environment } from '../environments/environment'
 
 
@@ -32,7 +31,7 @@ import { environment } from '../environments/environment'
     AppRoutingModule,
   ],
   providers: [
-	interceptorProviders
+	interceptorProviders,
   ],
   bootstrap: [AppComponent]
 })

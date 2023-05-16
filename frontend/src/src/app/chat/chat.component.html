@@ -1,5 +1,9 @@
-<p>chat works!</p>
+<p>chat</p>
+<form [formGroup]="messageToChat" (ngSubmit)="processMessage()">
+	<br />
+	<input id="" type="text" formControlName="newMessage" placeholder="Send new message...">
+	<button class="button" type="submit"> Submit</button>
+</form>
 <div *ngFor="let message of messageList">
 	<span>{{message}}</span>
 </div>
-<button (click)="sendMessage()">pepe</button>

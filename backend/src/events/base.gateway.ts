@@ -17,6 +17,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   private readonly logger; 
   gatewayName: string;
   users: string[] = [];
+  rooms: string[] = ["default"];
 
   @Inject(AuthService)
   private authService: AuthService;
@@ -40,6 +41,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		this.logger.log(`Socket client connected: ${socket.id}`)
 		this.users.push(socket.id);
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
+		this.joinUserToRoom(socket.id, "default");
 	}
 	else{
 		//disconnect
@@ -64,7 +66,8 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   public joinUserToRoom(clientSocketId: string, room: string): void{
-	  this.server.in(clientSocketId).socketsJoin(room)
+	  this.server.in(clientSocketId).socketsJoin(room);
+      this.logger.log("User " + clientSocketId + "joined room " + room);
   }
 
   public broadCastToRoom(room: string, event: string, message: string): void{
