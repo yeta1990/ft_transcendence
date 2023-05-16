@@ -1,3 +1,5 @@
+.DS_Store
+*sql
 backend/node_modules
 backend/dist
 backend/.env
@@ -16,6 +18,5 @@ frontend/src/node_modules
 postgres/*
 front/*
 srcs/*
-.DS_Store
-*sql
-
+*swp
+tty
