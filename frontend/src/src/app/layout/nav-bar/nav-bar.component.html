@@ -1,0 +1,9 @@
+<div class="topnav">
+    <app-button class="left" dir="/home" value="Home">
+        <img src="../../../assets/cadiz.png" alt="logo"/>
+    </app-button>
+    <app-button class="left" dir="/all-users" value='Users'></app-button>
+    <app-button class="left" dir="/my-profile" value='MyProfile'></app-button>
+    <app-button class="right" dir="/login" value='Login' *ngIf="!isUserLogged"></app-button>
+    <button class="blue right" value='Logout' *ngIf="isUserLogged" (click)=logout()>Logout</button>
+</div>
