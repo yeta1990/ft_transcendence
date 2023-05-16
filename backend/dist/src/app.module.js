@@ -17,6 +17,7 @@ const user_entity_1 = require("./user/user.entity");
 const user_controller_1 = require("./user/user.controller");
 const user_module_1 = require("./user/user.module");
 const axios_1 = require("@nestjs/axios");
+const events_module_1 = require("./events/events.module");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -38,6 +39,7 @@ AppModule = __decorate([
                 synchronize: true,
             }),
             axios_1.HttpModule,
+            events_module_1.EventsModule,
         ],
         controllers: [app_controller_1.AppController, user_controller_1.UserController],
         providers: [app_service_1.AppService]

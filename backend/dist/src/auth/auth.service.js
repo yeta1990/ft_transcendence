@@ -57,6 +57,21 @@ let AuthService = class AuthService {
         const decoded = this.jwtService.decode(token);
         return parseInt(decoded.id);
     }
+    async verifyJwt(token) {
+        console.log("verif");
+        if (!token) {
+            throw new common_1.UnauthorizedException();
+        }
+        try {
+            const payload = await this.jwtService.verifyAsync(token, {
+                secret: 'santanabanana'
+            });
+        }
+        catch (_a) {
+            return false;
+        }
+        return true;
+    }
 };
 AuthService = __decorate([
     (0, common_1.Injectable)(),

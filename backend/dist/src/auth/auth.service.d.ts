@@ -17,4 +17,5 @@ export declare class AuthService {
     confirmAuthFrom42(code: string): Promise<any>;
     signIn(code: string): Promise<any>;
     getIdFromJwt(token: string): number;
+    verifyJwt(token: string): Promise<boolean>;
 }
