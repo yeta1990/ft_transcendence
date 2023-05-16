@@ -33,18 +33,18 @@ export class ChatComponent implements OnInit {
 		this.chatService
 			.getMessage()
 			.subscribe((payload: SocketPayload) => {
-				console.log("received payload :" + payload.data);
+//				console.log("received payload :" + payload.data);
 				if (payload.event === 'message'){
 					this.messageList.push(payload.data);
 				}
 				else if (payload.event === 'listRooms'){
-//					this.messageList.push("list rooms received", Array.from(payload.data));
 					this.availableRoomsList = Array.from(payload.data);
 				}
-
-//				this.messageList.push(payload);
 			})
+		this.chatService.joinUserToRoom("room1");
+		this.chatService.joinUserToRoom("room2");
 		this.chatService.getRoomList();
+
 	}
 
 	processMessageToSend(): void {
@@ -54,14 +54,18 @@ export class ChatComponent implements OnInit {
 		}
 		else if (messageToSend){
 			this.sendMessage("message", this.currentRoom, messageToSend);
-			this.messageToChat.get('newMessage')!.setValue('');
 		}
+		this.messageToChat.get('newMessage')!.setValue('');
 	}
 
 	sendMessage(event: string, destination:string, message: string): void{
 //		const messageToSend = this.messageToChat.get('newMessage')!.value;
 		if (message)
 			this.chatService.sendMessageToChat("message", destination, message);
+	}
+
+	goToChatRoom(room: string): void{
+		console.log("go to chat room " + room);
 	}
  
 }

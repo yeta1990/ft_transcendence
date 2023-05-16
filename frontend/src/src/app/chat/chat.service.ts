@@ -23,9 +23,11 @@ export class ChatService {
 		this.socketService.sendMessageToChat(type, payloadToSend);
 	}
 
+	joinUserToRoom(room: string){
+		this.socketService.sendMessage("join", room);
+	}
+
 	getRoomList(){
 		this.socketService.sendMessage("listRooms", "");
 	}
-
-
 }
