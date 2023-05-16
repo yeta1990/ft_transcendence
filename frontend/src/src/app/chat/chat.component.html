@@ -1,14 +1,16 @@
-
-<p>chat</p>
-<h2>available rooms</h2>
-<div *ngFor="let room of availableRoomsList">
-	<a (click)="goToChatRoom(room)">{{room}}</a>
-</div>
+<b>available rooms, pick one</b>
+<ul *ngFor="let room of availableRoomsList">
+	<li><a href="#" (click)="goToChatRoom(room)">{{room}}</a></li>
+</ul>
+	<div class="chat-box-body">
+	<div #chatBox class="chat-logs">
+	<div #messages *ngFor="let message of messageList">
+		<span>{{message}}</span>
+	</div>
+	</div>
+	</div>
 <form [formGroup]="messageToChat" (ngSubmit)="processMessageToSend()">
 	<br />
 	<input id="" type="text" formControlName="newMessage" placeholder="Send new message...">
 	<button class="button" type="submit"> Submit</button>
 </form>
-<div *ngFor="let message of messageList">
-	<span>{{message}}</span>
-</div>

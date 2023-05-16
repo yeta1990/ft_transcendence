@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, QueryList, ElementRef, ViewChild, ViewChildren} from '@angular/core';
 import { ChatService } from './chat.service';
 import { FormBuilder } from '@angular/forms';
 import { ChatMessage, SocketPayload } from '@shared/types';
@@ -9,7 +9,10 @@ import { ChatMessage, SocketPayload } from '@shared/types';
   styleUrls: ['./chat.component.css']
 })
 
-export class ChatComponent implements OnInit {
+export class ChatComponent implements OnInit, AfterViewInit {
+	@ViewChildren('messages') messages!: QueryList<any>;
+	@ViewChild('chatBox') content!: ElementRef;
+
 
 	newMessage: string = '';
 	messageList: any[] = [];
@@ -40,11 +43,23 @@ export class ChatComponent implements OnInit {
 				else if (payload.event === 'listRooms'){
 					this.availableRoomsList = Array.from(payload.data);
 				}
+        		this.scrollToBottom();        
 			})
 		this.chatService.joinUserToRoom("room1");
 		this.chatService.joinUserToRoom("room2");
 		this.chatService.getRoomList();
 
+	}
+
+	ngAfterViewInit() {        
+        this.scrollToBottom();
+        this.messages.changes.subscribe(this.scrollToBottom); 
+    } 
+
+	scrollToBottom = () => {
+		try {
+			this.content.nativeElement.scrollTop = this.content.nativeElement.scrollHeight;
+		} catch (err) {}
 	}
 
 	processMessageToSend(): void {
