@@ -17,8 +17,6 @@ export class ChatGateway extends BaseGateway {
   @SubscribeMessage('message')
   handleMessage(client: Socket, payload: ChatMessage): void { //WsResponse<unknown>{
 	this.broadCastToRoom(payload.room, 'message', payload.message);
-
-//    return { event: 'message', data: payload.message};
   }
 
   @SubscribeMessage('join')

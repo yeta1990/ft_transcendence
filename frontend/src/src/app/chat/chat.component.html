@@ -1,5 +1,9 @@
+
 <p>chat</p>
-<div *ngFor="let room of availableRoomsList">{{room}}</div>
+<h2>available rooms</h2>
+<div *ngFor="let room of availableRoomsList">
+	<a (click)="goToChatRoom(room)">{{room}}</a>
+</div>
 <form [formGroup]="messageToChat" (ngSubmit)="processMessageToSend()">
 	<br />
 	<input id="" type="text" formControlName="newMessage" placeholder="Send new message...">
