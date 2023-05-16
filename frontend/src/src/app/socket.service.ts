@@ -10,7 +10,8 @@ export class SocketService {
 	private message = new Subject<string>();
 
 	constructor(namespace: string = "") {
-  		this.socket = io(environment.apiUrl + namespace);
+  		this.socket = io(environment.apiUrl + namespace, 
+  						 {auth: {token: localStorage.getItem("access_token") || "{}"} })
 	}
 
   //https://socket.io/docs/v3/emitting-events/

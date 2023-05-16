@@ -13,7 +13,7 @@ export interface authData42 {
 	scope: string;
 	created_at: number;
 }
-
+ 
 @Injectable()
 export class AuthService {
 	constructor(
@@ -85,4 +85,28 @@ export class AuthService {
 		const decoded: JwtPayload = this.jwtService.decode(token) as JwtPayload;
 		return parseInt(decoded.id)
 	}
+
+	async verifyJwt(token: string): Promise<boolean> {
+		console.log("verif");
+    	if (!token) {
+    	  throw new UnauthorizedException();
+    	}
+    	try {
+    	  const payload = await this.jwtService.verifyAsync(
+    	    token,
+    	    {
+    	      secret: 'santanabanana'
+    	    }
+    	  );
+    	  // 💡 We're assigning the payload to the request object here
+    	  // so that we can access it in our route handlers
+//    	  request['user'] = payload;
+			
+    	} catch {
+    		return false;
+//    	  throw new UnauthorizedException();
+    	}
+    	return true;
+    }
+
 }
