@@ -20,7 +20,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   private readonly logger; 
   gatewayName: string;
   users: string[] = [];
-  rooms: string[] = ["default", "room1"];
+  rooms: string[] = ["default"];
 
   @Inject(AuthService)
   private authService: AuthService;
