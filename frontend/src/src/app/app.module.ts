@@ -43,7 +43,7 @@ import { environment } from '../environments/environment'
     LayoutModule
   ],
   providers: [
-	interceptorProviders
+	interceptorProviders,
   ],
   bootstrap: [AppComponent]
 })
