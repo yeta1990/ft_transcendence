@@ -6,6 +6,7 @@ import { tap, shareReplay } from "rxjs/operators";
 import * as moment from "moment";
 import { environment } from '../environments/environment';
 import { Router } from '@angular/router';
+import jwt_decode from 'jwt-decode';
 
 @Injectable({
   providedIn: 'root'
@@ -41,29 +42,53 @@ export class AuthService {
         this.router.navigateByUrl('/login');
     }
 
-	private setSession(authResult: any) {
-		console.log("setting session");
-		console.log(authResult);
-//		const expiresAt = moment().add(authResult.expires_at,'second');
+	redirectToHome() {
+        this.router.navigateByUrl('/my-profile');
+    }
 
+	private setSession(authResult: any) {
         localStorage.setItem("access_token", authResult.access_token);
         localStorage.setItem("expires_at", authResult.expires_at);
-//        localStorage.setItem("expires_at", JSON.stringify(expiresAt.valueOf()) );
     }
 
     public isLoggedIn() {
-//    	console.log("is before? " + moment().second() + "," + this.getExpiration());
-        return moment().isBefore(this.getExpiration());
+    	let a:boolean = moment().isBefore(this.getExpiration());
+    	return a;
     }
 
     isLoggedOut() {
         return !this.isLoggedIn();
     }
 
+	getDecodedAccessToken(token: string): any {
+		try {
+	   		return jwt_decode(token);
+		} catch(Error) {
+			return null;
+		}
+	}
+
+	//extra protected to handle different situations:
+	//- if the token is not found
+	//- or the token doesn't have an "exp" property
     getExpiration() {
-        const expiration: string = localStorage.getItem("expires_at") || '';
-        const expiresAt = JSON.parse(expiration);
-        console.log(expiresAt);
-        return moment(expiresAt);
+		let expiration: number = 0;
+		try {
+			const decodedAccessToken = this.getDecodedAccessToken(localStorage.getItem("access_token") || "{}");
+
+			expiration = parseInt(decodedAccessToken.exp) * 1000;
+		} catch(Error) {
+		}
+        return moment(expiration);
     }
+
+	getUserToken() {
+		try { 
+			return localStorage.getItem("access_token") || "{}"
+		} catch (Error) {
+			
+		}
+		return ;
+	}
+
 }
