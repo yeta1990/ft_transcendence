@@ -53,8 +53,12 @@ down: ## Stops containers and removes containers, networks, volumes and images.
 	@echo "\n$(R)[$(B)'$(NAME)': $(R)All containers removed                             ]${END}\n"
 
 logs: ## Shows containers' logs in follow mode.
-	@echo "\n$(GR)[                     $(B)'$(NAME)'$(GR)LOGS                          ]${END}"
+	@echo "\n$(GR)[                     $(B)'$(NAME)'$(GR)LOGS - with historial         ]${END}"
 	@docker-compose logs -f
+
+attach:
+	@echo "\n$(GR)[                     $(B)'$(NAME)'$(GR)LOGS - without historial      ]${END}"
+	@bash -c "./scripts/docker-attach.sh" &
 
 clean: ## Stop containers. Remove containers. Remove data folders. Remove all unused images.
 	@echo "\n$(GR)[Cleaning $(B)'$(NAME)'$(GR). Please wait...                          ]${END}"
