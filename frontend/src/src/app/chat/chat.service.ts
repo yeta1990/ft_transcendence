@@ -19,7 +19,8 @@ export class ChatService {
 	}
 
 	sendMessageToChat(type: string, room: string, message: string) {
-		const payloadToSend: ChatMessage = { room, message }
+		const date: Date = new Date();
+		const payloadToSend: ChatMessage = { room, message, nick: "", date}
 		this.socketService.sendMessageToChat(type, payloadToSend);
 	}
 
