@@ -9,6 +9,7 @@ export class SocketService {
 
 	private socket: any;
 	private message = new Subject<SocketPayload>();
+	private messageObservable: Observable<SocketPayload> = new Observable<SocketPayload>();
 
 	constructor(namespace: string = "") {
   		this.socket = io(environment.apiUrl + namespace, 
@@ -16,6 +17,28 @@ export class SocketService {
   				auth: 
   					{token: localStorage.getItem("access_token") || "{}" }
   			})
+  		//subscription to all the kind of messages from the same listener
+  		// - the first parameter of "on" is defined by the "event" attribute
+  		// - in the response object of the chat.gateway
+  		// 
+		this.messageObservable = from(this.message);
+		this.socket
+			.on('message', (data: ChatMessage) => {
+				console.log("message received: " + data);
+				this.message.next({event: 'message', data});
+			})
+			.on('join', (data: any) => {
+				console.log("join received: " + data);
+				this.message.next({event: 'join', data});
+			})
+			.on('listRooms', (data: any) => {
+				console.log("listRooms received: " + data);
+				this.message.next({event: 'listRooms', data});
+			})
+			.on('help', (data: ChatMessage) => {
+//				console.log("help: " + data);
+				this.message.next({event: 'help', data});
+			})
 	}
 
   //https://socket.io/docs/v3/emitting-events/
@@ -32,29 +55,7 @@ export class SocketService {
 	this.socket.emit(type, payload);
   }
   
-  //subscription to all the kind of messages from the same listener
-  // - the first parameter of "on" is defined by the "event" attribute
-  // - in the response object of the chat.gateway
-  // 
   getMessage(): Observable<SocketPayload>{
-	let messageObservable: Observable<SocketPayload> = from(this.message);
-	this.socket
-		.on('message', (data: ChatMessage) => {
-			console.log("message received: " + data);
-			this.message.next({event: 'message', data});
-		})
-		.on('join', (data: any) => {
-			console.log("join received: " + data);
-			this.message.next({event: 'join', data});
-		})
-		.on('listRooms', (data: any) => {
-			console.log("listRooms received: " + data);
-			this.message.next({event: 'listRooms', data});
-		})
-		.on('help', (data: ChatMessage) => {
-//			console.log("help: " + data);
-			this.message.next({event: 'help', data});
-		})
-	return messageObservable;
+	return this.messageObservable;
   }
 }
