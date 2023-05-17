@@ -4,6 +4,8 @@ import {
 	WebSocketServer,
 	OnGatewayDisconnect
 } from '@nestjs/websockets';
+import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from 'jsonwebtoken';
 import { Logger, Inject, UnauthorizedException } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from '../auth/auth.service';
@@ -22,6 +24,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   @Inject(AuthService)
   private authService: AuthService;
 
+  @Inject(JwtService)
+  private jwtService: JwtService;
+
   constructor(name: string){
 	this.gatewayName = name;
 	this.logger = new Logger(this.gatewayName);
@@ -39,6 +44,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
     const isUserVerified = await this.authService.verifyJwt(socket.handshake.auth.token);
  
 	if (isUserVerified){
+		this.setNick(socket);
 		this.logger.log(`Socket client connected: ${socket.id}`)
 		this.users.push(socket.id);
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
@@ -48,6 +54,15 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		//disconnect
 		return this.disconnect(socket);
 	}
+
+  }
+
+  // if the provided token is valid, we take the nick from the decoded jwt. 
+  // by placing the nick in the handshake, the value remains during the whole connection
+  // between server and client
+  setNick(socket: Socket): void{
+		const decodedToken: JwtPayload = this.jwtService.decode(socket.handshake.auth.token) as JwtPayload;
+		socket.handshake.query.nick = decodedToken.nick;
 
   }
 

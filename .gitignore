@@ -20,3 +20,4 @@ front/*
 srcs/*
 *swp
 tty
+*.log
