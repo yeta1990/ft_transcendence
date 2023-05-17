@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, Inject, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 //import { getContext } from @angular/svelte;
 
 
@@ -19,23 +20,25 @@ export class PongComponent {
   private computerPlayer: ComputerPaddle;
   private ball: Ball;
   constructor(){
-      this.gameCanvas = <HTMLCanvasElement> document.getElementById("game-canvas");
-      this.gameContext = this.gameCanvas!.getContext("2d");
-      this.gameContext!.font = "30px Orbitron";
+
+    this.gameCanvas = <HTMLCanvasElement> document.getElementById("game-canvas");
+      //this.gameCanvas = document.getElementById("game-canvas") as HTMLCanvasElement;
+    this.gameContext = this.gameCanvas.getContext("2d");
+    this.gameContext!.font = "30px Orbitron";
       
-      window.addEventListener("keydown",function(e){
+    window.addEventListener("keydown",function(e){
          PongComponent.keysPressed[e.which] = true;
-      });
+    });
       
-      window.addEventListener("keyup",function(e){
-          PongComponent.keysPressed[e.which] = false;
-      });
+    window.addEventListener("keyup",function(e){
+        PongComponent.keysPressed[e.which] = false;
+    });
       
       var paddleWidth:number = 20, paddleHeight:number = 60, ballSize:number = 10, wallOffset:number = 20;
       
-      this.player1 = new Paddle(paddleWidth,paddleHeight,wallOffset,this.gameCanvas!.height / 2 - paddleHeight / 2); 
-      this.computerPlayer = new ComputerPaddle(paddleWidth,paddleHeight,this.gameCanvas!.width - (wallOffset + paddleWidth) ,this.gameCanvas!.height / 2 - paddleHeight / 2);
-      this.ball = new Ball(ballSize,ballSize,this.gameCanvas!.width / 2 - ballSize / 2, this.gameCanvas!.height / 2 - ballSize / 2);  
+    this.player1 = new Paddle(paddleWidth,paddleHeight,wallOffset,this.gameCanvas.height / 2 - paddleHeight / 2); 
+    this.computerPlayer = new ComputerPaddle(paddleWidth,paddleHeight,this.gameCanvas!.width - (wallOffset + paddleWidth) ,this.gameCanvas!.height / 2 - paddleHeight / 2);
+    this.ball = new Ball(ballSize,ballSize,this.gameCanvas!.width / 2 - ballSize / 2, this.gameCanvas!.height / 2 - ballSize / 2);  
 }
 
 drawBoardDetails(){
