@@ -1,7 +1,9 @@
-import { Component, OnInit, AfterViewInit, QueryList, ElementRef, ViewChild, ViewChildren} from '@angular/core';
+import { Component, OnInit, AfterViewInit, QueryList, ElementRef, ViewChild, ViewChildren, OnDestroy} from '@angular/core';
 import { ChatService } from './chat.service';
 import { FormBuilder } from '@angular/forms';
 import { ChatMessage, SocketPayload } from '@shared/types';
+import { takeUntil } from "rxjs/operators"
+import { Subject, Subscription, pipe } from "rxjs"
  
 @Component({
   selector: 'app-chat',
@@ -9,10 +11,9 @@ import { ChatMessage, SocketPayload } from '@shared/types';
   styleUrls: ['./chat.component.css']
 })
 
-export class ChatComponent implements OnInit, AfterViewInit {
+export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	@ViewChildren('messages') messages!: QueryList<any>;
 	@ViewChild('chatBox') content!: ElementRef;
-
 
 	newMessage: string = '';
 	messageList: ChatMessage[] = [];
@@ -20,6 +21,9 @@ export class ChatComponent implements OnInit, AfterViewInit {
 	currentRoom: string;
 	roomList: string[] = ["default"];
 	availableRoomsList: string[] = [];
+	private subscriptions = new Subscription();
+
+	destroy: Subject<any> = new Subject();
 
 	messageToChat = this.formBuilder.group({
 		newMessage: ''
@@ -33,8 +37,10 @@ export class ChatComponent implements OnInit, AfterViewInit {
 
 	//subscription to all events from the service
 	ngOnInit(): void {
-		this.chatService
+		console.log("init");
+		this.subscriptions.add(this.chatService
 			.getMessage()
+			.pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
 			.subscribe((payload: SocketPayload) => {
 				if (payload.event === 'message'){
 					this.messageList.push(payload.data);
@@ -48,16 +54,23 @@ export class ChatComponent implements OnInit, AfterViewInit {
 				}
         		this.scrollToBottom();
 			})
+		);
+
 		this.chatService.joinUserToRoom("room1");
 		this.chatService.joinUserToRoom("room2");
 		this.chatService.getRoomList();
-
 	}
 
-	ngAfterViewInit() {        
+	ngOnDestroy() {
+		//a trick to finish subscriptions (second part)
+		this.destroy.next("");
+		this.destroy.complete();
+	}
+
+	ngAfterViewInit() {
         this.scrollToBottom();
-        this.messages.changes.subscribe(this.scrollToBottom); 
-    } 
+        this.messages.changes.subscribe(this.scrollToBottom);
+    }
 
 	scrollToBottom = () => {
 		try {
