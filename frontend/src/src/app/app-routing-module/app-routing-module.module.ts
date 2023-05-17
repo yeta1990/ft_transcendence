@@ -10,6 +10,7 @@ import { AllUsersComponent } from '../all-users/all-users.component'
 import { UserProfileComponent } from '../user-profile/user-profile.component'
 import { HomeComponent } from '../home/home.component';
 import { EditProfileComponent } from '../edit-profile/edit-profile.component';
+import { PongComponent } from '../pong/pong.component';
 
 
 //routes are doubly protected:
@@ -53,6 +54,11 @@ const routes: Routes = [
 		component: EditProfileComponent, 
 		canActivate: [AuthGuard] 
 	},
+	{
+		path: 'play',
+		component: PongComponent,
+		canActivate: [AuthGuard] 
+	}
 ];
 
 @NgModule({

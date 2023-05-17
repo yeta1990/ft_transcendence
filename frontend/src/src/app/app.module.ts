@@ -17,7 +17,8 @@ import { ErrorInterceptor } from './error-interception/error.interceptor';
 import { GlobalErrorHandler } from './error-interception/global-error-handler.service';
 import { interceptorProviders } from './app.interceptors';
 import { ChatComponent } from './chat/chat.component';
-import { environment } from '../environments/environment'
+import { environment } from '../environments/environment';
+import { PongComponent } from './pong/pong.component'
 
 
 @NgModule({
@@ -31,7 +32,8 @@ import { environment } from '../environments/environment'
     UserProfileComponent,
     HomeComponent,
     EditProfileComponent,
-    ChatComponent
+    ChatComponent,
+    PongComponent
 
   ],
   imports: [
