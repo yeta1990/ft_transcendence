@@ -16,14 +16,16 @@ export class ChatGateway extends BaseGateway {
   // - data: the content
   @SubscribeMessage('message')
   handleMessage(client: Socket, payload: ChatMessage): void { //WsResponse<unknown>{
-    console.log(client.handshake.query.nick)
-	this.broadCastToRoom(payload.room, 'message', payload.message);
+//    console.log(client.handshake.query.nick)
+	const nick: string = client.handshake.query.nick as string;
+    payload.nick = client.handshake.query.nick as string;
+	this.broadCastToRoom('message', payload);
   }
 
   @SubscribeMessage('join')
   handleJoinRoom(client: Socket, room: string): WsResponse<unknown>{
 	  this.joinUserToRoom(client.id, room); 
-	  this.broadCastToRoom(room, 'join', "new user joined room");
+//	  this.broadCastToRoom('join', "new user joined room");
 	  return { event: 'join', data: room};
   }
     

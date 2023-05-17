@@ -9,6 +9,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import { Logger, Inject, UnauthorizedException } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from '../auth/auth.service';
+import { ChatMessage } from '@shared/types';
 
 //this base class is used to log the initialization
 //and avoid code duplications in the gateways
@@ -34,7 +35,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   afterInit(): void {
 	this.logger.log(this.gatewayName + ' initialized');
-//	this.logger.log(this.server.rooms); 
   }
 
   // about auth during client connection
@@ -86,8 +86,8 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
       this.logger.log("User " + clientSocketId + "joined room " + room);
   }
 
-  public broadCastToRoom(room: string, event: string, message: string): void{
-	  this.server.to(room).emit(event, message)
+  public broadCastToRoom(event: string, payload: ChatMessage): void{
+	  this.server.to(payload.room).emit(event, payload)
   }
 
   public getNumberOfConnectedUsers(): number{

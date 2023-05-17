@@ -15,7 +15,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
 
 
 	newMessage: string = '';
-	messageList: any[] = [];
+	messageList: ChatMessage[] = [];
 //	messageList: string[] = [];
 	currentRoom: string;
 	roomList: string[] = ["default"];

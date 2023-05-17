@@ -56,7 +56,6 @@ export class SocketService {
 			console.log("listRooms received: " + data);
 			this.message.next({event: 'listRooms', data});
 		})
-		
 	return messageObservable;
   }
 }
