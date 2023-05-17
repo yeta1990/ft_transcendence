@@ -10,3 +10,4 @@ export type SocketPayload = {
 	event: string;
 	data: any 
 }
+

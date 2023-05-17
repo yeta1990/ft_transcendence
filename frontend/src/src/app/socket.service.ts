@@ -28,23 +28,18 @@ export class SocketService {
 	this.socket.emit(type, payload);
   }
  
-  sendMessage(type: string, payload: string) {
+  sendMessageToServer(type: string, payload: any) {
 	this.socket.emit(type, payload);
   }
   
   //subscription to all the kind of messages from the same listener
-  // the first parameter of "on" is defined by the "event" attribute
-  // in the response object of the chat.gateway
+  // - the first parameter of "on" is defined by the "event" attribute
+  // - in the response object of the chat.gateway
+  // 
   getMessage(): Observable<SocketPayload>{
 	let messageObservable: Observable<SocketPayload> = from(this.message);
 	this.socket
-	/*
-		.onAny((event: any, data: ChatMessage) => {
-			console.log(`got: ${event}`);
-			this.message.next(data);
-		})
-		*/
-		.on('message', (data: any) => {
+		.on('message', (data: ChatMessage) => {
 			console.log("message received: " + data);
 			this.message.next({event: 'message', data});
 		})
@@ -55,6 +50,10 @@ export class SocketService {
 		.on('listRooms', (data: any) => {
 			console.log("listRooms received: " + data);
 			this.message.next({event: 'listRooms', data});
+		})
+		.on('help', (data: ChatMessage) => {
+//			console.log("help: " + data);
+			this.message.next({event: 'help', data});
 		})
 	return messageObservable;
   }

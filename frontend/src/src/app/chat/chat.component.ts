@@ -36,14 +36,17 @@ export class ChatComponent implements OnInit, AfterViewInit {
 		this.chatService
 			.getMessage()
 			.subscribe((payload: SocketPayload) => {
-//				console.log("received payload :" + payload.data);
 				if (payload.event === 'message'){
 					this.messageList.push(payload.data);
 				}
 				else if (payload.event === 'listRooms'){
 					this.availableRoomsList = Array.from(payload.data);
 				}
-        		this.scrollToBottom();        
+				else if (payload.event === 'help'){
+					console.log("received help response");
+					this.messageList.push(payload.data);
+				}
+        		this.scrollToBottom();
 			})
 		this.chatService.joinUserToRoom("room1");
 		this.chatService.joinUserToRoom("room2");
@@ -62,21 +65,29 @@ export class ChatComponent implements OnInit, AfterViewInit {
 		} catch (err) {}
 	}
 
+	processCommandToSend(command: string): void {
+		if (command && command=== '/help'){
+			this.sendMessageToChat("help", this.currentRoom, command);
+		}
+	}
+
 	processMessageToSend(): void {
 		const messageToSend: string = this.messageToChat.get('newMessage')!.value || "";
 		if (messageToSend && messageToSend[0] === '/'){
+			this.processCommandToSend(messageToSend);
+		}
+		else if (messageToSend && messageToSend[0] === '/'){
 			console.log("let's parse this");
 		}
 		else if (messageToSend){
-			this.sendMessage("message", this.currentRoom, messageToSend);
+			this.sendMessageToChat("message", this.currentRoom, messageToSend);
 		}
 		this.messageToChat.get('newMessage')!.setValue('');
 	}
 
-	sendMessage(event: string, destination:string, message: string): void{
-//		const messageToSend = this.messageToChat.get('newMessage')!.value;
+	sendMessageToChat(event: string, destination:string, message: string): void{
 		if (message)
-			this.chatService.sendMessageToChat("message", destination, message);
+			this.chatService.sendMessageToChat(event, destination, message);
 	}
 
 	goToChatRoom(room: string): void{
