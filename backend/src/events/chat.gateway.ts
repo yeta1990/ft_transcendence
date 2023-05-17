@@ -16,6 +16,7 @@ export class ChatGateway extends BaseGateway {
   // - data: the content
   @SubscribeMessage('message')
   handleMessage(client: Socket, payload: ChatMessage): void { //WsResponse<unknown>{
+    console.log(client.handshake.query.nick)
 	this.broadCastToRoom(payload.room, 'message', payload.message);
   }
 
@@ -25,7 +26,7 @@ export class ChatGateway extends BaseGateway {
 	  this.broadCastToRoom(room, 'join', "new user joined room");
 	  return { event: 'join', data: room};
   }
-
+    
   @SubscribeMessage('listRooms')
   listRooms(client: Socket): WsResponse<unknown>{
 //	  this.joinUserToRoom(client.id, room); 

@@ -6,5 +6,5 @@ export type ChatMessage = {
 
 export type SocketPayload = {
 	event: string;
-	data: string;
+	data: any 
 }

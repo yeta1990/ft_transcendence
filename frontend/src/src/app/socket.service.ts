@@ -12,7 +12,10 @@ export class SocketService {
 
 	constructor(namespace: string = "") {
   		this.socket = io(environment.apiUrl + namespace, 
-  						 {auth: {token: localStorage.getItem("access_token") || "{}"} })
+  			{
+  				auth: 
+  					{token: localStorage.getItem("access_token") || "{}" }
+  			})
 	}
 
   //https://socket.io/docs/v3/emitting-events/
