@@ -40,28 +40,42 @@ export class ChatGateway extends BaseGateway {
   	  console.log("join message received: " + rooms);
 	  const splittedRooms: Array<string> = rooms.split(",");
 	  let lastJoinedRoom: string;
+	  let newRoomCreated: boolean = false;
+	  const adapter: any = this.server.adapter;
+	  const roomsRaw: any = adapter.rooms;
+
 	  splittedRooms.forEach((room) => {
 	  	  if (room.length > 0 && room[0] != '#'){
 	  	  	lastJoinedRoom = '#' + room;
-			this.joinUserToRoom(client.id, lastJoinedRoom);
 	  	  } else {
 	  	  	lastJoinedRoom = room;
-			this.joinUserToRoom(client.id, room);
 	  	  }
+		  if (!roomsRaw.has(room))
+		  	  newRoomCreated = true;
+		  this.joinUserToRoom(client.id, lastJoinedRoom);
 	  })
+
+	  if (newRoomCreated){
+          const adapter: any = this.server.adapter;
+	      const roomsRaw: any = adapter.rooms;
+	  	  this.emit ('listRooms', Array.from(roomsRaw.keys()).filter(x => x[0] == '#'));
+	  }
+  
 		const response: ChatMessage = {
 			room: lastJoinedRoom,
 			message: `you are in room ${lastJoinedRoom}`,
 			nick: "system",
 			date: new Date()
 		}
+		
 	  return { event: 'system', data: response};
   }
 
   @SubscribeMessage('listRooms')
   listRooms(client: Socket): WsResponse<unknown>{
-	  console.log("rooms " + Array.from(client.rooms));
-	  return { event: 'listRooms', data: Array.from(client.rooms)};
+      const adapter: any = this.server.adapter;
+	  const roomsRaw: any = adapter.rooms;
+	  return { event: 'listRooms', data: Array.from(roomsRaw.keys()).filter(x => x[0] == '#')};
   }
  
 }

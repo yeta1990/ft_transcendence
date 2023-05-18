@@ -37,23 +37,30 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
    joinUserToRoom(rooms: string): void {
    	   	//splitting the channels in case they come as a comma-separated list
-
 	  	const splittedRooms: Array<string> = rooms.split(",");
+	    let lastJoinedRoom: string = "";
+
+	    //adding a # to those rooms who haven't it
 		splittedRooms.forEach((room) => {
-   	   	//in case the user was already in that channel
-   	   	//we want to preserve the historial of the room
-			if (!this.messageList.get(room)){
-				this.messageList.set(room, new Array<ChatMessage>);
-			}
+	  	  if (room.length > 0 && room[0] != '#'){
+			lastJoinedRoom = '#' + room;
+	  	  } else {
+	  	  	lastJoinedRoom = room;
+	  	  }
+   	      //in case the user was already in that channel
+   	      //we want to preserve the historial of the room
+		  if (!this.messageList.get(lastJoinedRoom)){
+		    this.messageList.set(lastJoinedRoom, new Array<ChatMessage>);
+		  }
 		})
-		//sending only one signal to the server
+		//sending only one signal to the server with the raw rooms string
 		this.chatService.joinUserToRoom(rooms);
-		this.currentRoom = splittedRooms[splittedRooms.length - 1];
+		this.currentRoom = lastJoinedRoom;
    }
 
 	//subscription to all events from the service
 	ngOnInit(): void {
-		this.joinUserToRoom("default");
+		this.joinUserToRoom("#default");
 		this.subscriptions.add(
 			this.chatService
 			.getMessage()
@@ -67,7 +74,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					this.availableRoomsList = Array.from(payload.data);
 				}
 				else if (payload.event === 'system'){
-					console.log("received help response");
 					this.messageList.get(this.currentRoom)!.push(payload.data);
 				}
         		this.scrollToBottom();
