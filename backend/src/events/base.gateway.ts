@@ -10,6 +10,7 @@ import { Logger, Inject, UnauthorizedException } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from '../auth/auth.service';
 import { ChatMessage } from '@shared/types';
+import { map } from 'rxjs/operators';
 
 //this base class is used to log the initialization
 //and avoid code duplications in the gateways
@@ -82,8 +83,15 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   public joinUserToRoom(clientSocketId: string, room: string): void{
-	  this.server.in(clientSocketId).socketsJoin(room);
-      this.logger.log("User " + clientSocketId + "joined room " + room);
+		const adapter: any = this.server.adapter;
+		const roomsRaw: any = adapter.rooms;
+		const roomsArray: string[] = adapter.rooms.keys();
+		console.log(roomsRaw.has(room));
+//		const filteredRoomsArray: string[] = roomsArray.filter(x => x[0] != '#');
+		this.server.in(clientSocketId).socketsJoin(room);
+		this.logger.log("User " + clientSocketId + "joined room " + room);
+//		const roomsArray: Array<string> = adapter.rooms.keys().filter(x => x[0] != '#');
+		console.log(roomsArray);
   }
 
   public broadCastToRoom(event: string, payload: ChatMessage): void{
