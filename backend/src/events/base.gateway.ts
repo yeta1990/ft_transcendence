@@ -10,6 +10,7 @@ import { Logger, Inject, UnauthorizedException } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from '../auth/auth.service';
 import { ChatMessage } from '@shared/types';
+import { map } from 'rxjs/operators';
 
 //this base class is used to log the initialization
 //and avoid code duplications in the gateways
@@ -20,7 +21,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   private readonly logger; 
   gatewayName: string;
   users: string[] = [];
-  rooms: string[] = ["default"];
 
   @Inject(AuthService)
   private authService: AuthService;
@@ -48,7 +48,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		this.logger.log(`Socket client connected: ${socket.id}`)
 		this.users.push(socket.id);
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
-		this.joinUserToRoom(socket.id, "default");
+//		this.joinUserToRoom(socket.id, "default");
 	}
 	else{
 		//disconnect
@@ -70,20 +70,28 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	this.logger.log(`Socket client disconnected: ${socket.id}`)
 	this.users = this.users.filter(e => e !== socket.id);
 	this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
+    this.emit('listRooms', this.getActiveRooms());
   }
 
+  getActiveRooms(): Array<string>{
+    const adapter: any = this.server.adapter;
+	const roomsRaw: any = adapter.rooms;
+	return (Array.from(roomsRaw.keys()).filter(x => x[0] == '#') as Array<string>);
+
+  }
   private disconnect(socket: Socket) {
     socket.emit('Error', new UnauthorizedException());
     socket.disconnect();
   }
+
   //emit to all connected users in this namespace
-  public emit(event: string, data: string): void {
+  public emit(event: string, data: any): void {
   	  this.server.emit(event, data);
   }
 
   public joinUserToRoom(clientSocketId: string, room: string): void{
-	  this.server.in(clientSocketId).socketsJoin(room);
-      this.logger.log("User " + clientSocketId + "joined room " + room);
+		this.server.in(clientSocketId).socketsJoin(room);
+		this.logger.log("User " + clientSocketId + "joined room " + room);
   }
 
   public broadCastToRoom(event: string, payload: ChatMessage): void{

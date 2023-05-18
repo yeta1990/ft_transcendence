@@ -30,22 +30,50 @@ export class ChatGateway extends BaseGateway {
 		nick: "system",
 		date: new Date()
 	}
-	return { event: 'help', data: response};
+	return { event: 'system', data: response};
   }
 
+  //in case it arrives different rooms separated by comma,
+  // the rooms param is splitted
   @SubscribeMessage('join')
-  handleJoinRoom(client: Socket, room: string): WsResponse<unknown>{
-	  this.joinUserToRoom(client.id, room); 
-//	  this.broadCastToRoom('join', "new user joined room");
-	  return { event: 'join', data: room};
+  handleJoinRoom(client: Socket, rooms: string): WsResponse<unknown>{
+  	  console.log("join message received: " + rooms);
+	  const splittedRooms: Array<string> = rooms.split(",");
+	  let lastJoinedRoom: string;
+	  let newRoomCreated: boolean = false;
+	  const adapter: any = this.server.adapter;
+	  const roomsRaw: any = adapter.rooms;
+
+	  splittedRooms.forEach((room) => {
+	  	  if (room.length > 0 && room[0] != '#'){
+	  	  	lastJoinedRoom = '#' + room;
+	  	  } else {
+	  	  	lastJoinedRoom = room;
+	  	  }
+		  if (!roomsRaw.has(room))
+		  	  newRoomCreated = true;
+		  this.joinUserToRoom(client.id, lastJoinedRoom);
+	  })
+
+	  if (newRoomCreated){
+		  this.emit('listRooms', this.getActiveRooms());
+	  }
+  
+		const response: ChatMessage = {
+			room: lastJoinedRoom,
+			message: `you are in room ${lastJoinedRoom}`,
+			nick: "system",
+			date: new Date()
+		}
+
+	  return { event: 'join', data: response};
   }
 
   @SubscribeMessage('listRooms')
   listRooms(client: Socket): WsResponse<unknown>{
-//	  this.joinUserToRoom(client.id, room);
-//	  this.broadCastToRoom(room, 'join', "new user joined room");
-	  console.log("rooms " + Array.from(client.rooms));
-	  return { event: 'listRooms', data: Array.from(client.rooms)};
+      const adapter: any = this.server.adapter;
+	  const roomsRaw: any = adapter.rooms;
+	  return { event: 'listRooms', data: Array.from(roomsRaw.keys()).filter(x => x[0] == '#')};
   }
  
 }
