@@ -16,10 +16,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	@ViewChild('chatBox') content!: ElementRef;
 
 	newMessage: string = '';
-	messageList: ChatMessage[] = [];
-//	messageList: string[] = [];
+	messageList: Map<string, ChatMessage[]> = new Map<string, ChatMessage[]>();
 	currentRoom: string;
 	roomList: string[] = ["default"];
+	joinedRooms: Set<string> = new Set<string>//;["default"];
 	availableRoomsList: string[] = [];
 	private subscriptions = new Subscription();
 
@@ -35,29 +35,53 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.currentRoom = "default";
    }
 
+   joinUserToRoom(rooms: string): void {
+   	   	//splitting the channels in case they come as a comma-separated list
+	  	const splittedRooms: Array<string> = rooms.split(",");
+	    let lastJoinedRoom: string = "";
+
+	    //adding a # to those rooms who haven't it
+		splittedRooms.forEach((room) => {
+	  	  if (room.length > 0 && room[0] != '#'){
+			lastJoinedRoom = '#' + room;
+	  	  } else {
+	  	  	lastJoinedRoom = room;
+	  	  }
+   	      //in case the user was already in that channel
+   	      //we want to preserve the historial of the room
+		  if (!this.messageList.get(lastJoinedRoom)){
+		    this.messageList.set(lastJoinedRoom, new Array<ChatMessage>);
+		  }
+		})
+		//sending only one signal to the server with the raw rooms string
+		this.chatService.joinUserToRoom(rooms);
+//		this.currentRoom = lastJoinedRoom;
+   }
+
 	//subscription to all events from the service
 	ngOnInit(): void {
-		console.log("init");
-		this.subscriptions.add(this.chatService
+		this.joinUserToRoom("#default");
+		this.subscriptions.add(
+			this.chatService
 			.getMessage()
 			.pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
 			.subscribe((payload: SocketPayload) => {
 				if (payload.event === 'message'){
-					this.messageList.push(payload.data);
+					console.log(payload.data);
+					this.messageList.get(payload.data.room)!.push(payload.data);
 				}
 				else if (payload.event === 'listRooms'){
 					this.availableRoomsList = Array.from(payload.data);
 				}
-				else if (payload.event === 'help'){
-					console.log("received help response");
-					this.messageList.push(payload.data);
+				else if (payload.event === 'system'){
+					this.messageList.get(this.currentRoom)!.push(payload.data);
+				}
+				else if (payload.event === 'join'){
+					this.currentRoom = payload.data.room;
 				}
         		this.scrollToBottom();
 			})
 		);
-
-		this.chatService.joinUserToRoom("room1");
-		this.chatService.joinUserToRoom("room2");
 		this.chatService.getRoomList();
 	}
 
@@ -79,8 +103,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	}
 
 	processCommandToSend(command: string): void {
-		if (command && command=== '/help'){
+		//possibly unnecessary this check
+		if (!command)
+			return ;
+		const splittedCommand: Array<string> = command.split(" ", 2);
+		if (splittedCommand[0] === '/help'){
 			this.sendMessageToChat("help", this.currentRoom, command);
+		}
+		else if (splittedCommand[0] === '/join'){
+			this.joinUserToRoom(splittedCommand[1]);
 		}
 	}
 
@@ -88,9 +119,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		const messageToSend: string = this.messageToChat.get('newMessage')!.value || "";
 		if (messageToSend && messageToSend[0] === '/'){
 			this.processCommandToSend(messageToSend);
-		}
-		else if (messageToSend && messageToSend[0] === '/'){
-			console.log("let's parse this");
 		}
 		else if (messageToSend){
 			this.sendMessageToChat("message", this.currentRoom, messageToSend);

@@ -35,9 +35,8 @@ export class SocketService {
 				console.log("listRooms received: " + data);
 				this.message.next({event: 'listRooms', data});
 			})
-			.on('help', (data: ChatMessage) => {
-//				console.log("help: " + data);
-				this.message.next({event: 'help', data});
+			.on('system', (data: ChatMessage) => {
+				this.message.next({event: 'system', data});
 			})
 	}
 
@@ -50,11 +49,11 @@ export class SocketService {
   sendMessageToChat(type: string, payload: ChatMessage) {
 	this.socket.emit(type, payload);
   }
- 
+
   sendMessageToServer(type: string, payload: any) {
 	this.socket.emit(type, payload);
   }
-  
+
   getMessage(): Observable<SocketPayload>{
 	return this.messageObservable;
   }
