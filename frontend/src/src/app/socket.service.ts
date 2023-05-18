@@ -50,11 +50,11 @@ export class SocketService {
   sendMessageToChat(type: string, payload: ChatMessage) {
 	this.socket.emit(type, payload);
   }
- 
+
   sendMessageToServer(type: string, payload: any) {
 	this.socket.emit(type, payload);
   }
-  
+
   getMessage(): Observable<SocketPayload>{
 	return this.messageObservable;
   }

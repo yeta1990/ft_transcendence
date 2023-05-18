@@ -37,9 +37,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
    joinUserToRoom(rooms: string): void {
    	   	//splitting the channels in case they come as a comma-separated list
+
 	  	const splittedRooms: Array<string> = rooms.split(",");
 		splittedRooms.forEach((room) => {
-			this.messageList.set(room, new Array<ChatMessage>);
+   	   	//in case the user was already in that channel
+   	   	//we want to preserve the historial of the room
+			if (!this.messageList.get(room)){
+				this.messageList.set(room, new Array<ChatMessage>);
+			}
 		})
 		//sending only one signal to the server
 		this.chatService.joinUserToRoom(rooms);
@@ -64,15 +69,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				else if (payload.event === 'system'){
 					console.log("received help response");
 					this.messageList.get(this.currentRoom)!.push(payload.data);
-//					this.joinUserToRoom("room");
-//					this.currentRoom = "room";
 				}
         		this.scrollToBottom();
 			})
 		);
-
-//		this.chatService.joinUserToRoom("room1");
-//		this.chatService.joinUserToRoom("room2");
 		this.chatService.getRoomList();
 	}
 
