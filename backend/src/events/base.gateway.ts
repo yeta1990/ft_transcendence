@@ -21,7 +21,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   private readonly logger; 
   gatewayName: string;
   users: string[] = [];
-  activeRooms: string[] = ["default"];
 
   @Inject(AuthService)
   private authService: AuthService;
@@ -71,43 +70,28 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	this.logger.log(`Socket client disconnected: ${socket.id}`)
 	this.users = this.users.filter(e => e !== socket.id);
 	this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
+    this.emit('listRooms', this.getActiveRooms());
   }
 
+  getActiveRooms(): Array<string>{
+    const adapter: any = this.server.adapter;
+	const roomsRaw: any = adapter.rooms;
+	return (Array.from(roomsRaw.keys()).filter(x => x[0] == '#') as Array<string>);
+
+  }
   private disconnect(socket: Socket) {
     socket.emit('Error', new UnauthorizedException());
     socket.disconnect();
   }
+
   //emit to all connected users in this namespace
   public emit(event: string, data: any): void {
   	  this.server.emit(event, data);
   }
 
   public joinUserToRoom(clientSocketId: string, room: string): void{
-		const adapter: any = this.server.adapter;
-		const roomsRaw: any = adapter.rooms;
-//		const roomsArray: string[] = adapter.rooms.keys();
-
-//		console.log(room);
-//		console.log(roomsRaw);
-//		console.log(roomsRaw.has(room))
 		this.server.in(clientSocketId).socketsJoin(room);
-		if (!roomsRaw.has(room)){
-			
-
-			console.log("no existe room");
-			const existRoom = roomsRaw.get(room);
-
-			console.log(existRoom);
-
-			this.logger.log("User " + clientSocketId + "joined room " + room);
-		}
-
-
-//		console.log(roomsRaw.has(room));
-//		const filteredRoomsArray: string[] = roomsArray.filter(x => x[0] != '#');
-
-//		const roomsArray: Array<string> = adapter.rooms.keys().filter(x => x[0] != '#');
-//		console.log(roomsArray);
+		this.logger.log("User " + clientSocketId + "joined room " + room);
   }
 
   public broadCastToRoom(event: string, payload: ChatMessage): void{

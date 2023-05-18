@@ -1,6 +1,6 @@
 <b>available rooms, pick one</b>
 <ul *ngFor="let room of availableRoomsList">
-	<li><a href="#" (click)="goToChatRoom(room)">{{room}}</a></li>
+	<li><a href="javascript:void(0)" (click)="joinUserToRoom(room)">{{room}}</a></li>
 </ul>
 -------------------
 <br>
@@ -20,6 +20,9 @@ Currently viewing room <b>{{this.currentRoom}}</b>
 	</div>
 <form [formGroup]="messageToChat" (ngSubmit)="processMessageToSend()">
 	<br />
+	To: <b>{{this.currentRoom}}</b>
+	<br />
 	<input id="" type="text" formControlName="newMessage" placeholder="Send new message...">
+
 	<button class="button" type="submit"> Submit</button>
 </form>

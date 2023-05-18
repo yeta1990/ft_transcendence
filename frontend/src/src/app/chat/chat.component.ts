@@ -55,7 +55,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		})
 		//sending only one signal to the server with the raw rooms string
 		this.chatService.joinUserToRoom(rooms);
-		this.currentRoom = lastJoinedRoom;
+//		this.currentRoom = lastJoinedRoom;
    }
 
 	//subscription to all events from the service
@@ -75,6 +75,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				}
 				else if (payload.event === 'system'){
 					this.messageList.get(this.currentRoom)!.push(payload.data);
+				}
+				else if (payload.event === 'join'){
+					this.currentRoom = payload.data.room;
 				}
         		this.scrollToBottom();
 			})
@@ -100,17 +103,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	}
 
 	processCommandToSend(command: string): void {
+		//possibly unnecessary this check
 		if (!command)
 			return ;
 		const splittedCommand: Array<string> = command.split(" ", 2);
-		//possibly unnecessary
 		if (splittedCommand[0] === '/help'){
 			this.sendMessageToChat("help", this.currentRoom, command);
 		}
 		else if (splittedCommand[0] === '/join'){
 			this.joinUserToRoom(splittedCommand[1]);
 		}
-
 	}
 
 	processMessageToSend(): void {
