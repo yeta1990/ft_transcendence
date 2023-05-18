@@ -4,7 +4,7 @@
 </ul>
 	<div class="chat-box-body">
 	<div #chatBox class="chat-logs">
-	<div #messages *ngFor="let message of messageList">
+	<div #messages *ngFor="let message of messageList.get(this.currentRoom)">
 		<div [ngSwitch]="message.nick">
 			<span *ngSwitchCase="'system'" style="font-weight: bold">System message: {{message.message}}</span>
 			<span *ngSwitchDefault>{{message.nick}} ({{message.date}}): {{message.message}}</span>
