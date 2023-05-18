@@ -40,23 +40,20 @@ export class ChatGateway extends BaseGateway {
   	  console.log("join message received: " + rooms);
 	  const splittedRooms: Array<string> = rooms.split(",");
 	  splittedRooms.forEach((room) => {
-	  	this.joinUserToRoom(client.id, room);
+		this.joinUserToRoom(client.id, room);
 	  })
 	  const lastJoinedRoom = splittedRooms[splittedRooms.length - 1];
 		const response: ChatMessage = {
 			room: lastJoinedRoom,
-			message: `you've joined ${lastJoinedRoom}`,
+			message: `you are in room ${lastJoinedRoom}`,
 			nick: "system",
 			date: new Date()
 		}
-//	  return { event: 'join', data: rooms};
 	  return { event: 'system', data: response};
   }
 
   @SubscribeMessage('listRooms')
   listRooms(client: Socket): WsResponse<unknown>{
-//	  this.joinUserToRoom(client.id, room);
-//	  this.broadCastToRoom(room, 'join', "new user joined room");
 	  console.log("rooms " + Array.from(client.rooms));
 	  return { event: 'listRooms', data: Array.from(client.rooms)};
   }
