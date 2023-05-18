@@ -48,7 +48,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		this.logger.log(`Socket client connected: ${socket.id}`)
 		this.users.push(socket.id);
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
-		this.joinUserToRoom(socket.id, "default");
+//		this.joinUserToRoom(socket.id, "default");
 	}
 	else{
 		//disconnect
