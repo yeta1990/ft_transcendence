@@ -2,6 +2,12 @@
 <ul *ngFor="let room of availableRoomsList">
 	<li><a href="#" (click)="goToChatRoom(room)">{{room}}</a></li>
 </ul>
+-------------------
+<br>
+<br>
+Currently viewing room <b>{{this.currentRoom}}</b>
+<br>
+<br>
 	<div class="chat-box-body">
 	<div #chatBox class="chat-logs">
 	<div #messages *ngFor="let message of messageList.get(this.currentRoom)">

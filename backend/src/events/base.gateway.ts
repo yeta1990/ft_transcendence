@@ -21,7 +21,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   private readonly logger; 
   gatewayName: string;
   users: string[] = [];
-  rooms: string[] = ["default"];
+  activeRooms: string[] = ["default"];
 
   @Inject(AuthService)
   private authService: AuthService;
@@ -78,20 +78,36 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
     socket.disconnect();
   }
   //emit to all connected users in this namespace
-  public emit(event: string, data: string): void {
+  public emit(event: string, data: any): void {
   	  this.server.emit(event, data);
   }
 
   public joinUserToRoom(clientSocketId: string, room: string): void{
 		const adapter: any = this.server.adapter;
 		const roomsRaw: any = adapter.rooms;
-		const roomsArray: string[] = adapter.rooms.keys();
-		console.log(roomsRaw.has(room));
-//		const filteredRoomsArray: string[] = roomsArray.filter(x => x[0] != '#');
+//		const roomsArray: string[] = adapter.rooms.keys();
+
+//		console.log(room);
+//		console.log(roomsRaw);
+//		console.log(roomsRaw.has(room))
 		this.server.in(clientSocketId).socketsJoin(room);
-		this.logger.log("User " + clientSocketId + "joined room " + room);
+		if (!roomsRaw.has(room)){
+			
+
+			console.log("no existe room");
+			const existRoom = roomsRaw.get(room);
+
+			console.log(existRoom);
+
+			this.logger.log("User " + clientSocketId + "joined room " + room);
+		}
+
+
+//		console.log(roomsRaw.has(room));
+//		const filteredRoomsArray: string[] = roomsArray.filter(x => x[0] != '#');
+
 //		const roomsArray: Array<string> = adapter.rooms.keys().filter(x => x[0] != '#');
-		console.log(roomsArray);
+//		console.log(roomsArray);
   }
 
   public broadCastToRoom(event: string, payload: ChatMessage): void{
