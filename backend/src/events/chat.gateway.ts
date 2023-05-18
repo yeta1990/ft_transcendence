@@ -56,9 +56,7 @@ export class ChatGateway extends BaseGateway {
 	  })
 
 	  if (newRoomCreated){
-          const adapter: any = this.server.adapter;
-	      const roomsRaw: any = adapter.rooms;
-	  	  this.emit ('listRooms', Array.from(roomsRaw.keys()).filter(x => x[0] == '#'));
+		  this.emit('listRooms', this.getActiveRooms());
 	  }
   
 		const response: ChatMessage = {
@@ -67,8 +65,8 @@ export class ChatGateway extends BaseGateway {
 			nick: "system",
 			date: new Date()
 		}
-		
-	  return { event: 'system', data: response};
+
+	  return { event: 'join', data: response};
   }
 
   @SubscribeMessage('listRooms')
