@@ -1,16 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-
-export enum UserStatus {
-	OFFLINE,
-	ONLINE,
-	LOBBY,
-	PLAYING,
-	SPECTATING
-}
-
-function validateStringLength(value: string, min: number, max: number): boolean {
-	return value.length <= max && value.length >= min;
-  }
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable } from 'typeorm';
+import { Friend } from './friend/friend.entity'
+import { Achievement, UserStatus } from '@shared/enum';
 
 @Entity()
 export class User {
@@ -18,6 +8,7 @@ export class User {
 	id: number;
 	
 	// IDENTIFICACION -------------------------------------
+
 	@Column({
 		unique: true,
 	})
@@ -35,33 +26,56 @@ export class User {
 	})
 	login: string;
 
-	/**
-	 * PASS??? (HASH???)
-	 */
+	@Column({
+		nullable: true,
+		default: undefined,
+	})
+	tokenHash: string;
+
 
 	// PERSONALIZACION -------------------------------------
+
 	@Column({
 		default: '' //Poner ruta de imagen por defecto
 	})
 	image: string;
 
 	// ESTADISTICAS Y JUEGO ---------------------------------
+
 	@Column({
 		default: UserStatus.OFFLINE
 	})
 	status: UserStatus;
 
-	/**
-	 * ACHIEVEMENTS
-	 * WINS
-	 * LOOSES
-	 * ELO
-	 * CREATION DATA
-	 * LAST LOGIN
-	 * DAYS ON A ROW (para achievement)
-	 */
+	@Column('enum', {
+		enum: Achievement,
+		array: true,
+		default: []
+	})
+	achievements: Achievement[];
+
+	@Column({
+		type: 'int',
+		unsigned: true,
+		default: 0
+	})
+	wins: number;
+  
+	@Column({
+		type: 'int',
+		unsigned: true,
+		default: 0
+	})
+	losses: number;
+
+	@Column({
+		type: 'float',
+		default: 0
+	})
+	elo: number;
 
 	// VALIDACION Y SEGURIDAD --------------------------------
+
 	@Column({
 		unique: true,
 	})
@@ -72,23 +86,31 @@ export class User {
 	})
 	mfa: boolean;
 
+	@Column({
+		nullable: true,
+		default: undefined,
+	})
+	mfaSecret: string;
 
-	// FUNCIONES ---------------------------------------------
+	// AMIGOS ------------------------------------------------
 
-	validateEmail() {
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (!emailRegex.test(this.email)) {
-		  throw new Error('Value of the "email" field is not valid');
+	@ManyToMany(() => Friend)
+	@JoinTable({
+		name: 'user_friends',
+		joinColumns: [
+		{
+			name: 'user_id',
+			referencedColumnName: 'id',
 		}
-	  }
-
-	  validateLength( str: string, field: string, min: number, max: number) {
-		if (!validateStringLength(str, min, max)) {
-			if (min === max)
-		  		throw new Error(`Lenght of ${field} must be ${min} characters`);
-			else
-				throw new Error(`Lenght of ${field} must be between ${min} and ${max} characters`)
+		],
+		inverseJoinColumns: [
+		{
+			name: 'friend_id',
+			referencedColumnName: 'id',
 		}
-	}
+		],
+	})
+	friends: Friend[];
+
 }
 
