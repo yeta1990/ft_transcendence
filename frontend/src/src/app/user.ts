@@ -1,10 +1,4 @@
-export enum UserStatus {
-	OFFLINE,
-	ONLINE,
-	LOBBY,
-	PLAYING,
-	SPECTATING
-}
+import { UserStatus } from '@shared/enum';
 
 export class User {
 	id: number;
