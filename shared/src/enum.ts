@@ -19,7 +19,7 @@ export const enum ChannelType {
 	PERSONAL_MESSAGE
 }
 
-export const enum Achievement {
+export enum Achievement {
 	NONE,
 	BEGINNERS_LUCK, // Win your first multiplayer match. Desc: Win a multiplayer match in pong against another player.
 	FLAWLESS_VICTORY, // Win a match without allowing the opponent to score a single point. Desc: Defeat your opponent with a score of 10-0 in a multiplayer match.

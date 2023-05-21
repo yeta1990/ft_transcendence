@@ -11,4 +11,4 @@ export class Friend {
 
 	@ManyToMany(() => User, user => user.friends)
 	users: User[];
-}
+} 
