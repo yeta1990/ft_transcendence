@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module'
 
 import { User } from './user/user.entity'
+import { Friend } from './user/friend/friend.entity'
 import { UserController } from './user/user.controller';
 import { UserService } from './user/user.service';
 import { UserModule } from './user/user.module';
@@ -28,7 +29,7 @@ import { EventsModule } from './events/events.module';
 		username: process.env.POSTGRES_USER,
 		password: process.env.POSTGRES_PASSWORD,
 		database: process.env.POSTGRES_DATABASE,
-		entities: [User],
+		entities: [User, Friend],
 		synchronize: true, // creo que esto hay que cambiarlo para subirlo a producción
 	}),
 	HttpModule,
