@@ -36,7 +36,7 @@ export class ChatGateway extends BaseGateway {
   //in case it arrives different rooms separated by comma,
   // the rooms param is splitted
   @SubscribeMessage('join')
-  handleJoinRoom(client: Socket, rooms: string): void {//WsResponse<unknown>{
+  handleJoinRoom(client: Socket, rooms: string): WsResponse<unknown>{
   	  console.log("join message received: " + rooms);
 	  const splittedRooms: Array<string> = rooms.split(",");
 	  let lastJoinedRoom: string;
@@ -65,29 +65,15 @@ export class ChatGateway extends BaseGateway {
 			nick: "system",
 			date: new Date()
 		}
-	const joinBroadCast: ChatMessage = {
-		room: lastJoinedRoom,
-		message: `${client.id} joined ${lastJoinedRoom}`,
-		nick: "system",
-		date: new Date()
-	}
-	  this.broadCastToRoom('join', response);
-//	  this.broadCastToRoom('system', joinBroadCast);
 
-//	  return { event: 'join', data: response};
+	  return { event: 'join', data: response};
   }
 
   @SubscribeMessage('listRooms')
   listRooms(client: Socket): WsResponse<unknown>{
-  	  console.log(this.getUsersFromRoom("#default"));
-	  return { event: 'listRooms', data: this.getActiveRooms()}
+      const adapter: any = this.server.adapter;
+	  const roomsRaw: any = adapter.rooms;
+	  return { event: 'listRooms', data: Array.from(roomsRaw.keys()).filter(x => x[0] == '#')};
   }
-
-  @SubscribeMessage('listRoomUsers')
-  listRoomUsers(client:Socket, room: string): WsResponse<unknown>{
-	 return { event: 'listRoomUsers', data: this.getUsersFromRoom(room)}
-
-  }
-
  
 }
