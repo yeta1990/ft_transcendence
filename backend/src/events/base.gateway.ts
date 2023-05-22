@@ -63,7 +63,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   setNick(socket: Socket): void{
 		const decodedToken: JwtPayload = this.jwtService.decode(socket.handshake.auth.token) as JwtPayload;
 		socket.handshake.query.nick = decodedToken.nick;
-
   }
 
   handleDisconnect(socket: Socket): void {
@@ -73,12 +72,26 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
     this.emit('listRooms', this.getActiveRooms());
   }
 
-  getActiveRooms(): Array<string>{
+  getActiveRooms(): Array<string> {
     const adapter: any = this.server.adapter;
 	const roomsRaw: any = adapter.rooms;
+
 	return (Array.from(roomsRaw.keys()).filter(x => x[0] == '#') as Array<string>);
 
   }
+
+	getUsersFromRoom(room: string): Array<string>{
+    	const adapter: any = this.server.adapter;
+		const roomsRaw: any = adapter.rooms;
+
+	return (Array.from(roomsRaw.get(room)) as Array<string>);
+
+//	const usersRaw: any = adapter.sids;
+//	console.log(adapter);
+
+	}
+//	console.log(usersRaw);
+
   private disconnect(socket: Socket) {
     socket.emit('Error', new UnauthorizedException());
     socket.disconnect();
