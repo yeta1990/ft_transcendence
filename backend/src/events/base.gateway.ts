@@ -22,6 +22,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   private readonly logger; 
   gatewayName: string;
   users: Map<string, ChatUser>;
+  rooms: Set<string>;
 
   @Inject(AuthService)
   private authService: AuthService;
@@ -33,6 +34,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	this.gatewayName = name;
 	this.logger = new Logger(this.gatewayName);
 	this.users = new Map();
+	this.rooms = new Set();
   }
 
   afterInit(): void {
@@ -49,8 +51,8 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		this.setNick(socket);
 		this.logger.log(`Socket client connected: ${socket.id}`)
 		this.users.set(socket.id, new ChatUser(
-			 socket.id, 
-			 this.authService.getIdFromJwt(socket.handshake.auth.token), 
+			 socket.id,
+			 this.authService.getIdFromJwt(socket.handshake.auth.token),
 			 this.authService.getNickFromJwt(socket.handshake.auth.token))
 		);
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
@@ -70,11 +72,22 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		socket.handshake.query.nick = decodedToken.nick;
   }
 
+  destroyEmptyRooms() {
+	const activeRooms: Array<string> = this.getActiveRooms();
+
+	[...this.rooms].forEach(x=>{
+		if (!activeRooms.includes(x)){
+			this.rooms.delete(x);
+		}
+	});
+  }
+
   handleDisconnect(socket: Socket): void {
 	this.logger.log(`Socket client disconnected: ${socket.id}`)
 	this.users.delete(socket.id);
 	this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
     this.emit('listRooms', this.getActiveRooms());
+    this.destroyEmptyRooms();
   }
 
   getActiveRooms(): Array<string> {
@@ -85,17 +98,16 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   }
 
-	getUsersFromRoom(room: string): Array<string>{
-    	const adapter: any = this.server.adapter;
-		const roomsRaw: any = adapter.rooms;
-
-	return (Array.from(roomsRaw.get(room)) as Array<string>);
-
-//	const usersRaw: any = adapter.sids;
-//	console.log(adapter);
-
-	}
-//	console.log(usersRaw);
+  getUsersFromRoom(room: string): Array<ChatUser>{
+   	const adapter: any = this.server.adapter;
+	const roomsRaw: any = adapter.rooms;
+	const usersRaw: Array<string> = Array.from(roomsRaw.get(room));
+	let usersWithCompleteData: Array<ChatUser> = new Array();
+	usersRaw.forEach(x => {
+		usersWithCompleteData.push(this.users.get(x));
+	});
+    return (usersWithCompleteData);
+  }
 
   private disconnect(socket: Socket) {
     socket.emit('Error', new UnauthorizedException());
@@ -109,6 +121,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   public joinUserToRoom(clientSocketId: string, room: string): void{
 		this.server.in(clientSocketId).socketsJoin(room);
+		this.rooms.add(room);
 		this.logger.log("User " + clientSocketId + "joined room " + room);
   }
 

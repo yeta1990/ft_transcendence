@@ -92,7 +92,6 @@ export class AuthService {
 	}
 
 	async verifyJwt(token: string): Promise<boolean> {
-		console.log("verif");
     	if (!token) {
     	  throw new UnauthorizedException();
     	}

@@ -14,7 +14,10 @@ export type SocketPayload = {
 // type to handle relationships between
 // client_id provided by socket.io and our identification
 export class ChatUser {
-	constructor (client_id: string, user_id: number, nick: string){
-	 }
+	constructor (
+		public client_id: string, 
+		public user_id: number, 
+		public nick: string
+	){ }
 }
 
