@@ -8,12 +8,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module'
 
 import { User } from './user/user.entity'
+import { Room } from './chat/room.entity'
 import { UserController } from './user/user.controller';
 import { UserService } from './user/user.service';
 import { UserModule } from './user/user.module';
 import { HttpModule } from '@nestjs/axios';
 import { EventsModule } from './events/events.module';
-
+import { ChatModule } from './chat/chat.module';
+ 
 @Module({
   imports: [
   	ConfigModule.forRoot({
@@ -28,11 +30,12 @@ import { EventsModule } from './events/events.module';
 		username: process.env.POSTGRES_USER,
 		password: process.env.POSTGRES_PASSWORD,
 		database: process.env.POSTGRES_DATABASE,
-		entities: [User],
+		entities: [User, Room],
 		synchronize: true, // creo que esto hay que cambiarlo para subirlo a producción
 	}),
 	HttpModule,
 	EventsModule,
+	ChatModule,
   ],
   controllers: [AppController, UserController],
   providers: [AppService]
