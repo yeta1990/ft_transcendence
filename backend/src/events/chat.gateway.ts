@@ -79,7 +79,6 @@ export class ChatGateway extends BaseGateway {
 
   @SubscribeMessage('listRooms')
   listRooms(client: Socket): WsResponse<unknown>{
-  	  console.log(this.getUsersFromRoom("#default"));
 	  return { event: 'listRooms', data: this.getActiveRooms()}
   }
 
