@@ -66,28 +66,13 @@ export class ChatGateway extends BaseGateway {
 			nick: "system",
 			date: new Date()
 		}
-	const joinBroadCast: ChatMessage = {
-		room: lastJoinedRoom,
-		message: `${client.id} joined ${lastJoinedRoom}`,
-		nick: "system",
-		date: new Date()
-	}
-	  this.broadCastToRoom('join', response);
-//	  this.broadCastToRoom('system', joinBroadCast);
 
-//	  return { event: 'join', data: response};
+	  return { event: 'join', data: response};
   }
 
   @SubscribeMessage('listRooms')
   listRooms(client: Socket): WsResponse<unknown>{
 	  return { event: 'listRooms', data: this.getActiveRooms()}
   }
-
-  @SubscribeMessage('listRoomUsers')
-  listRoomUsers(client:Socket, room: string): WsResponse<unknown>{
-	 return { event: 'listRoomUsers', data: this.getUsersFromRoom(room)}
-
-  }
-
  
 }

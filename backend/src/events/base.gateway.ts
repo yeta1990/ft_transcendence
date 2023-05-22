@@ -79,6 +79,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   setNick(socket: Socket): void{
 		const decodedToken: JwtPayload = this.jwtService.decode(socket.handshake.auth.token) as JwtPayload;
 		socket.handshake.query.nick = decodedToken.nick;
+
   }
 
   destroyEmptyRooms() {
@@ -100,7 +101,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
     this.destroyEmptyRooms();
   }
 
-  getActiveRooms(): Array<string> {
+  getActiveRooms(): Array<string>{
     const adapter: any = this.server.adapter;
 	const roomsRaw: any = adapter.rooms;
 
