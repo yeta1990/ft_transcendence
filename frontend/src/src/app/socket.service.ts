@@ -35,6 +35,10 @@ export class SocketService {
 				console.log("listRooms received: " + data);
 				this.message.next({event: 'listRooms', data});
 			})
+			.on('listRoomUsers', (data: any) => {
+				console.log("get users in this room: " + data);
+				this.message.next({event: 'listRooms', data});
+			})
 			.on('system', (data: ChatMessage) => {
 				this.message.next({event: 'system', data});
 			})

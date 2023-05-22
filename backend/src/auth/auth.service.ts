@@ -86,6 +86,11 @@ export class AuthService {
 		return parseInt(decoded.id)
 	}
 
+	getNickFromJwt(token: string): string{
+		const decoded: JwtPayload = this.jwtService.decode(token) as JwtPayload;
+		return (decoded.nick)
+	}
+
 	async verifyJwt(token: string): Promise<boolean> {
 		console.log("verif");
     	if (!token) {
