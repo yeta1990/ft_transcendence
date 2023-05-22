@@ -80,6 +80,7 @@ Recuerda también que deberás crear los archivos correspondientes para las clas
         console.log(this.gameCanvas);
         if (this.gameCanvas) {
             const canvas = this.gameCanvas.nativeElement;
+            this.gameContext = canvas.getContext('2d');
             //const context = canvas.getContext('2d');
             this.gameContext!.strokeRect(10,10,canvas.width - 20 , canvas.height - 20);
         }
