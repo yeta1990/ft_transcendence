@@ -11,6 +11,7 @@ export class PongComponent implements OnInit {
 
     //private gameCanvas;
     private gameContext: any;
+    private canvas: any;
     public static keysPressed: boolean[] = [];
     public static playerScore: number = 0;
     public static computerScore: number = 0;
@@ -21,73 +22,34 @@ export class PongComponent implements OnInit {
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
 
     ngOnInit() {
+        
     this.initCanvas();
     }
     initCanvas() {
-        if (this.gameCanvas) {
-            //console.log(this.gameCanvas);
-            const canvas = this.gameCanvas.nativeElement;
-            this.gameContext = canvas.getContext('2d');
-            console.log(canvas.height)
-            if (this.gameContext) {
-                console.log("CANVAS: " + canvas.height)
-                this.player1 = new Paddle(20, 60, 20, canvas.height / 2 - 60 / 2);
-                console.log("PLAYER: " + this.player1);
-                this.computerPlayer = new ComputerPaddle(20, 60, canvas.width - (20 + 20), canvas.height / 2 - 60 / 2);
-                this.ball = new Ball(10, 10, canvas.width / 2 - 10 / 2, canvas.height / 2 - 10 / 2);
-                this.gameContext.font = '30px Orbitron';
+        this.canvas = this.gameCanvas?.nativeElement;
+        this.gameContext = this.canvas?.getContext('2d');
+ 
+        if (this.gameContext && this.canvas) {
+            this.player1 = new Paddle(20, 60, 20, this.canvas.height / 2 - 60 / 2);
+            this.computerPlayer = new ComputerPaddle(20, 60, this.canvas.width - (20 + 20), this.canvas.height / 2 - 60 / 2);
+            this.ball = new Ball(10, 10, this.canvas.width / 2 - 10 / 2, this.canvas.height / 2 - 10 / 2);
+            this.gameContext.font = '30px Orbitron';
 
-                window.addEventListener('keydown', (e) => {
-                    PongComponent.keysPressed[e.which] = true;
-                });
+            window.addEventListener('keydown', (e) => {
+                PongComponent.keysPressed[e.which] = true;
+            });
 
-                window.addEventListener('keyup', (e) => {
-                    PongComponent.keysPressed[e.which] = false;
-                });
-            }
+            window.addEventListener('keyup', (e) => {
+                PongComponent.keysPressed[e.which] = false;
+            });
         }
     }
-
-/*
-Asegúrate de haber importado las clases Ball, Paddle y ComputerPaddle desde sus respectivos archivos. Además, ten en cuenta que he corregido el problema de inicialización del contexto gameContext y he utilizado funciones flecha (=>) para los eventos de teclado con el fin de mantener el contexto correcto dentro de los manejadores de eventos.
-
-Recuerda también que deberás crear los archivos correspondientes para las clases Ball, Paddle y ComputerPaddle, y asegurarte de que estén importados correctamente en el componente PongComponent.
-
-        }
-    // Ahora puedes usar la variable 'context' para dibujar en el canvas
-    }
-    constructor(){
-    this.gameContext!.font = "30px Orbitron";
-      
-    window.addEventListener("keydown",function(e){
-         PongComponent.keysPressed[e.which] = true;
-    });
-      
-    window.addEventListener("keyup",function(e){
-        PongComponent.keysPressed[e.which] = false;
-    });
-      
-      var paddleWidth:number = 20, paddleHeight:number = 60, ballSize:number = 10, wallOffset:number = 20;
-    if (this.gameCanvas) { 
-        this.player1 = new Paddle(paddleWidth,paddleHeight,wallOffset,this.gameCanvas.height / 2 - paddleHeight / 2); 
-        this.computerPlayer = new ComputerPaddle(paddleWidth,paddleHeight,this.gameCanvas!.width - (wallOffset + paddleWidth) ,this.gameCanvas!.height / 2 - paddleHeight / 2);
-        this.ball = new Ball(ballSize,ballSize,this.gameCanvas!.width / 2 - ballSize / 2, this.gameCanvas!.height / 2 - ballSize / 2);  
-    }
-}*/
 
     drawBoardDetails(){
 
-        console.log(this.gameCanvas);
-        if (this.gameCanvas) {
-            const canvas = this.gameCanvas.nativeElement;
-            this.gameContext = canvas.getContext('2d');
-            //const context = canvas.getContext('2d');
-            this.gameContext!.strokeRect(10,10,canvas.width - 20 , canvas.height - 20);
-        }
-        //draw court outline
         this.gameContext!.strokeStyle = "#fff";
         this.gameContext!.lineWidth = 5;
-        //this.gameContext!.strokeRect(10,10,canvas.width - 20 ,this.gameCanvas!.height - 20);
+        this.gameContext!.strokeRect(10,10,this.canvas.width - 20 ,this.canvas.height - 20);
         
         //draw center lines
         if (this.gameCanvas) {
@@ -99,16 +61,10 @@ Recuerda también que deberás crear los archivos correspondientes para las clas
         }
     
   //draw scores
-  //this.gameContext!.fillText(PongComponent.playerScore, 280, 50);
-  //this.gameContext!.fillText(PongComponent.computerScore, 390, 50);
-  
-    }/*
-    update(){
-    this.player1!.update(this.gameCanvas);
-    this.computerPlayer!.update(this.ball!,this.gameCanvas);
-    this.ball!.update(this.player1!,this.computerPlayer!,this.gameCanvas);
+        this.gameContext!.fillText(PongComponent.playerScore, 280, 50);
+        this.gameContext!.fillText(PongComponent.computerScore, 390, 50);
     }
-    */
+
     update() {
         if (this.player1) {
           this.player1.update(this.gameCanvas?.nativeElement);
@@ -118,23 +74,32 @@ Recuerda también que deberás crear los archivos correspondientes para las clas
           this.computerPlayer.update(this.ball, this.gameCanvas.nativeElement);
           this.ball.update(this.player1!, this.computerPlayer, this.gameCanvas.nativeElement);
         }
-      }
+    }
     draw(){
-        if (this.gameCanvas) {
-            const canvas = this.gameCanvas.nativeElement;
-            this.gameContext!.fillStyle = "#000";
-            this.gameContext!.fillRect(0,0,canvas.width, canvas.height);
-        }     
+        
+        this.gameContext!.fillStyle = "#000";
+        this.gameContext!.fillRect(0,0,this.canvas.width, this.canvas.height);   
         this.drawBoardDetails();
         this.player1!.draw(this.gameContext);
         this.computerPlayer!.draw(this.gameContext);
         this.ball!.draw(this.gameContext);
     }
+    
+    gameLoop(){
+        const self = this;
+        this.update();
+        this.draw();
+        requestAnimationFrame(function() {
+            self.gameLoop();
+        });
+    }
+   /*
     gameLoop(){
         game.update();
         game.draw();
         requestAnimationFrame(game.gameLoop);
     }
+    */
 }
 
 class Entity{
