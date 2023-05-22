@@ -10,6 +10,7 @@ import { Logger, Inject, UnauthorizedException } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from '../auth/auth.service';
 import { ChatMessage } from '@shared/types';
+import { ChatUser } from '@shared/types';
 import { map } from 'rxjs/operators';
 
 //this base class is used to log the initialization
@@ -20,7 +21,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   private readonly logger; 
   gatewayName: string;
-  users: string[] = [];
+  users: Map<string, ChatUser>;
 
   @Inject(AuthService)
   private authService: AuthService;
@@ -31,6 +32,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   constructor(name: string){
 	this.gatewayName = name;
 	this.logger = new Logger(this.gatewayName);
+	this.users = new Map();
   }
 
   afterInit(): void {
@@ -46,9 +48,12 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	if (isUserVerified){
 		this.setNick(socket);
 		this.logger.log(`Socket client connected: ${socket.id}`)
-		this.users.push(socket.id);
+		this.users.set(socket.id, new ChatUser(
+			 socket.id, 
+			 this.authService.getIdFromJwt(socket.handshake.auth.token), 
+			 this.authService.getNickFromJwt(socket.handshake.auth.token))
+		);
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
-//		this.joinUserToRoom(socket.id, "default");
 	}
 	else{
 		//disconnect
@@ -67,7 +72,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   handleDisconnect(socket: Socket): void {
 	this.logger.log(`Socket client disconnected: ${socket.id}`)
-	this.users = this.users.filter(e => e !== socket.id);
+	this.users.delete(socket.id);
 	this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
     this.emit('listRooms', this.getActiveRooms());
   }
@@ -112,7 +117,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   public getNumberOfConnectedUsers(): number{
-	return this.users.length;
+	return this.users.size;
   }
 
 }
