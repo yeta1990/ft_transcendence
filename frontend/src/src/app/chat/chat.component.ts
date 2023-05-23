@@ -37,6 +37,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
    joinUserToRoom(rooms: string): void {
    	   	//splitting the channels in case they come as a comma-separated list
+//   	   	console.log(rooms);
 	  	const splittedRooms: Array<string> = rooms.split(",");
 	    let lastJoinedRoom: string = "";
 
@@ -106,11 +107,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		//possibly unnecessary this check
 		if (!command)
 			return ;
-		const splittedCommand: Array<string> = command.split(" ", 2);
+		const splittedCommand: Array<string> = command.split(" ");
 		if (splittedCommand[0] === '/help'){
 			this.sendMessageToChat("help", this.currentRoom, command);
 		}
+		else if (splittedCommand[0] === '/join' && splittedCommand.length > 2){
+			//channel list comma-separated and password
+			this.joinUserToRoom(splittedCommand[1] + " " + splittedCommand[2]);
+		}
 		else if (splittedCommand[0] === '/join'){
+			//channel list comma-separated and password
 			this.joinUserToRoom(splittedCommand[1]);
 		}
 	}

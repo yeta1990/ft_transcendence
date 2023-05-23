@@ -26,7 +26,11 @@ export class ChatService {
 	}
 
 	public async deleteRoom(room: string): Promise<any>{
-		await this.repository.delete(room);
+		return this.repository.delete(room);
+	}
+
+	public async emptyTableRoom(): Promise<any>{
+		return this.repository.clear();
 	}
 
 }

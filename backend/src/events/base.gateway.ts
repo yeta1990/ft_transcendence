@@ -42,9 +42,10 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   afterInit(): void {
-	this.logger.log(this.gatewayName + ' initialized');
+	this.chatService.emptyTableRoom()
+		.then(this.logger.log(this.gatewayName + ' initialized'));
   }
-
+ 
   // about auth during client connection
   // https://github.com/ThomasOliver545/realtime-todo-task-management-app-nestjs-and-angular/blob/main/todo-api/src/todo/gateway/todo.gateway.ts
   async handleConnection(socket: Socket): Promise<void>{
@@ -79,10 +80,10 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   destroyEmptyRooms() {
 	const activeRooms: Array<string> = this.getActiveRooms();
 
-	[...this.rooms].forEach(x=>{
+	[...this.rooms].forEach(async x=>{
 		if (!activeRooms.includes(x)){
 			this.rooms.delete(x);
-			this.chatService.deleteRoom(x);
+			await this.chatService.deleteRoom(x);
 		}
 	});
   }
@@ -99,8 +100,10 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
     const adapter: any = this.server.adapter;
 	const roomsRaw: any = adapter.rooms;
 
-	return (Array.from(roomsRaw.keys()).filter(x => x[0] == '#') as Array<string>);
-
+	if (roomsRaw){
+		return (Array.from(roomsRaw.keys()).filter(x => x[0] == '#') as Array<string>);
+	}
+	return ([]);
   }
 
   getUsersFromRoom(room: string): Array<ChatUser>{
@@ -124,10 +127,11 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   	  this.server.emit(event, data);
   }
 
-  public joinUserToRoom(clientSocketId: string, room: string): void{
+  public joinUserToRoom(clientSocketId: string, room: string, password: string | undefined): void{
+  	  console.log(password == "undefined" );
+		this.chatService.createRoom(room, password != undefined ? true : false, password);
 		this.server.in(clientSocketId).socketsJoin(room);
 		this.rooms.add(room);
-		this.chatService.createRoom(room, false, null);
 		this.logger.log("User " + clientSocketId + "joined room " + room);
   }
 
