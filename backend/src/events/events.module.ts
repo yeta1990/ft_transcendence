@@ -7,10 +7,11 @@ import { ChatService } from '../chat/chat.service';
 import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Room } from '../chat/room.entity';
+import { HashService } from '../hash/hash.service';
 
 @Module({
 	imports: [TypeOrmModule.forFeature([Room]), AuthModule, HttpModule],
-  providers: [ChatService, ChatGateway, GameGateway, BaseGateway]
+  providers: [ChatService, ChatGateway, GameGateway, BaseGateway, HashService]
 })
 
 export class EventsModule {}
