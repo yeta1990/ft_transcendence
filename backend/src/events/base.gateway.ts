@@ -9,6 +9,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import { Logger, Inject, UnauthorizedException } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from '../auth/auth.service';
+import { ChatService } from '../chat/chat.service';
 import { ChatMessage } from '@shared/types';
 import { ChatUser } from '@shared/types';
 import { map } from 'rxjs/operators';
@@ -29,6 +30,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   @Inject(JwtService)
   private jwtService: JwtService;
+
+  @Inject(ChatService)
+  private chatService: ChatService;
 
   constructor(name: string){
 	this.gatewayName = name;
@@ -78,6 +82,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	[...this.rooms].forEach(x=>{
 		if (!activeRooms.includes(x)){
 			this.rooms.delete(x);
+			this.chatService.deleteRoom(x);
 		}
 	});
   }
@@ -122,6 +127,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   public joinUserToRoom(clientSocketId: string, room: string): void{
 		this.server.in(clientSocketId).socketsJoin(room);
 		this.rooms.add(room);
+		this.chatService.createRoom(room, false, null);
 		this.logger.log("User " + clientSocketId + "joined room " + room);
   }
 
