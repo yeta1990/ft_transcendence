@@ -37,8 +37,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
    joinUserToRoom(rooms: string): void {
    	   	//splitting the channels in case they come as a comma-separated list
-//   	   	console.log(rooms);
-	  	const splittedRooms: Array<string> = rooms.split(",");
+        //the command allows this structure: /join [#]channel[,channel] [pass]
+	    const splittedRooms: Array<string> = rooms.split(" ", 1)[0].split(",");
 	    let lastJoinedRoom: string = "";
 
 	    //adding a # to those rooms who haven't it
@@ -56,7 +56,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		})
 		//sending only one signal to the server with the raw rooms string
 		this.chatService.joinUserToRoom(rooms);
-//		this.currentRoom = lastJoinedRoom;
    }
 
 	//subscription to all events from the service
