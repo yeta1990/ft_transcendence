@@ -38,7 +38,8 @@ export class ChatGateway extends BaseGateway {
   @SubscribeMessage('join')
   handleJoinRoom(client: Socket, rooms: string): void {//WsResponse<unknown>{
   	  console.log("join message received: " + rooms);
-	  const splittedRooms: Array<string> = rooms.split(",");
+	  const splittedRooms: Array<string> = rooms.split(" ", 1)[0].split(",");
+	  const pass: string | undefined = rooms.split(" ")[1];
 	  let lastJoinedRoom: string;
 	  let newRoomCreated: boolean = false;
 	  const adapter: any = this.server.adapter;
@@ -50,9 +51,8 @@ export class ChatGateway extends BaseGateway {
 	  	  } else {
 	  	  	lastJoinedRoom = room;
 	  	  }
-		  if (!roomsRaw.has(room))
-		  	  newRoomCreated = true;
-		  this.joinUserToRoom(client.id, lastJoinedRoom);
+		  if (!roomsRaw.has(room)) newRoomCreated = true;
+		  this.joinUserToRoom(client.id, lastJoinedRoom, pass);
 	  })
 
 	  if (newRoomCreated){
