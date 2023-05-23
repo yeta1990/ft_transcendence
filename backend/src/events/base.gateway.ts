@@ -10,6 +10,7 @@ import { Logger, Inject, UnauthorizedException } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from '../auth/auth.service';
 import { ChatService } from '../chat/chat.service';
+import { HashService } from '../hash/hash.service';
 import { ChatMessage } from '@shared/types';
 import { ChatUser } from '@shared/types';
 import { map } from 'rxjs/operators';
@@ -33,6 +34,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   @Inject(ChatService)
   private chatService: ChatService;
+
+  @Inject(HashService)
+  private hashService: HashService;
 
   constructor(name: string){
 	this.gatewayName = name;
@@ -117,6 +121,17 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
     return (usersWithCompleteData);
   }
 
+  isUserInRoom(room: string, clientSocketId: string): boolean {
+	const allUsersInRoom: Array<ChatUser> = this.getUsersFromRoom(room);
+	for (const user of allUsersInRoom)
+	{
+		if (user.client_id === clientSocketId){ 
+			return (true);
+		}
+	}
+	return (false);
+  }
+
   private disconnect(socket: Socket) {
     socket.emit('Error', new UnauthorizedException());
     socket.disconnect();
@@ -127,12 +142,60 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   	  this.server.emit(event, data);
   }
 
-  public joinUserToRoom(clientSocketId: string, room: string, password: string | undefined): void{
-  	  console.log(password == "undefined" );
-		this.chatService.createRoom(room, password != undefined ? true : false, password);
-		this.server.in(clientSocketId).socketsJoin(room);
-		this.rooms.add(room);
-		this.logger.log("User " + clientSocketId + "joined room " + room);
+  public async joinUserToRoom(clientSocketId: string, room: string, password: string | undefined): Promise<any>{
+		//currently checking the existence of the room in the rooms Set
+
+		//[process]
+		// if the room doesn't exist:
+		//   1. is created in socket.io
+		//   2. is created in db
+		//   3. user is added in socket.io
+		// if the room exists:
+		//   1. check if the user is currently joined. if it's, just continue
+		//   2. (TBD!!) check if the user is banned from the channel
+		//   3. check if the room is protected by password. if it's, compare password with stored hashpassword
+	  	//		- match? join user 
+	  	//		- doesn't match? return an error to the user
+		//   
+
+		const roomExists: boolean = this.rooms.has(room);
+
+		if (!roomExists){
+			await this
+				.chatService
+				.createRoom(room, password != undefined ? true : false, password);
+			await this.rooms.add(room);
+			await this.server.in(clientSocketId).socketsJoin(room);
+			this.logger.log("User " + clientSocketId + "joined room " + room);
+		}
+		else if (roomExists && this.isUserInRoom(room, clientSocketId)){
+			this.server.in(clientSocketId).socketsJoin(room);
+		}
+		else if (roomExists){
+//			console.log("room already exists " + roomExists);
+			const isRoomProtectedByPassword: boolean = await this 
+				.chatService
+				.isProtectedByPassword(room);
+
+			if (isRoomProtectedByPassword && password === undefined ){
+//				console.log("no password provided");
+			}
+			else if (isRoomProtectedByPassword){
+				const isValidPassword: boolean = await this.hashService.comparePassword(password, await this.chatService.getHashPassFromRoom(room));
+				if (!isValidPassword){
+//					console.error("invalid password");
+				}
+				else{
+//					console.log("password is correct");
+					this.server.in(clientSocketId).socketsJoin(room);
+					this.logger.log("User " + clientSocketId + "joined room " + room);
+				}
+			}
+			else{
+//				console.log("room isn't protected");
+				this.server.in(clientSocketId).socketsJoin(room);
+			}
+		}
   }
 
   public broadCastToRoom(event: string, payload: ChatMessage): void{

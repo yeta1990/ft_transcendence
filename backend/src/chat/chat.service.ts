@@ -13,19 +13,20 @@ export class ChatService {
 
 	constructor(private httpService: HttpService, private hashService: HashService) {}
 
-	public async createRoom(room: string, hasPass: boolean, password: string | undefined): Promise<Room>{
+	public async createRoom(room: string, hasPass: boolean, password: string | undefined): Promise<boolean>{
 		const roomAlreadyExists = await this.repository.findOne({ where: {name: room}});
 
 		if (roomAlreadyExists){ 
-			Promise.resolve() 
+			return true;
 		} else {
 			const hashedPass = hasPass ? await this.hashService.hashPassword(password) : undefined;
-			const roomToCreate: Room = this.repository.create({
-				name: room, 
+			const roomToCreate: Room = await this.repository.create({
+				name: room,
 				hasPass: hasPass,
 				password: hashedPass
-			}); 
-			return this.repository.save(roomToCreate);
+			});
+			await this.repository.save(roomToCreate);
+			return false;
 		}
 	}
 
@@ -35,6 +36,18 @@ export class ChatService {
 
 	public async emptyTableRoom(): Promise<any>{
 		return this.repository.clear();
+	}
+
+	public async getHashPassFromRoom(room: string): Promise<string>{
+		return this.repository
+			.findOne({select: {password: true }, where: {name: room}})
+			.then(o => o.password);
+	}
+
+	public async isProtectedByPassword(room: string): Promise<boolean>{
+		return this.repository
+			.findOne({select: {hasPass: true }, where: {name: room}})
+			.then(o => o.hasPass);
 	}
 
 }
