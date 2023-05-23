@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
 @Component({
@@ -7,7 +7,7 @@ import { DOCUMENT } from '@angular/common';
   styleUrls: ['./pong.component.css']
 })
 
-export class PongComponent implements OnInit {
+export class PongComponent implements AfterViewInit {
 
     //private gameCanvas;
     private gameContext: any;
@@ -20,17 +20,21 @@ export class PongComponent implements OnInit {
     private ball: Ball | null = null;
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
-
-    ngOnInit() {
+    constructor(){} 
+    ngAfterViewInit() {
         
     this.initCanvas();
     }
     initCanvas() {
         this.canvas = this.gameCanvas?.nativeElement;
         this.gameContext = this.canvas?.getContext('2d');
+        console.log("CONTEXT: " + this.gameContext);
+        console.log("canvas: " + this.canvas);
+
  
         if (this.gameContext && this.canvas) {
             this.player1 = new Paddle(20, 60, 20, this.canvas.height / 2 - 60 / 2);
+            console.log("PLAYER: " + this.player1);
             this.computerPlayer = new ComputerPaddle(20, 60, this.canvas.width - (20 + 20), this.canvas.height / 2 - 60 / 2);
             this.ball = new Ball(10, 10, this.canvas.width / 2 - 10 / 2, this.canvas.height / 2 - 10 / 2);
             this.gameContext.font = '30px Orbitron';
@@ -43,13 +47,19 @@ export class PongComponent implements OnInit {
                 PongComponent.keysPressed[e.which] = false;
             });
         }
+      /*  try {
+            requestAnimationFrame(this.gameLoop);
+        } catch (error) {
+           console.error("HOLA");
+        }*/
+        requestAnimationFrame(this.gameLoop);
     }
 
     drawBoardDetails(){
 
-        this.gameContext!.strokeStyle = "#fff";
-        this.gameContext!.lineWidth = 5;
-        this.gameContext!.strokeRect(10,10,this.canvas.width - 20 ,this.canvas.height - 20);
+        this.gameContext.strokeStyle = "#fff";
+        this.gameContext.lineWidth = 5;
+        this.gameContext.strokeRect(10,10,this.canvas.width - 20 ,this.canvas.height - 20);
         
         //draw center lines
         if (this.gameCanvas) {
@@ -67,12 +77,14 @@ export class PongComponent implements OnInit {
 
     update() {
         if (this.player1) {
-          this.player1.update(this.gameCanvas?.nativeElement);
+         // this.player1.update(this.gameCanvas?.nativeElement);
+            this.player1.update(this.canvas);
+
         }
       
         if (this.computerPlayer && this.ball && this.gameCanvas) {
-          this.computerPlayer.update(this.ball, this.gameCanvas.nativeElement);
-          this.ball.update(this.player1!, this.computerPlayer, this.gameCanvas.nativeElement);
+          this.computerPlayer.update(this.ball, this.canvas);
+          this.ball.update(this.player1!, this.computerPlayer, this.canvas);
         }
     }
     draw(){
@@ -85,21 +97,29 @@ export class PongComponent implements OnInit {
         this.ball!.draw(this.gameContext);
     }
     
-    gameLoop(){
+  /*  gameLoop(){
         const self = this;
         this.update();
         this.draw();
         requestAnimationFrame(function() {
             self.gameLoop();
         });
-    }
-   /*
+    }*/
+
     gameLoop(){
-        game.update();
-        game.draw();
-        requestAnimationFrame(game.gameLoop);
+        const self = this;
+        //this.update();
+       // this.draw();
+        //requestAnimationFrame(()=> this.gameLoop);
+        try {
+            self.update();
+            self.draw();
+            requestAnimationFrame(self.gameLoop);
+        } catch (error) {
+           console.error("HOLA");
+        }
     }
-    */
+
 }
 
 class Entity{
@@ -234,9 +254,10 @@ class Ball extends Entity{
     this.y += this.yVel * this.speed;
     }
 }
-
+/*
 var game = new PongComponent();
 requestAnimationFrame(game.gameLoop);
+*/
 
 enum KeyBindings{
   UP = 38,
