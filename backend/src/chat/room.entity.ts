@@ -5,12 +5,12 @@ import { User } from '../user/user.entity';
 export class Room { 
 
 	@PrimaryColumn({
-		unique: true	
+		unique: true
 	})
 	name: string;
 
 	@Column({
-		nullable: false, 
+		nullable: false,
 		default: false
 	})
 	hasPass: boolean;
@@ -24,8 +24,8 @@ export class Room {
 //	@OneToMany(() => User, (user) => user.id)
 //	banned: User[];
 
-	@Column({
-		default: new Date()
-	})
-	creationDate: Date;
+//	@Column({
+//		default: new Date()
+//	})
+//	creationDate: Date;
 }
