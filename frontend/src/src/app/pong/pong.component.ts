@@ -68,11 +68,13 @@ export class PongComponent implements AfterViewInit {
     }
 
     mode(i: number) {
+        this.restartScores();
         if (i == 1) {
             this.computerPlayer = new ComputerPaddle(20, 60, this.canvas.width - (20 + 20), this.canvas.height / 2 - 60 / 2, 10);
         } else if (i == 2) {
             this.computerPlayer = new ComputerPaddle(20, 60, this.canvas.width - (20 + 20), this.canvas.height / 2 - 60 / 2, 20);
-        } 
+        }
+        PongComponent.init = true;
     }
 
     drawBoardDetails(){
