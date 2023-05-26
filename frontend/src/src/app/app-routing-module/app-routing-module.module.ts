@@ -24,9 +24,9 @@ import { PongComponent } from '../pong/pong.component';
 // - With an unauthorized error (401) response from the backend, 
 // the user will be redirected to login page
 const routes: Routes = [
-	{	path: '',  component: HomeComponent},
-	{	path: 'home',  component: HomeComponent},
-	{	path: 'form', component: FormComponent } ,
+	{	path: '',  component: HomeComponent, canActivate: [AuthGuard] },
+	{	path: 'home',  component: HomeComponent, canActivate: [AuthGuard] },
+	{	path: 'signup', component: FormComponent } ,
 	{	
 		path: 'chat', 
 		component: ChatComponent, 

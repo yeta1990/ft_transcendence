@@ -1,6 +1,7 @@
 import { SubscribeMessage, WebSocketGateway, WsResponse } from '@nestjs/websockets';
 import { BaseGateway } from './base.gateway';
 import { Socket } from 'socket.io';
+import { ChatMessage, SocketPayload } from '@shared/types';
 
 //https://stackoverflow.com/questions/69435506/how-to-pass-a-dynamic-port-to-the-websockets-gateway-in-nestjs
 @WebSocketGateway({ namespace: '/chat', cors: true } )
@@ -14,15 +15,65 @@ export class ChatGateway extends BaseGateway {
   // - event: type of event that the client will be listening to
   // - data: the content
   @SubscribeMessage('message')
-  handleMessage(client: Socket, payload: any): WsResponse<unknown>{
-    return { event: 'message', data: payload};
+  handleMessage(client: Socket, payload: ChatMessage): void { //WsResponse<unknown>{
+	const nick: string = client.handshake.query.nick as string;
+    payload.nick = client.handshake.query.nick as string;
+	this.broadCastToRoom('message', payload);
   }
 
+  //return a response directly to the client
+  @SubscribeMessage('help')
+  handleHelp(client: Socket, payload: ChatMessage): WsResponse<unknown>{
+	const response: ChatMessage = {
+		room: payload.room,
+		message: "help response",
+		nick: "system",
+		date: new Date()
+	}
+	return { event: 'system', data: response};
+  }
+
+  //in case it arrives different rooms separated by comma,
+  // the rooms param is splitted
   @SubscribeMessage('join')
-  handleJoinRoom(client: Socket, room: string): WsResponse<unknown>{
-	  this.joinUserToRoom(client.id, room); 
-	  this.broadCastToRoom(room, 'join', "new user joined room");
-	  return { event: 'join', data: room};
+  handleJoinRoom(client: Socket, rooms: string): WsResponse<unknown>{
+  	  console.log("join message received: " + rooms);
+	  const splittedRooms: Array<string> = rooms.split(",");
+	  let lastJoinedRoom: string;
+	  let newRoomCreated: boolean = false;
+	  const adapter: any = this.server.adapter;
+	  const roomsRaw: any = adapter.rooms;
+
+	  splittedRooms.forEach((room) => {
+	  	  if (room.length > 0 && room[0] != '#'){
+	  	  	lastJoinedRoom = '#' + room;
+	  	  } else {
+	  	  	lastJoinedRoom = room;
+	  	  }
+		  if (!roomsRaw.has(room))
+		  	  newRoomCreated = true;
+		  this.joinUserToRoom(client.id, lastJoinedRoom);
+	  })
+
+	  if (newRoomCreated){
+		  this.emit('listRooms', this.getActiveRooms());
+	  }
+  
+		const response: ChatMessage = {
+			room: lastJoinedRoom,
+			message: `you are in room ${lastJoinedRoom}`,
+			nick: "system",
+			date: new Date()
+		}
+
+	  return { event: 'join', data: response};
+  }
+
+  @SubscribeMessage('listRooms')
+  listRooms(client: Socket): WsResponse<unknown>{
+      const adapter: any = this.server.adapter;
+	  const roomsRaw: any = adapter.rooms;
+	  return { event: 'listRooms', data: Array.from(roomsRaw.keys()).filter(x => x[0] == '#')};
   }
  
 }
