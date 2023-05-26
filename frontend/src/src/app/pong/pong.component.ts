@@ -50,9 +50,7 @@ export class PongComponent implements AfterViewInit {
             window.addEventListener('keyup', (e) => {
                 if (e.which === 32) {
                     if (!PongComponent.init) {
-                        console.log('Space pressed')
                         PongComponent.init = true;
-                        console.log(PongComponent.init);
                         requestAnimationFrame(this.gameLoop);
                     }
                 }
@@ -87,10 +85,18 @@ export class PongComponent implements AfterViewInit {
   //draw scores
         this.gameContext!.fillText(PongComponent.playerScore, 280, 50);
         this.gameContext!.fillText(PongComponent.computerScore, 390, 50);
-        if (PongComponent.playerScore >= 7 || PongComponent.computerScore >= 7) {
+        if (PongComponent.playerScore >= 3) { //POINTS
             PongComponent.init = false;
             PongComponent.playerScore = 0;
             PongComponent.computerScore = 0;
+            this.gameContext!.fillStyle = "#00FF00";
+            this.gameContext!.fillText("YOU   WON!", 275, 150);
+        } else if (PongComponent.computerScore >= 3) { //POINTS
+            PongComponent.init = false;
+            PongComponent.playerScore = 0;
+            PongComponent.computerScore = 0;
+            this.gameContext!.fillStyle = "#FF0000";
+            this.gameContext!.fillText("YOU   LOOSE!", 250, 150);
         }
     }
 
