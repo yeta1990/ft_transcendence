@@ -286,5 +286,6 @@ class Ball extends Entity{
 enum KeyBindings{
   UP = 38,
   DOWN = 40,
-  SPACE = 32
+  SPACE = 32,
+  ESCAPE = 27
 }
