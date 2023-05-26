@@ -45,7 +45,7 @@ import { PongComponent } from './pong/pong.component'
     LayoutModule
   ],
   providers: [
-	interceptorProviders
+	interceptorProviders,
   ],
   bootstrap: [AppComponent]
 })

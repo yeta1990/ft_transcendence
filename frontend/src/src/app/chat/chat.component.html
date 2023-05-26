@@ -1,5 +1,28 @@
-<p>chat works!</p>
-<div *ngFor="let message of messageList">
-	<span>{{message}}</span>
-</div>
-<button (click)="sendMessage()">pepe</button>
+<b>available rooms, pick one</b>
+<ul *ngFor="let room of availableRoomsList">
+	<li><a href="javascript:void(0)" (click)="joinUserToRoom(room)">{{room}}</a></li>
+</ul>
+-------------------
+<br>
+<br>
+Currently viewing room <b>{{this.currentRoom}}</b>
+<br>
+<br>
+	<div class="chat-box-body">
+	<div #chatBox class="chat-logs">
+	<div #messages *ngFor="let message of messageList.get(this.currentRoom)">
+		<div [ngSwitch]="message.nick">
+			<span *ngSwitchCase="'system'" style="font-weight: bold">System message: {{message.message}}</span>
+			<span *ngSwitchDefault>{{message.nick}} ({{message.date}}): {{message.message}}</span>
+		</div>
+	</div>
+	</div>
+	</div>
+<form [formGroup]="messageToChat" (ngSubmit)="processMessageToSend()">
+	<br />
+	To: <b>{{this.currentRoom}}</b>
+	<br />
+	<input id="" type="text" formControlName="newMessage" placeholder="Send new message...">
+
+	<button class="button" type="submit"> Submit</button>
+</form>
