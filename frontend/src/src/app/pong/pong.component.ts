@@ -17,6 +17,7 @@ export class PongComponent implements AfterViewInit {
     private player1: Paddle | null = null;
     private computerPlayer: ComputerPaddle | null = null;
     private ball: Ball | null = null;
+    public static init: boolean = false;
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
     constructor(){} 
@@ -25,6 +26,9 @@ export class PongComponent implements AfterViewInit {
     this.initCanvas();
     }
     initCanvas() {
+        PongComponent.init = false;
+        PongComponent.computerScore = 0;
+        PongComponent.playerScore = 0;
         this.canvas = this.gameCanvas?.nativeElement;
         this.gameContext = this.canvas?.getContext('2d');
 
@@ -41,6 +45,15 @@ export class PongComponent implements AfterViewInit {
             window.addEventListener('keyup', (e) => {
                 PongComponent.keysPressed[e.which] = false;
             });
+
+            window.addEventListener('keyup', (e) => {
+                if (e.which === 32) {
+                    console.log('Space pressed')
+                    PongComponent.init = true;
+                    console.log(PongComponent.init);
+                    requestAnimationFrame(this.gameLoop);
+                }
+              })
         }
         requestAnimationFrame(this.gameLoop);
     }
@@ -63,6 +76,11 @@ export class PongComponent implements AfterViewInit {
   //draw scores
         this.gameContext!.fillText(PongComponent.playerScore, 280, 50);
         this.gameContext!.fillText(PongComponent.computerScore, 390, 50);
+        if (PongComponent.playerScore >= 7 || PongComponent.computerScore >= 7) {
+            PongComponent.init = false;
+            PongComponent.playerScore = 0;
+            PongComponent.computerScore = 0;
+        }
     }
 
     update() {
@@ -86,12 +104,16 @@ export class PongComponent implements AfterViewInit {
     }
 
     gameLoop = () => {
-        const self = this;
-        this.update();
-        this.draw();
-        requestAnimationFrame(this.gameLoop);
+        
+        console.log("Loop " + PongComponent.init);
+        if (PongComponent.init) {
+            const self = this;
+            this.update();
+            this.draw();
+            requestAnimationFrame(this.gameLoop);
+        }
+        //requestAnimationFrame(this.gameLoop);
     }
-
 }
 
 class Entity{
@@ -229,5 +251,6 @@ class Ball extends Entity{
 
 enum KeyBindings{
   UP = 38,
-  DOWN = 40
+  DOWN = 40,
+  SPACE = 32
 }
