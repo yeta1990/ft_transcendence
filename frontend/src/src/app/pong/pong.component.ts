@@ -20,11 +20,12 @@ export class PongComponent implements AfterViewInit {
     public static init: boolean = false;
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
-    constructor(){} 
-    ngAfterViewInit() {
-        
-    this.initCanvas();
+    constructor(){}
+
+    ngAfterViewInit() {    
+        this.initCanvas();
     }
+    
     initCanvas() {
         PongComponent.init = false;
         PongComponent.computerScore = 0;
@@ -48,12 +49,22 @@ export class PongComponent implements AfterViewInit {
 
             window.addEventListener('keyup', (e) => {
                 if (e.which === 32) {
-                    console.log('Space pressed')
-                    PongComponent.init = true;
-                    console.log(PongComponent.init);
-                    requestAnimationFrame(this.gameLoop);
+                    if (!PongComponent.init) {
+                        console.log('Space pressed')
+                        PongComponent.init = true;
+                        console.log(PongComponent.init);
+                        requestAnimationFrame(this.gameLoop);
+                    }
                 }
-              })
+            });
+
+            window.addEventListener('keyup', (e) => {
+                if (e.which === 27 ) {
+                    PongComponent.init = false;
+                    this.gameContext!.fillStyle = "#57a639";
+                    this.gameContext!.fillText("PAUSE", 300, 150);
+                }
+            });   
         }
         requestAnimationFrame(this.gameLoop);
     }
@@ -69,7 +80,7 @@ export class PongComponent implements AfterViewInit {
             const canvas = this.gameCanvas.nativeElement;
             for (var i = 0; i + 30 < canvas.height; i += 30) {
                 this.gameContext!.fillStyle = "#fff";
-                this.gameContext!.fillRect(canvas.width / 2 - 10, i + 10, 15, 20);
+                this.gameContext!.fillRect(canvas.width / 2 - 10, i + 10, 5, 20);
             }
         }
     
@@ -105,7 +116,6 @@ export class PongComponent implements AfterViewInit {
 
     gameLoop = () => {
         
-        console.log("Loop " + PongComponent.init);
         if (PongComponent.init) {
             const self = this;
             this.update();
