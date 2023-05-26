@@ -22,7 +22,7 @@ export class PongComponent implements AfterViewInit {
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
     constructor(){}
 
-    ngAfterViewInit() {    
+    ngAfterViewInit() {
         this.initCanvas();
     }
     
@@ -34,9 +34,9 @@ export class PongComponent implements AfterViewInit {
         this.gameContext = this.canvas?.getContext('2d');
 
         if (this.gameContext && this.canvas) {
-            this.player1 = new Paddle(20, 60, 20, this.canvas.height / 2 - 60 / 2);
-            this.computerPlayer = new ComputerPaddle(20, 60, this.canvas.width - (20 + 20), this.canvas.height / 2 - 60 / 2);
-            this.ball = new Ball(10, 10, this.canvas.width / 2 - 10 / 2, this.canvas.height / 2 - 10 / 2);
+            this.player1 = new Paddle(20, 60, 20, this.canvas.height / 2 - 60 / 2, 10);
+            this.mode(1);
+            this.ball = new Ball(10, 10, this.canvas.width / 2 - 10 / 2, this.canvas.height / 2 - 10 / 2, 5);
             this.gameContext.font = '30px Orbitron';
 
             window.addEventListener('keydown', (e) => {
@@ -67,6 +67,14 @@ export class PongComponent implements AfterViewInit {
         requestAnimationFrame(this.gameLoop);
     }
 
+    mode(i: number) {
+        if (i == 1) {
+            this.computerPlayer = new ComputerPaddle(20, 60, this.canvas.width - (20 + 20), this.canvas.height / 2 - 60 / 2, 10);
+        } else if (i == 2) {
+            this.computerPlayer = new ComputerPaddle(20, 60, this.canvas.width - (20 + 20), this.canvas.height / 2 - 60 / 2, 20);
+        } 
+    }
+
     drawBoardDetails(){
 
         this.gameContext.strokeStyle = "#fff";
@@ -78,26 +86,28 @@ export class PongComponent implements AfterViewInit {
             const canvas = this.gameCanvas.nativeElement;
             for (var i = 0; i + 30 < canvas.height; i += 30) {
                 this.gameContext!.fillStyle = "#fff";
-                this.gameContext!.fillRect(canvas.width / 2 - 10, i + 10, 5, 20);
+                this.gameContext!.fillRect(canvas.width / 2 - 1, i + 10, 2, 20);
             }
         }
     
-  //draw scores
+        //draw scores and check end game
         this.gameContext!.fillText(PongComponent.playerScore, 280, 50);
         this.gameContext!.fillText(PongComponent.computerScore, 390, 50);
         if (PongComponent.playerScore >= 3) { //POINTS
-            PongComponent.init = false;
-            PongComponent.playerScore = 0;
-            PongComponent.computerScore = 0;
+            this.restartScores();
             this.gameContext!.fillStyle = "#00FF00";
-            this.gameContext!.fillText("YOU   WON!", 275, 150);
+            this.gameContext!.fillText("YOU WON!", 280, 200);
         } else if (PongComponent.computerScore >= 3) { //POINTS
-            PongComponent.init = false;
-            PongComponent.playerScore = 0;
-            PongComponent.computerScore = 0;
+            this.restartScores();
             this.gameContext!.fillStyle = "#FF0000";
-            this.gameContext!.fillText("YOU   LOOSE!", 250, 150);
+            this.gameContext!.fillText("YOU LOOSE!", 260, 200);
         }
+    }
+
+    restartScores() {
+        PongComponent.init = false;
+        PongComponent.playerScore = 0;
+        PongComponent.computerScore = 0;
     }
 
     update() {
@@ -139,11 +149,13 @@ class Entity{
     y:number;
     xVel:number = 0;
     yVel:number = 0;
-    constructor(w:number,h:number,x:number,y:number){       
+    speed:number;
+    constructor(w:number,h:number,x:number,y:number,speed:number){       
         this.width = w;
         this.height = h;
         this.x = x;
         this.y = y;
+        this.speed = speed;
     }
     draw(context: any){
         context.fillStyle = "#fff";
@@ -153,10 +165,10 @@ class Entity{
 
 class Paddle extends Entity{
 
-    private speed:number = 10;
+    //private speed:number = 10;
 
-    constructor(w:number,h:number,x:number,y:number){
-        super(w,h,x,y);
+    constructor(w:number,h:number,x:number,y:number,speed:number){
+        super(w,h,x,y,speed);
     }
 
     update(canvas: any){
@@ -181,10 +193,12 @@ class Paddle extends Entity{
 
 class ComputerPaddle extends Entity{
 
-    private speed:number = 10;
+    //private speed:number = 10;
+    //private speed:number = 20; // never loose
 
-    constructor(w:number,h:number,x:number,y:number){
-        super(w,h,x,y);        
+
+    constructor(w:number,h:number,x:number,y:number,speed:number){
+        super(w,h,x,y,speed);        
     }
 
     update(ball:Ball, canvas: any){ 
@@ -209,16 +223,18 @@ class ComputerPaddle extends Entity{
         }  
  
         this.y += this.yVel * this.speed;
+        //this.y += this.yVel * speed;
+
 
     }
 }
 
 class Ball extends Entity{
 
-    private speed:number = 5;
+    //private speed:number = 5;
 
-    constructor(w:number,h:number,x:number,y:number){
-        super(w,h,x,y);
+    constructor(w:number,h:number,x:number,y:number,speed:number){
+        super(w,h,x,y,speed);
         var randomDirection = Math.floor(Math.random() * 2) + 1; 
         if(randomDirection % 2){
             this.xVel = 1;
