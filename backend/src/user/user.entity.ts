@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable } from 'typeorm';
 import { Friend } from './friend/friend.entity'
-import { Achievement, UserStatus } from '@shared/enum';
+import { UserStatus } from '@shared/enum';
+import { Achievement } from '@shared/achievement'
 
 @Entity()
 export class User {
@@ -47,11 +48,8 @@ export class User {
 	})
 	status: UserStatus;
 
-	@Column('enum', {
-		enum: Achievement,
-		array: true,
-		default: []
-	})
+	@ManyToMany(() => Achievement)
+	@JoinTable()
 	achievements: Achievement[];
 
 	@Column({
@@ -60,7 +58,10 @@ export class User {
 		default: 0
 	})
 	wins: number;
-  
+
+	@Column({ default: 0 })
+	winningStreak: number;
+
 	@Column({
 		type: 'int',
 		unsigned: true,
