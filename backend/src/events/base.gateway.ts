@@ -143,7 +143,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   	  this.server.emit(event, data);
   }
 
-  public async joinUserToRoom(clientSocketId: string, room: string, password: string | undefined): Promise<any>{
+  public async joinUserToRoom(clientSocketId: string, room: string, password: string | undefined): Promise<boolean>{
 		//currently checking the existence of the room in the rooms Set
 
 		//[process]
@@ -167,6 +167,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 				.createRoom(room, password != undefined ? true : false, password);
 			await this.rooms.add(room);
 			await this.server.in(clientSocketId).socketsJoin(room);
+			this.emit('listRooms', this.getActiveRooms());
 			this.logger.log("User " + clientSocketId + "joined room " + room);
 		}
 		else if (roomExists && this.isUserInRoom(room, clientSocketId)){
@@ -179,12 +180,14 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 				.isProtectedByPassword(room);
 
 			if (isRoomProtectedByPassword && password === undefined ){
-//				console.log("no password provided");
+				console.log("no password provided");
+				return false;
 			}
 			else if (isRoomProtectedByPassword){
 				const isValidPassword: boolean = await this.hashService.comparePassword(password, await this.chatService.getHashPassFromRoom(room));
 				if (!isValidPassword){
-//					console.error("invalid password");
+					console.error("invalid password");
+					return false;
 				}
 				else{
 //					console.log("password is correct");
@@ -197,10 +200,15 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 				this.server.in(clientSocketId).socketsJoin(room);
 			}
 		}
+		return true;
   }
 
   public broadCastToRoom(event: string, payload: ChatMessage): void{
 	  this.server.to(payload.room).emit(event, payload)
+  }
+
+  public messageToClient(clientId: string, event: string, payload: ChatMessage): void{
+	  this.server.to(clientId).emit(event, payload)
   }
 
   public getNumberOfConnectedUsers(): number{
