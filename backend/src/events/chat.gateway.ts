@@ -53,14 +53,23 @@ export class ChatGateway extends BaseGateway {
 	  	  }
 		  const successfulJoin = await this.joinUserToRoom(client.id, lastJoinedRoom, pass);
 
-	  const response: ChatMessage = {
-		  room: lastJoinedRoom,
-		  message: `you are in room ${lastJoinedRoom}`,
-		  nick: "system",
-		  date: new Date()
-		}
+	 	  const response: ChatMessage = {
+			  room: lastJoinedRoom,
+			  message: `you are in room ${lastJoinedRoom}`,
+			  nick: "system",
+			  date: new Date()
+		  }
 		  if (successfulJoin){
 			this.messageToClient(client.id, "join", response);
+		  }
+		  else{
+		  	  const err: ChatMessage = {
+			 	 room: lastJoinedRoom,
+			     message: `Error: bad password provided for ${lastJoinedRoom}`,
+			     nick: "system",
+			     date: new Date()
+		      }
+		  	  this.messageToClient(client.id, "system", response);
 		  }
 	  }
   }
