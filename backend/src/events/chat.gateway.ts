@@ -37,7 +37,7 @@ export class ChatGateway extends BaseGateway {
   // the rooms param is splitted
   //the command allows this structure: /join [#]channel[,channel] [pass]
   @SubscribeMessage('join')
-  async handleJoinRoom(client: Socket, rooms: string): Promise<void> {//WsResponse<unknown>{
+  handleJoinRoom(client: Socket, rooms: string): WsResponse<unknown>{
   	  console.log("join message received: " + rooms);
 	  const splittedRooms: Array<string> = rooms.split(" ", 1)[0].split(",");
 	  const pass: string | undefined = rooms.split(" ")[1];
@@ -73,6 +73,9 @@ export class ChatGateway extends BaseGateway {
   @SubscribeMessage('listRooms')
   listRooms(client: Socket): WsResponse<unknown>{
 	  return { event: 'listRooms', data: this.getActiveRooms()}
+      const adapter: any = this.server.adapter;
+	  const roomsRaw: any = adapter.rooms;
+	  return { event: 'listRooms', data: Array.from(roomsRaw.keys()).filter(x => x[0] == '#')};
   }
  
 }
