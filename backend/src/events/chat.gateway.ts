@@ -37,12 +37,11 @@ export class ChatGateway extends BaseGateway {
   // the rooms param is splitted
   //the command allows this structure: /join [#]channel[,channel] [pass]
   @SubscribeMessage('join')
-  async handleJoinRoom(client: Socket, rooms: string): Promise<unknown>{
+  async handleJoinRoom(client: Socket, rooms: string): Promise<void>{
   	  console.log("join message received: " + rooms);
 	  const splittedRooms: Array<string> = rooms.split(" ", 1)[0].split(",");
 	  const pass: string | undefined = rooms.split(" ")[1];
 	  let lastJoinedRoom: string;
-	  let newRoomCreated: boolean = false;
 	  const adapter: any = this.server.adapter;
 	  const roomsRaw: any = adapter.rooms;
 
@@ -52,22 +51,18 @@ export class ChatGateway extends BaseGateway {
 	  	  } else {
 	  	  	lastJoinedRoom = room;
 	  	  }
-		  if (!roomsRaw.has(room)) { newRoomCreated = true; }
-		  await this.joinUserToRoom(client.id, lastJoinedRoom, pass);
-	  }
+		  const successfulJoin = await this.joinUserToRoom(client.id, lastJoinedRoom, pass);
 
-	  if (newRoomCreated){
-		  this.emit('listRooms', this.getActiveRooms());
-	  }
-  
-		const response: ChatMessage = {
-			room: lastJoinedRoom,
-			message: `you are in room ${lastJoinedRoom}`,
-			nick: "system",
-			date: new Date()
+	  const response: ChatMessage = {
+		  room: lastJoinedRoom,
+		  message: `you are in room ${lastJoinedRoom}`,
+		  nick: "system",
+		  date: new Date()
 		}
-
-	  return { event: 'join', data: response};
+		  if (successfulJoin){
+			this.messageToClient(client.id, "join", response);
+		  }
+	  }
   }
 
   @SubscribeMessage('listRooms')
