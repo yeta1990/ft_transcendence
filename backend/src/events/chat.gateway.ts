@@ -35,42 +35,48 @@ export class ChatGateway extends BaseGateway {
 
   //in case it arrives different rooms separated by comma,
   // the rooms param is splitted
+  //the command allows this structure: /join [#]channel[,channel] [pass]
   @SubscribeMessage('join')
-  handleJoinRoom(client: Socket, rooms: string): WsResponse<unknown>{
+  async handleJoinRoom(client: Socket, rooms: string): Promise<void>{
   	  console.log("join message received: " + rooms);
-	  const splittedRooms: Array<string> = rooms.split(",");
+	  const splittedRooms: Array<string> = rooms.split(" ", 1)[0].split(",");
+	  const pass: string | undefined = rooms.split(" ")[1];
 	  let lastJoinedRoom: string;
-	  let newRoomCreated: boolean = false;
 	  const adapter: any = this.server.adapter;
 	  const roomsRaw: any = adapter.rooms;
 
-	  splittedRooms.forEach((room) => {
+	  for (let room of splittedRooms) {
 	  	  if (room.length > 0 && room[0] != '#'){
 	  	  	lastJoinedRoom = '#' + room;
 	  	  } else {
 	  	  	lastJoinedRoom = room;
 	  	  }
-		  if (!roomsRaw.has(room))
-		  	  newRoomCreated = true;
-		  this.joinUserToRoom(client.id, lastJoinedRoom);
-	  })
+		  const successfulJoin = await this.joinUserToRoom(client.id, lastJoinedRoom, pass);
 
-	  if (newRoomCreated){
-		  this.emit('listRooms', this.getActiveRooms());
+	 	  const response: ChatMessage = {
+			  room: lastJoinedRoom,
+			  message: `you are in room ${lastJoinedRoom}`,
+			  nick: "system",
+			  date: new Date()
+		  }
+		  if (successfulJoin){
+			this.messageToClient(client.id, "join", response);
+		  }
+		  else{
+		  	  const err: ChatMessage = {
+			 	 room: lastJoinedRoom,
+			     message: `Error: bad password provided for ${lastJoinedRoom}`,
+			     nick: "system",
+			     date: new Date()
+		      }
+		  	  this.messageToClient(client.id, "system", response);
+		  }
 	  }
-  
-		const response: ChatMessage = {
-			room: lastJoinedRoom,
-			message: `you are in room ${lastJoinedRoom}`,
-			nick: "system",
-			date: new Date()
-		}
-
-	  return { event: 'join', data: response};
   }
 
   @SubscribeMessage('listRooms')
   listRooms(client: Socket): WsResponse<unknown>{
+	  return { event: 'listRooms', data: this.getActiveRooms()}
       const adapter: any = this.server.adapter;
 	  const roomsRaw: any = adapter.rooms;
 	  return { event: 'listRooms', data: Array.from(roomsRaw.keys()).filter(x => x[0] == '#')};

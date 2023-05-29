@@ -28,11 +28,15 @@ export class SocketService {
 				this.message.next({event: 'message', data});
 			})
 			.on('join', (data: any) => {
-				console.log("join received: " + data);
+				console.log("join received: " + JSON.stringify(data));
 				this.message.next({event: 'join', data});
 			})
 			.on('listRooms', (data: any) => {
 				console.log("listRooms received: " + data);
+				this.message.next({event: 'listRooms', data});
+			})
+			.on('listRoomUsers', (data: any) => {
+				console.log("get users in this room: " + data);
 				this.message.next({event: 'listRooms', data});
 			})
 			.on('system', (data: ChatMessage) => {

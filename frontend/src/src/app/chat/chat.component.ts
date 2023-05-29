@@ -37,7 +37,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
    joinUserToRoom(rooms: string): void {
    	   	//splitting the channels in case they come as a comma-separated list
-	  	const splittedRooms: Array<string> = rooms.split(",");
+        //the command allows this structure: /join [#]channel[,channel] [pass]
+	    const splittedRooms: Array<string> = rooms.split(" ", 1)[0].split(",");
 	    let lastJoinedRoom: string = "";
 
 	    //adding a # to those rooms who haven't it
@@ -55,7 +56,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		})
 		//sending only one signal to the server with the raw rooms string
 		this.chatService.joinUserToRoom(rooms);
-//		this.currentRoom = lastJoinedRoom;
    }
 
 	//subscription to all events from the service
@@ -106,11 +106,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		//possibly unnecessary this check
 		if (!command)
 			return ;
-		const splittedCommand: Array<string> = command.split(" ", 2);
+		const splittedCommand: Array<string> = command.split(" ");
 		if (splittedCommand[0] === '/help'){
 			this.sendMessageToChat("help", this.currentRoom, command);
 		}
+		else if (splittedCommand[0] === '/join' && splittedCommand.length > 2){
+			//channel list comma-separated and password
+			this.joinUserToRoom(splittedCommand[1] + " " + splittedCommand[2]);
+		}
 		else if (splittedCommand[0] === '/join'){
+			//channel list comma-separated and password
 			this.joinUserToRoom(splittedCommand[1]);
 		}
 	}
