@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import 'module-alias/register';
 import { config }  from 'dotenv'; 
 
 config(); // to load process.env from here
