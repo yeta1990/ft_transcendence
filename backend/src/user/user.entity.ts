@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable } from 'typeorm';
 import { Friend } from './friend/friend.entity'
 import { UserStatus } from '@shared/enum';
-import { Achievement } from '@shared/achievement'
+import { Achievement } from './achievement/achievement.entity'
 
 @Entity()
 export class User {
@@ -14,6 +14,11 @@ export class User {
 		unique: true,
 	})
 	nick: string;
+
+	@Column({
+		unique: true,
+	})
+	email: string;
 	
 	@Column()
 	firstName: string;
@@ -31,8 +36,20 @@ export class User {
 		nullable: true,
 		default: undefined,
 	})
+
+	@Column({
+		default:false
+	})
+	mfa: boolean;
+
+	@Column({
+		nullable: true,
+		default: undefined,
+	})
+
 	tokenHash: string;
 
+	mfaSecret: string;
 
 	// PERSONALIZACION -------------------------------------
 
@@ -77,21 +94,7 @@ export class User {
 
 	// VALIDACION Y SEGURIDAD --------------------------------
 
-	@Column({
-		unique: true,
-	})
-	email: string;
 
-	@Column({
-		default:false
-	})
-	mfa: boolean;
-
-	@Column({
-		nullable: true,
-		default: undefined,
-	})
-	mfaSecret: string;
 
 	// AMIGOS ------------------------------------------------
 
