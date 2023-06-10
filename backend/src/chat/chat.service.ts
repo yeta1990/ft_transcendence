@@ -22,15 +22,16 @@ export class ChatService {
 		const roomAlreadyExists = await this.roomRepository.findOne({ where: {name: room}});
 
 		if (roomAlreadyExists){ 
-			return true;
-		} else {
+			return true; 
+		} else { 
 			const hashedPass = hasPass ? await this.hashService.hashPassword(password) : undefined;
 			const user: User = await this.userService.getUserByNick(nick);
 			const roomToCreate: Room = await this.roomRepository.create({
 				name: room,
 				hasPass: hasPass,
 				password: hashedPass,
-				owner: user 
+				owner: user,
+				users: [user]
 			});
 			const createdRoom = await this.roomRepository.save(roomToCreate);
 			return false;
