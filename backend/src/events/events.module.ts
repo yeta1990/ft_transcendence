@@ -5,6 +5,7 @@ import { User } from '../user/user.entity';
 import { GameGateway } from './game.gateway';
 import { BaseGateway } from './base.gateway';
 import { ChatService } from '../chat/chat.service';
+import { RoomService } from '../chat/room/room.service';
 import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Room } from '../chat/room.entity';
@@ -13,7 +14,7 @@ import {UserModule} from '../user/user.module';
 
 @Module({
 	imports: [TypeOrmModule.forFeature([Room, User]), AuthModule, HttpModule, UserModule],
-  providers: [ChatService, ChatGateway, GameGateway, BaseGateway, HashService]
+  providers: [ChatService, ChatGateway, GameGateway, BaseGateway, HashService, RoomService]
 })
 
 export class EventsModule {}

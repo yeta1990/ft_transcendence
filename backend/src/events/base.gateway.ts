@@ -11,6 +11,7 @@ import { Server, Socket } from 'socket.io';
 import { AuthService } from '../auth/auth.service';
 import { ChatService } from '../chat/chat.service';
 import { HashService } from '../hash/hash.service';
+import { RoomService } from '../chat/room/room.service';
 import { ChatMessage } from '@shared/types';
 import { ChatUser } from '@shared/types';
 import { map } from 'rxjs/operators';
@@ -38,16 +39,22 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   @Inject(HashService)
   private hashService: HashService;
 
+  @Inject(RoomService)
+  private roomService: RoomService;
+
   constructor(name: string){
 	this.gatewayName = name;
 	this.logger = new Logger(this.gatewayName);
 	this.users = new Map();
-	this.rooms = new Set();
+	this.rooms = new Set<string>();
+//	console.log(this.rooms)
   }
 
-  afterInit(): void {
+  async afterInit(): Promise<void>{
 	this.chatService.emptyTableRoom()
 		.then(this.logger.log(this.gatewayName + ' initialized'));
+	const allRoomsInDb: string[] = await this.chatService.getAllRooms();
+	allRoomsInDb.map(x => this.rooms.add(x));
   }
  
   // about auth during client connection
@@ -82,6 +89,8 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   }
 
+  //old method to destoy empty rooms in memory (socket server), but not in db!!!
+  /*
   destroyEmptyRooms() {
 	const activeRooms: Array<string> = this.getActiveRooms();
 
@@ -92,15 +101,24 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		}
 	});
   }
+  */
 
-  handleDisconnect(socket: Socket): void {
+  //find all rooms whith 0 users in db and delete them
+  destroyEmptyRooms() {
+
+  }
+
+
+  async handleDisconnect(socket: Socket): Promise<void> {
 	this.logger.log(`Socket client disconnected: ${socket.id}`)
 	this.users.delete(socket.id);
 	this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
-    this.emit('listRooms', this.getActiveRooms());
+    this.emit('listRooms', await this.chatService.getAllRooms());
     this.destroyEmptyRooms();
   }
 
+  //socket rooms, not db rooms
+  //all rooms are created in db, but not necessarily in the socket server
   getActiveRooms(): Array<string>{
     const adapter: any = this.server.adapter;
 	const roomsRaw: any = adapter.rooms;
@@ -111,7 +129,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	return ([]);
   }
 
-  getUsersFromRoom(room: string): Array<ChatUser>{
+  getConnectedUsersFromRoom(room: string): Array<ChatUser>{
    	const adapter: any = this.server.adapter;
 	const roomsRaw: any = adapter.rooms;
 	const usersRaw: Array<string> = Array.from(roomsRaw.get(room));
@@ -123,7 +141,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   isUserInRoom(room: string, clientSocketId: string): boolean {
-	const allUsersInRoom: Array<ChatUser> = this.getUsersFromRoom(room);
+	const allUsersInRoom: Array<ChatUser> = this.getConnectedUsersFromRoom(room);
 	for (const user of allUsersInRoom)
 	{
 		if (user.client_id === clientSocketId){ 
@@ -145,14 +163,18 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   public async joinUserToRoom(client: Socket, room: string, password: string | undefined): Promise<boolean>{
 		//currently checking the existence of the room in the rooms Set
+	    //different status of the user regarding a chat room:
+	  	// 1. connected to a room:  member of a room and currently online (bd + socket active)
+	  	// 2. member of a room but offline (only bd)
+	    // 3. not member of a room
 
 		//[process]
-		// if the room doesn't exist:
-		//   1. is created in socket.io
-		//   2. is created in db, associating the owner to the Room
-		//   3. user is added in socket.io
-		// if the room exists:
-		//   1. check if the user is currently joined. if it's, just continue
+		// if the room doesn't exist in database:
+		//   1. it's created in socket.io
+		//   2. it's created in db, associating the owner to the Room
+		//   3. user is joined in socket.io
+		// if the room exists in db:
+		//   1. check if the user is currently connected to the room. if it's, just continue. otherwise, follow the next steps
 		//   2. (TBD!!) check if the user is banned from the channel
 		//   3. check if the room is protected by password. if it's, compare password with stored hashpassword
 	  	//		- match? join user 
@@ -160,7 +182,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		//   
 
 		//socket.handshake.query.nick
-		const roomExists: boolean = this.rooms.has(room);
+//		method to know if the user is connected to the room
+//		const roomExists: boolean = this.rooms.has(room);
+	  	const roomExists: boolean = await this.chatService.isRoomCreated(room);
 
 		if (!roomExists){
 			const hasPass:boolean = password != undefined ? true : false;
@@ -169,7 +193,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 				.createRoom(client.handshake.query.nick as string, room, hasPass, password);
 			await this.rooms.add(room);
 			await this.server.in(client.id).socketsJoin(room);
-			this.emit('listRooms', this.getActiveRooms());
+			this.emit('listRooms', await this.chatService.getAllRooms());
 			this.logger.log("User " + client.id + "joined room " + room);
 		}
 		else if (roomExists && this.isUserInRoom(room, client.id)){
