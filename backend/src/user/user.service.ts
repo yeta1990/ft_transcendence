@@ -29,6 +29,17 @@ export class UserService {
     	})
 	}
 
+	public async getUserByNickWithRooms(nick: string): Promise<User | undefined>{
+		return this.repository.findOne({
+    		where: {
+        		nick: nick,
+    		},
+    		relations: {
+				ownedRooms: true
+    		}
+    	})
+	}
+
 	public async createUser(body: CreateUserDto): Promise<User>{
 		const alreadyRegisteredUser: User = await this.getUserByNick(body.nick);
 //		console.log("ye");
