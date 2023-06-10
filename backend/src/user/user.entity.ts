@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn, ManyToMany, JoinTable } from 'typeorm';
 
 import { Room } from '../chat/room.entity';
 export enum UserStatus {
@@ -73,10 +73,9 @@ export class User {
 	})
 	mfa: boolean;
 
-	@OneToMany(() => Room, (room) => room.owner)
-	@JoinColumn({name: "name"})
+	@OneToMany(() => Room, (room) => room.owner )
 	ownedRooms: Room[]
-
+ 
 	// FUNCIONES ---------------------------------------------
 
 	validateEmail() {

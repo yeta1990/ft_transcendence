@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, OneToOne } from 'typeorm';
+import { Entity, Column, PrimaryColumn, ManyToOne, OneToOne, ManyToMany, JoinTable } from 'typeorm';
 import { User } from '../user/user.entity';
 
 @Entity()
@@ -18,8 +18,15 @@ export class Room {
 	@Column({nullable: true})
 	password: string;
 
-	@ManyToOne(() => User, (user) => user.id)
+	@ManyToOne(() => User)
 	owner: User;
+
+	@ManyToMany(
+		() => User, 
+		{createForeignKeyConstraints: false})
+	@JoinTable()
+	users: User[];
+ 
 
 //	@OneToMany(() => User, (user) => user.id)
 //	owners: User[];
