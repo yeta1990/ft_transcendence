@@ -37,6 +37,27 @@ export class ChatService {
 		}
 	}
 
+	public async isRoomCreated(name: string): Promise<boolean>{
+		const foundRoom: Room | undefined = await this.roomRepository.findOne({
+			where: {
+				name: name,
+			},
+		})
+		if (foundRoom != undefined)
+			return true;
+		return false;
+	}
+
+	public async getAllRooms(): Promise<string[]>{
+		let allRooms: string[] = [];
+		const foundRoomsRaw = await this.roomRepository
+			.createQueryBuilder("room")
+			.select("name")
+			.execute()
+		foundRoomsRaw.map(room => allRooms.push(room.name))
+		return (allRooms);
+	}
+
 	public async deleteRoom(room: string): Promise<any>{
 		return this.roomRepository.delete(room);
 	}
