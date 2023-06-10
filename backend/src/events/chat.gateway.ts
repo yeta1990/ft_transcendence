@@ -51,7 +51,7 @@ export class ChatGateway extends BaseGateway {
 	  	  } else {
 	  	  	lastJoinedRoom = room;
 	  	  }
-		  const successfulJoin = await this.joinUserToRoom(client.id, lastJoinedRoom, pass);
+		  const successfulJoin = await this.joinUserToRoom(client, lastJoinedRoom, pass);
 
 	 	  const response: ChatMessage = {
 			  room: lastJoinedRoom,

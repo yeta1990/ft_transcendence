@@ -143,13 +143,13 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   	  this.server.emit(event, data);
   }
 
-  public async joinUserToRoom(clientSocketId: string, room: string, password: string | undefined): Promise<boolean>{
+  public async joinUserToRoom(client: Socket, room: string, password: string | undefined): Promise<boolean>{
 		//currently checking the existence of the room in the rooms Set
 
 		//[process]
 		// if the room doesn't exist:
 		//   1. is created in socket.io
-		//   2. is created in db
+		//   2. is created in db, associating the owner to the Room
 		//   3. user is added in socket.io
 		// if the room exists:
 		//   1. check if the user is currently joined. if it's, just continue
@@ -159,19 +159,21 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  	//		- doesn't match? return an error to the user
 		//   
 
+		//socket.handshake.query.nick
 		const roomExists: boolean = this.rooms.has(room);
 
 		if (!roomExists){
+			const hasPass:boolean = password != undefined ? true : false;
 			await this
 				.chatService
-				.createRoom(room, password != undefined ? true : false, password);
+				.createRoom(client.handshake.query.nick as string, room, hasPass, password);
 			await this.rooms.add(room);
-			await this.server.in(clientSocketId).socketsJoin(room);
+			await this.server.in(client.id).socketsJoin(room);
 			this.emit('listRooms', this.getActiveRooms());
-			this.logger.log("User " + clientSocketId + "joined room " + room);
+			this.logger.log("User " + client.id + "joined room " + room);
 		}
-		else if (roomExists && this.isUserInRoom(room, clientSocketId)){
-			this.server.in(clientSocketId).socketsJoin(room);
+		else if (roomExists && this.isUserInRoom(room, client.id)){
+			this.server.in(client.id).socketsJoin(room);
 		}
 		else if (roomExists){
 //			console.log("room already exists " + roomExists);
@@ -191,13 +193,13 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 				}
 				else{
 //					console.log("password is correct");
-					this.server.in(clientSocketId).socketsJoin(room);
-					this.logger.log("User " + clientSocketId + "joined room " + room);
+					this.server.in(client.id).socketsJoin(room);
+					this.logger.log("User " + client.id + "joined room " + room);
 				}
 			}
 			else{
 //				console.log("room isn't protected");
-				this.server.in(clientSocketId).socketsJoin(room);
+				this.server.in(client.id).socketsJoin(room);
 			}
 		}
 		return true;

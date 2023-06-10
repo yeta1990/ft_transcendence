@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn } from 'typeorm';
 
+import { Room } from '../chat/room.entity';
 export enum UserStatus {
 	OFFLINE,
 	ONLINE,
@@ -72,6 +73,9 @@ export class User {
 	})
 	mfa: boolean;
 
+	@OneToMany(() => Room, (room) => room.owner)
+	@JoinColumn({name: "name"})
+	ownedRooms: Room[]
 
 	// FUNCIONES ---------------------------------------------
 
