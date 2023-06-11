@@ -1,24 +1,29 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, OneToOne, ManyToMany, JoinTable } from 'typeorm';
+import { PrimaryGeneratedColumn, Entity, Column, PrimaryColumn, ManyToOne, OneToOne, ManyToMany, JoinTable } from 'typeorm';
 import { User } from '../user/user.entity';
 
 @Entity()
 export class Room { 
 
+//	@PrimaryGeneratedColumn()
+//	id: number;
+
+	
 	@PrimaryColumn({
 		unique: true
 	})
 	name: string;
-
+ 
 	@Column({
 		nullable: false,
 		default: false
 	})
 	hasPass: boolean;
-
+ 
 	@Column({nullable: true})
 	password: string;
+	
 
-	@ManyToOne(() => User)
+	@ManyToOne(() => User, (user) => user.id)
 	owner: User;
 
 	@ManyToMany(
@@ -28,8 +33,6 @@ export class Room {
 	users: User[];
  
 
-//	@OneToMany(() => User, (user) => user.id)
-//	owners: User[];
 
 //	@OneToMany(() => User, (user) => user.id)
 //	banned: User[];

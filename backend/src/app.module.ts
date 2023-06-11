@@ -33,7 +33,8 @@ import { HashService } from './hash/hash.service';
 		database: process.env.POSTGRES_DATABASE,
 		entities: [User, Room],
 		synchronize: true, // creo que esto hay que cambiarlo para subirlo a producción
-//		logging: true //useful for debugging errors in typeorm/postgres
+		logging: true //useful for debugging errors in typeorm/postgres
+
 	}),
 	HttpModule,
 	EventsModule,

@@ -1,4 +1,5 @@
 import { SubscribeMessage, WebSocketGateway, WsResponse } from '@nestjs/websockets';
+import { Inject } from '@nestjs/common';
 import { BaseGateway } from './base.gateway';
 import { Socket } from 'socket.io';
 import { ChatMessage, SocketPayload } from '@shared/types';
@@ -11,6 +12,9 @@ export class ChatGateway extends BaseGateway {
   constructor() {
 	super(ChatGateway.name);
   }
+
+  //separate afterInit from the base class
+  async afterInit(): Promise<void> {}
   //return object has two elements:
   // - event: type of event that the client will be listening to
   // - data: the content
@@ -75,11 +79,16 @@ export class ChatGateway extends BaseGateway {
   }
 
   @SubscribeMessage('listRooms')
-  listRooms(client: Socket): WsResponse<unknown>{
-	  return { event: 'listRooms', data: this.getActiveRooms()}
-      const adapter: any = this.server.adapter;
-	  const roomsRaw: any = adapter.rooms;
-	  return { event: 'listRooms', data: Array.from(roomsRaw.keys()).filter(x => x[0] == '#')};
+  async listRooms(client: Socket): Promise<WsResponse<unknown>>{
+	  return { event: 'listRooms', data: await this.chatService.getAllRooms()}
+  }
+
+  //part == to leave a room
+  @SubscribeMessage('part')
+  async part(client: Socket, room: string): Promise<void>{
+	  const nick: string = client.handshake.query.nick as string;
+  	  this.removeUserFromRoom(room, nick);
+//	  return { event: 'listRooms', data: await this.chatService.getAllRooms()}
   }
  
 }
