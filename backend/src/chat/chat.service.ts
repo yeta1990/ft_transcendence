@@ -81,14 +81,12 @@ export class ChatService {
 	}
 
 	public async removeUserFromRoom(room: string, nick: string): Promise<Room> {
-		
 		const foundRoom: Room = await this.getRoom(room);
-
 		foundRoom.users = foundRoom.users.filter(user => {
 			return user.nick != nick;
 		})
+		console.log(foundRoom);
 		this.roomRepository.save(foundRoom);
-		
 		return foundRoom;
 	}
 
