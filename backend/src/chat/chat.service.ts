@@ -69,15 +69,10 @@ export class ChatService {
 	}
 
 	public async addUserToRoom(room: string, nick: string): Promise<void>{
-		
 		const foundRoom = await this.getRoom(room);
 		const foundUser = await this.userService.getUserByNick(nick);
 		foundRoom.users.push(foundUser);
-		console.log(foundRoom);
 		await this.roomRepository.save(foundRoom);
-		console.log("added user to room");
-		
-
 	}
 
 	public async removeUserFromRoom(room: string, nick: string): Promise<boolean> {
@@ -88,8 +83,6 @@ export class ChatService {
 			return user.nick != nick;
 		})
 		this.roomRepository.save(foundRoom);
-		console.log("old size " + oldUserSize);
-		console.log("new size " + foundRoom.users.length);
 		if (oldUserSize === foundRoom.users.length){ 
 			return false;
 		}
@@ -98,7 +91,6 @@ export class ChatService {
 
 	public async getAllUsersInRoom(room: string): Promise<string[]>{
 		let allUsersInRoom: string[] = [];
-		
 		const usersRaw = await this.roomRepository
 			.findOne({
 				relations: ['users'],
@@ -106,9 +98,12 @@ export class ChatService {
 			})
 			.then(r => r.users)
 		usersRaw.map(u => allUsersInRoom.push(u.nick))
-		console.log(allUsersInRoom)
-		
 		return allUsersInRoom;
+	}
+
+	public async isUserInRoom(room: string, nick: string): Promise<boolean>{
+		const usersInRoom: string[] = await this.getAllUsersInRoom(room);
+		return usersInRoom.includes(nick);
 	}
 
 	public async deleteRoom(room: string): Promise<any>{

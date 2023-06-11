@@ -19,10 +19,12 @@ export class ChatGateway extends BaseGateway {
   // - event: type of event that the client will be listening to
   // - data: the content
   @SubscribeMessage('message')
-  handleMessage(client: Socket, payload: ChatMessage): void { //WsResponse<unknown>{
+  async handleMessage(client: Socket, payload: ChatMessage): Promise<void> { 
 	const nick: string = client.handshake.query.nick as string;
-    payload.nick = client.handshake.query.nick as string;
-	this.broadCastToRoom('message', payload);
+	if (await this.chatService.isUserInRoom(payload.room, nick)){
+    	payload.nick = client.handshake.query.nick as string;
+		this.broadCastToRoom('message', payload);
+	} 
   }
 
   //return a response directly to the client
