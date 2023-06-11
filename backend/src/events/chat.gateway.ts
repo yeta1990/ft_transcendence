@@ -85,9 +85,20 @@ export class ChatGateway extends BaseGateway {
 
   //part == to leave a room
   @SubscribeMessage('part')
-  async part(client: Socket, room: string): Promise<void>{
-	  const nick: string = client.handshake.query.nick as string;
-  	  this.removeUserFromRoom(room, nick);
+  async part(client: Socket, room: string): Promise<WsResponse<unknown>>{
+	const response: ChatMessage = {
+  		room: room,
+  		message: "you've left " + room,
+  		nick: "system",
+  		date: new Date()
+  	}
+	const nick: string = client.handshake.query.nick as string;
+	const successfulPart: boolean = await this.removeUserFromRoom(room, nick);
+	if (successfulPart){
+    	return { event: 'system', data: response};
+	}
+	response.message = "error: maybe the room " + room + " doesn't exist, or you aren't part of that room"
+    return { event: 'system', data: response};
   }
  
 }

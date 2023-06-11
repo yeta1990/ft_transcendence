@@ -80,14 +80,20 @@ export class ChatService {
 
 	}
 
-	public async removeUserFromRoom(room: string, nick: string): Promise<Room | void> {
+	public async removeUserFromRoom(room: string, nick: string): Promise<boolean> {
 		const foundRoom: Room = await this.getRoom(room);
-		if (!foundRoom) { return; }
+		if (!foundRoom) { return false; }
+		const oldUserSize: number = foundRoom.users.length;
 		foundRoom.users = foundRoom.users.filter(user => {
 			return user.nick != nick;
 		})
 		this.roomRepository.save(foundRoom);
-		return foundRoom;
+		console.log("old size " + oldUserSize);
+		console.log("new size " + foundRoom.users.length);
+		if (oldUserSize === foundRoom.users.length){ 
+			return false;
+		}
+		return true;
 	}
 
 	public async getAllUsersInRoom(room: string): Promise<string[]>{

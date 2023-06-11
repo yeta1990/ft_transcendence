@@ -89,10 +89,12 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   async removeUserFromRoom(room: string, nick: string): Promise<boolean> {
-  	  await this.chatService.removeUserFromRoom(room, nick)
-  	  this.destroyEmptyRooms();
-
-  	  return true;
+  	  const result: boolean = await this.chatService.removeUserFromRoom(room, nick)
+  	  if (result){
+  	  	this.destroyEmptyRooms();
+  	  	return true;
+  	  }
+  	  return false;
   	  
 //	const room: Room = await this.chatService.getroom(room);
 
