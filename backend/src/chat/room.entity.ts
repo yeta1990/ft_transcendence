@@ -26,8 +26,7 @@ export class Room {
 	@ManyToOne(() => User, (user) => user.id)
 	owner: User;
 
-	@ManyToMany(
-		() => User)
+	@ManyToMany(() => User, (user) => user.joinedRooms)
 //		{createForeignKeyConstraints: false}) 
 //		in case of problems deleting anything related
 //		to the Room entity and getting any kind of

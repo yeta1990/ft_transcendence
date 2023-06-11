@@ -21,6 +21,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	roomList: string[] = ["default"];
 	joinedRooms: Set<string> = new Set<string>//;["default"];
 	availableRoomsList: string[] = [];
+	myJointRoomList: string[] = [];
 	private subscriptions = new Subscription();
 
 	destroy: Subject<any> = new Subject();
@@ -29,10 +30,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		newMessage: ''
 	});
 	constructor(
-		private chatService: ChatService, 
+		private chatService: ChatService,
 		private formBuilder: FormBuilder,
    ) {
-		this.currentRoom = "default";
+		this.currentRoom = "";
    }
 
    joinUserToRoom(rooms: string): void {
@@ -70,8 +71,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					console.log(payload.data);
 					this.messageList.get(payload.data.room)!.push(payload.data);
 				}
-				else if (payload.event === 'listRooms'){
+				else if (payload.event === 'listAllRooms'){
 					this.availableRoomsList = Array.from(payload.data);
+				}
+				else if (payload.event === 'listMyJoinedRooms'){
+					this.myJointRoomList = Array.from(payload.data)	
 				}
 				else if (payload.event === 'system'){
 					this.messageList.get(this.currentRoom)!.push(payload.data);

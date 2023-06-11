@@ -29,7 +29,8 @@ export class ChatService {
 	}
 
 	getRoomList(){
-		this.socketService.sendMessageToServer("listRooms", "");
+		this.socketService.sendMessageToServer("listAllRooms", "");
+		this.socketService.sendMessageToServer("listMyJoinedRooms", "");
 	}
 
 	partFromRoom(room: string){
