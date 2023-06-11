@@ -75,6 +75,9 @@ export class User {
 
 	@OneToMany(() => Room, (room) => room.owner )
 	ownedRooms: Room[]
+
+	@ManyToMany(() => Room, (room) => room.users )
+	joinedRooms: Room[];
  
 	// FUNCIONES ---------------------------------------------
 

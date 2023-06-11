@@ -80,9 +80,15 @@ export class ChatGateway extends BaseGateway {
 	  }
   }
 
-  @SubscribeMessage('listRooms')
+  @SubscribeMessage('listAllRooms')
   async listRooms(client: Socket): Promise<WsResponse<unknown>>{
-	  return { event: 'listRooms', data: await this.chatService.getAllRooms()}
+	  return { event: 'listAllRooms', data: await this.chatService.getAllRooms()}
+  }
+
+  @SubscribeMessage('listMyJoinedRooms')
+  async listMyJoinedRooms(client: Socket): Promise<WsResponse<unknown>>{
+	  const nick: string = client.handshake.query.nick as string;
+	  return { event: 'listMyJoinedRooms', data: await this.chatService.getAllJoinedRoomsByOneUser(nick)}
   }
 
   //part == to leave a room
@@ -97,6 +103,7 @@ export class ChatGateway extends BaseGateway {
 	const nick: string = client.handshake.query.nick as string;
 	const successfulPart: boolean = await this.removeUserFromRoom(room, nick);
 	if (successfulPart){
+		this.server.to(client.id).emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(nick));
     	return { event: 'system', data: response};
 	}
 	response.message = "error: maybe the room " + room + " doesn't exist, or you aren't part of that room"

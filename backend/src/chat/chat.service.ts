@@ -59,6 +59,16 @@ export class ChatService {
 		return (allRooms);
 	}
 
+	public async getAllJoinedRoomsByOneUser(nick: string){
+		let allRooms: string[] = [];
+		const foundRoomsRaw = await this.userRepository
+			.createQueryBuilder("user")
+			.leftJoinAndSelect("user.joinedRooms", "room")
+			.getOne()
+			.then(u => u.joinedRooms.map(r => allRooms.push(r.name)))
+		return (allRooms);
+	}
+
 	public async getRoom(room: string): Promise<Room>{
 		const foundRoom = await this.roomRepository
 			.findOne({
