@@ -27,8 +27,11 @@ export class Room {
 	owner: User;
 
 	@ManyToMany(
-		() => User, 
-		{createForeignKeyConstraints: false})
+		() => User)
+//		{createForeignKeyConstraints: false}) 
+//		in case of problems deleting anything related
+//		to the Room entity and getting any kind of
+//		'foreign key' error, try using the createForeignKeyConstraints option
 	@JoinTable()
 	users: User[];
  

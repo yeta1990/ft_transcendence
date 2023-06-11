@@ -47,7 +47,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	this.logger = new Logger(this.gatewayName);
 	this.users = new Map();
 	this.rooms = new Set<string>();
-//	console.log(this.rooms)
   }
 
   async afterInit(): Promise<void>{
@@ -161,7 +160,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	for (const nick of allUsersInRoom)
 	{
 		if (nick === clientNick){ 
-			console.log("true");
 			return (true);
 		}
 	}
