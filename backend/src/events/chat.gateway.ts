@@ -88,7 +88,6 @@ export class ChatGateway extends BaseGateway {
   async part(client: Socket, room: string): Promise<void>{
 	  const nick: string = client.handshake.query.nick as string;
   	  this.removeUserFromRoom(room, nick);
-//	  return { event: 'listRooms', data: await this.chatService.getAllRooms()}
   }
  
 }
