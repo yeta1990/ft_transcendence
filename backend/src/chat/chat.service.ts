@@ -59,10 +59,59 @@ export class ChatService {
 		return (allRooms);
 	}
 
+	public async getRoom(room: string): Promise<Room>{
+		const foundRoom = await this.roomRepository
+			.findOne({
+				relations: ['users'],
+				where: { name: room}
+			});
+		return foundRoom;
+	}
+
+	public async addUserToRoom(room: string, nick: string): Promise<void>{
+		
+		const foundRoom = await this.getRoom(room);
+		const foundUser = await this.userService.getUserByNick(nick);
+		foundRoom.users.push(foundUser);
+		console.log(foundRoom);
+		await this.roomRepository.save(foundRoom);
+		console.log("added user to room");
+		
+
+	}
+
+	public async removeUserFromRoom(room: string, nick: string): Promise<Room> {
+		
+		const foundRoom: Room = await this.getRoom(room);
+
+		foundRoom.users = foundRoom.users.filter(user => {
+			return user.nick != nick;
+		})
+		this.roomRepository.save(foundRoom);
+		
+		return foundRoom;
+	}
+
+	public async getAllUsersInRoom(room: string): Promise<string[]>{
+		let allUsersInRoom: string[] = [];
+		
+		const usersRaw = await this.roomRepository
+			.findOne({
+				relations: ['users'],
+				where: { name: room} 
+			})
+			.then(r => r.users)
+		usersRaw.map(u => allUsersInRoom.push(u.nick))
+		console.log(allUsersInRoom)
+		
+		return allUsersInRoom;
+	}
+
 	public async deleteRoom(room: string): Promise<any>{
 		return this.roomRepository.delete(room);
 	}
 
+	//only for testing purposes
 	public async emptyTableRoom(): Promise<any>{
 		return this.roomRepository.clear();
 	}

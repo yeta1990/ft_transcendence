@@ -60,7 +60,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	//subscription to all events from the service
 	ngOnInit(): void {
-		this.joinUserToRoom("#default");
+//		this.joinUserToRoom("#default");
 		this.subscriptions.add(
 			this.chatService
 			.getMessage()
@@ -117,6 +117,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		else if (splittedCommand[0] === '/join'){
 			//channel list comma-separated and password
 			this.joinUserToRoom(splittedCommand[1]);
+		}
+		else if (splittedCommand[0] === '/part'){
+			//channel list comma-separated and password
+			this.chatService.partFromRoom(splittedCommand[1]);
 		}
 	}
 

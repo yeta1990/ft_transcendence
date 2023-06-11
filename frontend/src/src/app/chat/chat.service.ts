@@ -31,4 +31,9 @@ export class ChatService {
 	getRoomList(){
 		this.socketService.sendMessageToServer("listRooms", "");
 	}
+
+	partFromRoom(room: string){
+		this.socketService.sendMessageToServer("part", room);
+	}
+
 }
