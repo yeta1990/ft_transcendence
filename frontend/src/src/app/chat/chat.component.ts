@@ -77,9 +77,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				}
 				else if (payload.event === 'listMyJoinedRooms'){
 					this.myJointRoomList = Array.from(payload.data)	
+					if (this.myJointRoomList.length == 0){
+						this.currentRoom = "";
+					}
+					else if (!this.myJointRoomList.includes(this.currentRoom)){
+						this.currentRoom = this.myJointRoomList[0];
+						this.joinUserToRoom(this.currentRoom)
+					}
 				}
 				else if (payload.event === 'system'){
-					console.log("yee")
 					this.messageList.get(this.currentRoom)!.push(payload.data);
 				}
 				else if (payload.event === 'join'){
@@ -100,6 +106,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	ngAfterViewInit() {
         this.scrollToBottom();
         this.messages.changes.subscribe(this.scrollToBottom);
+        console.log("yee")
     }
 
 	scrollToBottom = () => {
@@ -127,6 +134,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		else if (splittedCommand[0] === '/part'){
 			//channel list comma-separated and password
 			this.chatService.partFromRoom(splittedCommand[1]);
+			this.messageList.delete(splittedCommand[1]);
+//			this.
 		}
 	}
 
