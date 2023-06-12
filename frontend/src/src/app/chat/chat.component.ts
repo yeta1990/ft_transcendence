@@ -69,7 +69,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			.pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
 			.subscribe((payload: SocketPayload) => {
 				if (payload.event === 'message'){
-					console.log(payload.data);
 					this.messageList.get(payload.data.room)!.push(payload.data);
 				}
 				else if (payload.event === 'listAllRooms'){
@@ -106,7 +105,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	ngAfterViewInit() {
         this.scrollToBottom();
         this.messages.changes.subscribe(this.scrollToBottom);
-        console.log("yee")
     }
 
 	scrollToBottom = () => {

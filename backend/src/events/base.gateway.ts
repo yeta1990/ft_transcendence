@@ -68,7 +68,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 			 this.authService.getIdFromJwt(socket.handshake.auth.token),
 			 this.authService.getNickFromJwt(socket.handshake.auth.token))
 		);
-		this.emit('listRooms', await this.chatService.getAllRooms());
+		this.emit('listAllRooms', await this.chatService.getAllRooms());
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
 	}
 	else{
@@ -90,7 +90,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   async removeUserFromRoom(room: string, nick: string): Promise<boolean> {
   	  const result: boolean = await this.chatService.removeUserFromRoom(room, nick)
   	  if (result){
-  	  	this.destroyEmptyRooms();
+  	  	await this.destroyEmptyRooms(room);
   	  	return true;
   	  }
   	  return false;
@@ -113,9 +113,12 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   */
 
   //find all rooms whith 0 users in db and delete them
-  async destroyEmptyRooms() {
-    this.emit('listRooms', await this.chatService.getAllRooms());
-
+  async destroyEmptyRooms(room: string): Promise<void> {
+	if (await this.chatService.isRoomEmpty(room)){
+		this.rooms.delete(room);
+		await this.chatService.deleteRoom(room);
+	}
+    this.emit('listAllRooms', await this.chatService.getAllRooms());
   }
 
 
@@ -123,8 +126,8 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	this.logger.log(`Socket client disconnected: ${socket.id}`)
 	this.users.delete(socket.id);
 	this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
-    this.emit('listRooms', await this.chatService.getAllRooms());
-    this.destroyEmptyRooms();
+//    this.emit('listRooms', await this.chatService.getAllRooms());
+//    this.destroyEmptyRooms();
   }
 
   //socket rooms, not db rooms
@@ -211,7 +214,8 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 			await this.rooms.add(room);
 			await this.server.in(client.id).socketsJoin(room);
 			await this.chatService.addUserToRoom(room, nick);
-			this.emit('listRooms', await this.chatService.getAllRooms());
+			this.emit('listAllRooms', await this.chatService.getAllRooms());
+//			this.emit('listRooms', await this.chatService.getAllRooms());
 			this.logger.log("User " + client.id + "joined room " + room);
 		}
 		else if (roomExists && await this.isUserInRoom(room, nick)){

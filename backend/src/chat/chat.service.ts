@@ -67,8 +67,6 @@ export class ChatService {
 			.getOne()
 
 		foundRoomsRaw.joinedRooms.map(r => allRooms.push(r.name))
-		console.log(foundRoomsRaw)
-		console.log(allRooms)
 		return (allRooms);
 	}
 
@@ -119,6 +117,14 @@ export class ChatService {
 	public async isUserInRoom(room: string, nick: string): Promise<boolean>{
 		const usersInRoom: string[] = await this.getAllUsersInRoom(room);
 		return usersInRoom.includes(nick);
+	}
+
+	public async isRoomEmpty(room: string): Promise<boolean>{
+		const foundRoom: Room = await this.getRoom(room);
+		if (foundRoom.users.length === 0){
+			return (true)	
+		}
+		return (false)
 	}
 
 	public async deleteRoom(room: string): Promise<any>{
