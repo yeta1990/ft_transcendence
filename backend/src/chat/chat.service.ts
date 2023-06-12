@@ -59,13 +59,16 @@ export class ChatService {
 		return (allRooms);
 	}
 
-	public async getAllJoinedRoomsByOneUser(nick: string){
+	public async getAllJoinedRoomsByOneUser(nick: string): Promise<string[]>{
 		let allRooms: string[] = [];
 		const foundRoomsRaw = await this.userRepository
 			.createQueryBuilder("user")
 			.leftJoinAndSelect("user.joinedRooms", "room")
 			.getOne()
-			.then(u => u.joinedRooms.map(r => allRooms.push(r.name)))
+
+		foundRoomsRaw.joinedRooms.map(r => allRooms.push(r.name))
+		console.log(foundRoomsRaw)
+		console.log(allRooms)
 		return (allRooms);
 	}
 
@@ -92,7 +95,7 @@ export class ChatService {
 		foundRoom.users = foundRoom.users.filter(user => {
 			return user.nick != nick;
 		})
-		this.roomRepository.save(foundRoom);
+		await this.roomRepository.save(foundRoom);
 		if (oldUserSize === foundRoom.users.length){ 
 			return false;
 		}
@@ -106,8 +109,10 @@ export class ChatService {
 				relations: ['users'],
 				where: { name: room} 
 			})
-			.then(r => r.users)
-		usersRaw.map(u => allUsersInRoom.push(u.nick))
+			.then(r => r ? r.users : null )
+		if (usersRaw){
+			usersRaw.map(u => allUsersInRoom.push(u.nick))
+		}
 		return allUsersInRoom;
 	}
 
