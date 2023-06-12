@@ -18,7 +18,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	newMessage: string = '';
 	messageList: Map<string, ChatMessage[]> = new Map<string, ChatMessage[]>();
 	currentRoom: string;
-	roomList: string[] = ["default"];
+	roomList: string[] = [""];
 	joinedRooms: Set<string> = new Set<string>//;["default"];
 	availableRoomsList: string[] = [];
 	myJointRoomList: string[] = [];
@@ -34,6 +34,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		private formBuilder: FormBuilder,
    ) {
 		this.currentRoom = "";
+		this.messageList.set(this.currentRoom, new Array<ChatMessage>);
    }
 
    joinUserToRoom(rooms: string): void {
@@ -78,6 +79,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					this.myJointRoomList = Array.from(payload.data)	
 				}
 				else if (payload.event === 'system'){
+					console.log("yee")
 					this.messageList.get(this.currentRoom)!.push(payload.data);
 				}
 				else if (payload.event === 'join'){
