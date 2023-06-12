@@ -9,12 +9,14 @@
 -------------------
 <br>
 <br>
-<div *ngIf="currentRoom.length > 0">
-Currently viewing room <b>{{this.currentRoom}}</b>
-</div>
 <div *ngIf="currentRoom.length === 0">
 	You aren't viewing any room! Choose one from the list
+
 </div>
+
+<div *ngIf="currentRoom.length > 0">
+Currently viewing room <b>{{this.currentRoom}}</b>
+
 <br>
 	<div class="chat-box-body">
 	<div #chatBox class="chat-logs">
@@ -26,9 +28,10 @@ Currently viewing room <b>{{this.currentRoom}}</b>
 	</div>
 	</div>
 	</div>
+</div>
 <form [formGroup]="messageToChat" (ngSubmit)="processMessageToSend()">
 	<br />
-	To: <b>{{this.currentRoom}}</b>
+	<b>{{this.currentRoom}}</b>
 	<br />
 	<input id="" type="text" formControlName="newMessage" placeholder="Send new message...">
 
