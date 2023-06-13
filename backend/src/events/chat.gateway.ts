@@ -3,15 +3,17 @@ import { Inject } from '@nestjs/common';
 import { BaseGateway } from './base.gateway';
 import { Socket } from 'socket.io';
 import { ChatMessage, SocketPayload } from '@shared/types';
+import { ChatMessageService } from '../chat/chat-message/chat-message.service';
 
 //https://stackoverflow.com/questions/69435506/how-to-pass-a-dynamic-port-to-the-websockets-gateway-in-nestjs
 @WebSocketGateway({ namespace: '/chat', cors: true } )
 //extending BaseGateway to log the gateway creation in the terminal
 export class ChatGateway extends BaseGateway {
 
-  constructor() {
+  constructor(private chatMessageService: ChatMessageService) {
 	super(ChatGateway.name);
   }
+
 
   //separate afterInit from the base class
   async afterInit(): Promise<void> {}
@@ -24,6 +26,7 @@ export class ChatGateway extends BaseGateway {
 	if (await this.chatService.isUserInRoom(payload.room, nick)){
     	payload.nick = client.handshake.query.nick as string;
 		this.broadCastToRoom('message', payload);
+		await this.chatMessageService.saveMessage(payload)
 	} 
   }
 
