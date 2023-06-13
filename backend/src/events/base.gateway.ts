@@ -145,10 +145,13 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   //this is the old method to get the users from a room
   //I don't remove it yet because it could be useful for
   //getting the currently connected users
-  /*
-  getJointUsersInRoom(room: string): Array<ChatUser>{
+  
+  getActiveUsersInRoom(room: string): Array<ChatUser>{
    	const adapter: any = this.server.adapter;
 	const roomsRaw: any = adapter.rooms;
+//	const roomsRaw: any = this.rooms;
+//	console.log(roomsRaw)
+//	if (!roomsRaw) return new Array();
 	const usersRaw: Array<string> = Array.from(roomsRaw.get(room));
 	let usersWithCompleteData: Array<ChatUser> = new Array();
 	usersRaw.forEach(x => {
@@ -156,10 +159,11 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	});
     return (usersWithCompleteData);
   }
-  */
+  
 
   async isUserInRoom(room: string, clientNick: string): Promise<boolean> {
 	const allUsersInRoom: Array<string> = await this.chatService.getAllUsersInRoom(room);
+
 	for (const nick of allUsersInRoom)
 	{
 		if (nick === clientNick){ 
@@ -222,6 +226,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 			//this option is in case the user is already in the channel,
 			//we don't need to save it again in db
 			this.server.in(client.id).socketsJoin(room);
+			console.log(this.getActiveUsersInRoom(room));
 		}
 		else if (roomExists){
 //			console.log("room already exists " + roomExists);

@@ -4,6 +4,7 @@ import { BaseGateway } from './base.gateway';
 import { Socket } from 'socket.io';
 import { ChatMessage, SocketPayload } from '@shared/types';
 import { ChatMessageService } from '../chat/chat-message/chat-message.service';
+import { RoomMessages, ChatUser } from '@shared/types';
 
 //https://stackoverflow.com/questions/69435506/how-to-pass-a-dynamic-port-to-the-websockets-gateway-in-nestjs
 @WebSocketGateway({ namespace: '/chat', cors: true } )
@@ -60,7 +61,21 @@ export class ChatGateway extends BaseGateway {
 	  	  } else {
 	  	  	lastJoinedRoom = room;
 	  	  }
-		  const successfulJoin = await this.joinUserToRoom(client, lastJoinedRoom, pass);
+		  let isUserAlreadyActiveInRoom: boolean = false;
+		  try {
+		  	const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(room);
+    		for (let i = 0; i < activeUsersInRoom.length; i++){
+  				if (client.id === activeUsersInRoom[i].client_id){
+  					isUserAlreadyActiveInRoom = true;
+  					break ;
+  				}
+  		    }
+		  } catch {}
+
+
+
+		  const successfulJoin = await 
+			this.joinUserToRoom(client, lastJoinedRoom, pass);
 
 	 	  const response: ChatMessage = {
 			  room: lastJoinedRoom,
@@ -70,6 +85,13 @@ export class ChatGateway extends BaseGateway {
 		  }
 		  if (successfulJoin){
 			this.messageToClient(client.id, "join", response);
+			if (!isUserAlreadyActiveInRoom){ 
+				const oldMessagesInRoom: RoomMessages = 
+					await this.chatMessageService.getAllMessagesFromRoom(lastJoinedRoom);
+				for (let message of oldMessagesInRoom.messages){
+					this.messageToClient(client.id, "message", message)
+				}
+			}
 		  }
 		  else{
 		  	  const err: ChatMessage = {
