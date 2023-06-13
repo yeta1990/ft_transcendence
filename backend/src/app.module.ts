@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module'
 
 import { User } from './user/user.entity'
 import { Room } from './chat/room.entity'
+import { ChatMessage } from './chat/chat-message/chat-message.entity'
 import { UserController } from './user/user.controller';
 import { UserService } from './user/user.service';
 import { UserModule } from './user/user.module';
@@ -31,7 +32,7 @@ import { HashService } from './hash/hash.service';
 		username: process.env.POSTGRES_USER,
 		password: process.env.POSTGRES_PASSWORD,
 		database: process.env.POSTGRES_DATABASE,
-		entities: [User, Room],
+		entities: [User, Room, ChatMessage],
 		synchronize: true, // creo que esto hay que cambiarlo para subirlo a producción
 		logging: false //useful for debugging errors in typeorm/postgres
 
