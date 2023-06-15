@@ -20,6 +20,7 @@ export class ChatMessageService {
 			.find({
 				where: { room: room }
 			})
+			.limit(100)
 		const messagesFromRoom: RoomMessages = new RoomMessages(room, messages);
 		console.log(messagesFromRoom);
 		return messagesFromRoom;
