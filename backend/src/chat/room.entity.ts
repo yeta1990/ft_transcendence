@@ -33,8 +33,14 @@ export class Room {
 //		'foreign key' error, try using the createForeignKeyConstraints option
 	@JoinTable()
 	users: User[];
- 
 
+	@ManyToMany(() => User, (user) => user.adminRooms)
+	@JoinTable()
+	admins: User[];
+
+	@ManyToMany(() => User, (user) => user.bannedRooms)
+	@JoinTable()
+	banned: User[];
 
 //	@OneToMany(() => User, (user) => user.id)
 //	banned: User[];

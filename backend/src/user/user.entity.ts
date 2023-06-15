@@ -73,11 +73,17 @@ export class User {
 	})
 	mfa: boolean;
 
-	@OneToMany(() => Room, (room) => room.owner )
+	@OneToMany(() => Room, (room) => room.owner)
 	ownedRooms: Room[]
 
-	@ManyToMany(() => Room, (room) => room.users )
+	@ManyToMany(() => Room, (room) => room.users)
 	joinedRooms: Room[];
+
+	@ManyToMany(() => Room, (room) => room.admins)
+	adminRooms: Room[];
+
+	@ManyToMany(() => Room, (room) => room.banned)
+	bannedRooms: Room[];
  
 	// FUNCIONES ---------------------------------------------
 

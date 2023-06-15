@@ -18,9 +18,9 @@ export class ChatMessageService {
 	public async getAllMessagesFromRoom(room: string): Promise<RoomMessages>{
 		const messages: ChatMessage[] = await this.chatMessageRepository
 			.find({
-				where: { room: room }
+				where: { room: room },
+				take: 100
 			})
-			.limit(100)
 		const messagesFromRoom: RoomMessages = new RoomMessages(room, messages);
 		console.log(messagesFromRoom);
 		return messagesFromRoom;
