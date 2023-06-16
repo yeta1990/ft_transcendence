@@ -73,7 +73,7 @@ export class ChatService {
 	public async getRoom(room: string): Promise<Room>{
 		const foundRoom = await this.roomRepository
 			.findOne({
-				relations: ['users'],
+				relations: ['owner', 'users', 'admins', 'banned'],
 				where: { name: room}
 			});
 		return foundRoom;
@@ -126,6 +126,45 @@ export class ChatService {
 		}
 		return (false)
 	}
+
+	public async isOwnerOfRoom(nick: string, room: string): Promise<boolean>{
+		const foundRoom: Room = await this.getRoom(room);
+//		console.log("found room " + room)
+//		console.log(foundRoom)
+		if (foundRoom.owner.nick === nick) return true;
+		return false;
+	}
+
+	public async makeRoomAdmin(executorNick: string, nick: string, room: string): Promise<boolean>{
+		const isOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorNick, room);
+		if (!isOwnerOfRoom) return false;
+
+		// isBanned(nick, room)
+		// if is banned, return false
+		//
+
+		const foundRoom: Room = await this.getRoom(room)
+		const roomAdmins: User[] = foundRoom.admins;
+		for (let admin of roomAdmins){
+			if (admin.nick === nick) return true;
+		}
+		const userToMakeAdmin: User | undefined = await this.userService.getUserByNick(nick);
+		if (!userToMakeAdmin) return false;
+		foundRoom.admins.push(userToMakeAdmin);
+		await this.roomRepository.save(foundRoom)
+		return true;
+	}
+
+	//isAdminOfRoom(nick: string, room: string)
+	/*
+	public async removeRoomAdmin(executorNick: string, nick: string, room: string): Promise<boolean>{
+		//if isn't room	
+		return false;
+	}
+	*/
+
+
+
 
 	public async deleteRoom(room: string): Promise<any>{
 		return this.roomRepository.delete(room);

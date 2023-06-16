@@ -21,7 +21,6 @@ export class Room {
  
 	@Column({nullable: true})
 	password: string;
-	
 
 	@ManyToOne(() => User, (user) => user.id)
 	owner: User;

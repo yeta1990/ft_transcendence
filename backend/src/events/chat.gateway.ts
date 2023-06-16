@@ -116,6 +116,12 @@ export class ChatGateway extends BaseGateway {
 	  return { event: 'listMyJoinedRooms', data: await this.chatService.getAllJoinedRoomsByOneUser(nick)}
   }
 
+  @SubscribeMessage('admin')
+  async makeRoomAdmin(client: Socket, payload: ChatMessage){
+	  const nick: string = client.handshake.query.nick as string;
+	  const adminOk: boolean = await this.chatService.makeRoomAdmin(nick, payload.nick, payload.room);
+  } 
+
   //part == to leave a room
   @SubscribeMessage('part')
   async part(client: Socket, room: string): Promise<WsResponse<unknown>>{
