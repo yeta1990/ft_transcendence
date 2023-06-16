@@ -17,13 +17,13 @@ function validateStringLength(value: string, min: number, max: number): boolean 
 export class User {
 	@PrimaryGeneratedColumn()
 	id: number;
-	
+
 	// IDENTIFICACION -------------------------------------
 	@Column({
 		unique: true,
 	})
 	nick: string;
-	
+
 	@Column()
 	firstName: string;
 

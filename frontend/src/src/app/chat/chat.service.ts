@@ -37,4 +37,9 @@ export class ChatService {
 		this.socketService.sendMessageToServer("part", room);
 	}
 
+	makeRoomAdmin(nick: string, room: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , nick: nick, date: new Date() }
+		this.socketService.sendMessageToServer("admin", payloadToSend);
+	}
+
 }
