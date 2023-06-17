@@ -145,7 +145,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				return ;
 			this.chatService.removeRoomAdmin(splittedCommand[1], splittedCommand[2])
 		}
+		else if (splittedCommand[0] === '/ban'){
+			if (splittedCommand.length < 3)
+				return ;
+			this.chatService.banUserFromRoom(splittedCommand[1], splittedCommand[2])
+		}
+		else if (splittedCommand[0] === '/noban'){
+			if (splittedCommand.length < 3)
+				return ;
+			this.chatService.removeBanFromRoom(splittedCommand[1], splittedCommand[2])
+		}
 	}
+
 
 	processMessageToSend(): void {
 		const messageToSend: string = this.messageToChat.get('newMessage')!.value || "";

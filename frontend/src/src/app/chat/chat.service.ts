@@ -46,4 +46,15 @@ export class ChatService {
 		const payloadToSend: ChatMessage = { room: room, message: "" , nick: nick, date: new Date() }
 		this.socketService.sendMessageToServer("noadmin", payloadToSend);
 	}
+
+	banUserFromRoom(nick:string, room: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , nick: nick, date: new Date() }
+		this.socketService.sendMessageToServer("ban", payloadToSend);
+	}
+
+	removeBanFromRoom(nick: string, room: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , nick: nick, date: new Date() }
+		this.socketService.sendMessageToServer("noban", payloadToSend);
+	}
+
 }
