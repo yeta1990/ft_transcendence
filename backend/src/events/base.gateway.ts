@@ -217,7 +217,8 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 				.createRoom(nick, room, hasPass, password);
 			await this.rooms.add(room);
 			await this.server.in(client.id).socketsJoin(room);
-			await this.chatService.addUserToRoom(room, nick);
+			const successfulJoin: boolean = await this.chatService.addUserToRoom(room, nick);
+			if (!successfulJoin) return false;
 			this.emit('listAllRooms', await this.chatService.getAllRooms());
 //			this.emit('listRooms', await this.chatService.getAllRooms());
 			this.logger.log("User " + client.id + "joined room " + room);
@@ -246,7 +247,8 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 				}
 			}
 			this.server.in(client.id).socketsJoin(room);
-			await this.chatService.addUserToRoom(room, nick);
+			const successfulJoin: boolean = await this.chatService.addUserToRoom(room, nick);
+			if (!successfulJoin) return false;
 			this.logger.log("User " + client.id + "joined room " + room);
 		}
 		this.server.to(client.id).emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(nick));

@@ -128,6 +128,23 @@ export class ChatGateway extends BaseGateway {
 	  const adminRemoved: boolean = await this.chatService.removeRoomAdmin(nick, payload.nick, payload.room);
   } 
 
+  @SubscribeMessage('ban')
+  async banUserOfRoom(client: Socket, payload: ChatMessage){
+	  const nick: string = client.handshake.query.nick as string;
+	  const targetUserConnected: ChatUser = this.users.get(payload.nick)
+
+	  const banOk: boolean = await this.chatService.banUserOfRoom(nick, payload.nick, payload.room);
+	  if (banOk && targetUserConnected){
+		this.server.to(targetUserConnected.client_id)
+			.emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(nick));
+  	  }
+  }
+
+  @SubscribeMessage('noban')
+  async removeBanOfRoom(client: Socket, payload: ChatMessage){
+	  const nick: string = client.handshake.query.nick as string;
+	  const banRemoved: boolean = await this.chatService.removeBanOfRoom(nick, payload.nick, payload.room);
+  } 
 
   //part == to leave a room
   @SubscribeMessage('part')
