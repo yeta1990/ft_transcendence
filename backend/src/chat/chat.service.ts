@@ -100,6 +100,10 @@ export class ChatService {
 		if (oldUserSize === foundRoom.users.length){ 
 			return false;
 		}
+		const isOwnerOfRoom: boolean = await this.isOwnerOfRoom(nick, room)
+		if (isOwnerOfRoom) {
+			await this.removeOwnerFromRoom(room)
+		}
 		return true;
 	}
 
@@ -137,6 +141,20 @@ export class ChatService {
 		if (!foundRoom || !foundRoom.owner) return false;
 		if (foundRoom.owner.nick === nick) return true;
 		return false;
+	}
+
+	public async removeOwnerFromRoom(room: string): Promise<boolean>{
+		const foundRoom: Room = await this.getRoom(room);
+		if (!foundRoom) return false;
+		const nick: string = foundRoom.owner.nick;
+		foundRoom.owner = undefined;
+		await this.roomRepository.save(foundRoom);
+		const user: User = await this.userService.getUserByNick(nick);
+		user.ownedRooms = user.ownedRooms.filter(r => {
+			return r.name != room;
+		})
+		await this.userRepository.save(user)
+		return true;
 	}
 
 	public async makeRoomAdmin(executorNick: string, nick: string, room: string): Promise<boolean>{

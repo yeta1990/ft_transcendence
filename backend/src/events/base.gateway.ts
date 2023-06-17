@@ -160,7 +160,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
     return (usersWithCompleteData);
   }
   
-
   async isUserInRoom(room: string, clientNick: string): Promise<boolean> {
 	const allUsersInRoom: Array<string> = await this.chatService.getAllUsersInRoom(room);
 

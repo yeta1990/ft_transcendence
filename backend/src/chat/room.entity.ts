@@ -22,7 +22,7 @@ export class Room {
 	@Column({nullable: true})
 	password: string;
 
-	@ManyToOne(() => User, (user) => user.id)
+	@ManyToOne(() => User, (user) => user.id, {createForeignKeyConstraints: false})
 	owner: User;
 
 	@ManyToMany(() => User, (user) => user.joinedRooms)
