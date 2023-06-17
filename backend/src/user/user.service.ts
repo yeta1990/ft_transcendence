@@ -23,6 +23,7 @@ export class UserService {
 
 	public async getUserByNick(nick: string): Promise<User | undefined>{
 		return this.repository.findOne({
+			relations: ['ownedRooms'],
     		where: {
         		nick: nick,
     		},
