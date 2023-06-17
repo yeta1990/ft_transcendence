@@ -42,4 +42,8 @@ export class ChatService {
 		this.socketService.sendMessageToServer("admin", payloadToSend);
 	}
 
+	removeRoomAdmin(nick: string, room: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , nick: nick, date: new Date() }
+		this.socketService.sendMessageToServer("noadmin", payloadToSend);
+	}
 }
