@@ -140,6 +140,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				return ;
 			this.chatService.makeRoomAdmin(splittedCommand[1], splittedCommand[2])
 		}
+		else if (splittedCommand[0] === '/noadmin'){
+			if (splittedCommand.length < 3)
+				return ;
+			this.chatService.removeRoomAdmin(splittedCommand[1], splittedCommand[2])
+		}
 	}
 
 	processMessageToSend(): void {

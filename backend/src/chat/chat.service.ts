@@ -156,12 +156,23 @@ export class ChatService {
 	}
 
 	//isAdminOfRoom(nick: string, room: string)
-	/*
+
 	public async removeRoomAdmin(executorNick: string, nick: string, room: string): Promise<boolean>{
-		//if isn't room	
-		return false;
+		const foundRoom: Room = await this.getRoom(room);
+		if (!foundRoom) return false;
+		const isOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorNick, room);
+		if (!isOwnerOfRoom) return false;
+		const oldUserSize: number = foundRoom.users.length;
+		foundRoom.admins = foundRoom.admins.filter(user => {
+			return user.nick != nick;
+		})
+		await this.roomRepository.save(foundRoom);
+		if (oldUserSize === foundRoom.users.length){ 
+			return false;
+		}
+		return true;
 	}
-	*/
+
 
 
 

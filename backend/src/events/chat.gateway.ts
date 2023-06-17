@@ -122,6 +122,13 @@ export class ChatGateway extends BaseGateway {
 	  const adminOk: boolean = await this.chatService.makeRoomAdmin(nick, payload.nick, payload.room);
   } 
 
+  @SubscribeMessage('noadmin')
+  async removeRoomAdmin(client: Socket, payload: ChatMessage){
+	  const nick: string = client.handshake.query.nick as string;
+	  const adminRemoved: boolean = await this.chatService.removeRoomAdmin(nick, payload.nick, payload.room);
+  } 
+
+
   //part == to leave a room
   @SubscribeMessage('part')
   async part(client: Socket, room: string): Promise<WsResponse<unknown>>{
