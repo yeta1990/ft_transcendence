@@ -66,6 +66,7 @@ export class ChatService {
 			.leftJoinAndSelect("user.joinedRooms", "room")
 			.getOne()
 
+			console.log(foundRoomsRaw)
 		foundRoomsRaw.joinedRooms.map(r => allRooms.push(r.name))
 		return (allRooms);
 	}

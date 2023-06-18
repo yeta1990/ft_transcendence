@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Room } from '../room.entity'
 
 @Entity()
 export class ChatMessage {
@@ -6,7 +7,9 @@ export class ChatMessage {
 	@PrimaryGeneratedColumn()
 	id: number;
 
-	@Column()
+	@ManyToOne(() => Room, (room) => room.messages, {
+		onDelete: 'CASCADE'	
+	})
 	room: string;
 
 	@Column()
