@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ChatMessage } from './chat-message.entity';
 import { RoomMessages } from '@shared/types';
 import { ChatMessage as ChatMessageType } from '@shared/types';
+import { DataSource } from "typeorm"
 
 @Injectable()
 export class ChatMessageService {
@@ -11,24 +12,22 @@ export class ChatMessageService {
 	@InjectRepository(ChatMessage)
 	private readonly chatMessageRepository: Repository<ChatMessage>;
 
+//	constructor(private readOnly chatMessageRepository: ChatMessage)
 	public async saveMessage(message: ChatMessageType): Promise<void>{
 		await this.chatMessageRepository.save(message)
 	}
 
 	public async getAllMessagesFromRoom(room: string): Promise<RoomMessages>{
-		const messages: ChatMessage[] = await this
+		const messages: any[] = await this
 			.chatMessageRepository
-			.createQueryBuilder('chatmessage')
-			.where('chatmessage.room= :room', {room})
-			.limit(100)
+			.createQueryBuilder()
+			.where('"roomName"= :room', {room})
+			.orderBy({"date": "DESC"})
+			.limit(3)
 			.getMany()
-//		console.log(messages)
-//		const messages: ChatMessage[] = await this.chatMessageRepository
-//			.find({
-//				where: { room: room },
-//			})
-		const messagesFromRoom: RoomMessages = new RoomMessages(room, messages);
-		console.log(messagesFromRoom);
+		//trick because column roomName is conflictive
+		messages.map(m => m.room = room);
+		const messagesFromRoom: RoomMessages = new RoomMessages(room, messages.reverse());
 		return messagesFromRoom;
 	}
 }
