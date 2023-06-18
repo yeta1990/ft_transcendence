@@ -16,11 +16,17 @@ export class ChatMessageService {
 	}
 
 	public async getAllMessagesFromRoom(room: string): Promise<RoomMessages>{
-		const messages: ChatMessage[] = await this.chatMessageRepository
-			.find({
-				where: { room: room },
-				take: 100
-			})
+		const messages: ChatMessage[] = await this
+			.chatMessageRepository
+			.createQueryBuilder('chatmessage')
+			.where('chatmessage.room= :room', {room})
+			.limit(100)
+			.getMany()
+//		console.log(messages)
+//		const messages: ChatMessage[] = await this.chatMessageRepository
+//			.find({
+//				where: { room: room },
+//			})
 		const messagesFromRoom: RoomMessages = new RoomMessages(room, messages);
 		console.log(messagesFromRoom);
 		return messagesFromRoom;
