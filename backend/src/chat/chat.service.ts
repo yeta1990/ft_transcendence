@@ -136,8 +136,6 @@ export class ChatService {
 
 	public async isOwnerOfRoom(nick: string, room: string): Promise<boolean>{
 		const foundRoom: Room = await this.getRoom(room);
-//		console.log("found room " + room)
-//		console.log(foundRoom)
 		if (!foundRoom || !foundRoom.owner) return false;
 		if (foundRoom.owner.nick === nick) return true;
 		return false;
@@ -215,6 +213,9 @@ export class ChatService {
 		if (targetIsAlreadyBanned) return true;
 		const targetIsAdminOfRoom: boolean = await this.isAdminOfRoom(nick, room)
 		if (executorIsAdminOfRoom && targetIsAdminOfRoom) return false;
+		const targetIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(nick, room)
+		if (executorIsAdminOfRoom && targetIsOwnerOfRoom) return false;
+		if (executorIsOwnerOfRoom && targetIsOwnerOfRoom) return false;
 
 		//ban
 		const foundRoom: Room = await this.getRoom(room)
