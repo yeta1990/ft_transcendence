@@ -87,30 +87,20 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   }
 
-  async removeUserFromRoom(room: string, nick: string): Promise<boolean> {
+  async removeUserFromRoom(clientId: string, room: string, nick: string): Promise<boolean> {
+  	  //updating relationships and entities in db
   	  const result: boolean = await this.chatService.removeUserFromRoom(room, nick)
+
   	  if (result){
+  	  	//unsubscribe user from socket service
+	    this.server.in(clientId).socketsLeave(room);
+
+	    //removing empty rooms
   	  	await this.destroyEmptyRooms(room);
   	  	return true;
   	  }
   	  return false;
-  	  
-//	const room: Room = await this.chatService.getroom(room);
-
   }
-  //old method to destoy empty rooms in memory (socket server), but not in db!!!
-  /*
-  destroyEmptyRooms() {
-	const activeRooms: Array<string> = this.getActiveRooms();
-
-	[...this.rooms].forEach(async x=>{
-		if (!activeRooms.includes(x)){
-			this.rooms.delete(x);
-			await this.chatService.deleteRoom(x);
-		}
-	});
-  }
-  */
 
   //find all rooms whith 0 users in db and delete them
   async destroyEmptyRooms(room: string): Promise<void> {

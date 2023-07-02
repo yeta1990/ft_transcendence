@@ -19,7 +19,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	messageList: Map<string, ChatMessage[]> = new Map<string, ChatMessage[]>();
 	currentRoom: string;
 	roomList: string[] = [""];
-	joinedRooms: Set<string> = new Set<string>//;["default"];
+//	joinedRooms: Set<string> = new Set<string>//;["default"];
 	availableRoomsList: string[] = [];
 	myJointRoomList: string[] = [];
 	private subscriptions = new Subscription();

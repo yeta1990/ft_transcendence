@@ -24,7 +24,7 @@ export class SocketService {
 		this.messageObservable = from(this.message);
 		this.socket
 			.on('message', (data: ChatMessage) => {
-				console.log("message received: " + data);
+				console.log("message received: " + JSON.stringify(data));
 				this.message.next({event: 'message', data});
 			})
 			.on('join', (data: any) => {
