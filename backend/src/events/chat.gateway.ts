@@ -72,18 +72,16 @@ export class ChatGateway extends BaseGateway {
   		    }
 		  } catch {}
 
-
-
 		  const successfulJoin = await 
 			this.joinUserToRoom(client, lastJoinedRoom, pass);
 
-	 	  const response: ChatMessage = {
-			  room: lastJoinedRoom,
-			  message: `you are in room ${lastJoinedRoom}`,
-			  nick: "system",
-			  date: new Date()
-		  }
 		  if (successfulJoin){
+	 	  	const response: ChatMessage = {
+		  	    room: lastJoinedRoom,
+		  	    message: `you are in room ${lastJoinedRoom}`,
+		  	    nick: "system",
+		  	    date: new Date()
+		  	}
 			this.messageToClient(client.id, "join", response);
 			if (!isUserAlreadyActiveInRoom){ 
 				const oldMessagesInRoom: RoomMessages = 
@@ -92,15 +90,6 @@ export class ChatGateway extends BaseGateway {
 					this.messageToClient(client.id, "message", message)
 				}
 			}
-		  }
-		  else{
-		  	  const err: ChatMessage = {
-			 	 room: lastJoinedRoom,
-			     message: `Error: bad password provided for ${lastJoinedRoom}`,
-			     nick: "system",
-			     date: new Date()
-		      }
-		  	  this.messageToClient(client.id, "system", response);
 		  }
 	  }
   }

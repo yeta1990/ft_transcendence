@@ -186,7 +186,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		//   3. user is joined in socket.io and saved in db
 		// if the room exists in db:
 		//   1. check if the user is currently connected to the room. if it's, just continue. otherwise, follow the next steps
-		//   2. (TBD!!) check if the user is banned from the channel
+		//   2. check if the user is banned from the channel
 		//   3. check if the room is protected by password. if it's, compare password with stored hashpassword
 	  	//		- match? join user 
 	  	//		- doesn't match? return an error to the user
@@ -223,17 +223,29 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 				.chatService
 				.isProtectedByPassword(room);
 			if (await this.chatService.isBannedOfRoom(nick, room)){
-				console.log("BANNED!!!!!!!!")
-				return false;
-			}
-			else if (isRoomProtectedByPassword && password === undefined ){
-				console.log("no password provided");
+		  	  	const err: ChatMessage = {
+			  	   room: room,
+			  	   message: `Error: you are banned from ${room}`,
+			  	   nick: "system",
+			  	   date: new Date()
+		      	}
+		  	  	this.messageToClient(client.id, "system", err);
+//				console.log("BANNED!!!!!!!!")
 				return false;
 			}
 			else if (isRoomProtectedByPassword){
-				const isValidPassword: boolean = await this.hashService.comparePassword(password, await this.chatService.getHashPassFromRoom(room));
-				if (!isValidPassword) {
-					console.error("invalid password");
+		  	  	const err: ChatMessage = {
+			  	   room: room,
+			  	   message: `Error: bad password provided for ${room}`,
+			  	   nick: "system",
+			  	   date: new Date()
+		      	}
+				let passwordChallengePassed: boolean = false;
+				if (password !== undefined){
+					passwordChallengePassed = await this.hashService.comparePassword(password, await this.chatService.getHashPassFromRoom(room));
+				}
+				if (!passwordChallengePassed){
+		  	  		this.messageToClient(client.id, "system", err);
 					return false;
 				}
 			}
