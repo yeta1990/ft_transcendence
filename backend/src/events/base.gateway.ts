@@ -184,6 +184,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		//   1. it's created in socket.io
 		//   2. it's created in db, associating the owner to the Room
 		//   3. user is joined in socket.io and saved in db
+	  	//
 		// if the room exists in db:
 		//   1. check if the user is currently connected to the room. if it's, just continue. otherwise, follow the next steps
 		//   2. check if the user is banned from the channel

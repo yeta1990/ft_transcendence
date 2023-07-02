@@ -179,8 +179,8 @@ export class ChatService {
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) return false;
 		const adminsOfRoom: User[] = foundRoom.admins;
-		for (let i; i < adminsOfRoom.length; i++){
-			if (adminsOfRoom[i].nick === nick) return true;
+		for (let admin of adminsOfRoom){
+			if (admin.nick === nick) return true;
 		}
 		return false;
 	}
@@ -248,8 +248,7 @@ export class ChatService {
 		if (executorNick === nick) return false;
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) return false;
-		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorNick, room);
-		if (!executorIsOwnerOfRoom) return false;
+		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorNick, room); 
 		const executorIsAdminOfRoom: boolean = await this.isAdminOfRoom(executorNick, room);
 		if (!executorIsOwnerOfRoom && !executorIsAdminOfRoom) return false;
 		const isTargetBanned: boolean = await this.isBannedOfRoom(nick, room)
