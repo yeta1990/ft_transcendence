@@ -156,7 +156,7 @@ export class ChatGateway extends BaseGateway {
   		date: new Date()
   	}
 	const nick: string = client.handshake.query.nick as string;
-	const successfulPart: boolean = await this.removeUserFromRoom(room, nick);
+	const successfulPart: boolean = await this.removeUserFromRoom(client.id, room, nick);
 	if (successfulPart){
 		this.server.to(client.id).emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(nick));
     	return { event: 'system', data: response};
