@@ -48,7 +48,7 @@ export class ChatGateway extends BaseGateway {
   //the command allows this structure: /join [#]channel[,channel] [pass]
   @SubscribeMessage('join')
   async handleJoinRoom(client: Socket, rooms: string): Promise<void>{
-  	  console.log("join message received: " + rooms);
+//  	  console.log("join message received: " + rooms);
 	  const splittedRooms: Array<string> = rooms.split(" ", 1)[0].split(",");
 	  const pass: string | undefined = rooms.split(" ")[1];
 	  let lastJoinedRoom: string;
@@ -120,12 +120,27 @@ export class ChatGateway extends BaseGateway {
   @SubscribeMessage('ban')
   async banUserOfRoom(client: Socket, payload: ChatMessage){
 	  const nick: string = client.handshake.query.nick as string;
-	  const targetUserConnected: ChatUser = this.users.get(payload.nick)
+	  const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(payload.room);
+	  let targetUserConnectedSocketId: string | undefined = undefined;
+
+	  for (let activeUser of activeUsersInRoom){
+		if (activeUser.nick === payload.nick){
+			targetUserConnectedSocketId = activeUser.client_id;
+			break ;
+		}
+	  }
 
 	  const banOk: boolean = await this.chatService.banUserOfRoom(nick, payload.nick, payload.room);
-	  if (banOk && targetUserConnected){
-		this.server.to(targetUserConnected.client_id)
-			.emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(nick));
+	  if (banOk && targetUserConnectedSocketId){
+		this.server.to(targetUserConnectedSocketId)
+			.emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(payload.nick));
+		const err: ChatMessage = {
+			room: payload.room,
+			message: `Information: you have been banned from ${payload.room}`,
+			nick: "system",
+			date: new Date()
+		}
+		this.messageToClient(targetUserConnectedSocketId, "system", err);
   	  }
   }
 
