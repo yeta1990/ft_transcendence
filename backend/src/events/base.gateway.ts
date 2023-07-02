@@ -217,7 +217,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 			//this option is in case the user is already in the channel,
 			//we don't need to save it again in db
 			this.server.in(client.id).socketsJoin(room);
-			console.log(this.getActiveUsersInRoom(room));
+//			console.log(this.getActiveUsersInRoom(room));
 		}
 		else if (roomExists){
 			const isRoomProtectedByPassword: boolean = await this 
