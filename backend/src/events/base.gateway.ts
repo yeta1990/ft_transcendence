@@ -219,12 +219,14 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 			console.log(this.getActiveUsersInRoom(room));
 		}
 		else if (roomExists){
-//			console.log("room already exists " + roomExists);
 			const isRoomProtectedByPassword: boolean = await this 
 				.chatService
 				.isProtectedByPassword(room);
-
-			if (isRoomProtectedByPassword && password === undefined ){
+			if (await this.chatService.isBannedOfRoom(nick, room)){
+				console.log("BANNED!!!!!!!!")
+				return false;
+			}
+			else if (isRoomProtectedByPassword && password === undefined ){
 				console.log("no password provided");
 				return false;
 			}
