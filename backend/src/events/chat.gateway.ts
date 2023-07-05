@@ -94,6 +94,36 @@ export class ChatGateway extends BaseGateway {
 	  }
   }
 
+  ////////////////////////////
+  // 	PRIVATE MESSAGES 	//
+  ////////////////////////////
+
+  // private messages are supported by fake/private channels which only
+  // allows only 2 users
+  // the name of that room is defined by the id of the 2 users, for instance:
+  // id 4 wants to send a private message to id 2, the name of the channel
+  // will be "#2-4", both ids, sorted asc, separated by a -
+  //
+  // [process]:
+  // if the room doesn't exist in database:
+  //	1. check if the user is banned by the other user
+  // 	2. it's created in socket.io
+  //	3. it's created in db
+  //	4. user is joined in socket.io and saved in db
+  //
+  // if the room exists in db:
+  //	1. check if the user is currently connected to the room. if it's, just continue. otherwise, follow the next steps
+  //	4. user is joined in socket.io and saved in db
+  //	
+  // finally: send the message!
+  // 	1. save it in the db
+  //	2. send the message back to both users
+
+  @SubscribeMessage('mp')
+  async mp(client: Socket, payload: ChatMessage): Promise<void> {
+	
+  } 
+
   @SubscribeMessage('listAllRooms')
   async listRooms(client: Socket): Promise<WsResponse<unknown>>{
 	  return { event: 'listAllRooms', data: await this.chatService.getAllRooms()}
