@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn, ManyToMany, JoinTable } from 'typeorm';
 
+import { Room } from '../chat/room.entity';
 export enum UserStatus {
 	OFFLINE,
 	ONLINE,
@@ -16,13 +17,13 @@ function validateStringLength(value: string, min: number, max: number): boolean 
 export class User {
 	@PrimaryGeneratedColumn()
 	id: number;
-	
+
 	// IDENTIFICACION -------------------------------------
 	@Column({
 		unique: true,
 	})
 	nick: string;
-	
+
 	@Column()
 	firstName: string;
 
@@ -72,7 +73,18 @@ export class User {
 	})
 	mfa: boolean;
 
+	@OneToMany(() => Room, (room) => room.owner)
+	ownedRooms: Room[]
 
+	@ManyToMany(() => Room, (room) => room.users)
+	joinedRooms: Room[];
+
+	@ManyToMany(() => Room, (room) => room.admins)
+	adminRooms: Room[];
+
+	@ManyToMany(() => Room, (room) => room.banned)
+	bannedRooms: Room[];
+ 
 	// FUNCIONES ---------------------------------------------
 
 	validateEmail() {
