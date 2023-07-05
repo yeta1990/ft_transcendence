@@ -29,6 +29,32 @@ export class ChatService {
 	}
 
 	getRoomList(){
-		this.socketService.sendMessageToServer("listRooms", "");
+		this.socketService.sendMessageToServer("listAllRooms", "");
+		this.socketService.sendMessageToServer("listMyJoinedRooms", "");
 	}
+
+	partFromRoom(room: string){
+		this.socketService.sendMessageToServer("part", room);
+	}
+
+	makeRoomAdmin(nick: string, room: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , nick: nick, date: new Date() }
+		this.socketService.sendMessageToServer("admin", payloadToSend);
+	}
+
+	removeRoomAdmin(nick: string, room: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , nick: nick, date: new Date() }
+		this.socketService.sendMessageToServer("noadmin", payloadToSend);
+	}
+
+	banUserFromRoom(nick:string, room: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , nick: nick, date: new Date() }
+		this.socketService.sendMessageToServer("ban", payloadToSend);
+	}
+
+	removeBanFromRoom(nick: string, room: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , nick: nick, date: new Date() }
+		this.socketService.sendMessageToServer("noban", payloadToSend);
+	}
+
 }

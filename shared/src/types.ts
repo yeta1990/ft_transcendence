@@ -19,4 +19,11 @@ export class ChatUser {
 		public user_id: number, 
 		public nick: string
 	){ }
+};
+
+export class RoomMessages {
+	constructor( 
+		public name: string,
+		public messages: Array<ChatMessage>
+	){}
 }
