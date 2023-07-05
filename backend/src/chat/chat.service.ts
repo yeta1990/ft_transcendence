@@ -66,6 +66,9 @@ export class ChatService {
 				relations: ['joinedRooms'],
 				where: { nick: nick}
 			})
+		if (!foundUser){
+			return [];
+		}
 		foundUser.joinedRooms.map(r => allRooms.push(r.name))
 		return (allRooms);
 	}
