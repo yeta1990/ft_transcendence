@@ -135,13 +135,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   //this is the old method to get the users from a room
   //I don't remove it yet because it could be useful for
   //getting the currently connected users
-  
   getActiveUsersInRoom(room: string): Array<ChatUser>{
    	const adapter: any = this.server.adapter;
 	const roomsRaw: any = adapter.rooms;
-//	const roomsRaw: any = this.rooms;
-//	console.log(roomsRaw)
-//	if (!roomsRaw) return new Array();
 	const usersRaw: Array<string> = Array.from(roomsRaw.get(room));
 	let usersWithCompleteData: Array<ChatUser> = new Array();
 	usersRaw.forEach(x => {
@@ -186,22 +182,22 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   	  this.server.emit(event, data);
   }
 
-  public async createNewRoomAndJoin(client: Socket, creatorNick: string, room: string, password: string | undefined): Promise<boolean>{
+  public async createNewRoomAndJoin(clientId: string, creatorNick: string, room: string, password: string | undefined): Promise<boolean>{
 		const hasPass:boolean = password != undefined ? true : false;
 		await this
 			.chatService
 			.createRoom(creatorNick, room, hasPass, password);
 		await this.rooms.add(room);
-		await this.server.in(client.id).socketsJoin(room);
+		await this.server.in(clientId).socketsJoin(room);
 		const successfulJoin: boolean = await this.chatService.addUserToRoom(room, creatorNick);
 		if (!successfulJoin) return false;
 		this.emit('listAllRooms', await this.chatService.getAllRooms());
-//		this.emit('listRooms', await this.chatService.getAllRooms());
-		this.logger.log("User " + client.id + "joined room " + room);
+		this.logger.log("User " + clientId + "joined room " + room);
 		return true
   }
 
-  public async joinUserToRoom(client: Socket, room: string, password: string | undefined): Promise<boolean>{
+  public async joinUserToRoom(clientId: string, nick: string, room: string, password: string | undefined): Promise<boolean>{
+//  public async joinUserToRoom(client: Socket, room: string, password: string | undefined): Promise<boolean>{
 		//currently checking the existence of the room in the rooms Set
 	    //different status of the user regarding a chat room:
 	  	// 1. connected to a room:  member of a room and currently online (bd + socket active)
@@ -224,18 +220,11 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		//   
 
 	  	const roomExists: boolean = await this.chatService.isRoomCreated(room);
-	  	const nick: string = client.handshake.query.nick as string;
-
+//	  	const nick: string = client.handshake.query.nick as string;
 		if (!roomExists){
-			const successfulCreatedAndJoin: boolean = await this.createNewRoomAndJoin(client, nick, room, password)
+			const successfulCreatedAndJoin: boolean = await this.createNewRoomAndJoin(clientId, nick, room, password)
 			if (!successfulCreatedAndJoin) return false;
 		}
-//		else if (roomExists && await this.isUserInRoom(room, nick)){
-			//this option is in case the user is already in the channel,
-			//we don't need to save it again in db
-//			this.server.in(client.id).socketsJoin(room);
-//			console.log(this.getActiveUsersInRoom(room));
-//		}
 		else if (roomExists && await !(this.isUserInRoom(room, nick))){
 			const isRoomProtectedByPassword: boolean = await this
 				.chatService
@@ -247,8 +236,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 			  	   nick: "system",
 			  	   date: new Date()
 		      	}
-		  	  	this.messageToClient(client.id, "system", err);
-//				console.log("BANNED!!!!!!!!")
+		  	  	this.messageToClient(clientId, "system", err);
 				return false;
 			}
 			else if (isRoomProtectedByPassword){
@@ -263,14 +251,14 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 					passwordChallengePassed = await this.hashService.comparePassword(password, await this.chatService.getHashPassFromRoom(room));
 				}
 				if (!passwordChallengePassed){
-		  	  		this.messageToClient(client.id, "system", err);
+		  	  		this.messageToClient(clientId, "system", err);
 					return false;
 				}
 			}
 
 			const successfulJoin: boolean = await this.chatService.addUserToRoom(room, nick);
 			if (!successfulJoin) return false;
-			this.logger.log("User " + client.id + "joined room " + room);
+			this.logger.log("User " + clientId + "joined room " + room);
 		}
 	    const socketIdsByNick = this.getClientSocketIdsFromNick(nick);
 	    const joinedRoomsByNick: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(nick);
@@ -280,9 +268,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  	  this.server.in(socketId).socketsJoin(room)
 		  this.server.to(socketId).emit("listMyJoinedRooms", joinedRoomsByNick);
 	  	});
-
-//		this.server.in(client.id).socketsJoin(room);
-//		this.server.to(client.id).emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(nick));
 		return true;
   }
 
