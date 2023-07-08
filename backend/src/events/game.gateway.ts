@@ -20,12 +20,12 @@ export class GameGateway extends BaseGateway {
   @SubscribeMessage('up')
   handleUp(client: Socket, payload: ChatMessage) {
     console.log("Going up\n");
-    return (-1);
+    return { event: 'getSignal', data: -1 };
   }
 
   @SubscribeMessage('down')
   handleDown(client: Socket, payload: ChatMessage) {
     console.log("Going down\n");
-    return (-1);
+    return { event: 'getSignal', data: 1 };
   }
 }

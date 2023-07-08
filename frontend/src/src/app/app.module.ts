@@ -18,7 +18,9 @@ import { GlobalErrorHandler } from './error-interception/global-error-handler.se
 import { interceptorProviders } from './app.interceptors';
 import { ChatComponent } from './chat/chat.component';
 import { environment } from '../environments/environment';
-import { PongComponent } from './pong/pong.component'
+import { PongComponent } from './pong/pong.component';
+import { PaddleComponent } from './pong/paddle/paddle.component';
+import { EntityComponent } from './pong/entity/entity.component'
 
 
 @NgModule({
@@ -33,7 +35,9 @@ import { PongComponent } from './pong/pong.component'
     HomeComponent,
     EditProfileComponent,
     ChatComponent,
-    PongComponent
+    PongComponent,
+    PaddleComponent,
+    EntityComponent
 
   ],
   imports: [

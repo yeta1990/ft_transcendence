@@ -11,6 +11,10 @@ export class PongService {
   private socketService: SocketService = new SocketService("/game")
   constructor() { }
 
+  getMessage(): Observable<SocketPayload>{
+		return this.socketService.getMessage();
+	}
+
   sendSignal(type: string, room: string, message: string) {
     const date: Date = new Date();
 		const payloadToSend: ChatMessage = { room, message, nick: "", date}

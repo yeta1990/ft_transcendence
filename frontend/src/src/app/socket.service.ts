@@ -46,8 +46,9 @@ export class SocketService {
 			.on('system', (data: ChatMessage) => {
 				this.message.next({event: 'system', data});
 			})
-			.on('getSignal', (data: ChatMessage) => {
-				this.message.next({event: 'system', data});
+			.on('getSignal', (data: number) => {				
+				this.message.next({event: 'direction', data});
+				console.log("direction: " + data);	
 			})
 
 	}
@@ -71,7 +72,6 @@ export class SocketService {
   }
 
   sendSignal(type: string, payload: ChatMessage){
-	console.log("I'm here");
 	this.socket.emit(type, payload);
   }
 }
