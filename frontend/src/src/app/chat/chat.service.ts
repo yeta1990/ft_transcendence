@@ -3,6 +3,7 @@ import { Subject, from, Observable } from  'rxjs';
 import { io } from "socket.io-client";
 import { environment } from '../../environments/environment'
 import { SocketService } from '../socket.service';
+
 import { ChatMessage, SocketPayload } from '@shared/types';
 
 @Injectable({
@@ -22,6 +23,12 @@ export class ChatService {
 		const date: Date = new Date();
 		const payloadToSend: ChatMessage = { room, message, nick: "", date}
 		this.socketService.sendMessageToChat(type, payloadToSend);
+	}
+
+	sendPrivateMessage(destinationNick: string, message: string) {
+		const date: Date = new Date();
+		const payloadToSend: ChatMessage = { room: destinationNick, message, nick: "", date}
+		this.socketService.sendMessageToChat("mp", payloadToSend);
 	}
 
 	joinUserToRoom(room: string){

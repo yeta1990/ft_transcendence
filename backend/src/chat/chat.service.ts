@@ -269,6 +269,21 @@ export class ChatService {
 		return true;
 	}
 
+	async generatePrivateRoomName(originNick: string, destinationNick: string): Promise<string | undefined>{
+		const originUser: User = await this.userService.getUserByNick(originNick);
+		const destinationUser: User = await this.userService.getUserByNick(destinationNick);
+
+		if (!originUser || !destinationUser){
+			return undefined
+		}
+		const originUserId: number = originUser.id
+		const destinationUserId: number = destinationUser.id
+	 	if (originUserId < destinationUserId){
+			return "#" + originUserId + ":" + destinationUserId;
+		}
+		return "#" + destinationUserId + ":" + originUserId;
+	}
+
 	public async deleteRoom(room: string): Promise<any>{
 		return this.roomRepository.delete(room);
 	}
