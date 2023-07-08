@@ -121,7 +121,32 @@ export class ChatGateway extends BaseGateway {
 
   @SubscribeMessage('mp')
   async mp(client: Socket, payload: ChatMessage): Promise<void> {
+	  const nick: string = client.handshake.query.nick as string;
+	  const destinationNick: string = payload.room;
+	  const privateRoomName: string = await this.chatService.generatePrivateRoomName(nick, destinationNick)
+	  const roomExists: boolean = await this.chatService.isRoomCreated(privateRoomName);
+
+	  const emisorSocketIds = this.getClientSocketIdsFromNick(nick);
+	  const destinationSocketIds = this.getClientSocketIdsFromNick(destinationNick);
+
+	  if (!roomExists){
+	  	  //join 
+	  	  this.createNewRoomAndJoin(client, nick, privateRoomName, undefined)
+
+	  	  //force join the second user in db
+
+		
+	  }
 	
+	 //join all socket ids of emisor and destination
+//	  emisorSocketIds.foreach...
+//	  destinationSocketIds.foreach...
+	  this.server.in(client.id).socketsJoin(privateRoomName);
+
+
+
+	
+//	  return { event: 'mp', data: await this.chatService.getAllRooms()}
   } 
 
   @SubscribeMessage('listAllRooms')
@@ -178,7 +203,7 @@ export class ChatGateway extends BaseGateway {
   async removeBanOfRoom(client: Socket, payload: ChatMessage){
 	  const nick: string = client.handshake.query.nick as string;
 	  const banRemoved: boolean = await this.chatService.removeBanOfRoom(nick, payload.nick, payload.room);
-  } 
+  }
 
   //part == to leave a room
   @SubscribeMessage('part')

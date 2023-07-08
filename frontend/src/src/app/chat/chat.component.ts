@@ -155,6 +155,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				return ;
 			this.chatService.removeBanFromRoom(splittedCommand[1], splittedCommand[2])
 		}
+		else if (splittedCommand[0] === '/mp'){
+			if (splittedCommand.length < 3)
+				return ;
+			this.chatService.sendPrivateMessage(splittedCommand[1], command.split(":", 2)[1])
+		}
 	}
 
 
@@ -168,7 +173,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		}
 		this.messageToChat.get('newMessage')!.setValue('');
 	}
-
+	
 	sendMessageToChat(event: string, destination:string, message: string): void{
 		if (message)
 			this.chatService.sendMessageToChat(event, destination, message);

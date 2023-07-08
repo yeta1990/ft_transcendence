@@ -149,6 +149,20 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	});
     return (usersWithCompleteData);
   }
+
+  getClientSocketIdsFromNick(nick: string): Array<string>{
+	const clientsIterator = this.users.entries();
+	const clientSocketIds = []
+
+	let connectedClient = clientsIterator.next()
+	while (!connectedClient.done){
+		if (connectedClient.value[1].nick === nick){
+			clientSocketIds.push(connectedClient.value[0])
+		}
+		connectedClient = clientsIterator.next()
+	}
+	return clientSocketIds;
+  }
   
   async isUserInRoom(room: string, clientNick: string): Promise<boolean> {
 	const allUsersInRoom: Array<string> = await this.chatService.getAllUsersInRoom(room);
@@ -170,6 +184,20 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   //emit to all connected users in this namespace
   public emit(event: string, data: any): void {
   	  this.server.emit(event, data);
+  }
+
+  public async createNewRoomAndJoin(client: Socket, creatorNick: string, room: string, password: string | undefined){
+		const hasPass:boolean = password != undefined ? true : false;
+		await this
+			.chatService
+			.createRoom(creatorNick, room, hasPass, password);
+		await this.rooms.add(room);
+		await this.server.in(client.id).socketsJoin(room);
+		const successfulJoin: boolean = await this.chatService.addUserToRoom(room, creatorNick);
+		if (!successfulJoin) return false;
+		this.emit('listAllRooms', await this.chatService.getAllRooms());
+//		this.emit('listRooms', await this.chatService.getAllRooms());
+		this.logger.log("User " + client.id + "joined room " + room);
   }
 
   public async joinUserToRoom(client: Socket, room: string, password: string | undefined): Promise<boolean>{
@@ -194,24 +222,11 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		//   4. user is joined in socket.io and saved in db
 		//   
 
-		//socket.handshake.query.nick
-//		method to know if the user is connected to the room
-//		const roomExists: boolean = this.rooms.has(room);
 	  	const roomExists: boolean = await this.chatService.isRoomCreated(room);
 	  	const nick: string = client.handshake.query.nick as string;
 
 		if (!roomExists){
-			const hasPass:boolean = password != undefined ? true : false;
-			await this
-				.chatService
-				.createRoom(nick, room, hasPass, password);
-			await this.rooms.add(room);
-			await this.server.in(client.id).socketsJoin(room);
-			const successfulJoin: boolean = await this.chatService.addUserToRoom(room, nick);
-			if (!successfulJoin) return false;
-			this.emit('listAllRooms', await this.chatService.getAllRooms());
-//			this.emit('listRooms', await this.chatService.getAllRooms());
-			this.logger.log("User " + client.id + "joined room " + room);
+			this.createNewRoomAndJoin(client, nick, room, password)
 		}
 		else if (roomExists && await this.isUserInRoom(room, nick)){
 			//this option is in case the user is already in the channel,
