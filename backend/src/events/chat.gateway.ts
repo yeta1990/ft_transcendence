@@ -73,7 +73,7 @@ export class ChatGateway extends BaseGateway {
 		  } catch {}
 
 		  const successfulJoin = await 
-			this.joinUserToRoom(client, lastJoinedRoom, pass);
+			this.joinUserToRoom(client.id, client.handshake.query.nick as string, lastJoinedRoom, pass);
 
 		  if (successfulJoin){
 	 	  	const response: ChatMessage = {
@@ -124,17 +124,35 @@ export class ChatGateway extends BaseGateway {
 	  const nick: string = client.handshake.query.nick as string;
 	  const destinationNick: string = payload.room;
 	  const privateRoomName: string = await this.chatService.generatePrivateRoomName(nick, destinationNick)
+	  const joinedRoomsByEmisor: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(nick);
+	  const joinedRoomsByDestination: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(destinationNick);
+	  const emisorSocketIds = this.getClientSocketIdsFromNick(nick);
+	  const destinationSocketIds = this.getClientSocketIdsFromNick(destinationNick);
+	  emisorSocketIds.map(async socketId => {
+	  	  this.server.in(socketId).socketsJoin(privateRoomName)
+		  this.server.to(socketId).emit("listMyJoinedRooms", joinedRoomsByEmisor);
+	  	  await this.joinUserToRoom(client.id, nick, privateRoomName, undefined)
+	  });
+
+	  destinationSocketIds.map(async socketId => {
+	  	  this.server.in(socketId).socketsJoin(privateRoomName)
+		  this.server.to(socketId).emit("listMyJoinedRooms", joinedRoomsByDestination);
+	  	  await this.joinUserToRoom(client.id, destinationNick, privateRoomName, undefined)
+
+
+	  });
+
+//	  await this.joinUserToRoom(client.id, nick, privateRoomName, undefined)
+	  /*
 	  const roomExists: boolean = await this.chatService.isRoomCreated(privateRoomName);
 	  const emisorSocketIds = this.getClientSocketIdsFromNick(nick);
 	  const destinationSocketIds = this.getClientSocketIdsFromNick(destinationNick);
 	  if (!roomExists){
-	  	  //join 
+	  	  //join emisor
 	  	  await this.createNewRoomAndJoin(client, nick, privateRoomName, undefined)
-
-	  	  //force join the second user in db
+	  	  //join the second user in db
 	  	  await this.chatService.addUserToRoom(privateRoomName, destinationNick)
 	  }
-	
 	 //join all socket ids of emisor and destination
 	  const joinedRoomsByEmisor: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(nick);
 	  const joinedRoomsByDestination: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(destinationNick);
@@ -148,6 +166,15 @@ export class ChatGateway extends BaseGateway {
 		  this.server.to(socketId).emit("listMyJoinedRooms", joinedRoomsByDestination);
 	  });
 
+//	  console.log(payload.message)
+*/
+   	  const messagePayload: ChatMessage = {
+    	room: privateRoomName,
+    	message: payload.message,
+    	nick: nick,
+    	date: new Date()
+      }
+	  await this.handleMessage(client, messagePayload)
   } 
 
   @SubscribeMessage('listAllRooms')
