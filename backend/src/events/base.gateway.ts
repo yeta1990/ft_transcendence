@@ -186,7 +186,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   	  this.server.emit(event, data);
   }
 
-  public async createNewRoomAndJoin(client: Socket, creatorNick: string, room: string, password: string | undefined){
+  public async createNewRoomAndJoin(client: Socket, creatorNick: string, room: string, password: string | undefined): Promise<boolean>{
 		const hasPass:boolean = password != undefined ? true : false;
 		await this
 			.chatService
@@ -198,6 +198,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		this.emit('listAllRooms', await this.chatService.getAllRooms());
 //		this.emit('listRooms', await this.chatService.getAllRooms());
 		this.logger.log("User " + client.id + "joined room " + room);
+		return true
   }
 
   public async joinUserToRoom(client: Socket, room: string, password: string | undefined): Promise<boolean>{
@@ -226,16 +227,17 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  	const nick: string = client.handshake.query.nick as string;
 
 		if (!roomExists){
-			this.createNewRoomAndJoin(client, nick, room, password)
+			const successfulCreatedAndJoin: boolean = await this.createNewRoomAndJoin(client, nick, room, password)
+			if (!successfulCreatedAndJoin) return false;
 		}
-		else if (roomExists && await this.isUserInRoom(room, nick)){
+//		else if (roomExists && await this.isUserInRoom(room, nick)){
 			//this option is in case the user is already in the channel,
 			//we don't need to save it again in db
-			this.server.in(client.id).socketsJoin(room);
+//			this.server.in(client.id).socketsJoin(room);
 //			console.log(this.getActiveUsersInRoom(room));
-		}
-		else if (roomExists){
-			const isRoomProtectedByPassword: boolean = await this 
+//		}
+		else if (roomExists && await !(this.isUserInRoom(room, nick))){
+			const isRoomProtectedByPassword: boolean = await this
 				.chatService
 				.isProtectedByPassword(room);
 			if (await this.chatService.isBannedOfRoom(nick, room)){
@@ -265,12 +267,22 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 					return false;
 				}
 			}
-			this.server.in(client.id).socketsJoin(room);
+
 			const successfulJoin: boolean = await this.chatService.addUserToRoom(room, nick);
 			if (!successfulJoin) return false;
 			this.logger.log("User " + client.id + "joined room " + room);
 		}
-		this.server.to(client.id).emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(nick));
+	    const socketIdsByNick = this.getClientSocketIdsFromNick(nick);
+	    const joinedRoomsByNick: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(nick);
+	    console.log(socketIdsByNick)
+	    console.log(joinedRoomsByNick)
+	  	socketIdsByNick.forEach(socketId => {
+	  	  this.server.in(socketId).socketsJoin(room)
+		  this.server.to(socketId).emit("listMyJoinedRooms", joinedRoomsByNick);
+	  	});
+
+//		this.server.in(client.id).socketsJoin(room);
+//		this.server.to(client.id).emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(nick));
 		return true;
   }
 

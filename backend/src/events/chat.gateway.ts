@@ -125,28 +125,29 @@ export class ChatGateway extends BaseGateway {
 	  const destinationNick: string = payload.room;
 	  const privateRoomName: string = await this.chatService.generatePrivateRoomName(nick, destinationNick)
 	  const roomExists: boolean = await this.chatService.isRoomCreated(privateRoomName);
-
 	  const emisorSocketIds = this.getClientSocketIdsFromNick(nick);
 	  const destinationSocketIds = this.getClientSocketIdsFromNick(destinationNick);
-
 	  if (!roomExists){
 	  	  //join 
-	  	  this.createNewRoomAndJoin(client, nick, privateRoomName, undefined)
+	  	  await this.createNewRoomAndJoin(client, nick, privateRoomName, undefined)
 
 	  	  //force join the second user in db
-
-		
+	  	  await this.chatService.addUserToRoom(privateRoomName, destinationNick)
 	  }
 	
 	 //join all socket ids of emisor and destination
-//	  emisorSocketIds.foreach...
-//	  destinationSocketIds.foreach...
-	  this.server.in(client.id).socketsJoin(privateRoomName);
+	  const joinedRoomsByEmisor: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(nick);
+	  const joinedRoomsByDestination: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(destinationNick);
+	  emisorSocketIds.forEach(socketId => {
+	  	  this.server.in(socketId).socketsJoin(privateRoomName)
+		  this.server.to(socketId).emit("listMyJoinedRooms", joinedRoomsByEmisor);
+	  });
 
+	  destinationSocketIds.forEach(socketId => {
+	  	  this.server.in(socketId).socketsJoin(privateRoomName)
+		  this.server.to(socketId).emit("listMyJoinedRooms", joinedRoomsByDestination);
+	  });
 
-
-	
-//	  return { event: 'mp', data: await this.chatService.getAllRooms()}
   } 
 
   @SubscribeMessage('listAllRooms')
