@@ -11,3 +11,19 @@ export type SocketPayload = {
 	data: any 
 }
 
+// type to handle relationships between
+// client_id provided by socket.io and our identification
+export class ChatUser {
+	constructor (
+		public client_id: string, 
+		public user_id: number, 
+		public nick: string
+	){ }
+};
+
+export class RoomMessages {
+	constructor( 
+		public name: string,
+		public messages: Array<ChatMessage>
+	){}
+}

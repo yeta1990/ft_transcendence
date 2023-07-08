@@ -24,15 +24,23 @@ export class SocketService {
 		this.messageObservable = from(this.message);
 		this.socket
 			.on('message', (data: ChatMessage) => {
-				console.log("message received: " + data);
+				console.log("message received: " + JSON.stringify(data));
 				this.message.next({event: 'message', data});
 			})
 			.on('join', (data: any) => {
-				console.log("join received: " + data);
+				console.log("join received: " + JSON.stringify(data));
 				this.message.next({event: 'join', data});
 			})
-			.on('listRooms', (data: any) => {
+			.on('listAllRooms', (data: any) => {
 				console.log("listRooms received: " + data);
+				this.message.next({event: 'listAllRooms', data});
+			})
+			.on('listMyJoinedRooms', (data: any) => {
+				console.log("listMyJoinedRooms received: " + data);
+				this.message.next({event: 'listMyJoinedRooms', data});
+			})
+			.on('listRoomUsers', (data: any) => {
+				console.log("get users in this room: " + data);
 				this.message.next({event: 'listRooms', data});
 			})
 			.on('system', (data: ChatMessage) => {

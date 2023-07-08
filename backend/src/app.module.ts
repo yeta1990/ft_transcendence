@@ -4,16 +4,21 @@ import { AppService } from './app.service';
 
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 import { AuthModule } from './auth/auth.module'
 
 import { User } from './user/user.entity'
+import { Room } from './chat/room.entity'
+import { ChatMessage } from './chat/chat-message/chat-message.entity'
 import { UserController } from './user/user.controller';
 import { UserService } from './user/user.service';
 import { UserModule } from './user/user.module';
 import { HttpModule } from '@nestjs/axios';
 import { EventsModule } from './events/events.module';
-
+import { ChatModule } from './chat/chat.module';
+import { HashService } from './hash/hash.service';
+ 
 @Module({
   imports: [
   	ConfigModule.forRoot({
@@ -28,13 +33,16 @@ import { EventsModule } from './events/events.module';
 		username: process.env.POSTGRES_USER,
 		password: process.env.POSTGRES_PASSWORD,
 		database: process.env.POSTGRES_DATABASE,
-		entities: [User],
+		entities: [User, Room, ChatMessage],
 		synchronize: true, // creo que esto hay que cambiarlo para subirlo a producción
+		logging: false //useful for debugging errors in typeorm/postgres
+
 	}),
 	HttpModule,
 	EventsModule,
+	ChatModule,
   ],
   controllers: [AppController, UserController],
-  providers: [AppService]
+  providers: [AppService, HashService]
 })
 export class AppModule {}
