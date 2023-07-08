@@ -46,6 +46,10 @@ export class SocketService {
 			.on('system', (data: ChatMessage) => {
 				this.message.next({event: 'system', data});
 			})
+			.on('getSignal', (data: ChatMessage) => {
+				this.message.next({event: 'system', data});
+			})
+
 	}
 
   //https://socket.io/docs/v3/emitting-events/
@@ -64,5 +68,10 @@ export class SocketService {
 
   getMessage(): Observable<SocketPayload>{
 	return this.messageObservable;
+  }
+
+  sendSignal(type: string, payload: ChatMessage){
+	console.log("I'm here");
+	this.socket.emit(type, payload);
   }
 }

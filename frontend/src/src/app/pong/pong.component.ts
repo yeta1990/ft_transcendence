@@ -1,5 +1,6 @@
 import { Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
+import { PongService } from './pong.service';
 
 @Component({
   selector: 'app-pong',
@@ -20,7 +21,9 @@ export class PongComponent implements AfterViewInit {
     public static init: boolean = false;
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
-    constructor(){}
+    constructor(
+        //private pongService: PongService,
+    ){}
 
     ngAfterViewInit() {
         this.initCanvas();
@@ -168,9 +171,14 @@ class Entity{
 class Paddle extends Entity{
 
     //private speed:number = 10;
+    move:string = "";
+    pongService:PongService = new PongService();
 
-    constructor(w:number,h:number,x:number,y:number,speed:number){
+    constructor(w:number,h:number,x:number,y:number,speed:number) {
+        
         super(w,h,x,y,speed);
+        //pongService: PongService;
+        
     }
 
     update(canvas: any){
@@ -189,7 +197,13 @@ class Paddle extends Entity{
         }
 
         this.y += this.yVel * this.speed;
-
+        if (this.yVel == -1)
+            this.pongService.sendSignal("up", "pongRoom", "pong");
+            //this.move = "up";
+        else if (this.yVel == 1)
+            this.pongService.sendSignal("down", "pongRoom", "pong");
+           //this.move = "down";
+        //this.pongService.sendSignal(this.move, "pongRoom", "pong");
     }
 }
 
