@@ -84,6 +84,12 @@ export class User {
 
 	@ManyToMany(() => Room, (room) => room.banned)
 	bannedRooms: Room[];
+
+	@ManyToMany(() => User, (user) => user.bannedBy)
+	bannedUsers: User[];
+
+	@ManyToMany(() => User, (user) => user.bannedUsers)
+	bannedBy: User[];
  
 	// FUNCIONES ---------------------------------------------
 
