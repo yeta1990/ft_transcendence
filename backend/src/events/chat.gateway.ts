@@ -177,7 +177,7 @@ export class ChatGateway extends BaseGateway {
 	  }
 
    	  const messagePayload: ChatMessage = {
-    	room: privateRoomName,
+    	room: destinationNickWithAt,
     	message: payload.message,
     	nick: nick,
     	date: new Date()
