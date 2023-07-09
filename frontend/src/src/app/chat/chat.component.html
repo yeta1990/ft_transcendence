@@ -2,6 +2,11 @@
 <ul *ngFor="let room of availableRoomsList">
 	<li><a href="javascript:void(0)" (click)="joinUserToRoom(room)">{{room}}</a></li>
 </ul>
+<br>
+currently open private messages:
+<ul *ngFor="let room of myPrivateMessageRooms">
+	<li><a href="javascript:void(0)" (click)="joinUserToRoom(room)">{{room}}</a></li>
+</ul>
 <br><br>
 <b>you've already joined all these rooms:</b>
 <ul *ngFor="let room of myJointRoomList">{{room}},</ul>

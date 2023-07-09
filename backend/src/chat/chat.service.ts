@@ -49,14 +49,38 @@ export class ChatService {
 		return false;
 	}
 
+	public async getRoomMaskOfPrivateRoom(room: string, myNick: string): Promise<string>{
+		if (room.includes(":")){
+			const userIds: Array<number> = room
+				.replace("#", "")
+				.split(":")
+				.map(n => parseInt(n));
+			const user1: User = await this.userService.getUser(userIds[0])
+			const user2: User = await this.userService.getUser(userIds[1])
+			console.log(user1)
+			console.log(user2)
+			if (user1.nick === myNick){
+				return "@" + user2.nick
+			}
+			return "@" + user1.nick
+		}
+		return room
+	}
+
 	public async getAllRooms(): Promise<string[]>{
 		let allRooms: string[] = [];
+
 		const foundRoomsRaw = await this.roomRepository
 			.createQueryBuilder("room")
 			.select("name")
 			.execute()
-		foundRoomsRaw.map(room => allRooms.push(room.name))
+		foundRoomsRaw.map(room => room.name.includes(":") ? undefined : allRooms.push(room.name))
 		return (allRooms);
+	}
+
+	public async getMyPrivateRooms(nick: string): Promise<string []>{
+		const allMyJoinedRooms: Array<string> = await this.getAllJoinedRoomsByOneUser(nick)
+		return allMyJoinedRooms.filter(r => r.includes("@"))
 	}
 
 	public async getAllJoinedRoomsByOneUser(nick: string): Promise<string[]>{
@@ -69,7 +93,15 @@ export class ChatService {
 		if (!foundUser){
 			return [];
 		}
-		foundUser.joinedRooms.map(r => allRooms.push(r.name))
+		const joinedRoomsRaw = foundUser.joinedRooms;
+		for (let i = 0; i < joinedRoomsRaw.length; i++){
+			if (joinedRoomsRaw[i].name.includes(":")){
+				allRooms.push(await this.getRoomMaskOfPrivateRoom(joinedRoomsRaw[i].name, nick))
+			}
+			else{
+				allRooms.push(joinedRoomsRaw[i].name)
+			}
+		}
 		return (allRooms);
 	}
 
