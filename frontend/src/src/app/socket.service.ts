@@ -31,6 +31,10 @@ export class SocketService {
 				console.log("join received: " + JSON.stringify(data));
 				this.message.next({event: 'join', data});
 			})
+			.on('joinmp', (data: any) => {
+				console.log("join private message received: " + JSON.stringify(data));
+				this.message.next({event: 'joinmp', data});
+			})
 			.on('listAllRooms', (data: any) => {
 				console.log("listRooms received: " + data);
 				this.message.next({event: 'listAllRooms', data});

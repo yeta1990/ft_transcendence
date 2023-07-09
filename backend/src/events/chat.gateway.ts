@@ -162,7 +162,7 @@ export class ChatGateway extends BaseGateway {
 	  for (let i = 0; i < destinationSocketIds.length; i++){
 	  	  const successfulJoin = await this.joinUserToRoom(destinationSocketIds[i], destinationNick, privateRoomName, undefined)
 	  	  if (successfulJoin){
-		  	 this.messageToClient(destinationSocketIds[i], "join", response);
+		  	 this.messageToClient(destinationSocketIds[i], "joinmp", response);
 			 if (!(await this.isUserAlreadyActiveInRoom(destinationSocketIds[i], privateRoomName))){ 
 				const oldMessagesInRoom: RoomMessages = 
 					await this.chatMessageService.getAllMessagesFromRoom(privateRoomName);

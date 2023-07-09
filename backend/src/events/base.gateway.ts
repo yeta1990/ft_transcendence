@@ -261,8 +261,8 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		}
 	    const socketIdsByNick = this.getClientSocketIdsFromNick(nick);
 	    const joinedRoomsByNick: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(nick);
-	    console.log(socketIdsByNick)
-	    console.log(joinedRoomsByNick)
+//	    console.log(socketIdsByNick)
+//	    console.log(joinedRoomsByNick)
 	  	socketIdsByNick.forEach(socketId => {
 	  	  this.server.in(socketId).socketsJoin(room)
 		  this.server.to(socketId).emit("listMyJoinedRooms", joinedRoomsByNick);

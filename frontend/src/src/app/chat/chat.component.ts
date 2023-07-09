@@ -19,7 +19,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	messageList: Map<string, ChatMessage[]> = new Map<string, ChatMessage[]>();
 	currentRoom: string;
 	roomList: string[] = [""];
-//	joinedRooms: Set<string> = new Set<string>//;["default"];
 	availableRoomsList: string[] = [];
 	myJointRoomList: string[] = [];
 	private subscriptions = new Subscription();
@@ -89,6 +88,17 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				}
 				else if (payload.event === 'join'){
 					this.currentRoom = payload.data.room;
+					//check if the messageList map has space to store the room messages. in case of private messages, currently it needs to be created:
+					if (!this.messageList.has(payload.data.room)){
+						this.messageList.set(this.currentRoom, new Array<ChatMessage>);
+					}
+				}
+				else if (payload.event === 'joinmp'){
+//					this.currentRoom = payload.data.room;
+					//check if the messageList map has space to store the room messages. in case of private messages, currently it needs to be created:
+					if (!this.messageList.has(payload.data.room)){
+						this.messageList.set(payload.data.room, new Array<ChatMessage>);
+					}
 				}
         		this.scrollToBottom();
 			})
@@ -133,7 +143,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			//channel list comma-separated and password
 			this.chatService.partFromRoom(splittedCommand[1]);
 			this.messageList.delete(splittedCommand[1]);
-//			this.
 		}
 		else if (splittedCommand[0] === '/admin'){
 			if (splittedCommand.length < 3)
