@@ -17,17 +17,48 @@ export class ChatGateway extends BaseGateway {
 	super(ChatGateway.name);
   }
 
-
   //separate afterInit from the base class
   async afterInit(): Promise<void> {}
+
+  async handlePrivateMessage(client:Socket, payload: ChatMessage){
+  	  console.log(payload)
+	  const emisorNick: string = client.handshake.query.nick as string;
+	  const destinationNick: string = payload.room.substr(1, payload.room.length - 1)
+	  const realRoomName: string = await this.chatService.generatePrivateRoomName(emisorNick, destinationNick)
+
+	  const emisorSocketIds = this.getClientSocketIdsFromNick(emisorNick);
+	  const destinationSocketIds = this.getClientSocketIdsFromNick(destinationNick);
+	  let emisorNickWithAt;
+	  let destinationNickWithAt;
+  	  if (emisorNick.length > 0 && emisorNick[0] != '@'){
+  	  	emisorNickWithAt = '@' + emisorNick;
+  	  }
+  	  if (destinationNick.length > 0 && destinationNick[0] != '@'){
+  	  	destinationNickWithAt = '@' + destinationNick;
+  	  }
+	  payload.room = destinationNickWithAt;
+	  for (let i = 0; i < emisorSocketIds.length; i++){
+		this.messageToClient(emisorSocketIds[i], "message", payload)	
+	  }
+	  payload.room = emisorNickWithAt;
+	  for (let i = 0; i < destinationSocketIds.length; i++){
+		this.messageToClient(destinationSocketIds[i], "message", payload)	
+	  }
+	  payload.room = realRoomName;
+	  await this.chatMessageService.saveMessage(payload)
+  }
+
   //return object has two elements:
   // - event: type of event that the client will be listening to
   // - data: the content
   @SubscribeMessage('message')
   async handleMessage(client: Socket, payload: ChatMessage): Promise<void> { 
 	const nick: string = client.handshake.query.nick as string;
-	if (await this.chatService.isUserInRoom(payload.room, nick)){
-    	payload.nick = client.handshake.query.nick as string;
+   	payload.nick = client.handshake.query.nick as string;
+	if (payload.room.length > 0 && payload.room[0] === '@'){
+		this.handlePrivateMessage(client, payload)
+	}
+	else if (await this.chatService.isUserInRoom(payload.room, nick)){
 		this.broadCastToRoom('message', payload);
 		await this.chatMessageService.saveMessage(payload)
 	} 
@@ -46,6 +77,7 @@ export class ChatGateway extends BaseGateway {
   }
 
   async joinRoutine(clientSocketId: string, nick: string, room: string, pass: string, typeOfJoin: string){
+  	  const originalRoom = room;
   	  if (room.length > 0 && room[0] == '@'){
 		  room = await this.chatService.generatePrivateRoomName(nick, room.substr(1, room.length - 1))
   	  }
@@ -55,11 +87,16 @@ export class ChatGateway extends BaseGateway {
 		this.joinUserToRoom(clientSocketId, nick, room, pass);
 
 	  if (successfulJoin){
-	  	const response: ChatMessage = generateJoinResponse(room);
+	  	const response: ChatMessage = generateJoinResponse(originalRoom);
+	  	console.log(response)
 		this.messageToClient(clientSocketId, typeOfJoin, response);
 		if (!wasUserAlreadyActiveInRoom){
-			const oldMessagesInRoom: RoomMessages = 
+			let oldMessagesInRoom: RoomMessages = 
 				await this.chatMessageService.getAllMessagesFromRoom(room);
+			if (originalRoom !== room){
+				oldMessagesInRoom.name = originalRoom
+				oldMessagesInRoom.messages.map(m => m.room = originalRoom)
+			}
 			for (let message of oldMessagesInRoom.messages){
 				this.messageToClient(clientSocketId, "message", message)
 			}
@@ -92,7 +129,7 @@ export class ChatGateway extends BaseGateway {
 	  const roomsRaw: any = adapter.rooms;
 	  const nick: string = client.handshake.query.nick as string;
 
-  	  if (room.length > 0 && room[0] != '#'){
+  	  if (room.length > 0 && room[0] != '#' && room[0] != '@'){
   	  	room = '#' + room;
   	  }
   	  await this.joinRoutine(client.id, nick, room, pass, "join")
