@@ -220,12 +220,11 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		//   
 
 	  	const roomExists: boolean = await this.chatService.isRoomCreated(room);
-//	  	const nick: string = client.handshake.query.nick as string;
 		if (!roomExists){
 			const successfulCreatedAndJoin: boolean = await this.createNewRoomAndJoin(clientId, nick, room, password)
 			if (!successfulCreatedAndJoin) return false;
 		}
-		else if (roomExists && await !(this.isUserInRoom(room, nick))){
+		else if (roomExists && !(await this.isUserInRoom(room, nick))){
 			const isRoomProtectedByPassword: boolean = await this
 				.chatService
 				.isProtectedByPassword(room);
