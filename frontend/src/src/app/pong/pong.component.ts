@@ -1,10 +1,16 @@
 import { Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
+import { PongService } from './pong.service';
+import { Subject, Subscription, pipe } from "rxjs"
+import { takeUntil } from "rxjs/operators"
+import { ChatMessage, SocketPayload } from '@shared/types';
+import { PaddleComponent }  from './paddle/paddle.component'
+import { EntityComponent } from './entity/entity.component'
 
 @Component({
   selector: 'app-pong',
   templateUrl: './pong.component.html',
-  styleUrls: ['./pong.component.css']
+  styleUrls: ['./pong.component.css'],
 })
 
 export class PongComponent implements AfterViewInit {
@@ -14,13 +20,15 @@ export class PongComponent implements AfterViewInit {
     public static keysPressed: boolean[] = [];
     public static playerScore: number = 0;
     public static computerScore: number = 0;
-    private player1: Paddle | null = null;
+    private player1: PaddleComponent | null = null;
     private computerPlayer: ComputerPaddle | null = null;
     private ball: Ball | null = null;
     public static init: boolean = false;
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
-    constructor(){}
+    constructor(
+        //private pongService: PongService,
+    ){}
 
     ngAfterViewInit() {
         this.initCanvas();
@@ -34,7 +42,7 @@ export class PongComponent implements AfterViewInit {
         this.gameContext = this.canvas?.getContext('2d');
 
         if (this.gameContext && this.canvas) {
-            this.player1 = new Paddle(20, 60, 20, this.canvas.height / 2 - 60 / 2, 10);
+            this.player1 = new PaddleComponent(20, 60, 20, this.canvas.height / 2 - 60 / 2, 10);
             this.mode(1);
             this.ball = new Ball(10, 10, this.canvas.width / 2 - 10 / 2, this.canvas.height / 2 - 10 / 2, 5);
             this.gameContext.font = '30px Orbitron';
@@ -144,56 +152,7 @@ export class PongComponent implements AfterViewInit {
     }
 }
 
-class Entity{
-    width:number;
-    height:number;
-    x:number;
-    y:number;
-    xVel:number = 0;
-    yVel:number = 0;
-    speed:number;
-    constructor(w:number,h:number,x:number,y:number,speed:number){       
-        this.width = w;
-        this.height = h;
-        this.x = x;
-        this.y = y;
-        this.speed = speed;
-    }
-    draw(context: any){
-        context.fillStyle = "#fff";
-        context.fillRect(this.x,this.y,this.width,this.height);
-    }
-}
-
-class Paddle extends Entity{
-
-    //private speed:number = 10;
-
-    constructor(w:number,h:number,x:number,y:number,speed:number){
-        super(w,h,x,y,speed);
-    }
-
-    update(canvas: any){
-        if( PongComponent.keysPressed[KeyBindings.UP] ){
-            this.yVel = -1;
-            if(this.y <= 20){
-              this.yVel = 0
-         }
-        }else if(PongComponent.keysPressed[KeyBindings.DOWN]){
-            this.yVel = 1;
-            if(this.y + this.height >= canvas.height - 20){
-            this.yVel = 0;
-            }
-        }else{
-            this.yVel = 0;
-        }
-
-        this.y += this.yVel * this.speed;
-
-    }
-}
-
-class ComputerPaddle extends Entity{
+class ComputerPaddle extends EntityComponent{
 
     //private speed:number = 10;
     //private speed:number = 20; // never loose
@@ -231,7 +190,7 @@ class ComputerPaddle extends Entity{
     }
 }
 
-class Ball extends Entity{
+class Ball extends EntityComponent{
 
     //private speed:number = 5;
 
@@ -246,7 +205,7 @@ class Ball extends Entity{
         this.yVel = 1;
     }
 
-    update(player:Paddle,computer:ComputerPaddle,canvas: any){
+    update(player:PaddleComponent,computer:ComputerPaddle,canvas: any){
  
     //check top canvas bounds
         if(this.y <= 10){
