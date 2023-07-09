@@ -3,6 +3,7 @@ import { Inject } from '@nestjs/common';
 import { BaseGateway } from './base.gateway';
 import { Socket } from 'socket.io';
 import { ChatMessage, SocketPayload } from '@shared/types';
+import { generateJoinResponse } from '@shared/functions';
 import { ChatMessageService } from '../chat/chat-message/chat-message.service';
 import { RoomMessages, ChatUser } from '@shared/types';
 
@@ -43,55 +44,40 @@ export class ChatGateway extends BaseGateway {
 	return { event: 'system', data: response};
   }
 
+  async joinRoutine(clientSocketId: string, nick: string, room: string, pass: string, typeOfJoin: string){
+	  const wasUserAlreadyActiveInRoom: boolean = await this.isUserAlreadyActiveInRoom(clientSocketId, room);
+	  const successfulJoin = await 
+		this.joinUserToRoom(clientSocketId, nick, room, pass);
+
+	  if (successfulJoin){
+	  	const response: ChatMessage = generateJoinResponse(room);
+		this.messageToClient(clientSocketId, typeOfJoin, response);
+		if (!wasUserAlreadyActiveInRoom){
+			const oldMessagesInRoom: RoomMessages = 
+				await this.chatMessageService.getAllMessagesFromRoom(room);
+			for (let message of oldMessagesInRoom.messages){
+				this.messageToClient(clientSocketId, "message", message)
+			}
+		}
+	  }
+
+  }
   //in case it arrives different rooms separated by comma,
   // the rooms param is splitted
-  //the command allows this structure: /join [#]channel[,channel] [pass]
+  //the command allows this structure: /join [#]channel [pass with spaces allowed]
   @SubscribeMessage('join')
-  async handleJoinRoom(client: Socket, rooms: string): Promise<void>{
-//  	  console.log("join message received: " + rooms);
-	  const splittedRooms: Array<string> = rooms.split(" ", 1)[0].split(",");
-	  const pass: string | undefined = rooms.split(" ")[1];
-	  let lastJoinedRoom: string;
+  async handleJoinRoom(client: Socket, roomAndPassword: string): Promise<void>{
+	  const splittedRooms: Array<string> = roomAndPassword.split(" ", 1)[0].split(",");
+	  let room: string = roomAndPassword.split(" ", 2)[0];
+	  const pass: string | undefined = roomAndPassword.split(" ", 2)[1];
 	  const adapter: any = this.server.adapter;
 	  const roomsRaw: any = adapter.rooms;
+	  const nick: string = client.handshake.query.nick as string;
 
-	  for (let room of splittedRooms) {
-	  	  if (room.length > 0 && room[0] != '#'){
-	  	  	lastJoinedRoom = '#' + room;
-	  	  } else {
-	  	  	lastJoinedRoom = room;
-	  	  }
-		  let isUserAlreadyActiveInRoom: boolean = false;
-		  try {
-		  	const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(room);
-    		for (let i = 0; i < activeUsersInRoom.length; i++){
-  				if (client.id === activeUsersInRoom[i].client_id){
-  					isUserAlreadyActiveInRoom = true;
-  					break ;
-  				}
-  		    }
-		  } catch {}
-
-		  const successfulJoin = await 
-			this.joinUserToRoom(client.id, client.handshake.query.nick as string, lastJoinedRoom, pass);
-
-		  if (successfulJoin){
-	 	  	const response: ChatMessage = {
-		  	    room: lastJoinedRoom,
-		  	    message: `you are in room ${lastJoinedRoom}`,
-		  	    nick: "system",
-		  	    date: new Date()
-		  	}
-			this.messageToClient(client.id, "join", response);
-			if (!isUserAlreadyActiveInRoom){ 
-				const oldMessagesInRoom: RoomMessages = 
-					await this.chatMessageService.getAllMessagesFromRoom(lastJoinedRoom);
-				for (let message of oldMessagesInRoom.messages){
-					this.messageToClient(client.id, "message", message)
-				}
-			}
-		  }
-	  }
+  	  if (room.length > 0 && room[0] != '#'){
+  	  	room = '#' + room;
+  	  }
+  	  await this.joinRoutine(client.id, nick, room, pass, "join")
   }
 
   ////////////////////////////
@@ -135,94 +121,17 @@ export class ChatGateway extends BaseGateway {
 	  const nick: string = client.handshake.query.nick as string;
 	  const destinationNick: string = payload.room;
 	  const privateRoomName: string = await this.chatService.generatePrivateRoomName(nick, destinationNick)
-	  const joinedRoomsByEmisor: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(nick);
-	  const joinedRoomsByDestination: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(destinationNick);
 	  const emisorSocketIds = this.getClientSocketIdsFromNick(nick);
 	  const destinationSocketIds = this.getClientSocketIdsFromNick(destinationNick);
- 	  const response: ChatMessage = {
-	  	    room: privateRoomName,
-	  	    message: `you are in room ${privateRoomName}`,
-	  	    nick: "system",
-	  	    date: new Date()
-	  }
+	  const response: ChatMessage = generateJoinResponse(privateRoomName);
 
 	  for (let i = 0; i < emisorSocketIds.length; i++){
-	  	  const successfulJoin = await this.joinUserToRoom(emisorSocketIds[i], nick, privateRoomName, undefined)
-	  	  if (successfulJoin){
-		  	 this.messageToClient(emisorSocketIds[i], "join", response);
-			 if (!(await this.isUserAlreadyActiveInRoom(emisorSocketIds[i], privateRoomName))){ 
-				const oldMessagesInRoom: RoomMessages = 
-					await this.chatMessageService.getAllMessagesFromRoom(privateRoomName);
-				for (let message of oldMessagesInRoom.messages){
-					this.messageToClient(emisorSocketIds[i], "message", message)
-				}
-			}
-	  	  }
+  	  	await this.joinRoutine(emisorSocketIds[i], nick, privateRoomName, undefined, "join")
 	  }
 	  for (let i = 0; i < destinationSocketIds.length; i++){
-	  	  const successfulJoin = await this.joinUserToRoom(destinationSocketIds[i], destinationNick, privateRoomName, undefined)
-	  	  if (successfulJoin){
-		  	 this.messageToClient(destinationSocketIds[i], "joinmp", response);
-			 if (!(await this.isUserAlreadyActiveInRoom(destinationSocketIds[i], privateRoomName))){ 
-				const oldMessagesInRoom: RoomMessages = 
-					await this.chatMessageService.getAllMessagesFromRoom(privateRoomName);
-				for (let message of oldMessagesInRoom.messages){
-					this.messageToClient(destinationSocketIds[i], "message", message)
-				}
-			 }
-	  	  }
+  	  	await this.joinRoutine(destinationSocketIds[i], destinationNick, privateRoomName, undefined, "joinmp")
 	  }
 
-	  /*
-	  if (successfulJoin){
-		this.messageToClient(client.id, "join", response);
-		if (!isUserAlreadyActiveInRoom){ 
-			const oldMessagesInRoom: RoomMessages = 
-				await this.chatMessageService.getAllMessagesFromRoom(lastJoinedRoom);
-			for (let message of oldMessagesInRoom.messages){
-				this.messageToClient(client.id, "message", message)
-			}
-		}
-	  }
-	  */
-//	  emisorSocketIds.map(async socketId => {
-//	  	  this.server.in(socketId).socketsJoin(privateRoomName)
-//		  this.server.to(socketId).emit("listMyJoinedRooms", joinedRoomsByEmisor);
-//	  	  await this.joinUserToRoom(socketId, nick, privateRoomName, undefined)
-//	  });
-
-//	  destinationSocketIds.map(async socketId => {
-//	  	  this.server.in(socketId).socketsJoin(privateRoomName)
-//		  this.server.to(socketId).emit("listMyJoinedRooms", joinedRoomsByDestination);
-//	  	  await this.joinUserToRoom(socketId, destinationNick, privateRoomName, undefined)
-//	  });
-
-//	  await this.joinUserToRoom(client.id, nick, privateRoomName, undefined)
-	  /*
-	  const roomExists: boolean = await this.chatService.isRoomCreated(privateRoomName);
-	  const emisorSocketIds = this.getClientSocketIdsFromNick(nick);
-	  const destinationSocketIds = this.getClientSocketIdsFromNick(destinationNick);
-	  if (!roomExists){
-	  	  //join emisor
-	  	  await this.createNewRoomAndJoin(client, nick, privateRoomName, undefined)
-	  	  //join the second user in db
-	  	  await this.chatService.addUserToRoom(privateRoomName, destinationNick)
-	  }
-	 //join all socket ids of emisor and destination
-	  const joinedRoomsByEmisor: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(nick);
-	  const joinedRoomsByDestination: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(destinationNick);
-	  emisorSocketIds.forEach(socketId => {
-	  	  this.server.in(socketId).socketsJoin(privateRoomName)
-		  this.server.to(socketId).emit("listMyJoinedRooms", joinedRoomsByEmisor);
-	  });
-
-	  destinationSocketIds.forEach(socketId => {
-	  	  this.server.in(socketId).socketsJoin(privateRoomName)
-		  this.server.to(socketId).emit("listMyJoinedRooms", joinedRoomsByDestination);
-	  });
-
-//	  console.log(payload.message)
-*/
    	  const messagePayload: ChatMessage = {
     	room: privateRoomName,
     	message: payload.message,

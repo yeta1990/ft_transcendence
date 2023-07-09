@@ -61,7 +61,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	//subscription to all events from the service
 	ngOnInit(): void {
-//		this.joinUserToRoom("#default");
 		this.subscriptions.add(
 			this.chatService
 			.getMessage()
@@ -88,13 +87,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				}
 				else if (payload.event === 'join'){
 					this.currentRoom = payload.data.room;
-					//check if the messageList map has space to store the room messages. in case of private messages, currently it needs to be created:
+					//check if the messageList map has space to store the room messages to prevent errors, but only 100% necessary in joinmp
 					if (!this.messageList.has(payload.data.room)){
 						this.messageList.set(this.currentRoom, new Array<ChatMessage>);
 					}
 				}
 				else if (payload.event === 'joinmp'){
-//					this.currentRoom = payload.data.room;
 					//check if the messageList map has space to store the room messages. in case of private messages, currently it needs to be created:
 					if (!this.messageList.has(payload.data.room)){
 						this.messageList.set(payload.data.room, new Array<ChatMessage>);
