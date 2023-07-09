@@ -13,6 +13,7 @@ import { ChatService } from '../chat/chat.service';
 import { HashService } from '../hash/hash.service';
 import { RoomService } from '../chat/room/room.service';
 import { ChatMessage } from '@shared/types';
+import { events } from '@shared/const';
 import { ChatUser } from '@shared/types';
 import { map } from 'rxjs/operators';
 
@@ -261,11 +262,13 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		}
 	    const socketIdsByNick = this.getClientSocketIdsFromNick(nick);
 	    const joinedRoomsByNick: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(nick);
+	    const privateRoomsByNick: Array<string> = await this.chatService.getMyPrivateRooms(nick);
 //	    console.log(socketIdsByNick)
-//	    console.log(joinedRoomsByNick)
+	    console.log(joinedRoomsByNick)
 	  	socketIdsByNick.forEach(socketId => {
 	  	  this.server.in(socketId).socketsJoin(room)
-		  this.server.to(socketId).emit("listMyJoinedRooms", joinedRoomsByNick);
+		  this.server.to(socketId).emit(events.ListMyJoinedRooms, joinedRoomsByNick);
+		  this.server.to(socketId).emit(events.ListMyPrivateRooms, privateRoomsByNick);
 	  	});
 		return true;
   }

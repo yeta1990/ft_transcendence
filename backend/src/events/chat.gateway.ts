@@ -3,6 +3,7 @@ import { Inject } from '@nestjs/common';
 import { BaseGateway } from './base.gateway';
 import { Socket } from 'socket.io';
 import { ChatMessage, SocketPayload } from '@shared/types';
+import { events } from '@shared/const';
 import { generateJoinResponse } from '@shared/functions';
 import { ChatMessageService } from '../chat/chat-message/chat-message.service';
 import { RoomMessages, ChatUser } from '@shared/types';
@@ -45,6 +46,10 @@ export class ChatGateway extends BaseGateway {
   }
 
   async joinRoutine(clientSocketId: string, nick: string, room: string, pass: string, typeOfJoin: string){
+  	  if (room.length > 0 && room[0] == '@'){
+		  room = await this.chatService.generatePrivateRoomName(nick, room.substr(1, room.length - 1))
+  	  }
+
 	  const wasUserAlreadyActiveInRoom: boolean = await this.isUserAlreadyActiveInRoom(clientSocketId, room);
 	  const successfulJoin = await 
 		this.joinUserToRoom(clientSocketId, nick, room, pass);
@@ -60,8 +65,21 @@ export class ChatGateway extends BaseGateway {
 			}
 		}
 	  }
-
   }
+
+  async isUserAlreadyActiveInRoom(clientSocketId: string, room: string){
+	  try {
+	  	const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(room);
+	  		for (let i = 0; i < activeUsersInRoom.length; i++){
+				if (clientSocketId === activeUsersInRoom[i].client_id){
+					return true;
+	  			}
+	  	    }
+	  } catch {}
+	  return (false)
+  }
+
+
   //in case it arrives different rooms separated by comma,
   // the rooms param is splitted
   //the command allows this structure: /join [#]channel [pass with spaces allowed]
@@ -84,52 +102,41 @@ export class ChatGateway extends BaseGateway {
   // 	PRIVATE MESSAGES 	//
   ////////////////////////////
 
-  // private messages are supported by fake/private channels which only
-  // allows only 2 users
-  // the name of that room is defined by the id of the 2 users, for instance:
+  // - private messages are supported by common channels which only
+  // allows 2 users
+  // - the name of that room is defined by the id of the 2 users, for instance:
   // id 4 wants to send a private message to id 2, the name of the channel
   // will be "#2-4", both ids, sorted asc, separated by a -
   //
   // [process]:
-  // if the room doesn't exist in database:
-  //	1. check if the user is banned by the other user
-  // 	2. it's created in socket.io
-  //	3. it's created in db
-  //	4. user is joined in socket.io and saved in db
-  //
-  // if the room exists in db:
-  //	1. check if the user is currently connected to the room. if it's, just continue. otherwise, follow the next steps
-  //	4. user is joined in socket.io and saved in db
-  //	
-  // finally: send the message!
-  // 	1. save it in the db
-  //	2. send the message back to both users
-  async isUserAlreadyActiveInRoom(clientSocketId: string, room: string){
-	  try {
-	  	const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(room);
-	  		for (let i = 0; i < activeUsersInRoom.length; i++){
-				if (clientSocketId === activeUsersInRoom[i].client_id){
-					return true;
-	  			}
-	  	    }
-	  } catch {}
-	  return (false)
-  }
+  //	1. [tbd] check if the user is banned by the other user
+  //	2. joins the first message emisor to the room (following the same process as a normal join)
+  //	3. destination user is forced to join the room (as a normal join but on behind)
+  //	4. send the message to the channel
 
   @SubscribeMessage('mp')
   async mp(client: Socket, payload: ChatMessage): Promise<void> {
 	  const nick: string = client.handshake.query.nick as string;
-	  const destinationNick: string = payload.room;
+	  let destinationNick: string = payload.room;
 	  const privateRoomName: string = await this.chatService.generatePrivateRoomName(nick, destinationNick)
 	  const emisorSocketIds = this.getClientSocketIdsFromNick(nick);
 	  const destinationSocketIds = this.getClientSocketIdsFromNick(destinationNick);
-	  const response: ChatMessage = generateJoinResponse(privateRoomName);
+	  let emisorNickWithAt;
+	  let destinationNickWithAt;
+
+  	  if (nick.length > 0 && nick[0] != '@'){
+  	  	emisorNickWithAt = '@' + nick;
+  	  }
+
+  	  if (destinationNick.length > 0 && destinationNick[0] != '@'){
+  	  	destinationNickWithAt = '@' + destinationNick;
+  	  }
 
 	  for (let i = 0; i < emisorSocketIds.length; i++){
-  	  	await this.joinRoutine(emisorSocketIds[i], nick, privateRoomName, undefined, "join")
+  	  	await this.joinRoutine(emisorSocketIds[i], nick, destinationNickWithAt, undefined, "join")
 	  }
 	  for (let i = 0; i < destinationSocketIds.length; i++){
-  	  	await this.joinRoutine(destinationSocketIds[i], destinationNick, privateRoomName, undefined, "joinmp")
+  	  	await this.joinRoutine(destinationSocketIds[i], destinationNick, emisorNickWithAt, undefined, "joinmp")
 	  }
 
    	  const messagePayload: ChatMessage = {
@@ -139,24 +146,30 @@ export class ChatGateway extends BaseGateway {
     	date: new Date()
       }
 	  await this.handleMessage(client, messagePayload)
-  } 
-
-  @SubscribeMessage('listAllRooms')
-  async listRooms(client: Socket): Promise<WsResponse<unknown>>{
-	  return { event: 'listAllRooms', data: await this.chatService.getAllRooms()}
   }
 
-  @SubscribeMessage('listMyJoinedRooms')
+  @SubscribeMessage(events.ListAllRooms)
+  async listRooms(client: Socket): Promise<WsResponse<unknown>>{
+	  return { event: events.ListAllRooms, data: await this.chatService.getAllRooms()}
+  }
+
+  @SubscribeMessage(events.ListMyPrivateRooms)
+  async listMyPrivateRooms(client: Socket): Promise<WsResponse<unknown>>{
+	  const nick: string = client.handshake.query.nick as string;
+	  return { event: events.ListMyPrivateRooms, data: await this.chatService.getMyPrivateRooms(nick)}
+  }
+
+  @SubscribeMessage(events.ListMyJoinedRooms)
   async listMyJoinedRooms(client: Socket): Promise<WsResponse<unknown>>{
 	  const nick: string = client.handshake.query.nick as string;
-	  return { event: 'listMyJoinedRooms', data: await this.chatService.getAllJoinedRoomsByOneUser(nick)}
+	  return { event: events.ListMyJoinedRooms, data: await this.chatService.getAllJoinedRoomsByOneUser(nick)}
   }
 
   @SubscribeMessage('admin')
   async makeRoomAdmin(client: Socket, payload: ChatMessage){
 	  const nick: string = client.handshake.query.nick as string;
 	  const adminOk: boolean = await this.chatService.makeRoomAdmin(nick, payload.nick, payload.room);
-  } 
+  }
 
   @SubscribeMessage('noadmin')
   async removeRoomAdmin(client: Socket, payload: ChatMessage){

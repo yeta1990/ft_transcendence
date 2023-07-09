@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, QueryList, ElementRef, ViewChild, Vie
 import { ChatService } from './chat.service';
 import { FormBuilder } from '@angular/forms';
 import { ChatMessage, SocketPayload } from '@shared/types';
+import { events } from '@shared/const';
 import { takeUntil } from "rxjs/operators"
 import { Subject, Subscription, pipe } from "rxjs"
  
@@ -21,6 +22,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	roomList: string[] = [""];
 	availableRoomsList: string[] = [];
 	myJointRoomList: string[] = [];
+	myPrivateMessageRooms: string[] = [];
 	private subscriptions = new Subscription();
 
 	destroy: Subject<any> = new Subject();
@@ -69,10 +71,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				if (payload.event === 'message'){
 					this.messageList.get(payload.data.room)!.push(payload.data);
 				}
-				else if (payload.event === 'listAllRooms'){
+				else if (payload.event === events.ListAllRooms){
 					this.availableRoomsList = Array.from(payload.data);
 				}
-				else if (payload.event === 'listMyJoinedRooms'){
+				else if (payload.event === events.ListMyPrivateRooms){
+					this.myPrivateMessageRooms = Array.from(payload.data);
+				}
+				else if (payload.event === events.ListMyJoinedRooms){
 					this.myJointRoomList = Array.from(payload.data)	
 					if (this.myJointRoomList.length == 0){
 						this.currentRoom = "";

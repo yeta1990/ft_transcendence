@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject, from, Observable } from  'rxjs';
 import { io } from "socket.io-client";
+import { events } from '@shared/const';
 import { environment } from '../../environments/environment'
 import { SocketService } from '../socket.service';
 
@@ -36,8 +37,9 @@ export class ChatService {
 	}
 
 	getRoomList(){
-		this.socketService.sendMessageToServer("listAllRooms", "");
-		this.socketService.sendMessageToServer("listMyJoinedRooms", "");
+		this.socketService.sendMessageToServer(events.ListAllRooms, "");
+		this.socketService.sendMessageToServer(events.ListMyJoinedRooms, "");
+		this.socketService.sendMessageToServer(events.ListMyPrivateRooms, "");
 	}
 
 	partFromRoom(room: string){
