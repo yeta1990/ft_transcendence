@@ -162,7 +162,7 @@ export class ChatService {
 	public async isRoomEmpty(room: string): Promise<boolean>{
 		const foundRoom: Room = await this.getRoom(room);
 		if (foundRoom.users.length === 0){
-			return (true)	
+			return (true)
 		}
 		return (false)
 	}
@@ -314,21 +314,22 @@ export class ChatService {
 		return "#" + destinationUserId + ":" + originUserId;
 	}
 
-	public async banUser2User(emisorNick: string, targetNick: string){
+	public async banUser2User(emisorNick: string, targetNick: string): Promise<boolean>{
 
 		const bannedUsers = await this.userService.getBannedUsersByNick(emisorNick)
-		console.log(bannedUsers)
+		// check if user is already banned
 		for (let i = 0; i < bannedUsers.length; i++){
-			if (bannedUsers[i].nick == targetNick) return console.log("Already banned");
+			if (bannedUsers[i].nick == targetNick) return true;
 		}
 		const foundEmisor = await this.userService.getUserByNick(emisorNick);
+		if (foundEmisor === undefined) 
+			return false
 		const foundTarget = await this.userService.getUserByNick(targetNick);
-
+		if (foundTarget === undefined)
+			return false
 		foundEmisor.bannedUsers.push(foundTarget)
-//		console.log(foundEmisor)
-		this.userRepository.save(foundEmisor)
-//		console.log(foundTarget)
-//		console.log("eooooooo")
+		await this.userRepository.save(foundEmisor)
+		return true
 	}
 
 	public async deleteRoom(room: string): Promise<any>{

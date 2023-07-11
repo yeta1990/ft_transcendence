@@ -69,7 +69,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 			 this.authService.getIdFromJwt(socket.handshake.auth.token),
 			 this.authService.getNickFromJwt(socket.handshake.auth.token))
 		);
-		this.emit('listAllRooms', await this.chatService.getAllRooms());
+//		this.emit('listAllRooms', await this.chatService.getAllRooms());
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
 	}
 	else{

@@ -10,3 +10,13 @@ export function generateJoinResponse(room: string): ChatMessage{
 	}
 	return response;
 }
+
+export function generateSocketErrorResponse(room: string, message: string): any {
+	const response: ChatMessage = {
+		room: room,
+		message: message,
+		nick: "system",
+		date: new Date()
+	}
+   	return { event: 'system', data: response};
+}
