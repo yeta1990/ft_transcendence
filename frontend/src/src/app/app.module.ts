@@ -20,7 +20,8 @@ import { ChatComponent } from './chat/chat.component';
 import { environment } from '../environments/environment';
 import { PongComponent } from './pong/pong.component';
 import { PaddleComponent } from './pong/paddle/paddle.component';
-import { EntityComponent } from './pong/entity/entity.component'
+import { EntityComponent } from './pong/entity/entity.component';
+import { RoomComponent } from './pong/room/room.component'
 
 
 @NgModule({
@@ -37,7 +38,8 @@ import { EntityComponent } from './pong/entity/entity.component'
     ChatComponent,
     PongComponent,
     PaddleComponent,
-    EntityComponent
+    EntityComponent,
+    RoomComponent
 
   ],
   imports: [
