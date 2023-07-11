@@ -57,8 +57,6 @@ export class ChatService {
 				.map(n => parseInt(n));
 			const user1: User = await this.userService.getUser(userIds[0])
 			const user2: User = await this.userService.getUser(userIds[1])
-			console.log(user1)
-			console.log(user2)
 			if (user1.nick === myNick){
 				return "@" + user2.nick
 			}
@@ -314,6 +312,23 @@ export class ChatService {
 			return "#" + originUserId + ":" + destinationUserId;
 		}
 		return "#" + destinationUserId + ":" + originUserId;
+	}
+
+	public async banUser2User(emisorNick: string, targetNick: string){
+
+		const bannedUsers = await this.userService.getBannedUsersByNick(emisorNick)
+		console.log(bannedUsers)
+		for (let i = 0; i < bannedUsers.length; i++){
+			if (bannedUsers[i].nick == targetNick) return console.log("Already banned");
+		}
+		const foundEmisor = await this.userService.getUserByNick(emisorNick);
+		const foundTarget = await this.userService.getUserByNick(targetNick);
+
+		foundEmisor.bannedUsers.push(foundTarget)
+//		console.log(foundEmisor)
+		this.userRepository.save(foundEmisor)
+//		console.log(foundTarget)
+//		console.log("eooooooo")
 	}
 
 	public async deleteRoom(room: string): Promise<any>{

@@ -172,6 +172,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				return ;
 			this.chatService.sendPrivateMessage(splittedCommand[1], command.split(":", 2)[1])
 		}
+		else if (splittedCommand[0] === '/banuser'){
+			if (splittedCommand.length < 2)
+				return ;
+			this.chatService.banUser2User(splittedCommand[1])
+		}
 	}
 
 

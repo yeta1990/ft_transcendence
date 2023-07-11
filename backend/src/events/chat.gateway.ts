@@ -247,6 +247,12 @@ export class ChatGateway extends BaseGateway {
 	  const banRemoved: boolean = await this.chatService.removeBanOfRoom(nick, payload.nick, payload.room);
   }
 
+  @SubscribeMessage('banuser')
+  async banUser2User(client: Socket, payload: ChatMessage){
+	  const nick: string = client.handshake.query.nick as string;
+	  this.chatService.banUser2User(nick, payload.room)
+  }
+
   //part == to leave a room
   @SubscribeMessage('part')
   async part(client: Socket, room: string): Promise<WsResponse<unknown>>{
