@@ -1,7 +1,7 @@
 import { Injectable, NotAcceptableException, HttpStatus } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository, InjectConnection} from '@nestjs/typeorm';
 import { HttpService } from '@nestjs/axios';
-import { Repository } from 'typeorm';
+import { Repository, Connection } from 'typeorm';
 import { CreateUserDto } from './user.dto';
 import { User } from './user.entity';
 import { catchError, lastValueFrom, map } from 'rxjs';
@@ -11,7 +11,7 @@ export class UserService {
 	@InjectRepository(User)
 	private readonly repository: Repository<User>;
 
-	constructor(private httpService: HttpService) {}
+	constructor(private httpService: HttpService, @InjectConnection() private readonly connection: Connection) {}
 
 	public async getUser(id: number): Promise<User | undefined>{
 		return this.repository.findOne({
@@ -21,9 +21,18 @@ export class UserService {
     	})
 	}
 
+	public async getBannedUsersByNick(nick: string): Promise<User[]> {
+		const user: User = await this.getUserByNick(nick);
+	    return await this.connection.query(
+	    	`SELECT f."userId_2" as id, nick
+	    	FROM user_banned_users_user f
+	    	LEFT JOIN public.user ON f."userId_2" = public.user.id 
+	    	WHERE (f."userId_1" = $1)`, [user.id]);
+	}
+
 	public async getUserByNick(nick: string): Promise<User | undefined>{
 		return this.repository.findOne({
-			relations: ['ownedRooms'],
+			relations: ['ownedRooms', 'bannedUsers'],
     		where: {
         		nick: nick,
     		},
