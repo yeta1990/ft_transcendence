@@ -30,6 +30,14 @@ export class UserService {
 	    	WHERE (f."userId_1" = $1)`, [user.id]);
 	}
 
+	public async isUserBannedFromUser(executor: string, banned: string): Promise<boolean>{
+		const bannedUsers = await this.getBannedUsersByNick(executor);
+		for (let i = 0; i < bannedUsers.length; i++){
+			if (bannedUsers[i].nick === banned) return true;
+		}
+		return false;
+	}
+
 	public async getUserByNick(nick: string): Promise<User | undefined>{
 		return this.repository.findOne({
 			relations: ['ownedRooms', 'bannedUsers'],

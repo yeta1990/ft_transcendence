@@ -4,8 +4,10 @@ import { BaseGateway } from './base.gateway';
 import { Socket } from 'socket.io';
 import { ChatMessage, SocketPayload } from '@shared/types';
 import { events } from '@shared/const';
+import { generateSocketErrorResponse } from '@shared/functions';
 import { generateJoinResponse } from '@shared/functions';
 import { ChatMessageService } from '../chat/chat-message/chat-message.service';
+import { UserService } from '../user/user.service';
 import { RoomMessages, ChatUser } from '@shared/types';
 
 //https://stackoverflow.com/questions/69435506/how-to-pass-a-dynamic-port-to-the-websockets-gateway-in-nestjs
@@ -13,7 +15,9 @@ import { RoomMessages, ChatUser } from '@shared/types';
 //extending BaseGateway to log the gateway creation in the terminal
 export class ChatGateway extends BaseGateway {
 
-  constructor(private chatMessageService: ChatMessageService) {
+
+	
+  constructor(private userService: UserService, private chatMessageService: ChatMessageService) {
 	super(ChatGateway.name);
   }
 
@@ -21,7 +25,6 @@ export class ChatGateway extends BaseGateway {
   async afterInit(): Promise<void> {}
 
   async handlePrivateMessage(client:Socket, payload: ChatMessage){
-  	  console.log(payload)
 	  const emisorNick: string = client.handshake.query.nick as string;
 	  const destinationNick: string = payload.room.substr(1, payload.room.length - 1)
 	  const realRoomName: string = await this.chatService.generatePrivateRoomName(emisorNick, destinationNick)
@@ -155,6 +158,11 @@ export class ChatGateway extends BaseGateway {
   async mp(client: Socket, payload: ChatMessage): Promise<void> {
 	  const nick: string = client.handshake.query.nick as string;
 	  let destinationNick: string = payload.room;
+	  const destinationUser = await this.userService.getUserByNick(destinationNick);
+	  if (!destinationUser)
+	  	  return generateSocketErrorResponse("", `User not found: ${destinationNick}`);
+	  if (await this.userService.isUserBannedFromUser(destinationNick, nick))
+	  	  return generateSocketErrorResponse("", `You are banned from: ${destinationNick}`);
 	  const privateRoomName: string = await this.chatService.generatePrivateRoomName(nick, destinationNick)
 	  const emisorSocketIds = this.getClientSocketIdsFromNick(nick);
 	  const destinationSocketIds = this.getClientSocketIdsFromNick(destinationNick);
