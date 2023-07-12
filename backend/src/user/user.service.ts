@@ -30,6 +30,15 @@ export class UserService {
 	    	WHERE (f."userId_1" = $1)`, [user.id]);
 	}
 
+	public async getUsersThatHaveBannedAnother(nick: string): Promise<User[]> {
+		const user: User = await this.getUserByNick(nick);
+	    return await this.connection.query(
+	    	`SELECT f."userId_1" as id, nick
+	    	FROM user_banned_users_user f
+	    	LEFT JOIN public.user ON f."userId_1" = public.user.id 
+	    	WHERE (f."userId_2" = $1)`, [user.id]);
+	}
+
 	public async isUserBannedFromUser(executor: string, banned: string): Promise<boolean>{
 		const bannedUsers = await this.getBannedUsersByNick(executor);
 		for (let i = 0; i < bannedUsers.length; i++){
