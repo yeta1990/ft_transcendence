@@ -182,6 +182,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				return ;
 			this.chatService.noBanUser2User(splittedCommand[1])
 		}
+		else if (splittedCommand[0] === '/' + events.Pass){
+			if (splittedCommand.length < 3)
+				return ;
+			this.chatService.addPassToRoom(splittedCommand[1], command.split(" ", 3)[2])
+		}
+		else if (splittedCommand[0] === '/' + events.RemovePass){
+			if (splittedCommand.length < 2)
+				return ;
+			this.chatService.removePassOfRoom(splittedCommand[1])
+		}
 	}
 
 

@@ -271,6 +271,19 @@ export class ChatGateway extends BaseGateway {
 	  const adminRemoved: boolean = await this.chatService.removeRoomAdmin(nick, payload.nick, payload.room);
   } 
 
+  @SubscribeMessage(events.Pass)
+  async addPassToRoom(client: Socket, payload: ChatMessage){
+	  const nick: string = client.handshake.query.nick as string;
+	  this.chatService.addPassToRoom(nick, payload.room, payload.message);
+  }
+
+  @SubscribeMessage(events.RemovePass)
+  async removePassOfRoom(client: Socket, payload: ChatMessage){
+	  const nick: string = client.handshake.query.nick as string;
+	  this.chatService.removePassOfRoom(nick, payload.room);
+  }
+
+
   @SubscribeMessage('ban')
   async banUserOfRoom(client: Socket, payload: ChatMessage){
 	  const nick: string = client.handshake.query.nick as string;

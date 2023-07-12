@@ -298,6 +298,31 @@ export class ChatService {
 		return true;
 	}
 
+
+	public async addPassToRoom(nick: string, room: string, pass: string){
+		const foundRoom: Room = await this.getRoom(room);
+		if (!foundRoom) return false;
+		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(nick, room); 
+		if (!executorIsOwnerOfRoom) return false;
+		const hashedPass = await this.hashService.hashPassword(pass);
+		foundRoom.hasPass = true;
+		foundRoom.password = hashedPass
+		await this.roomRepository.save(foundRoom)
+		return true
+	}
+
+	public async removePassOfRoom(nick: string, room: string){
+		const foundRoom: Room = await this.getRoom(room);
+		if (!foundRoom) return false;
+		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(nick, room); 
+		if (!executorIsOwnerOfRoom) return false;
+		foundRoom.hasPass = false;
+		foundRoom.password = null;
+		await this.roomRepository.save(foundRoom)
+		return true
+	}
+
+
 	async generatePrivateRoomName(originNick: string, destinationNick: string): Promise<string | undefined>{
 		const originUser: User = await this.userService.getUserByNick(originNick);
 		const destinationUser: User = await this.userService.getUserByNick(destinationNick);
