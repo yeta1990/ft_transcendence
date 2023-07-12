@@ -3,7 +3,7 @@ import { Inject } from '@nestjs/common';
 import { BaseGateway } from './base.gateway';
 import { Socket } from 'socket.io';
 import { ChatMessage, SocketPayload } from '@shared/types';
-import { events } from '@shared/const';
+import { events, values } from '@shared/const';
 import { generateSocketErrorResponse, generateSocketInformationResponse } from '@shared/functions';
 import { generateJoinResponse } from '@shared/functions';
 import { ChatMessageService } from '../chat/chat-message/chat-message.service';
@@ -172,18 +172,23 @@ export class ChatGateway extends BaseGateway {
   //the command allows this structure: /join [#]channel [pass with spaces allowed]
   @SubscribeMessage('join')
   async handleJoinRoom(client: Socket, roomAndPassword: string): Promise<void>{
-	  const splittedRooms: Array<string> = roomAndPassword.split(" ", 1)[0].split(",");
 	  let room: string = roomAndPassword.split(" ", 2)[0];
 	  const pass: string | undefined = roomAndPassword.split(" ", 2)[1];
-	  const adapter: any = this.server.adapter;
-	  const roomsRaw: any = adapter.rooms;
 	  const nick: string = client.handshake.query.nick as string;
+
+	  for (const c of values.forbiddenChatRoomCharacters){
+		if (room.includes(c)){
+			this.server.to(client.id)
+				.emit("system", generateSocketErrorResponse(room, 
+					`Invalid name for the channel ${room}, try other`).data)
+			return ;
+		} 
+	  }
 
   	  if (room.length > 0 && room[0] != '#' && room[0] != '@'){
   	  	room = '#' + room;
   	  }
   	  //check if user is banned from channel
-
   	  await this.joinRoutine(client.id, nick, room, pass, "join")
   }
 
