@@ -68,7 +68,24 @@ export class ChatGateway extends BaseGateway {
 		this.handlePrivateMessage(client, payload)
 	}
 	else if (await this.chatService.isUserInRoom(payload.room, nick)){
-		this.broadCastToRoom('message', payload);
+
+		//check if user is banned from the channel
+		//////
+
+		const bannedUsersBySender: Array<string> = 
+			(await this
+			.userService
+			.getBannedUsersByNick(nick))
+			.map(m => m.nick)
+		//send message only to non-banned users
+		const activeUsersInRoom: Array<ChatUser> = this
+			.getActiveUsersInRoom(payload.room)
+			.filter(u => !(bannedUsersBySender.includes(u.nick)))
+		for (let i = 0; i < activeUsersInRoom.length; i++){
+			this.messageToClient(activeUsersInRoom[i].client_id, "message", payload)
+		}
+
+		//this.broadCastToRoom('message', payload);
 		await this.chatMessageService.saveMessage(payload)
 	} 
   }
@@ -114,16 +131,8 @@ export class ChatGateway extends BaseGateway {
 			//on every message, check the nick of the sender, if it's one of
 			//the users that have banned the one trying to join,
 			//the message isn't send
-			
 			const usersThatHaveBanned: Array<string> = (await this.userService.getUsersThatHaveBannedAnother(nick)).map(u => u.nick)
-			console.log(usersThatHaveBanned)
-			/*
-	  	    if (await this.userService
-	  	      	  .isUserBannedFromUser(room.substr(1, room.length - 1), nick)){
-	  	      	  return this.messageToClient(clientSocketId, "system", 
-	  	      			generateSocketErrorResponse("", `You can't open a private conversation with ${room.substr(1, room.length - 1)} because you are banned`).data);
-	        }
-	        */
+
 			//using originalRoom is a way to handle the names of private rooms:
 			//in db are #2-8, for instance, but we send @nick to the client as 
 			//a room name
