@@ -331,6 +331,17 @@ export class ChatService {
 		return true
 	}
 
+	public async noBanUser2User(emisorNick: string, targetNick: string): Promise<boolean>{
+		let foundEmisor = await this.userService.getUserByNick(emisorNick);
+		if (foundEmisor === undefined) 
+			return false
+		const newBannedUsers: Array<User> = foundEmisor.bannedUsers.filter(u => u.nick !== targetNick)
+		if (foundEmisor.bannedUsers.length === newBannedUsers.length) return false;
+		foundEmisor.bannedUsers = newBannedUsers;
+		await this.userRepository.save(foundEmisor)
+		return true
+	}
+
 	public async deleteRoom(room: string): Promise<any>{
 		return this.roomRepository.delete(room);
 	}
