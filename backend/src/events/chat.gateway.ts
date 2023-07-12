@@ -345,21 +345,27 @@ export class ChatGateway extends BaseGateway {
 
   //part == to leave a room
   @SubscribeMessage('part')
-  async part(client: Socket, room: string): Promise<WsResponse<unknown>>{
-	const response: ChatMessage = {
-  		room: room,
-  		message: "you've left " + room,
-  		nick: "system",
-  		date: new Date()
-  	}
+  async part(client: Socket, room: string): Promise<void>{
 	const nick: string = client.handshake.query.nick as string;
-	const successfulPart: boolean = await this.removeUserFromRoom(client.id, room, nick);
+	const socketIdsByNick: Array<string> = this.getClientSocketIdsFromNick(nick);
+	if (socketIdsByNick.length === 0)
+		return generateSocketErrorResponse(room, `Error`)
+	const successfulPart: boolean = await this.removeUserFromRoom(room, nick);
 	if (successfulPart){
-		this.server.to(client.id).emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(nick));
-    	return { event: 'system', data: response};
+	    const joinedRoomsByNick: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(nick);
+	    const privateRoomsByNick: Array<string> = await this.chatService.getMyPrivateRooms(nick);
+	  	socketIdsByNick.forEach(socketId => {
+		  this.server.to(socketId).emit(events.ListMyJoinedRooms, joinedRoomsByNick);
+		  this.server.to(socketId).emit(events.ListMyPrivateRooms, privateRoomsByNick);
+		  this.server.to(socketId).emit("system", generateSocketInformationResponse(room, `you've left ${room}`).data);
+	  	});
+	  	return
 	}
-	response.message = "error: maybe the room " + room + " doesn't exist, or you aren't part of that room"
-    return { event: 'system', data: response};
+	else{
+		this.server.to(client.id)
+			.emit("system", generateSocketErrorResponse(room, 
+				`Error: maybe the room ${room} doesn't exist, or you aren't part of that room`).data)
+	}
   }
  
 }
