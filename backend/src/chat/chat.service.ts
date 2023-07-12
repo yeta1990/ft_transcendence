@@ -271,7 +271,6 @@ export class ChatService {
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) return false;
 		const bannedOfRoom: User[] = foundRoom.banned;
-		console.log(bannedOfRoom)
 		for (let i = 0; i < bannedOfRoom.length; i++){
 			if (bannedOfRoom[i].nick === nick) return true;
 		}

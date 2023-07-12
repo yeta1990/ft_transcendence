@@ -139,7 +139,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   getActiveUsersInRoom(room: string): Array<ChatUser>{
    	const adapter: any = this.server.adapter;
 	const roomsRaw: any = adapter.rooms;
-	const usersRaw: Array<string> = Array.from(roomsRaw.get(room));
+	const roomIds = roomsRaw.get(room)
+	if (!roomIds) return [];
+	const usersRaw: Array<string> = Array.from(roomIds);
 	let usersWithCompleteData: Array<ChatUser> = new Array();
 	usersRaw.forEach(x => {
 		usersWithCompleteData.push(this.users.get(x));

@@ -4,7 +4,7 @@ import { BaseGateway } from './base.gateway';
 import { Socket } from 'socket.io';
 import { ChatMessage, SocketPayload } from '@shared/types';
 import { events } from '@shared/const';
-import { generateSocketErrorResponse } from '@shared/functions';
+import { generateSocketErrorResponse, generateSocketInformationResponse } from '@shared/functions';
 import { generateJoinResponse } from '@shared/functions';
 import { ChatMessageService } from '../chat/chat-message/chat-message.service';
 import { UserService } from '../user/user.service';
@@ -70,14 +70,20 @@ export class ChatGateway extends BaseGateway {
 	else if (await this.chatService.isUserInRoom(payload.room, nick)){
 
 		//check if user is banned from the channel
-		//////
+		const isBannedOfRoom: boolean = await this
+			.chatService
+			.isBannedOfRoom(nick, payload.room)
+		if (isBannedOfRoom)	{
+			return this.messageToClient(client.id, "system",
+				generateSocketErrorResponse("", `You can't send a message to channel ${payload.room} because you are banned`).data);
+		}
 
+		//send message only to non-banned users
 		const bannedUsersBySender: Array<string> = 
 			(await this
 			.userService
 			.getBannedUsersByNick(nick))
 			.map(m => m.nick)
-		//send message only to non-banned users
 		const activeUsersInRoom: Array<ChatUser> = this
 			.getActiveUsersInRoom(payload.room)
 			.filter(u => !(bannedUsersBySender.includes(u.nick)))
@@ -85,7 +91,6 @@ export class ChatGateway extends BaseGateway {
 			this.messageToClient(activeUsersInRoom[i].client_id, "message", payload)
 		}
 
-		//this.broadCastToRoom('message', payload);
 		await this.chatMessageService.saveMessage(payload)
 	} 
   }
@@ -270,26 +275,27 @@ export class ChatGateway extends BaseGateway {
   async banUserOfRoom(client: Socket, payload: ChatMessage){
 	  const nick: string = client.handshake.query.nick as string;
 	  const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(payload.room);
-	  let targetUserConnectedSocketId: string | undefined = undefined;
+	  const banOk: boolean = await this
+	  	.chatService
+	  	.banUserOfRoom(nick, payload.nick, payload.room);
 
-	  for (let activeUser of activeUsersInRoom){
-		if (activeUser.nick === payload.nick){
-			targetUserConnectedSocketId = activeUser.client_id;
-			break ;
-		}
-	  }
+	  if (banOk){
 
-	  const banOk: boolean = await this.chatService.banUserOfRoom(nick, payload.nick, payload.room);
-	  if (banOk && targetUserConnectedSocketId){
-		this.server.to(targetUserConnectedSocketId)
-			.emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(payload.nick));
-		const err: ChatMessage = {
-			room: payload.room,
-			message: `Information: you have been banned from ${payload.room}`,
-			nick: "system",
-			date: new Date()
+	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromNick(payload.nick);
+	  	if (targetSocketIds.length){
+
+			const err: ChatMessage = generateSocketErrorResponse(payload.room, 
+				`Information: you have been banned from ${payload.room}`)
+
+			for (let i = 0; i < targetSocketIds.length; i++){
+				this.messageToClient(targetSocketIds[i], "system", err);
+				this.server.to(targetSocketIds[i])
+					.emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(payload.nick));
+			}
 		}
-		this.messageToClient(targetUserConnectedSocketId, "system", err);
+		this.server.to(client.id)
+			.emit("system", generateSocketInformationResponse(payload.room, 
+				`You've banned ${payload.nick} in ${payload.room} successfully`).data)
   	  }
   }
 
@@ -297,6 +303,11 @@ export class ChatGateway extends BaseGateway {
   async removeBanOfRoom(client: Socket, payload: ChatMessage){
 	  const nick: string = client.handshake.query.nick as string;
 	  const banRemoved: boolean = await this.chatService.removeBanOfRoom(nick, payload.nick, payload.room);
+	  if (banRemoved)
+		this.server.to(client.id)
+			.emit("system", generateSocketInformationResponse(payload.room, 
+				`You've removed the ban of ${payload.nick} in ${payload.room} successfully`).data)
+		
   }
 
   @SubscribeMessage('banuser')
