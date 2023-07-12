@@ -88,14 +88,16 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   }
 
-  async removeUserFromRoom(clientId: string, room: string, nick: string): Promise<boolean> {
+  async removeUserFromRoom(room: string, nick: string): Promise<boolean> {
   	  //updating relationships and entities in db
   	  const result: boolean = await this.chatService.removeUserFromRoom(room, nick)
 
   	  if (result){
+	    const socketIdsByNick: Array<string> = this.getClientSocketIdsFromNick(nick);
   	  	//unsubscribe user from socket service
-	    this.server.in(clientId).socketsLeave(room);
-
+  	  	for (const clientId in socketIdsByNick){
+	    	this.server.in(clientId).socketsLeave(room);
+	    }
 	    //removing empty rooms
   	  	await this.destroyEmptyRooms(room);
   	  	return true;
@@ -265,8 +267,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	    const socketIdsByNick = this.getClientSocketIdsFromNick(nick);
 	    const joinedRoomsByNick: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(nick);
 	    const privateRoomsByNick: Array<string> = await this.chatService.getMyPrivateRooms(nick);
-//	    console.log(socketIdsByNick)
-//	    console.log(joinedRoomsByNick)
 	  	socketIdsByNick.forEach(socketId => {
 	  	  this.server.in(socketId).socketsJoin(room)
 		  this.server.to(socketId).emit(events.ListMyJoinedRooms, joinedRoomsByNick);
