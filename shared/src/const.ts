@@ -6,3 +6,8 @@ export const events = {
 	Pass: "pass",
 	RemovePass: "nopass"
 }
+
+export const values = {
+	forbiddenChatRoomCharacters: [':', '@']
+}
+

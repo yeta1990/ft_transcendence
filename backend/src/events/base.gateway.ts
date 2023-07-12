@@ -95,7 +95,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   	  if (result){
 	    const socketIdsByNick: Array<string> = this.getClientSocketIdsFromNick(nick);
   	  	//unsubscribe user from socket service
-  	  	for (const clientId in socketIdsByNick){
+  	  	for (const clientId of socketIdsByNick){
 	    	this.server.in(clientId).socketsLeave(room);
 	    }
 	    //removing empty rooms
