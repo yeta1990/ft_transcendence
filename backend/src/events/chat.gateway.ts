@@ -313,7 +313,21 @@ export class ChatGateway extends BaseGateway {
   @SubscribeMessage('banuser')
   async banUser2User(client: Socket, payload: ChatMessage){
 	  const nick: string = client.handshake.query.nick as string;
-	  this.chatService.banUser2User(nick, payload.room)
+	  const banOk: boolean = await this.chatService.banUser2User(nick, payload.room)
+	  if (banOk)
+		this.server.to(client.id)
+			.emit("system", generateSocketInformationResponse(payload.room, 
+				`You've banned ${payload.room} successfully`).data)
+  }
+
+  @SubscribeMessage('nobanuser')
+  async nobanUser2User(client: Socket, payload: ChatMessage){
+	  const nick: string = client.handshake.query.nick as string;
+	  const noBanOk: boolean = await this.chatService.noBanUser2User(nick, payload.room)
+	  if (noBanOk)
+		this.server.to(client.id)
+			.emit("system", generateSocketInformationResponse(payload.room, 
+				`You've removed the ban of ${payload.room} successfully`).data)
   }
 
   //part == to leave a room

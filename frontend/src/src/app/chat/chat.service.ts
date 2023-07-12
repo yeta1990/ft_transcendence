@@ -66,6 +66,11 @@ export class ChatService {
 		this.socketService.sendMessageToServer("banuser", payloadToSend);
 	}
 
+	noBanUser2User(targetNick:string){
+		const payloadToSend: ChatMessage = { room: targetNick, message: "" , nick: "", date: new Date() }
+		this.socketService.sendMessageToServer("nobanuser", payloadToSend);
+	}
+
 	removeBanFromRoom(nick: string, room: string){
 		const payloadToSend: ChatMessage = { room: room, message: "" , nick: nick, date: new Date() }
 		this.socketService.sendMessageToServer("noban", payloadToSend);
