@@ -76,4 +76,15 @@ export class ChatService {
 		this.socketService.sendMessageToServer("noban", payloadToSend);
 	}
 
+	addPassToRoom(room: string, pass: string){
+		const payloadToSend: ChatMessage = { room: room, message: pass, nick: "", date: new Date() }
+		this.socketService.sendMessageToServer(events.Pass, payloadToSend);
+	}
+
+	removePassOfRoom(room: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , nick: "", date: new Date() }
+		this.socketService.sendMessageToServer(events.RemovePass, payloadToSend);
+	}
+
+
 }
