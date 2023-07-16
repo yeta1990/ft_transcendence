@@ -12,7 +12,7 @@ import { AuthService } from '../auth/auth.service';
 import { ChatService } from '../chat/chat.service';
 import { HashService } from '../hash/hash.service';
 import { RoomService } from '../chat/room/room.service';
-import { ChatMessage, SocketPayload } from '@shared/types';
+import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
 import { generateSocketInformationResponse } from '@shared/functions';
 import { events } from '@shared/const';
 import { ChatUser } from '@shared/types';
@@ -117,11 +117,25 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
 
   async handleDisconnect(socket: Socket): Promise<void> {
-	this.logger.log(`Socket client disconnected: ${socket.id}`)
-	this.users.delete(socket.id);
-	this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
-//    this.emit('listRooms', await this.chatService.getAllRooms());
-//    this.destroyEmptyRooms();
+  	  const nick: string = this.users.get(socket.id).nick
+	  this.logger.log(`Socket client disconnected: ${socket.id}`)
+	  this.users.delete(socket.id);
+	  this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
+
+  	  //check if all clients of same nick has been disconnected or not
+  	  const isHardDisconnect: boolean = this.getClientSocketIdsFromNick(nick).length > 0 ? false : true
+  	  if (isHardDisconnect){
+		  const allJoinedRoomsByUser: Array<string> = await this.chatService
+		  	  .getAllJoinedRoomsByOneUser(nick);
+		  for (let room of allJoinedRoomsByUser){
+	  		  let roomMetaData: RoomMetaData = await this.roomService
+	  		    .getRoomMetaData(room)
+	  		    roomMetaData.connectedUsers = [...new Set(this
+	  		        .getActiveUsersInRoom(room)
+	  		    	.map(u => u.nick))];
+	  		  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
+		  }
+  	  }
   }
 
   //socket rooms, not db rooms
