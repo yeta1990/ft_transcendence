@@ -12,7 +12,8 @@ import { AuthService } from '../auth/auth.service';
 import { ChatService } from '../chat/chat.service';
 import { HashService } from '../hash/hash.service';
 import { RoomService } from '../chat/room/room.service';
-import { ChatMessage } from '@shared/types';
+import { ChatMessage, SocketPayload } from '@shared/types';
+import { generateSocketInformationResponse } from '@shared/functions';
 import { events } from '@shared/const';
 import { ChatUser } from '@shared/types';
 import { map } from 'rxjs/operators';
@@ -223,7 +224,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  	//		- doesn't match? return an error to the user
 		//   4. user is joined in socket.io and saved in db
 		//   
-
+		let hardJoin: boolean = true; //nick wasn't in channel with other client
 	  	const roomExists: boolean = await this.chatService.isRoomCreated(room);
 		if (!roomExists){
 			const successfulCreatedAndJoin: boolean = await this.createNewRoomAndJoin(clientId, nick, room, password)
@@ -262,8 +263,12 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
 			const successfulJoin: boolean = await this.chatService.addUserToRoom(room, nick);
 			if (!successfulJoin) return false;
-			this.logger.log("User " + clientId + "joined room " + room);
+
 		}
+		else hardJoin = false;
+
+		this.logger.log("User " + clientId + "joined room " + room);
+		//confirm join to all the connected clients with the same nick
 	    const socketIdsByNick = this.getClientSocketIdsFromNick(nick);
 	    const joinedRoomsByNick: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(nick);
 	    const privateRoomsByNick: Array<string> = await this.chatService.getMyPrivateRooms(nick);
@@ -272,7 +277,22 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		  this.server.to(socketId).emit(events.ListMyJoinedRooms, joinedRoomsByNick);
 		  this.server.to(socketId).emit(events.ListMyPrivateRooms, privateRoomsByNick);
 	  	});
+
+	  	//announce the rest of the channel a new user has joined
+	  	if (hardJoin){
+	  		const socketInfo: SocketPayload = generateSocketInformationResponse(room, `user ${nick} has joined room ${room}`)
+			this.broadCastToRoomExceptForSomeUsers('system', socketInfo.data, [nick])
+		}
 		return true;
+  }
+
+  public broadCastToRoomExceptForSomeUsers(event: string, payload: ChatMessage, excludedUsers: Array<string>): void {
+		const targetUsers: Array<ChatUser> = this
+			.getActiveUsersInRoom(payload.room)
+			.filter(u => !(excludedUsers.includes(u.nick)))
+		for (let i = 0; i < targetUsers.length; i++){
+			this.messageToClient(targetUsers[i].client_id, "message", payload)
+		}
   }
 
   public broadCastToRoom(event: string, payload: ChatMessage): void{
