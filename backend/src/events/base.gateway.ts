@@ -12,7 +12,9 @@ import { AuthService } from '../auth/auth.service';
 import { ChatService } from '../chat/chat.service';
 import { HashService } from '../hash/hash.service';
 import { RoomService } from '../chat/room/room.service';
-import { ChatMessage } from '@shared/types';
+import { ChatMessage, SocketPayload } from '@shared/types';
+import { generateSocketInformationResponse } from '@shared/functions';
+import { events } from '@shared/const';
 import { ChatUser } from '@shared/types';
 import { map } from 'rxjs/operators';
 
@@ -68,7 +70,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 			 this.authService.getIdFromJwt(socket.handshake.auth.token),
 			 this.authService.getNickFromJwt(socket.handshake.auth.token))
 		);
-		this.emit('listAllRooms', await this.chatService.getAllRooms());
+//		this.emit('listAllRooms', await this.chatService.getAllRooms());
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
 	}
 	else{
@@ -87,14 +89,16 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   }
 
-  async removeUserFromRoom(clientId: string, room: string, nick: string): Promise<boolean> {
+  async removeUserFromRoom(room: string, nick: string): Promise<boolean> {
   	  //updating relationships and entities in db
   	  const result: boolean = await this.chatService.removeUserFromRoom(room, nick)
 
   	  if (result){
+	    const socketIdsByNick: Array<string> = this.getClientSocketIdsFromNick(nick);
   	  	//unsubscribe user from socket service
-	    this.server.in(clientId).socketsLeave(room);
-
+  	  	for (const clientId of socketIdsByNick){
+	    	this.server.in(clientId).socketsLeave(room);
+	    }
 	    //removing empty rooms
   	  	await this.destroyEmptyRooms(room);
   	  	return true;
@@ -135,19 +139,31 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   //this is the old method to get the users from a room
   //I don't remove it yet because it could be useful for
   //getting the currently connected users
-  
   getActiveUsersInRoom(room: string): Array<ChatUser>{
    	const adapter: any = this.server.adapter;
 	const roomsRaw: any = adapter.rooms;
-//	const roomsRaw: any = this.rooms;
-//	console.log(roomsRaw)
-//	if (!roomsRaw) return new Array();
-	const usersRaw: Array<string> = Array.from(roomsRaw.get(room));
+	const roomIds = roomsRaw.get(room)
+	if (!roomIds) return [];
+	const usersRaw: Array<string> = Array.from(roomIds);
 	let usersWithCompleteData: Array<ChatUser> = new Array();
 	usersRaw.forEach(x => {
 		usersWithCompleteData.push(this.users.get(x));
 	});
     return (usersWithCompleteData);
+  }
+
+  getClientSocketIdsFromNick(nick: string): Array<string>{
+	const clientsIterator = this.users.entries();
+	const clientSocketIds = []
+
+	let connectedClient = clientsIterator.next()
+	while (!connectedClient.done){
+		if (connectedClient.value[1].nick === nick){
+			clientSocketIds.push(connectedClient.value[0])
+		}
+		connectedClient = clientsIterator.next()
+	}
+	return clientSocketIds;
   }
   
   async isUserInRoom(room: string, clientNick: string): Promise<boolean> {
@@ -172,7 +188,22 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   	  this.server.emit(event, data);
   }
 
-  public async joinUserToRoom(client: Socket, room: string, password: string | undefined): Promise<boolean>{
+  public async createNewRoomAndJoin(clientId: string, creatorNick: string, room: string, password: string | undefined): Promise<boolean>{
+		const hasPass:boolean = password != undefined ? true : false;
+		await this
+			.chatService
+			.createRoom(creatorNick, room, hasPass, password);
+		await this.rooms.add(room);
+		await this.server.in(clientId).socketsJoin(room);
+		const successfulJoin: boolean = await this.chatService.addUserToRoom(room, creatorNick);
+		if (!successfulJoin) return false;
+		this.emit('listAllRooms', await this.chatService.getAllRooms());
+		this.logger.log("User " + clientId + "joined room " + room);
+		return true
+  }
+
+  public async joinUserToRoom(clientId: string, nick: string, room: string, password: string | undefined): Promise<boolean>{
+//  public async joinUserToRoom(client: Socket, room: string, password: string | undefined): Promise<boolean>{
 		//currently checking the existence of the room in the rooms Set
 	    //different status of the user regarding a chat room:
 	  	// 1. connected to a room:  member of a room and currently online (bd + socket active)
@@ -193,34 +224,14 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  	//		- doesn't match? return an error to the user
 		//   4. user is joined in socket.io and saved in db
 		//   
-
-		//socket.handshake.query.nick
-//		method to know if the user is connected to the room
-//		const roomExists: boolean = this.rooms.has(room);
+		let hardJoin: boolean = true; //nick wasn't in channel with other client
 	  	const roomExists: boolean = await this.chatService.isRoomCreated(room);
-	  	const nick: string = client.handshake.query.nick as string;
-
 		if (!roomExists){
-			const hasPass:boolean = password != undefined ? true : false;
-			await this
-				.chatService
-				.createRoom(nick, room, hasPass, password);
-			await this.rooms.add(room);
-			await this.server.in(client.id).socketsJoin(room);
-			const successfulJoin: boolean = await this.chatService.addUserToRoom(room, nick);
-			if (!successfulJoin) return false;
-			this.emit('listAllRooms', await this.chatService.getAllRooms());
-//			this.emit('listRooms', await this.chatService.getAllRooms());
-			this.logger.log("User " + client.id + "joined room " + room);
+			const successfulCreatedAndJoin: boolean = await this.createNewRoomAndJoin(clientId, nick, room, password)
+			if (!successfulCreatedAndJoin) return false;
 		}
-		else if (roomExists && await this.isUserInRoom(room, nick)){
-			//this option is in case the user is already in the channel,
-			//we don't need to save it again in db
-			this.server.in(client.id).socketsJoin(room);
-//			console.log(this.getActiveUsersInRoom(room));
-		}
-		else if (roomExists){
-			const isRoomProtectedByPassword: boolean = await this 
+		else if (roomExists && !(await this.isUserInRoom(room, nick))){
+			const isRoomProtectedByPassword: boolean = await this
 				.chatService
 				.isProtectedByPassword(room);
 			if (await this.chatService.isBannedOfRoom(nick, room)){
@@ -230,8 +241,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 			  	   nick: "system",
 			  	   date: new Date()
 		      	}
-		  	  	this.messageToClient(client.id, "system", err);
-//				console.log("BANNED!!!!!!!!")
+		  	  	this.messageToClient(clientId, "system", err);
 				return false;
 			}
 			else if (isRoomProtectedByPassword){
@@ -246,21 +256,51 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 					passwordChallengePassed = await this.hashService.comparePassword(password, await this.chatService.getHashPassFromRoom(room));
 				}
 				if (!passwordChallengePassed){
-		  	  		this.messageToClient(client.id, "system", err);
+		  	  		this.messageToClient(clientId, "system", err);
 					return false;
 				}
 			}
-			this.server.in(client.id).socketsJoin(room);
+
 			const successfulJoin: boolean = await this.chatService.addUserToRoom(room, nick);
 			if (!successfulJoin) return false;
-			this.logger.log("User " + client.id + "joined room " + room);
+
 		}
-		this.server.to(client.id).emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(nick));
+		else hardJoin = false;
+
+		this.logger.log("User " + clientId + "joined room " + room);
+		//confirm join to all the connected clients with the same nick
+	    const socketIdsByNick = this.getClientSocketIdsFromNick(nick);
+	    const joinedRoomsByNick: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(nick);
+	    const privateRoomsByNick: Array<string> = await this.chatService.getMyPrivateRooms(nick);
+	  	socketIdsByNick.forEach(socketId => {
+	  	  this.server.in(socketId).socketsJoin(room)
+		  this.server.to(socketId).emit(events.ListMyJoinedRooms, joinedRoomsByNick);
+		  this.server.to(socketId).emit(events.ListMyPrivateRooms, privateRoomsByNick);
+	  	});
+
+	  	//announce the rest of the channel a new user has joined
+	  	if (hardJoin){
+	  		const socketInfo: SocketPayload = generateSocketInformationResponse(room, `user ${nick} has joined room ${room}`)
+			this.broadCastToRoomExceptForSomeUsers('system', socketInfo.data, [nick])
+		}
 		return true;
   }
 
+  public broadCastToRoomExceptForSomeUsers(event: string, payload: ChatMessage, excludedUsers: Array<string>): void {
+		const targetUsers: Array<ChatUser> = this
+			.getActiveUsersInRoom(payload.room)
+			.filter(u => !(excludedUsers.includes(u.nick)))
+		for (let i = 0; i < targetUsers.length; i++){
+			this.messageToClient(targetUsers[i].client_id, "message", payload)
+		}
+  }
+
   public broadCastToRoom(event: string, payload: ChatMessage): void{
-	  this.server.to(payload.room).emit(event, payload)
+		const targetUsers: Array<ChatUser> = this
+			.getActiveUsersInRoom(payload.room)
+		for (let i = 0; i < targetUsers.length; i++){
+			this.messageToClient(targetUsers[i].client_id, "message", payload)
+		}
   }
 
   public messageToClient(clientId: string, event: string, payload: ChatMessage): void{

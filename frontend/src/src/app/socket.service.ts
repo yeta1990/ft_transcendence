@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject, from, Observable } from  'rxjs';
 import { io } from "socket.io-client";
+import { events } from '@shared/const';
 import { environment } from '../environments/environment'
 import { ChatMessage, SocketPayload } from '@shared/types';
 
@@ -31,13 +32,21 @@ export class SocketService {
 				console.log("join received: " + JSON.stringify(data));
 				this.message.next({event: 'join', data});
 			})
-			.on('listAllRooms', (data: any) => {
-				console.log("listRooms received: " + data);
-				this.message.next({event: 'listAllRooms', data});
+			.on('joinmp', (data: any) => {
+				console.log("join private message received: " + JSON.stringify(data));
+				this.message.next({event: 'joinmp', data});
 			})
-			.on('listMyJoinedRooms', (data: any) => {
+			.on(events.ListAllRooms, (data: any) => {
+				console.log("listRooms received: " + data);
+				this.message.next({event: events.ListAllRooms, data});
+			})
+			.on(events.ListMyJoinedRooms, (data: any) => {
 				console.log("listMyJoinedRooms received: " + data);
-				this.message.next({event: 'listMyJoinedRooms', data});
+				this.message.next({event: events.ListMyJoinedRooms, data});
+			})
+			.on(events.ListMyPrivateRooms, (data: any) => {
+				console.log("listMyPrivateRooms: " + data);
+				this.message.next({event: events.ListMyPrivateRooms, data});
 			})
 			.on('listRoomUsers', (data: any) => {
 				console.log("get users in this room: " + data);
