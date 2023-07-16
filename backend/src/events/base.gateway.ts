@@ -42,7 +42,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   private hashService: HashService;
 
   @Inject(RoomService)
-  private roomService: RoomService;
+  protected roomService: RoomService;
 
   constructor(name: string){
 	this.gatewayName = name;
@@ -281,7 +281,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  	//announce the rest of the channel a new user has joined
 	  	if (hardJoin){
 	  		const socketInfo: SocketPayload = generateSocketInformationResponse(room, `user ${nick} has joined room ${room}`)
-			this.broadCastToRoomExceptForSomeUsers('system', socketInfo.data, [nick])
+			this.broadCastToRoomExceptForSomeUsers(socketInfo.event, socketInfo.data, [nick])
 		}
 		return true;
   }
@@ -291,15 +291,15 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 			.getActiveUsersInRoom(payload.room)
 			.filter(u => !(excludedUsers.includes(u.nick)))
 		for (let i = 0; i < targetUsers.length; i++){
-			this.messageToClient(targetUsers[i].client_id, "message", payload)
+			this.messageToClient(targetUsers[i].client_id, event, payload)
 		}
   }
 
-  public broadCastToRoom(event: string, payload: ChatMessage): void{
+  public broadCastToRoom(event: string, payload: any): void{
 		const targetUsers: Array<ChatUser> = this
 			.getActiveUsersInRoom(payload.room)
 		for (let i = 0; i < targetUsers.length; i++){
-			this.messageToClient(targetUsers[i].client_id, "message", payload)
+			this.messageToClient(targetUsers[i].client_id, event, payload)
 		}
   }
 
