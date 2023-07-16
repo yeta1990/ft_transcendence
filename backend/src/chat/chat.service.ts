@@ -197,7 +197,7 @@ export class ChatService {
 		const foundRoom: Room = await this.getRoom(room)
 		const roomAdmins: User[] = foundRoom.admins;
 		for (let admin of roomAdmins){
-			if (admin.nick === nick) return true;
+			if (admin.nick === nick) return false;
 		}
 		const userToMakeAdmin: User | undefined = await this.userService.getUserByNick(nick);
 		if (!userToMakeAdmin) return false;
@@ -221,12 +221,12 @@ export class ChatService {
 		if (!foundRoom) return false;
 		const isOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorNick, room);
 		if (!isOwnerOfRoom) return false;
-		const oldUserSize: number = foundRoom.users.length;
+		const oldAdminSize: number = foundRoom.admins.length;
 		foundRoom.admins = foundRoom.admins.filter(user => {
 			return user.nick != nick;
 		})
 		await this.roomRepository.save(foundRoom);
-		if (oldUserSize === foundRoom.users.length){ 
+		if (oldAdminSize === foundRoom.admins.length){ 
 			return false;
 		}
 		return true;
