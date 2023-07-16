@@ -296,7 +296,11 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   public broadCastToRoom(event: string, payload: ChatMessage): void{
-	  this.server.to(payload.room).emit(event, payload)
+		const targetUsers: Array<ChatUser> = this
+			.getActiveUsersInRoom(payload.room)
+		for (let i = 0; i < targetUsers.length; i++){
+			this.messageToClient(targetUsers[i].client_id, "message", payload)
+		}
   }
 
   public messageToClient(clientId: string, event: string, payload: ChatMessage): void{
