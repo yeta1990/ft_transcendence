@@ -364,7 +364,9 @@ export class ChatGateway extends BaseGateway {
 		  this.server.to(socketId).emit(events.ListMyPrivateRooms, privateRoomsByNick);
 		  this.server.to(socketId).emit("system", generateSocketInformationResponse(room, `you've left ${room}`).data);
 	  	});
-	  	return
+
+	 	const roomInfo: SocketPayload = generateSocketInformationResponse(room, `user ${nick} has left room ${room}`)
+	  	this.broadCastToRoom(roomInfo.event, roomInfo.data)
 	}
 	else{
 		this.server.to(client.id)
