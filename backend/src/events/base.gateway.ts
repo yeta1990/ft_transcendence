@@ -63,15 +63,22 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
     const isUserVerified = await this.authService.verifyJwt(socket.handshake.auth.token);
  
 	if (isUserVerified){
+		const nick = this.authService.getNickFromJwt(socket.handshake.auth.token)
+  	    const isHardConnect: boolean = this.getClientSocketIdsFromNick(nick).length > 0 ? false : true
 		this.setNick(socket);
 		this.logger.log(`Socket client connected: ${socket.id}`)
 		this.users.set(socket.id, new ChatUser(
 			 socket.id,
 			 this.authService.getIdFromJwt(socket.handshake.auth.token),
-			 this.authService.getNickFromJwt(socket.handshake.auth.token))
+			 nick)
 		);
-//		this.emit('listAllRooms', await this.chatService.getAllRooms());
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
+
+  	    if (isHardConnect){
+  	    	const activeNicksInServer: Array<string> = this
+  	    		.getActiveNicksInServer()
+			this.server.emit(events.ActiveUsers, activeNicksInServer)	
+		}
 	}
 	else{
 		//disconnect
@@ -127,6 +134,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   	  if (isHardDisconnect){
 		  const allJoinedRoomsByUser: Array<string> = await this.chatService
 		  	  .getAllJoinedRoomsByOneUser(nick);
+  	   	  const activeNicksInServer: Array<string> = this
+  	    	  .getActiveNicksInServer()
+		  this.server.emit(events.ActiveUsers, activeNicksInServer)	
 		  for (let room of allJoinedRoomsByUser){
 	  		  let roomMetaData: RoomMetaData = await this.roomService
 	  		    .getRoomMetaData(room)
@@ -150,8 +160,17 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	return ([]);
   }
 
-  //this is the old method to get the users from a room
-  //I don't remove it yet because it could be useful for
+  getActiveNicksInServer(): Array<string>{
+	const clientsIterator = this.users.entries();
+	let nicks: Array<string> = []	
+	let connectedClient = clientsIterator.next()
+	while (!connectedClient.done){
+		nicks.push(connectedClient.value[1].nick)
+		connectedClient = clientsIterator.next()
+	}
+	return [...new Set(nicks)];
+  }
+
   //getting the currently connected users
   getActiveUsersInRoom(room: string): Array<ChatUser>{
    	const adapter: any = this.server.adapter;

@@ -54,7 +54,9 @@ export class SocketService {
 			})
 			.on(events.RoomMetaData, (data: RoomMetaData) => {
 				console.log("room metadata: " + JSON.stringify(data));
-					
+			})
+			.on(events.ActiveUsers, (data: Array<string>) => {
+				console.log("active users: " + JSON.stringify(data));
 			})
 			.on('system', (data: ChatMessage) => {
 				this.message.next({event: 'system', data});
