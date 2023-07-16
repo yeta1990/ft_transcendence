@@ -268,12 +268,21 @@ export class ChatGateway extends BaseGateway {
   async makeRoomAdmin(client: Socket, payload: ChatMessage){
 	  const nick: string = client.handshake.query.nick as string;
 	  const adminOk: boolean = await this.chatService.makeRoomAdmin(nick, payload.nick, payload.room);
+	  if (adminOk){
+	    const roomInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.nick} is now admin of room ${payload.room}`)
+	  	this.broadCastToRoom(roomInfo.event, roomInfo.data)
+	  }
   }
 
   @SubscribeMessage('noadmin')
   async removeRoomAdmin(client: Socket, payload: ChatMessage){
 	  const nick: string = client.handshake.query.nick as string;
 	  const adminRemoved: boolean = await this.chatService.removeRoomAdmin(nick, payload.nick, payload.room);
+	  console.log(adminRemoved)
+	  if (adminRemoved){
+	    const roomInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.nick} isn't admin of room ${payload.room} anymore`)
+	  	this.broadCastToRoom(roomInfo.event, roomInfo.data)
+	  }
   } 
 
   @SubscribeMessage(events.Pass)
