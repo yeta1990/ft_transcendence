@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, QueryList, ElementRef, ViewChild, Vie
 import { ChatService } from './chat.service';
 import { FormBuilder } from '@angular/forms';
 import { ChatMessage, SocketPayload } from '@shared/types';
+import { events } from '@shared/const';
 import { takeUntil } from "rxjs/operators"
 import { Subject, Subscription, pipe } from "rxjs"
  
@@ -19,9 +20,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	messageList: Map<string, ChatMessage[]> = new Map<string, ChatMessage[]>();
 	currentRoom: string;
 	roomList: string[] = [""];
-//	joinedRooms: Set<string> = new Set<string>//;["default"];
 	availableRoomsList: string[] = [];
 	myJointRoomList: string[] = [];
+	myPrivateMessageRooms: string[] = [];
 	private subscriptions = new Subscription();
 
 	destroy: Subject<any> = new Subject();
@@ -62,7 +63,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	//subscription to all events from the service
 	ngOnInit(): void {
-//		this.joinUserToRoom("#default");
 		this.subscriptions.add(
 			this.chatService
 			.getMessage()
@@ -71,10 +71,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				if (payload.event === 'message'){
 					this.messageList.get(payload.data.room)!.push(payload.data);
 				}
-				else if (payload.event === 'listAllRooms'){
+				else if (payload.event === events.ListAllRooms){
 					this.availableRoomsList = Array.from(payload.data);
 				}
-				else if (payload.event === 'listMyJoinedRooms'){
+				else if (payload.event === events.ListMyPrivateRooms){
+					this.myPrivateMessageRooms = Array.from(payload.data);
+				}
+				else if (payload.event === events.ListMyJoinedRooms){
 					this.myJointRoomList = Array.from(payload.data)	
 					if (this.myJointRoomList.length == 0){
 						this.currentRoom = "";
@@ -89,6 +92,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				}
 				else if (payload.event === 'join'){
 					this.currentRoom = payload.data.room;
+					//check if the messageList map has space to store the room messages to prevent errors, but only 100% necessary in joinmp
+					if (!this.messageList.has(payload.data.room)){
+						this.messageList.set(this.currentRoom, new Array<ChatMessage>);
+					}
+				}
+				else if (payload.event === 'joinmp'){
+					//check if the messageList map has space to store the room messages. in case of private messages, currently it needs to be created:
+					if (!this.messageList.has(payload.data.room)){
+						this.messageList.set(payload.data.room, new Array<ChatMessage>);
+					}
 				}
         		this.scrollToBottom();
 			})
@@ -133,7 +146,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			//channel list comma-separated and password
 			this.chatService.partFromRoom(splittedCommand[1]);
 			this.messageList.delete(splittedCommand[1]);
-//			this.
 		}
 		else if (splittedCommand[0] === '/admin'){
 			if (splittedCommand.length < 3)
@@ -155,6 +167,31 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				return ;
 			this.chatService.removeBanFromRoom(splittedCommand[1], splittedCommand[2])
 		}
+		else if (splittedCommand[0] === '/mp'){
+			if (splittedCommand.length < 3)
+				return ;
+			this.chatService.sendPrivateMessage(splittedCommand[1], command.split(":", 2)[1])
+		}
+		else if (splittedCommand[0] === '/banuser'){
+			if (splittedCommand.length < 2)
+				return ;
+			this.chatService.banUser2User(splittedCommand[1])
+		}
+		else if (splittedCommand[0] === '/nobanuser'){
+			if (splittedCommand.length < 2)
+				return ;
+			this.chatService.noBanUser2User(splittedCommand[1])
+		}
+		else if (splittedCommand[0] === '/' + events.Pass){
+			if (splittedCommand.length < 3)
+				return ;
+			this.chatService.addPassToRoom(splittedCommand[1], command.split(" ", 3)[2])
+		}
+		else if (splittedCommand[0] === '/' + events.RemovePass){
+			if (splittedCommand.length < 2)
+				return ;
+			this.chatService.removePassOfRoom(splittedCommand[1])
+		}
 	}
 
 
@@ -168,7 +205,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		}
 		this.messageToChat.get('newMessage')!.setValue('');
 	}
-
+	
 	sendMessageToChat(event: string, destination:string, message: string): void{
 		if (message)
 			this.chatService.sendMessageToChat(event, destination, message);
