@@ -4,6 +4,8 @@ import { HttpService } from '@nestjs/axios';
 import { HashService } from '../hash/hash.service';
 import { Repository } from 'typeorm';
 import { Room } from './room.entity';
+import { RoomService } from './room/room.service';
+
 import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
 
@@ -16,7 +18,7 @@ export class ChatService {
 	@InjectRepository(User)
 	private readonly userRepository: Repository<User>;
 
-	constructor(private httpService: HttpService, private hashService: HashService, private userService: UserService) {}
+	constructor(private httpService: HttpService, private hashService: HashService, private userService: UserService, private roomService: RoomService) {}
 
 	public async createRoom(nick:string, room: string, hasPass: boolean, password: string | undefined): Promise<boolean>{
 		const roomAlreadyExists = await this.roomRepository.findOne({ where: {name: room}});
@@ -104,12 +106,15 @@ export class ChatService {
 	}
 
 	public async getRoom(room: string): Promise<Room>{
+		return await this.roomService.getRoom(room)
+		/*
 		const foundRoom = await this.roomRepository
 			.findOne({
 				relations: ['owner', 'users', 'admins', 'banned'],
 				where: { name: room}
 			});
 		return foundRoom;
+		*/
 	}
 
 	public async addUserToRoom(room: string, nick: string): Promise<boolean>{
