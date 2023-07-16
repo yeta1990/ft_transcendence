@@ -238,19 +238,21 @@ export class ChatService {
 	// - nobody can ban himself
 	public async banUserOfRoom(executorNick: string, nick: string, room: string): Promise<boolean>{
 		//check privileges
+		console.log(executorNick, nick, room)
 		if (executorNick === nick) return false;
 		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorNick, room);
 		const executorIsAdminOfRoom: boolean = await this.isAdminOfRoom(executorNick, room);
 		if (!executorIsOwnerOfRoom && !executorIsAdminOfRoom) return false;
 		const targetIsAlreadyBanned: boolean = await this.isBannedOfRoom(nick, room)
-		if (targetIsAlreadyBanned) return true;
+		if (targetIsAlreadyBanned) return false;
 		const targetIsAdminOfRoom: boolean = await this.isAdminOfRoom(nick, room)
-		if (executorIsAdminOfRoom && targetIsAdminOfRoom) return false;
+		if (!executorIsOwnerOfRoom && executorIsAdminOfRoom && targetIsAdminOfRoom) return false;
 		const targetIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(nick, room)
 		if (executorIsAdminOfRoom && targetIsOwnerOfRoom) return false;
 		if (executorIsOwnerOfRoom && targetIsOwnerOfRoom) return false;
 
-		//ban
+		//remove privileges and ban
+		await this.removeRoomAdmin(executorNick, nick, room);
 		const foundRoom: Room = await this.getRoom(room)
 		if (!foundRoom) return false;
 		const roomBanned: User[] = foundRoom.banned;
@@ -285,14 +287,14 @@ export class ChatService {
 		const executorIsAdminOfRoom: boolean = await this.isAdminOfRoom(executorNick, room);
 		if (!executorIsOwnerOfRoom && !executorIsAdminOfRoom) return false;
 		const isTargetBanned: boolean = await this.isBannedOfRoom(nick, room)
-		if (!isTargetBanned) return true;
+		if (!isTargetBanned) return false;
 
-		const oldUserSize: number = foundRoom.users.length;
+		const oldBannedSize: number = foundRoom.users.length;
 		foundRoom.banned = foundRoom.banned.filter(user => {
 			return user.nick != nick;
 		})
 		await this.roomRepository.save(foundRoom);
-		if (oldUserSize === foundRoom.users.length){ 
+		if (oldBannedSize === foundRoom.banned.length){ 
 			return false;
 		}
 		return true;

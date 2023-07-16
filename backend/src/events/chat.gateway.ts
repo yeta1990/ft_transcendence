@@ -306,6 +306,7 @@ export class ChatGateway extends BaseGateway {
 	  	.chatService
 	  	.banUserOfRoom(nick, payload.nick, payload.room);
 
+		console.log(banOk)
 	  if (banOk){
 
 	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromNick(payload.nick);
@@ -323,6 +324,9 @@ export class ChatGateway extends BaseGateway {
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
 				`You've banned ${payload.nick} in ${payload.room} successfully`).data)
+	    const banInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.nick} has been banned of ${payload.room}`)
+	  	this.broadCastToRoom(banInfo.event, banInfo.data)
+		
   	  }
   }
 
