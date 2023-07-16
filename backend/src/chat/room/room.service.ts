@@ -35,12 +35,12 @@ export class RoomService {
 	public async getRoomMetaData(room: string): Promise<RoomMetaData> {
 		let data: RoomMetaData = {} as RoomMetaData;
 		const roomData: Room = await this.getRoom(room);
+		if (!roomData)
+			return data;
 		data.room = room;
-
 		data.owner = roomData.owner ? roomData.owner.nick : null;
 		data.admins = [...new Set(roomData.admins.map(a => a.nick))];
 		data.users = [...new Set(roomData.users.map(u => u.nick))];
-		console.log(data)
 		return data;
 	}
 }
