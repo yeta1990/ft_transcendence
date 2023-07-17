@@ -53,10 +53,12 @@ export class SocketService {
 				this.message.next({event: 'listRooms', data});
 			})
 			.on(events.RoomMetaData, (data: RoomMetaData) => {
-				console.log("room metadata: " + JSON.stringify(data));
+				this.message.next({event: events.RoomMetaData, data})
+//				console.log("room metadata: " + JSON.stringify(data));
 			})
 			.on(events.ActiveUsers, (data: Array<string>) => {
-				console.log("active users: " + JSON.stringify(data));
+				this.message.next({event: events.ActiveUsers, data})
+//				console.log("active users: " + JSON.stringify(data));
 			})
 			.on('system', (data: ChatMessage) => {
 				this.message.next({event: 'system', data});

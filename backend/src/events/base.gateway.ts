@@ -140,9 +140,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		  for (let room of allJoinedRoomsByUser){
 	  		  let roomMetaData: RoomMetaData = await this.roomService
 	  		    .getRoomMetaData(room)
-	  		    roomMetaData.connectedUsers = [...new Set(this
-	  		        .getActiveUsersInRoom(room)
-	  		    	.map(u => u.nick))];
 	  		  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
 		  }
   	  }

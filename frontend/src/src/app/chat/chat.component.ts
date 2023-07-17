@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, QueryList, ElementRef, ViewChild, ViewChildren, OnDestroy} from '@angular/core';
 import { ChatService } from './chat.service';
 import { FormBuilder } from '@angular/forms';
-import { ChatMessage, SocketPayload } from '@shared/types';
+import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
 import { events } from '@shared/const';
 import { takeUntil } from "rxjs/operators"
 import { Subject, Subscription, pipe } from "rxjs"
@@ -23,6 +23,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	availableRoomsList: string[] = [];
 	myJointRoomList: string[] = [];
 	myPrivateMessageRooms: string[] = [];
+	activeUsers: Array<string> = [];
+	roomsMetaData: Map<string, RoomMetaData> = new Map<string, RoomMetaData>();
 	private subscriptions = new Subscription();
 
 	destroy: Subject<any> = new Subject();
@@ -102,6 +104,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					if (!this.messageList.has(payload.data.room)){
 						this.messageList.set(payload.data.room, new Array<ChatMessage>);
 					}
+				}
+				else if (payload.event === events.ActiveUsers){
+					this.activeUsers = payload.data;
+				}
+				else if (payload.event === events.RoomMetaData){
+					console.log("-------rooms metadata--------")
+					this.roomsMetaData.set(payload.data.room, payload.data)
+					const it = this.roomsMetaData.entries();
+					for (const el of it){
+						console.log(JSON.stringify(el))
+					}
+					console.log("-----end of rooms metadata-----")
 				}
         		this.scrollToBottom();
 			})

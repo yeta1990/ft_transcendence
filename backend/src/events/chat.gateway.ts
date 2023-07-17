@@ -129,8 +129,6 @@ export class ChatGateway extends BaseGateway {
 		//update metadata to all users of the room
 		let roomMetaData: RoomMetaData = await this.roomService
 			.getRoomMetaData(room)
-		roomMetaData.connectedUsers = [...new Set(this.getActiveUsersInRoom(room)
-			.map(u => u.nick))];
 	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
 
 		//sending old messages of the room, except for those of users that banned
