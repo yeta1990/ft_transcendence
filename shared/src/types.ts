@@ -16,7 +16,6 @@ export type RoomMetaData = {
 	owner: string,
 	admins: Array<string>,
 	users: Array<string>,
-	connectedUsers: Array<string>
 }
 
 // type to handle relationships between
