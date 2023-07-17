@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn, ManyToMany, JoinTable } from 'typeorm';
 
 import { Room } from '../chat/room.entity';
 export enum UserStatus {
@@ -84,6 +84,20 @@ export class User {
 
 	@ManyToMany(() => Room, (room) => room.banned)
 	bannedRooms: Room[];
+
+	@ManyToMany(type => User)
+	@JoinTable()
+	bannedUsers: User[];
+
+
+//	@OneToMany(() => User, (user) => user.bannedUsers)
+//	bannedBy: User[];
+
+//	@ManyToMany(() => User, (user) => user.bannedBy)
+//	bannedUsers: User[];
+
+//	@ManyToMany(() => User, (user) => user.bannedUsers)
+//	bannedBy: User[];
  
 	// FUNCIONES ---------------------------------------------
 
