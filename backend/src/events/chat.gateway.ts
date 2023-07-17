@@ -2,7 +2,7 @@ import { SubscribeMessage, WebSocketGateway, WsResponse } from '@nestjs/websocke
 import { Inject } from '@nestjs/common';
 import { BaseGateway } from './base.gateway';
 import { Socket } from 'socket.io';
-import { ChatMessage, SocketPayload } from '@shared/types';
+import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
 import { events, values } from '@shared/const';
 import { generateSocketErrorResponse, generateSocketInformationResponse } from '@shared/functions';
 import { generateJoinResponse } from '@shared/functions';
@@ -125,6 +125,11 @@ export class ChatGateway extends BaseGateway {
 	  if (successfulJoin){
 	  	const response: ChatMessage = generateJoinResponse(originalRoom);
 		this.messageToClient(clientSocketId, typeOfJoin, response);
+
+		//update metadata to all users of the room
+		let roomMetaData: RoomMetaData = await this.roomService
+			.getRoomMetaData(room)
+	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
 
 		//sending old messages of the room, except for those of users that banned
 		//the new user trying to join

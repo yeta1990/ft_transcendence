@@ -3,7 +3,7 @@ import { Subject, from, Observable } from  'rxjs';
 import { io } from "socket.io-client";
 import { events } from '@shared/const';
 import { environment } from '../environments/environment'
-import { ChatMessage, SocketPayload } from '@shared/types';
+import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
 
 export class SocketService {
 //https://auth0.com/blog/real-time-charts-using-angular-d3-and-socket-io/
@@ -51,6 +51,14 @@ export class SocketService {
 			.on('listRoomUsers', (data: any) => {
 				console.log("get users in this room: " + data);
 				this.message.next({event: 'listRooms', data});
+			})
+			.on(events.RoomMetaData, (data: RoomMetaData) => {
+				this.message.next({event: events.RoomMetaData, data})
+//				console.log("room metadata: " + JSON.stringify(data));
+			})
+			.on(events.ActiveUsers, (data: Array<string>) => {
+				this.message.next({event: events.ActiveUsers, data})
+//				console.log("active users: " + JSON.stringify(data));
 			})
 			.on('system', (data: ChatMessage) => {
 				this.message.next({event: 'system', data});
