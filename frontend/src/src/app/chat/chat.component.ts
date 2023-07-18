@@ -5,6 +5,8 @@ import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
 import { events } from '@shared/const';
 import { takeUntil } from "rxjs/operators"
 import { Subject, Subscription, pipe } from "rxjs"
+import { User } from '../user';
+import { MyProfileService } from '../my-profile/my-profile.service';
  
 @Component({
   selector: 'app-chat',
@@ -25,6 +27,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	myPrivateMessageRooms: string[] = [];
 	activeUsers: Array<string> = [];
 	roomsMetaData: Map<string, RoomMetaData> = new Map<string, RoomMetaData>();
+	myUser: User | undefined;
 	private subscriptions = new Subscription();
 
 	destroy: Subject<any> = new Subject();
@@ -35,9 +38,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	constructor(
 		private chatService: ChatService,
 		private formBuilder: FormBuilder,
+		private profileService: MyProfileService,
    ) {
 		this.currentRoom = "";
 		this.messageList.set(this.currentRoom, new Array<ChatMessage>);
+		this.profileService.getUserDetails()
+			.subscribe(
+				(response: User) => {this.myUser= response;},
+			(error) => {console.log(error);}
+			);
    }
 
    joinUserToRoom(rooms: string): void {
@@ -65,6 +74,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	//subscription to all events from the service
 	ngOnInit(): void {
+		this.profileService.getUserDetails()
 		this.subscriptions.add(
 			this.chatService
 			.getMessage()
