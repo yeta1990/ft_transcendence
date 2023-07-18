@@ -31,7 +31,6 @@ export class MyProfileComponent implements OnInit {
 			);
 	}
 	logout(): void {
-		console.log("log out");
 		this.authService.logout();
 		this.router.navigateByUrl('/login');
 	}

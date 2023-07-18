@@ -25,6 +25,10 @@ display:none;
   overflow-y:scroll;
 }
 
+.input-message-chat {
+  width: 450px;
+}
+
 .chat-logs::-webkit-scrollbar-track
 {
 	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);

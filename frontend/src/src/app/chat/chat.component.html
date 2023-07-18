@@ -50,20 +50,39 @@
       </div>
 		<form [formGroup]="messageToChat" (ngSubmit)="processMessageToSend()">
 			<br />
-			<b>{{this.currentRoom}} &nbsp;&nbsp;&nbsp;</b>
-			<input id="" type="text" formControlName="newMessage" placeholder="Send new message...">
+			<b>{{myUser?.nick}}&nbsp;&nbsp;&nbsp;</b>
+			<input class="input-message-chat" type="text" formControlName="newMessage" placeholder="Send new message...">
 		
-			<button class="button" type="submit"> Submit</button>
+			<button class="button" type="submit">Submit</button>
 		</form>
     </div>
 
 	<div class="right-column">
-		<div *ngFor="let roomMetaData of roomsMetaData | keyvalue"> 
-			<h2 *ngIf="roomMetaData.key === currentRoom" class="column-heading">Channel users</h2>
+		<h2 class="column-heading">Channel owner</h2>
+		<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
+      		<ul class="user-list">
+      			<span *ngIf="roomMetaData.key === currentRoom && roomMetaData.value.owner">@{{roomMetaData.value.owner}}</span>
+      			<span *ngIf="roomMetaData.key === currentRoom && !roomMetaData.value.owner">(none)</span>
+			</ul>
+		</div>
+		<h2 class="column-heading">Channel administrators</h2>
+		<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
+      		<ul class="user-list">
+				<div *ngFor="let nick of roomMetaData.value.admins" > 
+						<li *ngIf="roomMetaData.key === currentRoom">@{{nick}}</li>
+				</div>
+			</ul>
+		</div>
+
+	<h2 class="column-heading">Channel users</h2>
+		<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
       		<ul class="user-list">
 				<div *ngFor="let nick of roomMetaData.value.users" > 
-
-						<li *ngIf="roomMetaData.key === currentRoom">@{{nick}}</li>
+						<li *ngIf="roomMetaData.key === currentRoom && 
+							!roomMetaData.value.admins.includes(nick) && 
+							roomMetaData.value.owner !== nick">
+							@{{nick}}
+						</li>
 				</div>
 			</ul>
 		</div>
@@ -74,12 +93,3 @@
 -------------------
 <br>
 <br>
-
-<form [formGroup]="messageToChat" (ngSubmit)="processMessageToSend()">
-	<br />
-	<b>{{this.currentRoom}}</b>
-	<br />
-	<input id="" type="text" formControlName="newMessage" placeholder="Send new message...">
-
-	<button class="button" type="submit"> Submit</button>
-</form>
