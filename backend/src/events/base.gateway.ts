@@ -99,7 +99,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   async removeUserFromRoom(room: string, nick: string): Promise<boolean> {
   	  //updating relationships and entities in db
   	  const result: boolean = await this.chatService.removeUserFromRoom(room, nick)
-
   	  if (result){
 	    const socketIdsByNick: Array<string> = this.getClientSocketIdsFromNick(nick);
   	  	//unsubscribe user from socket service
@@ -152,6 +151,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	const roomsRaw: any = adapter.rooms;
 
 	if (roomsRaw){
+		console.log(roomsRaw)
 		return (Array.from(roomsRaw.keys()).filter(x => x[0] == '#') as Array<string>);
 	}
 	return ([]);

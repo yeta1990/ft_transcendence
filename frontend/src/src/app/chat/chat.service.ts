@@ -86,5 +86,9 @@ export class ChatService {
 		this.socketService.sendMessageToServer(events.RemovePass, payloadToSend);
 	}
 
+	disconnectClient(){
+		this.socketService.disconnectClient();
+	}
+
 
 }

@@ -137,6 +137,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		//a trick to finish subscriptions (second part)
 		this.destroy.next("");
 		this.destroy.complete();
+
+		//this is a soft disconnect, not a real disconnect
+  		//when the chat component disappears (bc user has clicked
+  		//in other section of the site)
+  		//this way we force the server to send the historial of each joined room
+  		//in case the component appears again in the client
+		this.chatService.disconnectClient();
 	}
 
 	ngAfterViewInit() {

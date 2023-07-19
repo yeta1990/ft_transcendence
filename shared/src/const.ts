@@ -6,7 +6,8 @@ export const events = {
 	Pass: "pass",
 	RemovePass: "nopass",
 	RoomMetaData: "roomMetaData",
-	ActiveUsers: "activeUsers"
+	ActiveUsers: "activeUsers",
+	SoftDisconnect: "softDisconnect"
 }
 
 export const values = {
