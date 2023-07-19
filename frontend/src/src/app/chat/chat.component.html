@@ -1,29 +1,42 @@
-<b>available rooms, pick one</b>
-<ul *ngFor="let room of availableRoomsList">
-	<li><a href="javascript:void(0)" (click)="joinUserToRoom(room)">{{room}}</a></li>
-</ul>
-<br>
-currently open private messages:
-<ul *ngFor="let room of myPrivateMessageRooms">
-	<li><a href="javascript:void(0)" (click)="joinUserToRoom(room)">{{room}}</a></li>
-</ul>
-<br><br>
-<b>you've already joined all these rooms:</b>
-<ul *ngFor="let room of myJointRoomList">{{room}},</ul>
-<br>
--------------------
-<br>
-<br>
-<div *ngIf="currentRoom.length === 0">
-	You aren't viewing any room! Choose one from the list
 
-</div>
 
-<div *ngIf="currentRoom.length > 0">
-Currently viewing room <b>{{this.currentRoom}}</b>
+  <div class="container">
+    <div class="left-column">
+      <h2 class="column-heading">Joined channels</h2>
+      <ul class="channel-list">
+      	  <div *ngFor="let room of myJointRoomList">
+      	 	 <li *ngIf="room[0] === '#'">
+				<a href="javascript:void(0)" (click)="joinUserToRoom(room)">
+					{{room}}
+				</a>
+			 </li>
+      	  </div>
+      </ul>
 
-<br>
-	<div class="chat-box-body">
+      <h2 class="column-heading">My private conversations</h2>
+	  <ul class="private-messages-list" *ngFor="let room of myPrivateMessageRooms">
+	  	<li><a href="javascript:void(0)" (click)="joinUserToRoom(room)">{{room}}</a></li>
+	  </ul>
+
+      <h2 class="column-heading">Available channels</h2>
+      <ul class="available-channels-list">
+      	  <div *ngFor="let room of availableRoomsList">
+      	 	 <li *ngIf="room[0] === '#' && !myJointRoomList.includes(room)">
+				<a href="javascript:void(0)" (click)="joinUserToRoom(room)">
+					{{room}}
+				</a>
+      		</li>
+      	  </div>
+      </ul>
+    </div>
+
+    <div class="center-column">
+      	<h2 class="column-heading" *ngIf="currentRoom.length > 0">{{currentRoom}}</h2>
+      	<h2 class="column-heading" *ngIf="currentRoom.length === 0">
+			Welcome! Choose one channel from the list
+      	</h2>
+      <div class="chat-box-body">
+	  <!-- <div class="chat-box-body"> -->
 	<div #chatBox class="chat-logs">
 	<div #messages *ngFor="let message of messageList.get(this.currentRoom)">
 		<div [ngSwitch]="message.nick">
@@ -32,13 +45,51 @@ Currently viewing room <b>{{this.currentRoom}}</b>
 		</div>
 	</div>
 	</div>
-	</div>
-</div>
-<form [formGroup]="messageToChat" (ngSubmit)="processMessageToSend()">
-	<br />
-	<b>{{this.currentRoom}}</b>
-	<br />
-	<input id="" type="text" formControlName="newMessage" placeholder="Send new message...">
 
-	<button class="button" type="submit"> Submit</button>
-</form>
+	<!-- </div> -->
+      </div>
+		<form [formGroup]="messageToChat" (ngSubmit)="processMessageToSend()">
+			<br />
+			<b>{{myUser?.nick}}&nbsp;&nbsp;&nbsp;</b>
+			<input class="input-message-chat" type="text" formControlName="newMessage" placeholder="Send new message...">
+		
+			<button class="button" type="submit">Submit</button>
+		</form>
+    </div>
+
+	<div class="right-column">
+		<h2 class="column-heading">Channel owner</h2>
+		<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
+      		<ul class="user-list">
+      			<span *ngIf="roomMetaData.key === currentRoom && roomMetaData.value.owner">@{{roomMetaData.value.owner}}</span>
+      			<span *ngIf="roomMetaData.key === currentRoom && !roomMetaData.value.owner">(none)</span>
+			</ul>
+		</div>
+		<h2 class="column-heading">Channel administrators</h2>
+		<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
+      		<ul class="user-list">
+				<div *ngFor="let nick of roomMetaData.value.admins" > 
+						<li *ngIf="roomMetaData.key === currentRoom">@{{nick}}</li>
+				</div>
+			</ul>
+		</div>
+
+	<h2 class="column-heading">Channel users</h2>
+		<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
+      		<ul class="user-list">
+				<div *ngFor="let nick of roomMetaData.value.users" > 
+						<li *ngIf="roomMetaData.key === currentRoom && 
+							!roomMetaData.value.admins.includes(nick) && 
+							roomMetaData.value.owner !== nick">
+							@{{nick}}
+						</li>
+				</div>
+			</ul>
+		</div>
+	</div>
+  </div>
+
+<br>
+-------------------
+<br>
+<br>

@@ -23,7 +23,7 @@ export class ChatMessageService {
 			.createQueryBuilder()
 			.where('"roomName"= :room', {room})
 			.orderBy({"date": "DESC"})
-			.limit(3)
+			.limit(200)
 			.getMany()
 		//trick because column roomName is conflictive
 		messages.map(m => m.room = room);

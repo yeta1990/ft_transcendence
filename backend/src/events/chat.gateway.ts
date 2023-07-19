@@ -2,7 +2,7 @@ import { SubscribeMessage, WebSocketGateway, WsResponse } from '@nestjs/websocke
 import { Inject } from '@nestjs/common';
 import { BaseGateway } from './base.gateway';
 import { Socket } from 'socket.io';
-import { ChatMessage, SocketPayload } from '@shared/types';
+import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
 import { events, values } from '@shared/const';
 import { generateSocketErrorResponse, generateSocketInformationResponse } from '@shared/functions';
 import { generateJoinResponse } from '@shared/functions';
@@ -116,6 +116,10 @@ export class ChatGateway extends BaseGateway {
 	  					generateSocketErrorResponse("", `You can't open a private conversation with ${room.substr(1, room.length - 1)} because you are banned`).data);
 	      }
 		  room = await this.chatService.generatePrivateRoomName(nick, room.substr(1, room.length - 1))
+		  if (!room){ 
+			  return this.messageToClient(clientSocketId, "system", 
+	  		  	  generateSocketErrorResponse("", `Bad channel name`).data);
+	  	  }
   	  }
 
 	  const wasUserAlreadyActiveInRoom: boolean = await this.isUserAlreadyActiveInRoom(clientSocketId, room);
@@ -125,6 +129,11 @@ export class ChatGateway extends BaseGateway {
 	  if (successfulJoin){
 	  	const response: ChatMessage = generateJoinResponse(originalRoom);
 		this.messageToClient(clientSocketId, typeOfJoin, response);
+
+		//update metadata to all users of the room
+		let roomMetaData: RoomMetaData = await this.roomService
+			.getRoomMetaData(room)
+	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
 
 		//sending old messages of the room, except for those of users that banned
 		//the new user trying to join
@@ -176,18 +185,19 @@ export class ChatGateway extends BaseGateway {
 	  const pass: string | undefined = roomAndPassword.split(" ", 2)[1];
 	  const nick: string = client.handshake.query.nick as string;
 
+  	  if (room.length > 0 && room[0] != '#' && room[0] != '@'){
+  	  	room = '#' + room;
+  	  }
+
 	  for (const c of values.forbiddenChatRoomCharacters){
-		if (room.includes(c)){
+		if (room.substr(1, room.length - 1).includes(c)){
 			this.server.to(client.id)
 				.emit("system", generateSocketErrorResponse(room, 
 					`Invalid name for the channel ${room}, try other`).data)
 			return ;
-		} 
+		}
 	  }
 
-  	  if (room.length > 0 && room[0] != '#' && room[0] != '@'){
-  	  	room = '#' + room;
-  	  }
   	  //check if user is banned from channel
   	  await this.joinRoutine(client.id, nick, room, pass, "join")
   }
@@ -387,5 +397,15 @@ export class ChatGateway extends BaseGateway {
 				`Error: maybe the room ${room} doesn't exist, or you aren't part of that room`).data)
 	}
   }
- 
+
+  //used when the client changes the view and the chat component disappears.
+  //this way we force the server to send the historial of each joined room
+  //in case the component appears again in the client
+  @SubscribeMessage(events.SoftDisconnect)
+  softDisconnect(client: Socket): void{
+  	  const activeRooms: Array<string> = this.getActiveRooms()
+  	  for (const room of activeRooms){
+		this.server.in(client.id).socketsLeave(room);
+  	  }
+  }
 }

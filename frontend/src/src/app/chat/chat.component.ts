@@ -1,10 +1,12 @@
 import { Component, OnInit, AfterViewInit, QueryList, ElementRef, ViewChild, ViewChildren, OnDestroy} from '@angular/core';
 import { ChatService } from './chat.service';
 import { FormBuilder } from '@angular/forms';
-import { ChatMessage, SocketPayload } from '@shared/types';
+import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
 import { events } from '@shared/const';
 import { takeUntil } from "rxjs/operators"
 import { Subject, Subscription, pipe } from "rxjs"
+import { User } from '../user';
+import { MyProfileService } from '../my-profile/my-profile.service';
  
 @Component({
   selector: 'app-chat',
@@ -23,6 +25,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	availableRoomsList: string[] = [];
 	myJointRoomList: string[] = [];
 	myPrivateMessageRooms: string[] = [];
+	activeUsers: Array<string> = [];
+	roomsMetaData: Map<string, RoomMetaData> = new Map<string, RoomMetaData>();
+	myUser: User | undefined;
 	private subscriptions = new Subscription();
 
 	destroy: Subject<any> = new Subject();
@@ -33,9 +38,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	constructor(
 		private chatService: ChatService,
 		private formBuilder: FormBuilder,
+		private profileService: MyProfileService,
    ) {
 		this.currentRoom = "";
 		this.messageList.set(this.currentRoom, new Array<ChatMessage>);
+		this.profileService.getUserDetails()
+			.subscribe(
+				(response: User) => {this.myUser= response;},
+			(error) => {console.log(error);}
+			);
    }
 
    joinUserToRoom(rooms: string): void {
@@ -63,6 +74,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	//subscription to all events from the service
 	ngOnInit(): void {
+		this.profileService.getUserDetails()
 		this.subscriptions.add(
 			this.chatService
 			.getMessage()
@@ -103,6 +115,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 						this.messageList.set(payload.data.room, new Array<ChatMessage>);
 					}
 				}
+				else if (payload.event === events.ActiveUsers){
+					this.activeUsers = payload.data;
+				}
+				else if (payload.event === events.RoomMetaData){
+					console.log("-------rooms metadata--------")
+					this.roomsMetaData.set(payload.data.room, payload.data)
+					const it = this.roomsMetaData.entries();
+					for (const el of it){
+						console.log(JSON.stringify(el))
+					}
+					console.log("-----end of rooms metadata-----")
+				}
         		this.scrollToBottom();
 			})
 		);
@@ -113,6 +137,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		//a trick to finish subscriptions (second part)
 		this.destroy.next("");
 		this.destroy.complete();
+
+		//this is a soft disconnect, not a real disconnect
+  		//when the chat component disappears (bc user has clicked
+  		//in other section of the site)
+  		//this way we force the server to send the historial of each joined room
+  		//in case the component appears again in the client
+		this.chatService.disconnectClient();
 	}
 
 	ngAfterViewInit() {

@@ -4,10 +4,13 @@ export const events = {
 	ListMyPrivateRooms: "listMyPrivateRooms",
 	ListAllRooms: "listAllRooms",
 	Pass: "pass",
-	RemovePass: "nopass"
+	RemovePass: "nopass",
+	RoomMetaData: "roomMetaData",
+	ActiveUsers: "activeUsers",
+	SoftDisconnect: "softDisconnect"
 }
 
 export const values = {
-	forbiddenChatRoomCharacters: [':', '@']
+	forbiddenChatRoomCharacters: [':', '#', '@']
 }
 
