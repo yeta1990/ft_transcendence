@@ -10,6 +10,6 @@ export const events = {
 }
 
 export const values = {
-	forbiddenChatRoomCharacters: [':', '@']
+	forbiddenChatRoomCharacters: [':', '#', '@']
 }
 

@@ -21,8 +21,9 @@ export class UserService {
     	})
 	}
 
-	public async getBannedUsersByNick(nick: string): Promise<User[]> {
+	public async getBannedUsersByNick(nick: string): Promise<User[] | undefined> {
 		const user: User = await this.getUserByNick(nick);
+		if (!user) return null;
 	    return await this.connection.query(
 	    	`SELECT f."userId_2" as id, nick
 	    	FROM user_banned_users_user f
@@ -41,6 +42,7 @@ export class UserService {
 
 	public async isUserBannedFromUser(executor: string, banned: string): Promise<boolean>{
 		const bannedUsers = await this.getBannedUsersByNick(executor);
+		if (!bannedUsers) return false;
 		for (let i = 0; i < bannedUsers.length; i++){
 			if (bannedUsers[i].nick === banned) return true;
 		}
