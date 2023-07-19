@@ -397,5 +397,15 @@ export class ChatGateway extends BaseGateway {
 				`Error: maybe the room ${room} doesn't exist, or you aren't part of that room`).data)
 	}
   }
- 
+
+  //used when the client changes the view and the chat component disappears.
+  //this way we force the server to send the historial of each joined room
+  //in case the component appears again in the client
+  @SubscribeMessage(events.SoftDisconnect)
+  softDisconnect(client: Socket): void{
+  	  const activeRooms: Array<string> = this.getActiveRooms()
+  	  for (const room of activeRooms){
+		this.server.in(client.id).socketsLeave(room);
+  	  }
+  }
 }
