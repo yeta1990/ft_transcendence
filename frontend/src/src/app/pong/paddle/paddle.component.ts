@@ -28,7 +28,6 @@ export class PaddleComponent extends EntityComponent {//implements OnInit {
       
       super(w,h,x,y,speed);
       //pongService: PongService;
-      console.log("Here now\n");
 
     this.subscriptions.add(
     this.pongService
@@ -50,7 +49,7 @@ export class PaddleComponent extends EntityComponent {//implements OnInit {
   update(canvas: any){
       if( PongComponent.keysPressed[KeyBindings.UP] ){
           //this.yVel = -1;
-          this.pongService.sendSignal("up", "pongRoom", "pong");
+          this.pongService.sendSignal("up", "#pongRoom", "pong");
           if(this.y <= 20){
             this.yVel = 0
        }

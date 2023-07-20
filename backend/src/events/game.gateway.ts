@@ -41,7 +41,7 @@ export class GameGateway extends BaseGateway {
 	  let room: string = roomAndPassword.split(" ", 2)[0];
 	  const pass: string | undefined = roomAndPassword.split(" ", 2)[1];
 	  const nick: string = client.handshake.query.nick as string;
-
+		console.log("Try join.");
 	  for (const c of values.forbiddenChatRoomCharacters){
 		if (room.includes(c)){
 			this.server.to(client.id)
@@ -50,7 +50,6 @@ export class GameGateway extends BaseGateway {
 			return ;
 		} 
 	  }
-
   	  if (room.length > 0 && room[0] != '#' && room[0] != '@'){
   	  	room = '#' + room;
   	  }
@@ -60,6 +59,7 @@ export class GameGateway extends BaseGateway {
 
   async joinRoutine(clientSocketId: string, nick: string, room: string, pass: string, typeOfJoin: string){
 	const originalRoom = room;
+	console.log("Try join..");
 		if (room.length > 0 && room[0] == '@'){
 			if (await this.userService
 					.isUserBannedFromUser(room.substr(1, room.length - 1), nick)){

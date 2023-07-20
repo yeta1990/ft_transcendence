@@ -20,4 +20,9 @@ export class PongService {
 		const payloadToSend: ChatMessage = { room, message, nick: "", date}
 		this.socketService.sendSignal(type, payloadToSend);
 	}
+
+  joinUserToRoom(room: string){
+		this.socketService.sendMessageToServer("join", room);
+	}
+
 }

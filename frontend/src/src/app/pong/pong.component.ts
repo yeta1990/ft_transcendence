@@ -24,17 +24,24 @@ export class PongComponent implements AfterViewInit {
     private computerPlayer: ComputerPaddle | null = null;
     private ball: Ball | null = null;
     public static init: boolean = false;
+    pongService:PongService = new PongService();
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
     constructor(
         //private pongService: PongService,
-    ){}
+    ){
+        console.log("Try join Room: #pongRoom");
+        this.pongService.joinUserToRoom("#pongRoom");
+    }
 
     ngAfterViewInit() {
         this.initCanvas();
     }
     
     initCanvas() {
+
+        //console.log("Try join Room: #pongRoom");
+        //this.pongService.joinUserToRoom("#pongRoom");
         PongComponent.init = false;
         PongComponent.computerScore = 0;
         PongComponent.playerScore = 0;
