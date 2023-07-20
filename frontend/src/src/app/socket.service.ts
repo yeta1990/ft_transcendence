@@ -84,6 +84,10 @@ export class SocketService {
 	this.socket.emit(type, payload);
   }
 
+  disconnectClient(){
+	this.socket.emit(events.SoftDisconnect);
+  }
+
   getMessage(): Observable<SocketPayload>{
 	return this.messageObservable;
   }
