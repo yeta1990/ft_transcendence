@@ -18,6 +18,7 @@ import { GlobalErrorHandler } from './error-interception/global-error-handler.se
 import { interceptorProviders } from './app.interceptors';
 import { ChatComponent } from './chat/chat.component';
 import { environment } from '../environments/environment'
+import { ValidationFunctions } from '@shared/user.functions'
 
 
 @NgModule({
@@ -44,6 +45,7 @@ import { environment } from '../environments/environment'
   ],
   providers: [
 	interceptorProviders,
+  ValidationFunctions,
   ],
   bootstrap: [AppComponent]
 })

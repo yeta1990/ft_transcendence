@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable } from 'typeorm';
 import { Friend } from './friend/friend.entity'
-import { UserStatus } from '@shared/enum';
+import { UserStatus, Campuses } from '@shared/enum';
 import { Achievement } from './achievement/achievement.entity'
 
 @Entity()
@@ -32,10 +32,17 @@ export class User {
 	})
 	login: string;
 
-	@Column({
+		@Column({
 		nullable: true,
 		default: undefined,
 	})
+	tokenHash: string;
+
+	@Column({
+		nullable: true,
+		default: Campuses.Madrid
+	})
+	campus: Campuses;
 
 	@Column({
 		default:false
@@ -46,10 +53,9 @@ export class User {
 		nullable: true,
 		default: undefined,
 	})
-
-	tokenHash: string;
-
 	mfaSecret: string;
+
+
 
 	// PERSONALIZACION -------------------------------------
 
