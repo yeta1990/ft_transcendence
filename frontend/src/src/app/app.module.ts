@@ -17,6 +17,7 @@ import { ErrorInterceptor } from './error-interception/error.interceptor';
 import { GlobalErrorHandler } from './error-interception/global-error-handler.service';
 import { interceptorProviders } from './app.interceptors';
 import { ChatComponent } from './chat/chat.component';
+import { PongComponent } from './pong/pong.component'
 import { environment } from '../environments/environment'
 import { ValidationFunctions } from '@shared/user.functions'
 
@@ -32,7 +33,8 @@ import { ValidationFunctions } from '@shared/user.functions'
     UserProfileComponent,
     HomeComponent,
     EditProfileComponent,
-    ChatComponent
+    ChatComponent,
+    PongComponent
 
   ],
   imports: [

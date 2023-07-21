@@ -13,9 +13,7 @@ display:none;
 
 .chat-box-body {
   position: relative;  
-  height:170px;  
   height:auto;
-  width:370px;
   border:1px solid #ccc;  
   overflow: hidden;
 }
@@ -23,8 +21,12 @@ display:none;
 
 .chat-logs {
   padding:15px; 
-  height:170px;
+  height:500px;
   overflow-y:scroll;
+}
+
+.input-message-chat {
+  width: 450px;
 }
 
 .chat-logs::-webkit-scrollbar-track
@@ -51,3 +53,69 @@ display:none;
         height:40vh;
     }
 }
+
+.container {
+      display: flex;
+      justify-content: space-between;
+	  padding: 20px;
+      margin: 20px;
+  	  background-color: #f2f2f2;
+}
+    
+.left-column,
+.center-column,
+.right-column {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+    
+.left-column {
+      flex-basis: 20%;
+}
+    
+.center-column {
+      flex-basis: 60%;
+}
+    
+.right-column {
+      flex-basis: 20%;
+}
+    
+.column-heading {
+      font-size: 18px;
+      margin-top: 0;
+}
+    
+ul {
+      padding: 0;
+      margin: 0 0 30px 0;
+      list-style-type: none;
+}
+    
+.channel-list,
+.private-messages-list,
+.available-channels-list,
+.user-list {
+	margin-top: 10px;
+}
+    
+li {
+	padding: 5px;
+   	cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+    
+li:hover {
+      background-color: #f5f5f5;
+}
+    
+.conversation {
+	border: 1px solid #ccc;
+   	height: 500px;
+  	margin-top: 10px;
+   	padding: 10px;
+  	overflow-y: auto;
+}
+

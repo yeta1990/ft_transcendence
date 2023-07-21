@@ -4,6 +4,7 @@ import { config } from 'dotenv';
 import { User } from './src/user/user.entity'
 import { Friend } from './src/user/friend/friend.entity'
 import { Achievement } from './src/user/achievement/achievement.entity'
+import { Room } from './src/chat/room.entity';
 
 config();
 

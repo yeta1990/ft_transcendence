@@ -1,13 +1,15 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn, ManyToMany, JoinTable } from 'typeorm';
 import { Friend } from './friend/friend.entity'
 import { UserStatus, Campuses } from '@shared/enum';
 import { Achievement } from './achievement/achievement.entity'
+import { Room } from '../chat/room.entity';
+
 
 @Entity()
 export class User {
 	@PrimaryGeneratedColumn()
 	id: number;
-	
+
 	// IDENTIFICACION -------------------------------------
 
 	@Column({
@@ -98,7 +100,26 @@ export class User {
 	})
 	elo: number;
 
+
 	// VALIDACION Y SEGURIDAD --------------------------------
+    
+    // CHATS -------------------------------------------------
+	
+    @OneToMany(() => Room, (room) => room.owner)
+	ownedRooms: Room[]
+    
+    @ManyToMany(() => Room, (room) => room.users)
+	joinedRooms: Room[];
+
+	@ManyToMany(() => Room, (room) => room.admins)
+	adminRooms: Room[];
+
+	@ManyToMany(() => Room, (room) => room.banned)
+	bannedRooms: Room[];
+
+	@ManyToMany(type => User)
+	@JoinTable()
+	bannedUsers: User[];
 
 
 
