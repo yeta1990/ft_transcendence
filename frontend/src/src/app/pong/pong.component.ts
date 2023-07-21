@@ -25,6 +25,9 @@ export class PongComponent implements AfterViewInit {
     private ball: Ball | null = null;
     public static init: boolean = false;
     pongService:PongService = new PongService();
+    public playerOne: boolean = false;
+    private subscriptions = new Subscription();
+    destroy: Subject<any> = new Subject();
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
     constructor(
@@ -32,6 +35,15 @@ export class PongComponent implements AfterViewInit {
     ){
         console.log("Try join Room: #pongRoom");
         this.pongService.joinUserToRoom("#pongRoom");
+        this.subscriptions.add(
+        this.pongService
+        .getMessage()
+        .pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
+        .subscribe((payload: SocketPayload) => {
+        if (payload.event === 'gameStatus')
+            this.playerOne = payload.data.player1;
+            console.log("PlauerOne: " + this.playerOne);
+        }));
     }
 
     ngAfterViewInit() {
@@ -39,8 +51,10 @@ export class PongComponent implements AfterViewInit {
     }
     
     initCanvas() {
-
-        //console.log("Try join Room: #pongRoom");
+        if (this.playerOne)
+            console.log("You are Player 1");
+        else
+            console.log("You are NOT Player 1");
         //this.pongService.joinUserToRoom("#pongRoom");
         PongComponent.init = false;
         PongComponent.computerScore = 0;
@@ -49,7 +63,7 @@ export class PongComponent implements AfterViewInit {
         this.gameContext = this.canvas?.getContext('2d');
 
         if (this.gameContext && this.canvas) {
-            this.player1 = new PaddleComponent(20, 60, 20, this.canvas.height / 2 - 60 / 2, 10);
+            this.player1 = new PaddleComponent(20, 60, 20, this.canvas.height / 2 - 60 / 2, 10, this.pongService);
             this.mode(1);
             this.ball = new Ball(10, 10, this.canvas.width / 2 - 10 / 2, this.canvas.height / 2 - 10 / 2, 5);
             this.gameContext.font = '30px Orbitron';
@@ -110,11 +124,11 @@ export class PongComponent implements AfterViewInit {
         //draw scores and check end game
         this.gameContext!.fillText(PongComponent.playerScore, 280, 50);
         this.gameContext!.fillText(PongComponent.computerScore, 390, 50);
-        if (PongComponent.playerScore >= 3) { //POINTS
+        if (PongComponent.playerScore >= 300) { //POINTS
             this.restartScores();
             this.gameContext!.fillStyle = "#00FF00";
             this.gameContext!.fillText("YOU WON!", 280, 200);
-        } else if (PongComponent.computerScore >= 3) { //POINTS
+        } else if (PongComponent.computerScore >= 300) { //POINTS
             this.restartScores();
             this.gameContext!.fillStyle = "#FF0000";
             this.gameContext!.fillText("YOU LOOSE!", 260, 200);

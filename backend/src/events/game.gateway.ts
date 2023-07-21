@@ -2,7 +2,7 @@ import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { BaseGateway } from './base.gateway';
 import { Socket } from 'socket.io';
 import { ChatMessage, SocketPayload } from '@shared/types';
-import { RoomMessages, ChatUser } from '@shared/types';
+import { RoomMessages, ChatUser, GameStatus } from '@shared/types';
 import { events, values } from '@shared/const';
 import { generateJoinResponse } from '@shared/functions';
 import { generateSocketErrorResponse, generateSocketInformationResponse } from '@shared/functions';
@@ -27,32 +27,49 @@ export class GameGateway extends BaseGateway {
   @SubscribeMessage('up')
   handleUp(client: Socket, payload: ChatMessage) {
     console.log("Going up\n");
-    return { event: 'getSignal', data: -1 };
+	const targetUsers: Array<ChatUser> = this
+	.getActiveUsersInRoom("#pongRoom")
+	console.log("Up: " + targetUsers);
+	for (let i = 0; i < targetUsers.length; i++){
+	this.server.to(targetUsers[i].client_id).emit('getSignal', -1)
+	//this.messageToClient(targetUsers[i].client_id, 'getSignal', -1)
+	}
+    //return { event: 'getSignal', data: -1 };
   }
 
   @SubscribeMessage('down')
   handleDown(client: Socket, payload: ChatMessage) {
     console.log("Going down\n");
-    return { event: 'getSignal', data: 1 };
+	console.log("Going up\n");
+	const targetUsers: Array<ChatUser> = this
+	.getActiveUsersInRoom("#pongRoom")
+	console.log("Down. " + targetUsers);
+	for (let i = 0; i < targetUsers.length; i++){
+	this.server.to(targetUsers[i].client_id).emit('getSignal', 1)
+	}
+    //return { event: 'getSignal', data: 1 };
   }
 
   @SubscribeMessage('join')
   async handleJoinRoom(client: Socket, roomAndPassword: string): Promise<void>{
-	  let room: string = roomAndPassword.split(" ", 2)[0];
-	  const pass: string | undefined = roomAndPassword.split(" ", 2)[1];
-	  const nick: string = client.handshake.query.nick as string;
+		let room: string = roomAndPassword.split(" ", 2)[0];
+		const pass: string | undefined = roomAndPassword.split(" ", 2)[1];
+		const nick: string = client.handshake.query.nick as string;
 		console.log("Try join.");
+		if (room.length > 0 && room[0] != '#' && room[0] != '@'){
+  	  	room = '#' + room;
+  		}
 	  for (const c of values.forbiddenChatRoomCharacters){
-		if (room.includes(c)){
+		if (room.substr(1, room.length - 1).includes(c)){
 			this.server.to(client.id)
 				.emit("system", generateSocketErrorResponse(room, 
 					`Invalid name for the channel ${room}, try other`).data)
+					console.log("Try join..");
+
 			return ;
 		} 
 	  }
-  	  if (room.length > 0 && room[0] != '#' && room[0] != '@'){
-  	  	room = '#' + room;
-  	  }
+  	  
   	  //check if user is banned from channel
   	  await this.joinRoutine(client.id, nick, room, pass, "join")
   }
@@ -75,7 +92,25 @@ export class GameGateway extends BaseGateway {
 
   		if (successfulJoin){
 			const response: ChatMessage = generateJoinResponse(originalRoom);
-			this.messageToClient(clientSocketId, typeOfJoin, response);
+			var userInRoom = this.getActiveUsersInRoom('#pongRoom');
+			if (userInRoom.length == 1 || userInRoom[0].nick == nick) //Esto hay que hacer una funcion que lo compruebe siempre
+			{
+				let gameStatus:GameStatus = { 
+					room: '#pongRoom',
+					message: '',
+					nick: nick,
+					date: new Date,
+					player1:true};
+				}	
+			else{
+				let gameStatus:GameStatus = { 
+					room: '#pongRoom',
+					message: '',
+					nick: nick,
+					date: new Date,
+					player1:false};
+			}
+			this.messageToClient(clientSocketId, 'gameStatus', response);
 
 			//sending old messages of the room, except for those of users that banned
 			//the new user trying to join

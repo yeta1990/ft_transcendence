@@ -34,3 +34,11 @@ export class RoomMessages {
 		public messages: Array<ChatMessage>
 	){}
 }
+
+export type GameStatus = {
+	room: string;
+	message: string;
+	nick: string;
+	date: Date;
+	player1:boolean;
+}

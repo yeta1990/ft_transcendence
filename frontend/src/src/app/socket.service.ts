@@ -67,6 +67,10 @@ export class SocketService {
 				this.message.next({event: 'direction', data});
 				console.log("direction: " + data);	
 			})
+			.on('gameStatus', (data: any) => {
+				console.log("join received: " + JSON.stringify(data));
+				this.message.next({event: 'join', data});
+			})
 
 	}
 
