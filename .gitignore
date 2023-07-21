@@ -13,6 +13,7 @@ frontend/src/.git/*
 frontend/src/.vscode/
 frontend/src/.editorconfig
 frontend/src/.angular
+frontend/src/dist
 frontend/src/package-lock.json
 frontend/src/node_modules
 postgres/*
