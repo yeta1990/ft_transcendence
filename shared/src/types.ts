@@ -34,3 +34,9 @@ export class RoomMessages {
 		public messages: Array<ChatMessage>
 	){}
 }
+
+export interface ToastData {
+  status: boolean;
+  type: string;
+  message: string;
+}

@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, QueryList, ElementRef, ViewChild, ViewChildren, OnDestroy} from '@angular/core';
 import { ChatService } from './chat.service';
 import { FormBuilder } from '@angular/forms';
-import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
+import { ChatMessage, SocketPayload, RoomMetaData, ToastData } from '@shared/types';
 import { events } from '@shared/const';
 import { takeUntil } from "rxjs/operators"
 import { Subject, Subscription, pipe } from "rxjs"
@@ -33,7 +33,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	destroy: Subject<any> = new Subject();
 
-	isToastVisible: boolean = false;
+	toastData: ToastData = {status: false, type: "none", message: ""}
 
 	messageToChat = this.formBuilder.group({
 		newMessage: ''
@@ -139,6 +139,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			})
 		);
 		this.chatService.getRoomList();
+		this.toasterService.toggle.subscribe(toastData => this.toastData.status = toastData.status)
 	}
 
 	ngOnDestroy() {
@@ -255,8 +256,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	}
 
 	toggleToast() {
-		this.toasterService.toggle.emit(!this.isToastVisible)
-		this.toasterService.toggle.subscribe(isToastVisible => this.isToastVisible = isToastVisible)
+		this.toasterService.toggle.emit({status: !(this.toastData.status), type: "Information", message: "my message"})
 	}
- 
 }

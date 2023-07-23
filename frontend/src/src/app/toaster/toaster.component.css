@@ -1,0 +1,34 @@
+/* Animación de entrada */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Animación de salida */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Establece la duración de la animación */
+.toast {
+  animation-duration: 0.3s;
+}
+
+/* Establece la animación de entrada */
+.toast.show {
+  animation-name: fadeIn;
+}
+
+/* Establece la animación de salida */
+.toast.hide {
+  animation-name: fadeOut;
+}
