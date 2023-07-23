@@ -19,8 +19,7 @@ import { ToastData } from '@shared/types';
         opacity: 1,
         display: 'block'
       })),
-      transition('hidden => visible', animate('2s')),
-      transition('visible => hidden', animate('0.5s'))
+      transition('visible => hidden', animate('0.5s')),
     ])
   ]
 })
@@ -34,8 +33,8 @@ import { ToastData } from '@shared/types';
 export class ToasterComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>(); // Subject para controlar la desubscripción
   private hideToastSubjects: { [key: number]: Subject<void> } = {}; // Objeto para almacenar los Subjects de ocultación de cada toast
-  toasts: ToastData[] = []; // Lista de toasts
-  private toastCounter = 0; // Contador para asignar identificadores únicos a los toasts
+  toasts: ToastData[] = []; 
+  private toastCounter = 0; 
 
   constructor(private toasterService: ToasterService) {}
 
@@ -45,6 +44,7 @@ export class ToasterComponent implements OnInit, OnDestroy {
 
 	  toastData.id = toastId;
 	  toastData.status = true;
+
       // Si el toast ya existe, cancelamos el temporizador anterior
       if (this.hideToastSubjects[toastId]) {
         this.hideToastSubjects[toastId].next();
@@ -54,6 +54,8 @@ export class ToasterComponent implements OnInit, OnDestroy {
       // Creamos un nuevo temporizador para el toast actual
       this.hideToastSubjects[toastId] = new Subject<void>();
 
+      this.toasts.push(toastData);
+
       // Suscribimos el tiempo de ocultación del toast actual
       timer(3000)
         .pipe(takeUntil(this.hideToastSubjects[toastId]))
@@ -62,7 +64,7 @@ export class ToasterComponent implements OnInit, OnDestroy {
         });
 
       // Agregamos el toast a la lista
-      this.toasts.push(toastData);
+
     });
   }
 
@@ -83,7 +85,7 @@ export class ToasterComponent implements OnInit, OnDestroy {
 	this.toasts[index].status = false;
     if (index !== -1) {
     	setTimeout(() => {
-			this.toasts.splice(index, 1); // Eliminar el toast actual de la lista
+//			this.toasts.splice(index, 1); // Eliminar el toast actual de la lista
     	}, 1000)
     }
   }

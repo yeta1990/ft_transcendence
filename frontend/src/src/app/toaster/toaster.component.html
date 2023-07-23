@@ -1,5 +1,5 @@
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-  <div *ngFor="let toast of toasts" [ngClass]="{'toast': true, 'show': toast.status}" [@fadeInOut]="toast.status ? 'visible' : 'hidden'" role="alert" aria-live="assertive" aria-atomic="true">
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+  <div *ngFor="let toast of toasts" [ngClass]="{'toast': true, show: toast.status}" [@fadeInOut]="toast.status ? 'visible' : 'hidden'" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="toast-header">
       <strong class="me-auto">{{toast.type}}</strong>
       <small>11 mins ago</small>
@@ -7,8 +7,6 @@
     </div>
     <div class="toast-body">
       {{toast.message}}
-      {{toast.status}}
     </div>
   </div>
 </div>
-
