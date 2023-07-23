@@ -7,6 +7,7 @@ import { takeUntil } from "rxjs/operators"
 import { Subject, Subscription, pipe } from "rxjs"
 import { User } from '../user';
 import { MyProfileService } from '../my-profile/my-profile.service';
+import { ToasterService } from '../toaster/toaster.service'
  
 @Component({
   selector: 'app-chat',
@@ -32,6 +33,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	destroy: Subject<any> = new Subject();
 
+	isToastVisible: boolean = false;
+
 	messageToChat = this.formBuilder.group({
 		newMessage: ''
 	});
@@ -39,6 +42,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		private chatService: ChatService,
 		private formBuilder: FormBuilder,
 		private profileService: MyProfileService,
+		private toasterService: ToasterService
    ) {
 		this.currentRoom = "";
 		this.messageList.set(this.currentRoom, new Array<ChatMessage>);
@@ -248,6 +252,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	goToChatRoom(room: string): void{
 		console.log("go to chat room " + room);
+	}
+
+	toggleToast() {
+		this.toasterService.toggle.emit(!this.isToastVisible)
+		this.toasterService.toggle.subscribe(isToastVisible => this.isToastVisible = isToastVisible)
 	}
  
 }
