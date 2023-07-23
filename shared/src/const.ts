@@ -14,3 +14,9 @@ export const values = {
 	forbiddenChatRoomCharacters: [':', '#', '@']
 }
 
+export const ToastValues = {
+	INFO: "Information",
+	SUCCESS: "Success",
+	WARNING: "Warning",
+	ERROR: "Error"
+}

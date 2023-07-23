@@ -2,7 +2,7 @@ import { Component, OnInit, AfterViewInit, QueryList, ElementRef, ViewChild, Vie
 import { ChatService } from './chat.service';
 import { FormBuilder } from '@angular/forms';
 import { ChatMessage, SocketPayload, RoomMetaData, ToastData } from '@shared/types';
-import { events } from '@shared/const';
+import { events, ToastValues } from '@shared/const';
 import { takeUntil } from "rxjs/operators"
 import { Subject, Subscription, pipe } from "rxjs"
 import { User } from '../user';
@@ -255,7 +255,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	}
 
 	launchToast() {
-		const toastData: ToastData = {status: true, type: "none", message: "", id: -1}
-		this.toasterService.toaster.emit({status: toastData.status, type: "Information", message: "my message", id: -1})
+		this.toasterService.launchToaster(ToastValues.INFO, "my message")
 	}
 }

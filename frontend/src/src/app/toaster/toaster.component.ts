@@ -4,6 +4,7 @@ import { ToasterService } from './toaster.service';
 import { Subject, timer } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ToastData } from '@shared/types';
+import { ToastValues } from '@shared/const'
 
 @Component({
   selector: 'app-toaster',
@@ -31,6 +32,7 @@ import { ToastData } from '@shared/types';
 // - Each message has an "id" assigned to it
 // - With that id you can assign a timer to that message and also manually close the event.
 export class ToasterComponent implements OnInit, OnDestroy {
+  toastValues = ToastValues;
   private ngUnsubscribe = new Subject<void>(); // Subject para controlar la desubscripción
   private hideToastSubjects: { [key: number]: Subject<void> } = {}; // Objeto para almacenar los Subjects de ocultación de cada toast
   toasts: ToastData[] = []; 
@@ -85,7 +87,7 @@ export class ToasterComponent implements OnInit, OnDestroy {
 	this.toasts[index].status = false;
     if (index !== -1) {
     	setTimeout(() => {
-//			this.toasts.splice(index, 1); // Eliminar el toast actual de la lista
+			this.toasts.splice(index, 1); // Eliminar el toast actual de la lista
     	}, 1000)
     }
   }
