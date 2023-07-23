@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { trigger, state, style, animate, transition } from '@angular/animations';
 import { ToasterService } from './toaster.service';
 import { Subject, timer } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -7,7 +8,21 @@ import { ToastData } from '@shared/types';
 @Component({
   selector: 'app-toaster',
   templateUrl: './toaster.component.html',
-  styleUrls: ['./toaster.component.css']
+  styleUrls: ['./toaster.component.css'],
+  animations: [
+    trigger('fadeInOut', [
+      state('hidden', style({
+        opacity: 0,
+        display: 'none'
+      })),
+      state('visible', style({
+        opacity: 1,
+        display: 'block'
+      })),
+      transition('hidden => visible', animate('2s')),
+      transition('visible => hidden', animate('0.5s'))
+    ])
+  ]
 })
 
 //Here the logic is:
@@ -29,6 +44,7 @@ export class ToasterComponent implements OnInit, OnDestroy {
       const toastId = this.toastCounter++; // Unique id for 
 
 	  toastData.id = toastId;
+	  toastData.status = true;
       // Si el toast ya existe, cancelamos el temporizador anterior
       if (this.hideToastSubjects[toastId]) {
         this.hideToastSubjects[toastId].next();
@@ -63,9 +79,12 @@ export class ToasterComponent implements OnInit, OnDestroy {
   }
 
   hideToast(toastId: number) {
-    const index = this.toasts.findIndex((toast) => toastId === toastId);
+    const index = this.toasts.findIndex((toast) => toastId === toast.id);
+	this.toasts[index].status = false;
     if (index !== -1) {
-      this.toasts.splice(index, 1); // Eliminar el toast actual de la lista
+    	setTimeout(() => {
+			this.toasts.splice(index, 1); // Eliminar el toast actual de la lista
+    	}, 1000)
     }
   }
 }

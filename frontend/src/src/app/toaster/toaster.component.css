@@ -8,19 +8,10 @@
   }
 }
 
-/* Animación de salida */
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
 
 /* Establece la duración de la animación */
 .toast {
-  animation-duration: 0.3s;
+  animation-duration: 0.5s;
 }
 
 /* Establece la animación de entrada */
@@ -29,6 +20,3 @@
 }
 
 /* Establece la animación de salida */
-.toast.hide {
-  animation-name: fadeOut;
-}

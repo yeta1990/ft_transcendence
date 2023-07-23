@@ -1,5 +1,6 @@
 import { NgModule ,ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing-module/app-routing-module.module'
@@ -42,6 +43,7 @@ import { ToasterService } from './toaster/toaster.service'
   imports: [
     FormsModule,
     BrowserModule,
+    BrowserAnimationsModule,
     HttpClientModule,
     ReactiveFormsModule,
     AppRoutingModule,
