@@ -39,4 +39,5 @@ export interface ToastData {
   status: boolean;
   type: string;
   message: string;
+  id: number;
 }

@@ -5,6 +5,6 @@ import { ToastData } from '@shared/types';
   providedIn: 'root'
 })
 export class ToasterService {
-	toggle : EventEmitter<ToastData> = new EventEmitter<ToastData>()
+	toaster: EventEmitter<ToastData> = new EventEmitter<ToastData>()
 }
 

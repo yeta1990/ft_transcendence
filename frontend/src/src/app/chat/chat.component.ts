@@ -33,7 +33,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	destroy: Subject<any> = new Subject();
 
-	toastData: ToastData = {status: false, type: "none", message: ""}
+
 
 	messageToChat = this.formBuilder.group({
 		newMessage: ''
@@ -139,7 +139,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			})
 		);
 		this.chatService.getRoomList();
-		this.toasterService.toggle.subscribe(toastData => this.toastData.status = toastData.status)
 	}
 
 	ngOnDestroy() {
@@ -255,7 +254,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		console.log("go to chat room " + room);
 	}
 
-	toggleToast() {
-		this.toasterService.toggle.emit({status: !(this.toastData.status), type: "Information", message: "my message"})
+	launchToast() {
+		const toastData: ToastData = {status: true, type: "none", message: "", id: -1}
+		this.toasterService.toaster.emit({status: !(toastData.status), type: "Information", message: "my message", id: -1})
 	}
 }
