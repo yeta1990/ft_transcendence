@@ -277,7 +277,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		  	  	const err: ChatMessage = {
 			  	   room: room,
 			  	   message: `Error: bad password provided for ${room}`,
-			  	   nick: "system",
+			  	   nick: "system-error",
 			  	   date: new Date()
 		      	}
 				let passwordChallengePassed: boolean = false;
@@ -285,7 +285,8 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 					passwordChallengePassed = await this.hashService.comparePassword(password, await this.chatService.getHashPassFromRoom(room));
 				}
 				if (!passwordChallengePassed){
-		  	  		this.messageToClient(clientId, "system", err);
+					console.log("sending system error")
+		  	  		this.messageToClient(clientId, "system-error", err);
 					return false;
 				}
 			}
@@ -311,6 +312,8 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  	if (hardJoin){
 	  		const socketInfo: SocketPayload = generateSocketInformationResponse(room, `user ${nick} has joined room ${room}`)
 			this.broadCastToRoomExceptForSomeUsers(socketInfo.event, socketInfo.data, [nick])
+			const joinFeedback: SocketPayload = generateSocketInformationResponse(room, `You have joined ${room}`)
+			this.server.to(clientId).emit("system", joinFeedback.data)
 		}
 		return true;
   }

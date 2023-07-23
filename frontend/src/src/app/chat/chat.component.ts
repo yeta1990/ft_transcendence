@@ -108,7 +108,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					}
 				}
 				else if (payload.event === 'system'){
-					this.messageList.get(this.currentRoom)!.push(payload.data);
+//					old method to log a message in the chat window
+//					this.messageList.get(this.currentRoom)!.push(payload.data);
+
+//					new method to log a message in a toaster
+					console.log(payload.data)
+					this.toasterService.launchToaster(ToastValues.INFO, payload.data.message)
+				}
+				else if (payload.event === 'system-error'){
+					this.toasterService.launchToaster(ToastValues.ERROR, payload.data.message)
 				}
 				else if (payload.event === 'join'){
 					this.currentRoom = payload.data.room;

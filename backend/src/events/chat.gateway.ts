@@ -112,12 +112,12 @@ export class ChatGateway extends BaseGateway {
   	  if (room.length > 0 && room[0] == '@'){
 	  	  if (await this.userService
 	  			  .isUserBannedFromUser(room.substr(1, room.length - 1), nick)){
-	  			  return this.messageToClient(clientSocketId, "system", 
+	  			  return this.messageToClient(clientSocketId, "system-error", 
 	  					generateSocketErrorResponse("", `You can't open a private conversation with ${room.substr(1, room.length - 1)} because you are banned`).data);
 	      }
 		  room = await this.chatService.generatePrivateRoomName(nick, room.substr(1, room.length - 1))
 		  if (!room){ 
-			  return this.messageToClient(clientSocketId, "system", 
+			  return this.messageToClient(clientSocketId, "system-error", 
 	  		  	  generateSocketErrorResponse("", `Bad channel name`).data);
 	  	  }
   	  }

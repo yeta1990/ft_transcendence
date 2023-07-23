@@ -63,6 +63,9 @@ export class SocketService {
 			.on('system', (data: ChatMessage) => {
 				this.message.next({event: 'system', data});
 			})
+			.on('system-error', (data: ChatMessage) => {
+				this.message.next({event: 'system-error', data});
+			})
 	}
 
   //https://socket.io/docs/v3/emitting-events/
