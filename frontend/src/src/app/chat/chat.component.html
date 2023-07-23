@@ -9,25 +9,29 @@
 					{{room}}
 				</div>
 				<div class="p-2">
-					<i class="bi bi-x-circle"></i>
+					<i class="bi bi-x-circle" (click)="leaveRoom(room)"></i>
 				</div>
-
 			 </li>
       	  </div>
       </ul>
 
       <h2 class="column-heading">My private conversations</h2>
-	  <ul class="private-messages-list" *ngFor="let room of myPrivateMessageRooms">
-	  	<li [class.active]="currentRoom === room"><a href="javascript:void(0)" (click)="joinUserToRoom(room)">{{room}}</a></li>
+	  <ul class="channel-list"> 
+	  	  <div *ngFor="let room of myPrivateMessageRooms">
+	  	<li [class.active]="currentRoom === room" class="d-flex">
+	  		<div class="p-2 flex-grow-1 link-channel" (click)="joinUserToRoom(room)">{{room}}
+	  		</div>
+	  	</li>
+	  	  </div>
 	  </ul>
 
       <h2 class="column-heading">Available channels</h2>
-      <ul class="available-channels-list">
+      <ul class="channel-list">
       	  <div *ngFor="let room of availableRoomsList">
-      	 	 <li *ngIf="room[0] === '#' && !myJointRoomList.includes(room)">
-				<a href="javascript:void(0)" (click)="joinUserToRoom(room)">
+      	 	 <li *ngIf="room[0] === '#' && !myJointRoomList.includes(room)" class="d-flex">
+      	 	 	<div class="p-2 flex-grow-1 link-channel" (click)="joinUserToRoom(room)">
 					{{room}}
-				</a>
+				</div>
       		</li>
       	  </div>
       </ul>
@@ -62,12 +66,14 @@
 
 	<div class="right-column">
 		<h2 class="column-heading">Channel owner</h2>
-		<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
-      		<ul class="user-list">
-      			<span *ngIf="roomMetaData.key === currentRoom && roomMetaData.value.owner">@{{roomMetaData.value.owner}}</span>
-      			<span *ngIf="roomMetaData.key === currentRoom && !roomMetaData.value.owner">(none)</span>
-			</ul>
-		</div>
+      	<ul class="user-list">
+			<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
+
+    	  			<span *ngIf="roomMetaData.key === currentRoom && roomMetaData.value.owner">@{{roomMetaData.value.owner}}</span>
+    	  			<span *ngIf="roomMetaData.key === currentRoom && !roomMetaData.value.owner">(none)</span>
+
+			</div>
+		</ul>
 		<h2 class="column-heading">Channel administrators</h2>
 		<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
       		<ul class="user-list">

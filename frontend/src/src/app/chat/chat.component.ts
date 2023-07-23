@@ -72,6 +72,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.chatService.joinUserToRoom(rooms);
    }
 
+	leaveRoom(room: string): void{
+		this.chatService.partFromRoom(room);	
+	}
+
 	//subscription to all events from the service
 	ngOnInit(): void {
 		this.profileService.getUserDetails()
