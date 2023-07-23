@@ -59,13 +59,12 @@ display:none;
       justify-content: space-between;
 	  padding: 20px;
       margin: 20px;
-  	  background-color: #f2f2f2;
+      background: var(--bs-secondary-bg);
 }
     
 .left-column,
 .center-column,
 .right-column {
-      background-color: #ffffff;
       padding: 20px;
       border-radius: 4px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -101,14 +100,24 @@ ul {
 	margin-top: 10px;
 }
     
+
+.link-channel {
+	color: #ffffff;
+}
+
+
 li {
 	padding: 5px;
    	cursor: pointer;
     transition: background-color 0.2s ease;
 }
     
+li.active {
+	background-color: var(--bs-secondary-color);
+} 
+
 li:hover {
-      background-color: #f5f5f5;
+      background-color: var(--bs-secondary-color);
 }
     
 .conversation {

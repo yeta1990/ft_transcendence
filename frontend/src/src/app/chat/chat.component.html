@@ -1,21 +1,24 @@
 
-
   <div class="container">
     <div class="left-column">
       <h2 class="column-heading">Joined channels</h2>
       <ul class="channel-list">
       	  <div *ngFor="let room of myJointRoomList">
-      	 	 <li *ngIf="room[0] === '#'">
-				<a href="javascript:void(0)" (click)="joinUserToRoom(room)">
+      	 	  <li *ngIf="room[0] === '#'" [class.active]="currentRoom ===room" class="d-flex"> 
+      	 	  	  <div class="p-2 flex-grow-1 link-channel" (click)="joinUserToRoom(room)">
 					{{room}}
-				</a>
+				</div>
+				<div class="p-2">
+					<i class="bi bi-x-circle"></i>
+				</div>
+
 			 </li>
       	  </div>
       </ul>
 
       <h2 class="column-heading">My private conversations</h2>
 	  <ul class="private-messages-list" *ngFor="let room of myPrivateMessageRooms">
-	  	<li><a href="javascript:void(0)" (click)="joinUserToRoom(room)">{{room}}</a></li>
+	  	<li [class.active]="currentRoom === room"><a href="javascript:void(0)" (click)="joinUserToRoom(room)">{{room}}</a></li>
 	  </ul>
 
       <h2 class="column-heading">Available channels</h2>
