@@ -40,5 +40,15 @@ export type GameStatus = {
 	message: string;
 	nick: string;
 	date: Date;
-	player1:boolean;
+	player1:boolean; 
+}
+export type GameRoom = {
+	room: string;
+	message: string;
+	nick: string;
+	date: Date;
+	//canvas: any;
+	y: number;
+	height: number;
+	canvasheight: number;
 }

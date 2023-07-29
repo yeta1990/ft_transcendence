@@ -26,20 +26,25 @@ export class PaddleComponent extends EntityComponent {//implements OnInit {
     @Inject('xToken') x:number,
     @Inject('yToken') y:number,
     @Inject('speedToken') speed:number,
-    pongService:PongService) {
+    pongService:PongService){
       
       super(w,h,x,y,speed);
       //pongService: PongService;
-    this.pongService = pongService;
-    this.subscriptions.add(
-    this.pongService
-    .getMessage()
-    .pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
-    .subscribe((payload: SocketPayload) => {
-      if (payload.event === 'direction')
+      this.pongService = pongService;
+      this.subscriptions.add(
+      this.pongService
+      .getMessage()
+      .pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
+      .subscribe((payload: SocketPayload) => {
+        if (payload.event === 'direction')
           //this.yVel = payload.data;
-        this.y += payload.data * this.speed;
-    }));      
+          this.y += payload.data * this.speed;
+          //console.log("y-->" + this.y);
+        if(this.y <= 20)
+          this.yVel = 0
+        if(this.y + this.height >= this.y - 20)
+            this.yVel = 0;
+      }));
   }
 
   ngOnDestroy() {
@@ -51,13 +56,13 @@ export class PaddleComponent extends EntityComponent {//implements OnInit {
   update(canvas: any){
       if( PongComponent.keysPressed[KeyBindings.UP] ){
           //this.yVel = -1;
-          this.pongService.sendSignal("up", "#pongRoom", "pong");
+          this.pongService.sendSignal("up", "#pongRoom", "pong", this.y, this.height, canvas.height);
           if(this.y <= 20){
             this.yVel = 0
           }
       }else if(PongComponent.keysPressed[KeyBindings.DOWN]){
           //this.yVel = 1;
-          this.pongService.sendSignal("down", "pongRoom", "pong");
+          this.pongService.sendSignal("down", "pongRoom", "pong", this.y, this.height, canvas.height);
           if(this.y + this.height >= canvas.height - 20){
           this.yVel = 0;
           }
