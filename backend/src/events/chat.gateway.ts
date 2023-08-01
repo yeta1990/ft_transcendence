@@ -16,8 +16,6 @@ import { RoomMessages, ChatUser } from '@shared/types';
 //extending BaseGateway to log the gateway creation in the terminal
 export class ChatGateway extends BaseGateway {
 
-
-	
   constructor(private userService: UserService, private chatMessageService: ChatMessageService) {
 	super(ChatGateway.name);
   }
@@ -116,8 +114,8 @@ export class ChatGateway extends BaseGateway {
 	  					generateSocketErrorResponse("", `You can't open a private conversation with ${room.substr(1, room.length - 1)} because you are banned`).data);
 	      }
 		  room = await this.chatService.generatePrivateRoomName(nick, room.substr(1, room.length - 1))
-		  if (!room){ 
-			  return this.messageToClient(clientSocketId, "system-error", 
+		  if (!room){
+			  return this.messageToClient(clientSocketId, "system-error",
 	  		  	  generateSocketErrorResponse("", `Bad channel name`).data);
 	  	  }
   	  }
@@ -259,7 +257,7 @@ export class ChatGateway extends BaseGateway {
 
   @SubscribeMessage(events.ListAllRooms)
   async listRooms(client: Socket): Promise<WsResponse<unknown>>{
-	  return { event: events.ListAllRooms, data: await this.chatService.getAllRooms()}
+	  return { event: events.ListAllRooms, data: await this.roomService.getAllRoomsMetaData()}
   }
 
   @SubscribeMessage(events.ListMyPrivateRooms)

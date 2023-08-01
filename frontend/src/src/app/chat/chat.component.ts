@@ -92,7 +92,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					this.messageList.get(payload.data.room)!.push(payload.data);
 				}
 				else if (payload.event === events.ListAllRooms){
-					this.availableRoomsList = Array.from(payload.data);
+					this.availableRoomsList = Array.from(payload.data.map((r: any) => r.room));
+					payload.data.map((r: RoomMetaData) => this.roomsMetaData.set(r.room, r))
 				}
 				else if (payload.event === events.ListMyPrivateRooms){
 					this.myPrivateMessageRooms = Array.from(payload.data);
@@ -260,6 +261,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	goToChatRoom(room: string): void{
 		console.log("go to chat room " + room);
+	}
+
+	isPrivateRoom(room: string): boolean {
+		if (this.roomsMetaData.has(room))
+			return this.roomsMetaData.get(room)!.hasPass;
+		return false
 	}
 
 	launchToast() {

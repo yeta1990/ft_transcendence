@@ -118,7 +118,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		this.rooms.delete(room);
 		await this.chatService.deleteRoom(room);
 	}
-    this.emit('listAllRooms', await this.chatService.getAllRooms());
+    this.emit(events.ListAllRooms, await this.roomService.getAllRoomsMetaData());
   }
 
 
@@ -227,7 +227,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		await this.server.in(clientId).socketsJoin(room);
 		const successfulJoin: boolean = await this.chatService.addUserToRoom(room, creatorNick);
 		if (!successfulJoin) return false;
-		this.emit('listAllRooms', await this.chatService.getAllRooms());
+		this.emit(events.ListAllRooms, await this.chatService.getAllRooms());
 		this.logger.log("User " + clientId + "joined room " + room);
 		return true
   }

@@ -36,7 +36,7 @@ export class SocketService {
 				console.log("join private message received: " + JSON.stringify(data));
 				this.message.next({event: 'joinmp', data});
 			})
-			.on(events.ListAllRooms, (data: any) => {
+			.on(events.ListAllRooms, (data: Array<RoomMetaData>) => {
 				console.log("listRooms received: " + data);
 				this.message.next({event: events.ListAllRooms, data});
 			})
