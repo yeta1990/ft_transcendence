@@ -20,6 +20,8 @@ import { UserId } from './user.decorator';
 import { JwtPayload } from 'jsonwebtoken';
 import { JwtService } from '@nestjs/jwt';
 
+import { ValidationFunctions } from '@shared/user.functions'
+
 @Controller('user')
 export class UserController {
 	@Inject(UserService)
@@ -64,6 +66,21 @@ export class UserController {
 			access_token: access_token,
 			expires_at: decoded.exp * 1000, //ms
 		};
+	}
+
+	@Post('check-username')
+	public async checkUsername(@Body() body: { username: string }): Promise<{ isValid: boolean }> {
+		const { username } = body;
+
+		const isValidLocal = ValidationFunctions.UsernameValidator(username); // Validación en la lista local
+		if (!isValidLocal) {
+			return { isValid: false }; // Si el nombre de usuario no es válido en la lista local, devolver false
+		}
+		
+		const existingUser = await this.service.getUserByNick(username);
+		const isValidDB = !existingUser; // Si el usuario no existe, el nombre de usuario es válido en la base de datos
+
+		return { isValid: isValidDB };
 	}
 
 }

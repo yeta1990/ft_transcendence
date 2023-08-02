@@ -6,6 +6,7 @@ import { User } from '../user';
 import { ValidationFunctions } from '@shared/user.functions'
 import { AuthService } from '../auth.service';
 import { Campuses } from '@shared/enum';
+import { HttpClient } from '@angular/common/http';
 
 const MatchPassword : ValidatorFn = (control : AbstractControl) : ValidationErrors | null => {
 	  const passwordControl = control.get('password');
@@ -57,7 +58,8 @@ export class FormComponent implements OnInit {
 		private formService: FormService,
 		private router: Router,
 		private authService: AuthService,
-		private validators: ValidationFunctions
+		private validators: ValidationFunctions,
+		private http: HttpClient
 		){ }
 		
 	ngOnInit() {
@@ -128,8 +130,13 @@ export class FormComponent implements OnInit {
 
 	async usernameValidator(control: AbstractControl): Promise<any> {
 		const userName = control.value;
-		const isValid = await this.validators.UsernameValidator(userName);
-		return isValid ? null : { userNameNotAvailable: true };
+		const isValidLocal = await this.validators.UsernameValidator(userName);
+		if (!isValidLocal) {
+			return { userNameNotAvailable: true };
+		  }
+		
+		  const isValidDB = await this.formService.checkUsername(userName);
+		  return isValidDB ? null : { userNameNotAvailable: true };
 	  }
 
 
