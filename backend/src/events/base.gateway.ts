@@ -227,7 +227,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		await this.server.in(clientId).socketsJoin(room);
 		const successfulJoin: boolean = await this.chatService.addUserToRoom(room, creatorNick);
 		if (!successfulJoin) return false;
-		this.emit(events.ListAllRooms, await this.chatService.getAllRooms());
+		this.emit(events.ListAllRooms, await this.roomService.getAllRoomsMetaData());
 		this.logger.log("User " + clientId + "joined room " + room);
 		return true
   }
@@ -285,7 +285,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 					passwordChallengePassed = await this.hashService.comparePassword(password, await this.chatService.getHashPassFromRoom(room));
 				}
 				if (!passwordChallengePassed){
-					console.log("sending system error")
 		  	  		this.messageToClient(clientId, "system-error", err);
 					return false;
 				}

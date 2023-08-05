@@ -94,13 +94,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				}
 				else if (payload.event === events.ListAllRooms){
 					this.availableRoomsList = Array.from(payload.data.map((r: any) => r.room));
-					payload.data.map((r: RoomMetaData) => this.roomsMetaData.set(r.room, r))
+					payload.data.map((r: RoomMetaData) => {
+						if (r.room) this.roomsMetaData.set(r.room, r)
+					}
+					)
 				}
 				else if (payload.event === events.ListMyPrivateRooms){
 					this.myPrivateMessageRooms = Array.from(payload.data);
 				}
 				else if (payload.event === events.ListMyJoinedRooms){
 					this.myJointRoomList = Array.from(payload.data)	
+					console.log("my joint room list")
+					console.log(this.myJointRoomList);
 					if (this.myJointRoomList.length == 0){
 						this.currentRoom = "";
 					}
@@ -108,6 +113,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 						this.currentRoom = this.myJointRoomList[0];
 						this.joinUserToRoom(this.currentRoom)
 					}
+					console.log("yes")
 				}
 				else if (payload.event === 'system'){
 //					old method to log a message in the chat window
@@ -138,6 +144,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				}
 				else if (payload.event === events.RoomMetaData){
 					console.log("-------rooms metadata--------")
+					console.log(payload.data)
 					this.roomsMetaData.set(payload.data.room, payload.data)
 					const it = this.roomsMetaData.entries();
 					for (const el of it){
@@ -265,8 +272,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	}
 
 	isPrivateRoom(room: string): boolean {
-		if (this.roomsMetaData.has(room))
-			return this.roomsMetaData.get(room)!.hasPass;
+		if (this.roomsMetaData.has(room)){
+			const b = this.roomsMetaData.get(room)!.hasPass;
+			return b;
+		}
 		return false
 	}
 

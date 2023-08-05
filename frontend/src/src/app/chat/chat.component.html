@@ -27,7 +27,7 @@
       <h2 class="column-heading">Available channels</h2>
       <ul class="channel-list">
       	  <div *ngFor="let room of availableRoomsList">
-      	 	 <li *ngIf="room[0] === '#' && !myJointRoomList.includes(room)" class="d-flex">
+      	 	 <li *ngIf="room && room[0] === '#' && !myJointRoomList.includes(room)" class="d-flex">
       	 	 	<div class="p-2 flex-grow-1 link-channel" *ngIf="!isPrivateRoom(room)" (click)="joinUserToRoom(room)">
 					{{room}} 
 				</div>
