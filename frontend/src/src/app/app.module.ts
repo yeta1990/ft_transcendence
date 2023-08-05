@@ -21,7 +21,9 @@ import { ChatComponent } from './chat/chat.component';
 import { environment } from '../environments/environment';
 import { PongComponent } from './pong/pong.component';
 import { ToasterComponent } from './toaster/toaster.component'
-import { ToasterService } from './toaster/toaster.service'
+import { ToasterService } from './toaster/toaster.service';
+import { ModalComponent } from './modal/modal.component'
+import { ModalService } from './modal/modal.service'
 
 
 @NgModule({
@@ -37,7 +39,8 @@ import { ToasterService } from './toaster/toaster.service'
     EditProfileComponent,
     ChatComponent,
     PongComponent,
-    ToasterComponent
+    ToasterComponent,
+    ModalComponent
 
   ],
   imports: [
@@ -51,7 +54,8 @@ import { ToasterService } from './toaster/toaster.service'
   ],
   providers: [
 	interceptorProviders,
-	ToasterService
+	ToasterService,
+	ModalService
   ],
   bootstrap: [AppComponent]
 })

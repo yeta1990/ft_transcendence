@@ -1,0 +1,55 @@
+<div class="modal fade" id="exampleModal" tabindex="-1" [ngClass]="{ 'show': isModalOpen(), 'd-block': isModalOpen() }">
+<div class="modal-overlay modal-dialog modal-dialog-centered">
+  <div class="modal-content">
+    <!-- Seleccionar el template según el valor de 'currentModal' -->
+    <ng-container [ngSwitch]="getCurrentModal()">
+      <!-- Template 1 -->
+      <ng-template [ngSwitchCase]="'template1'">
+        <div id="modal-content-template1">
+		  <div class="modal-header">
+		  <h1 class="modal-title fs-5" id="exampleModalLabel">Modal template 1</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+          <!-- Agregar contenido específico para el template 1 aquí -->
+		  <div class="modal-body">
+          	<p>This is the content of template 1.</p>
+      	  </div>
+		  <div class="modal-footer">
+	        <button (click)="closeModal()" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+   		    <button type="button" class="btn btn-primary">Save changes</button>
+      	</div>
+        </div>
+      </ng-template>
+
+      <!-- Template 2 -->
+      <ng-template [ngSwitchCase]="'template2'">
+        <div id="modal-content-template2">
+          <h2>Modal Template 2</h2>
+          <!-- Agregar contenido específico para el template 2 aquí -->
+          <p>This is the content of template 2.</p>
+          <button (click)="closeModal()">Close Modal</button>
+        </div>
+      </ng-template>
+
+      <!-- Template 3 -->
+      <ng-template [ngSwitchCase]="'template3'">
+        <div id="modal-content-template3">
+          <h2>Modal Template 3</h2>
+          <!-- Agregar contenido específico para el template 3 aquí -->
+          <p>This is the content of template 3.</p>
+          <button (click)="closeModal()">Close Modal</button>
+        </div>
+      </ng-template>
+
+      <!-- Si se proporciona un identificador desconocido -->
+      <ng-template ngSwitchDefault>
+        <div>
+          <h2>Unknown Modal Template</h2>
+          <p>This is an unknown template.</p>
+          <button (click)="closeModal()">Close Modal</button>
+        </div>
+      </ng-template>
+    </ng-container>
+  </div>
+</div>
+</div>

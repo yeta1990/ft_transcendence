@@ -1,4 +1,5 @@
-
+<button (click)="openModal('template1')" > Button </button>
+<button (click)="openModal('template2')" > Button </button>
   <div class="container">
     <div class="left-column">
       <h2 class="column-heading">Joined channels</h2>
@@ -30,7 +31,7 @@
       	  <div *ngFor="let room of availableRoomsList">
       	 	 <li *ngIf="room[0] === '#' && !myJointRoomList.includes(room)" class="d-flex">
       	 	 	<div class="p-2 flex-grow-1 link-channel" (click)="joinUserToRoom(room)">
-					{{room}}
+					{{room}} <i *ngIf="isPrivateRoom(room)" class="bi bi-lock"></i>	
 				</div>
       		</li>
       	  </div>

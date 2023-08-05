@@ -8,6 +8,7 @@ import { Subject, Subscription, pipe } from "rxjs"
 import { User } from '../user';
 import { MyProfileService } from '../my-profile/my-profile.service';
 import { ToasterService } from '../toaster/toaster.service'
+import { ModalService } from '../modal/modal.service'
  
 @Component({
   selector: 'app-chat',
@@ -42,6 +43,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		private chatService: ChatService,
 		private formBuilder: FormBuilder,
 		private profileService: MyProfileService,
+		private modalService: ModalService,
 		private toasterService: ToasterService
    ) {
 		this.currentRoom = "";
@@ -271,5 +273,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	launchToast() {
 		this.toasterService.launchToaster(ToastValues.INFO, "my message")
+	}
+
+	openModal(template: string) {
+		this.modalService.openModal(template);
 	}
 }
