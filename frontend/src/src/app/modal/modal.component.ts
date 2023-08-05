@@ -8,6 +8,7 @@ import { ModalService } from './modal.service';
   styleUrls: ['./modal.component.css'],
 })
 export class ModalComponent {
+  inputValue: string = "";
   textInput: string = "";
 
   constructor(private modalService: ModalService) {}
@@ -20,8 +21,13 @@ export class ModalComponent {
     this.modalService.closeModal();
   }
 
-  saveAndCloseModal(): void {
+  submitAndClose(): void {
     this.modalService.setModalData(this.textInput);
+    this.modalService.closeModal();
+  }
+
+  saveAndCloseModal(): void {
+    this.modalService.setModalData(this.inputValue);
     this.modalService.closeModal();
   }
 

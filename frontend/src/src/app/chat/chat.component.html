@@ -30,8 +30,11 @@
       <ul class="channel-list">
       	  <div *ngFor="let room of availableRoomsList">
       	 	 <li *ngIf="room[0] === '#' && !myJointRoomList.includes(room)" class="d-flex">
-      	 	 	<div class="p-2 flex-grow-1 link-channel" (click)="joinUserToRoom(room)">
-					{{room}} <i *ngIf="isPrivateRoom(room)" class="bi bi-lock"></i>	
+      	 	 	<div class="p-2 flex-grow-1 link-channel" *ngIf="!isPrivateRoom(room)" (click)="joinUserToRoom(room)">
+					{{room}} 
+				</div>
+      	 	 	<div class="p-2  flex-grow-1 link-channel" *ngIf="isPrivateRoom(room)" (click)="openModal('template1')">
+					{{room}} <i class="bi bi-lock"></i>	
 				</div>
       		</li>
       	  </div>

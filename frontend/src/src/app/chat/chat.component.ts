@@ -33,8 +33,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	private subscriptions = new Subscription();
 
 	destroy: Subject<any> = new Subject();
-
-
+	private modalClosedSubscription: Subscription = {} as Subscription;
 
 	messageToChat = this.formBuilder.group({
 		newMessage: ''
@@ -276,6 +275,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	}
 
 	openModal(template: string) {
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const introducedPass = this.modalService.getModalData();
+			console.log("introduced :" + introducedPass)
+			this.joinUserToRoom("#p" + " " + introducedPass);
+			this.modalClosedSubscription.unsubscribe();
+    	});
 		this.modalService.openModal(template);
 	}
 }
