@@ -42,13 +42,41 @@ export type GameStatus = {
 	date: Date;
 	player1:boolean; 
 }
+
 export type GameRoom = {
 	room: string;
 	message: string;
 	nick: string;
 	date: Date;
-	//canvas: any;
 	y: number;
 	height: number;
+
+	//PaddleOneComponent
+	playerOneX: number;
+	playerOneY: number;
+	playerOneW: number;
+	playerOneH: number;
+
+	//PaddleTwoComponent
+	playerTwoX: number;
+	playerTwoY: number;
+	playerTwoW: number;
+	playerTwoH: number;
+
+	//Canvas
 	canvasheight: number;
+	canvasWidth: number;
+
+	//Ball
+	ballHeight: number;
+	ballWidth: number;
+	ballSpeed: number;
+	ballXVel: number;
+	ballYVel: number;
+	ballX: number;
+	ballY: number;
+
+	//Scores
+	playerOneScore: number;
+	playerTwoScore: number;
 }

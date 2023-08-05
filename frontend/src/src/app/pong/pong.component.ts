@@ -3,7 +3,7 @@ import { DOCUMENT } from '@angular/common';
 import { PongService } from './pong.service';
 import { Subject, Subscription, pipe } from "rxjs"
 import { takeUntil } from "rxjs/operators"
-import { ChatMessage, SocketPayload } from '@shared/types';
+import { ChatMessage, SocketPayload, GameRoom } from '@shared/types';
 import { PaddleComponent }  from './paddle/paddle.component'
 import { EntityComponent } from './entity/entity.component'
 
@@ -28,11 +28,49 @@ export class PongComponent implements AfterViewInit {
     public playerOne: boolean = false;
     private subscriptions = new Subscription();
     destroy: Subject<any> = new Subject();
+    public game: GameRoom;
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
     constructor(
         //private pongService: PongService,
     ){
+        this.game = {
+            //room: string;
+	        //message: string;
+	        //nick: string;
+	        //date: Date;
+	        //y: number;
+	        //height: number;
+
+	        //PaddleOneComponent
+	        playerOneX: this.player1?.x,
+	        playerOneY: this.player1?.y,
+	        playerOneW: this.player1?.width,
+	        playerOneH: this.player1?.height,
+
+	        //PaddleTwoComponent
+	        playerTwoX: this.computerPlayer?.x,
+	        playerTwoY: this.computerPlayer?.y,
+	        playerTwoW: this.computerPlayer?.width,
+	        playerTwoH: this.computerPlayer?.height,
+
+	        //Canvas
+	        canvasheight: this.canvas.height,
+	        canvasWidth: this.canvas.width,
+
+	        //Ball
+	        //ballHeight: ;
+	        //ballWidth: number;
+	        //ballSpeed: number;
+	        //ballXVel: number;
+	        //ballYVel: number;
+	        //ballX: number;
+        	//ballY: number;
+
+	        //Scores
+	        playerOneScore: 0,
+	        playerTwoScore: 0
+        }
         console.log("Try join Room: #pongRoom");
         this.pongService.joinUserToRoom("#pongRoom");
         this.subscriptions.add(
@@ -42,7 +80,7 @@ export class PongComponent implements AfterViewInit {
         .subscribe((payload: SocketPayload) => {
         if (payload.event === 'gameStatus')
             this.playerOne = payload.data.player1;
-            console.log("PlauerOne: " + this.playerOne);
+            console.log("PlayerOne: " + this.playerOne);
         }));
     }
 

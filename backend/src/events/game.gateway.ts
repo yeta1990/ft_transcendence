@@ -157,3 +157,66 @@ export class GameGateway extends BaseGateway {
 		return (false)
 	}
 }
+
+class Ball {
+
+    //private speed:number = 5;
+	//ballHeight: number;
+	//ballWidth: number;
+	//ballSpeed: number;
+	//ballXVel: number;
+	//ballYVel: number;
+	//ballX: number;
+	//ballY: number;
+
+    constructor(game: GameRoom){
+		game.ballWidth = 10;
+		game.ballHeight = 10;
+		game.ballX = game.canvasWidth / 2 - 10 / 2;
+		game.ballY = game.canvasheight/ 2 - 10 / 2;
+		game.ballSpeed = 5;
+        var randomDirection = Math.floor(Math.random() * 2) + 1; 
+        if(randomDirection % 2){
+            game.ballXVel = 1;
+        }else{
+            game.ballXVel = -1;
+        }
+        game.ballYVel = 1;
+    }
+
+    update(game: GameRoom){ //game = payload
+ 
+    //check top canvas bounds
+        if(game.ballY <= 10){
+          game.ballYVel = 1;
+        }
+    //check bottom canvas bounds
+        if(game.ballY + game.ballHeight >= game.canvasheight - 10){
+			game.ballYVel = -1;
+        }
+    //check left canvas bounds
+        if(game.ballX <= 0){  
+            game.ballX = game.canvasWidth / 2 - game.ballWidth / 2;
+            game.playerTwoScore += 1;
+        }
+    //check right canvas bounds
+        if(game.ballX + game.ballWidth >= game.canvasWidth){
+            game.ballX = game.canvasWidth / 2 - game.ballWidth / 2;
+            game.playerOneScore += 1;
+        }
+    //check player collision
+        if(game.ballX <= game.playerOneX.x + game.playerOneW){
+            if(game.ballY >= game.playerOneY && game.ballY + game.ballHeight <= game.playerOneY + game.playerOneH){
+            game.ballXVel = 1;
+            }
+        }
+    //check computer collision
+        if(game.ballX + game.ballWidth >= game.playerTwoX){
+            if(game.ballY >= game.playerTwoY && game.ballY + game.ballHeight <= game.playerTwoY + game.playerTwoH){
+                game.ballXVel = -1;
+            }
+        }
+	game.ballX += game.ballXVel * game.ballSpeed;
+    game.ballY += game.ballYVel * game.ballSpeed;
+    }
+}
