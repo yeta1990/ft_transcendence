@@ -25,8 +25,11 @@ export class ModalService {
     this.modalData = data;
     this.modalStatus = true;
   }
-
   closeModal(): void {
+    this.modalStatus = false;
+  }
+
+  closeModalWithData(): void {
     this.modalStatus = false;
 	this.modalCloseSubject.next();
   }
@@ -45,6 +48,10 @@ export class ModalService {
 
   getInputvalue(): string {
  	return this.inputValue; 
+  }
+
+  resetModalInput(): void {
+ 	this.inputValue = ""; 
   }
 }
 

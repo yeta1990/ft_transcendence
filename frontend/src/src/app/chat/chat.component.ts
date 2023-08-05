@@ -274,13 +274,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.toasterService.launchToaster(ToastValues.INFO, "my message")
 	}
 
-	openModal(template: string) {
+	askForChannelPasswordToJoin(template: string, room: string) {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const introducedPass = this.modalService.getModalData();
-			console.log("introduced :" + introducedPass)
-			this.joinUserToRoom("#p" + " " + introducedPass);
+			this.joinUserToRoom(room + " " + introducedPass);
 			this.modalClosedSubscription.unsubscribe();
+			this.modalService.resetModalInput()
     	});
-		this.modalService.openModal(template);
+		this.modalService.openModal(template, room);
 	}
 }

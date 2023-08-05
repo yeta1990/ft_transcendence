@@ -6,14 +6,16 @@
       <ng-template [ngSwitchCase]="'template1'">
         <div id="modal-content-template1">
 		  <div class="modal-header">
-		  <h1 class="modal-title fs-5" id="exampleModalLabel">Channel protected by password</h1>
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Channel {{getModalData()}} protected by password</h1>
 		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		  </div>
 		  <div class="modal-body">
           	<p>This channel is protected. To join it, introduce the password: </p>
-			<input type="text" [(ngModel)]="inputValue" placeholder="Enter password">
+			<input type="text" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter password">
+			&nbsp;&nbsp;&nbsp;
+
+   		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Join</button>
       	  </div>
-   		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-primary">Join</button>
         </div>
       </ng-template>
 
