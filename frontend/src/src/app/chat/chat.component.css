@@ -118,6 +118,10 @@ li.active {
 li:hover {
       background-color: var(--bs-gray-800);
 }
+
+i {
+	cursor: pointer;
+}
     
 .conversation {
 	border: 1px solid #ccc;

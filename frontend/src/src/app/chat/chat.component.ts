@@ -54,27 +54,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			);
    }
 
-   joinUserToRoom(rooms: string): void {
-   	   	//splitting the channels in case they come as a comma-separated list
-        //the command allows this structure: /join [#]channel[,channel] [pass]
-	    const splittedRooms: Array<string> = rooms.split(" ", 1)[0].split(",");
-	    let lastJoinedRoom: string = "";
-
+   joinUserToRoom(roomAndPass: string): void {
 	    //adding a # to those rooms who haven't it
-		splittedRooms.forEach((room) => {
-	  	  if (room.length > 0 && room[0] != '#'){
-			lastJoinedRoom = '#' + room;
-	  	  } else {
-	  	  	lastJoinedRoom = room;
-	  	  }
+	  	if (roomAndPass.length > 0 && roomAndPass[0] != '#') roomAndPass = '#' + roomAndPass;
    	      //in case the user was already in that channel
    	      //we want to preserve the historial of the room
-		  if (!this.messageList.get(lastJoinedRoom)){
-		    this.messageList.set(lastJoinedRoom, new Array<ChatMessage>);
-		  }
-		})
+		if (!this.messageList.get(roomAndPass)){
+			this.messageList.set(roomAndPass, new Array<ChatMessage>);
+		}
 		//sending only one signal to the server with the raw rooms string
-		this.chatService.joinUserToRoom(rooms);
+		this.chatService.joinUserToRoom(roomAndPass.trim());
    }
 
 	leaveRoom(room: string): void{
@@ -104,8 +93,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				}
 				else if (payload.event === events.ListMyJoinedRooms){
 					this.myJointRoomList = Array.from(payload.data)	
-					console.log("my joint room list")
-					console.log(this.myJointRoomList);
 					if (this.myJointRoomList.length == 0){
 						this.currentRoom = "";
 					}
@@ -113,7 +100,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 						this.currentRoom = this.myJointRoomList[0];
 						this.joinUserToRoom(this.currentRoom)
 					}
-					console.log("yes")
 				}
 				else if (payload.event === 'system'){
 //					old method to log a message in the chat window
@@ -283,13 +269,25 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.toasterService.launchToaster(ToastValues.INFO, "my message")
 	}
 
-	askForChannelPasswordToJoin(template: string, room: string) {
+	askForChannelPasswordToJoin(room: string) {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-      		const introducedPass = this.modalService.getModalData();
+      		const introducedPass = this.modalService.getModalData()[0];
 			this.joinUserToRoom(room + " " + introducedPass);
 			this.modalClosedSubscription.unsubscribe();
 			this.modalService.resetModalInput()
     	});
-		this.modalService.openModal(template, room);
+		this.modalService.openModal('template1', room);
+	}
+
+	createChannelModal() {
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+			const receivedData = this.modalService.getModalData();
+			const room = receivedData[0]
+      		const pass = receivedData[1]
+			this.joinUserToRoom(room + " " + pass);
+			this.modalClosedSubscription.unsubscribe();
+			this.modalService.resetModalInput()
+    	});
+		this.modalService.openModal('template2');
 	}
 }

@@ -21,11 +21,22 @@
 
       <ng-template [ngSwitchCase]="'template2'">
         <div id="modal-content-template2">
-          <h2>Modal Template 2</h2>
-          <p>This is the content of template 2.</p>
-          <button (click)="closeModal()">Close Modal</button>
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Create new channel</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+          	<p>Introduce a name for the channel: </p>
+			<input type="text" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter name"><br/>
+			<input type="text" [(ngModel)]="inputValue2" (keydown.enter)="saveAndCloseModal()" placeholder="Enter password">
+			&nbsp;&nbsp;&nbsp;
+			<br />
+
+   		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Join</button>
+      	  </div>
         </div>
       </ng-template>
+
 
       <ng-template [ngSwitchCase]="'template3'">
         <div id="modal-content-template3">

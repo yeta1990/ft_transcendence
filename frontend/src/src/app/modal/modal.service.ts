@@ -7,9 +7,11 @@ import { Subject, Observable } from 'rxjs';
 })
 export class ModalService {
   private modalStatus = false;
-  private modalData: any;
+  private modalData1: any;
+  private modalData2: any;
   private currentModal: string = "";
   private inputValue: string = "";
+  private inputValue2: string = "";
   private modalCloseSubject: Subject<void> = new Subject<void>();
 
   constructor() {}
@@ -22,7 +24,7 @@ export class ModalService {
 
   openModal(templateId: string, data?: any): void {
     this.currentModal = templateId;
-    this.modalData = data;
+    this.modalData1 = data;
     this.modalStatus = true;
   }
   closeModal(): void {
@@ -34,12 +36,13 @@ export class ModalService {
 	this.modalCloseSubject.next();
   }
 
-  setModalData(data: any): void {
-    this.modalData = data;
+  setModalData(data1: any, data2: any): void {
+    this.modalData1 = data1;
+    this.modalData2 = data2;
   }
 
   getModalData(): any {
-    return this.modalData;
+    return [this.modalData1, this.modalData2];
   }
 
   getCurrentModal(): string {
@@ -50,8 +53,13 @@ export class ModalService {
  	return this.inputValue; 
   }
 
+  getInput2value(): string {
+ 	return this.inputValue; 
+  }
+
   resetModalInput(): void {
  	this.inputValue = ""; 
+ 	this.inputValue2 = ""; 
   }
 }
 

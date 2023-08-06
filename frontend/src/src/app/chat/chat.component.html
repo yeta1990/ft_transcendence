@@ -24,14 +24,14 @@
 	  	  </div>
 	  </ul>
 
-      <h2 class="column-heading">Available channels</h2>
+      <div class="d-flex"><div class="flex-grow-1"><span class="column-heading h2">Available channels</span></div><div class="flex-grow-1"><i class="bi bi-plus-circle-fill" (click)="createChannelModal()"></i></div></div>
       <ul class="channel-list">
       	  <div *ngFor="let room of availableRoomsList">
       	 	 <li *ngIf="room && room[0] === '#' && !myJointRoomList.includes(room)" class="d-flex">
       	 	 	<div class="p-2 flex-grow-1 link-channel" *ngIf="!isPrivateRoom(room)" (click)="joinUserToRoom(room)">
 					{{room}} 
 				</div>
-      	 	 	<div class="p-2  flex-grow-1 link-channel" *ngIf="isPrivateRoom(room)" (click)="askForChannelPasswordToJoin('template1', room)">
+      	 	 	<div class="p-2  flex-grow-1 link-channel" *ngIf="isPrivateRoom(room)" (click)="askForChannelPasswordToJoin(room)">
 					{{room}} <i class="bi bi-lock"></i>	
 				</div>
       		</li>

@@ -9,6 +9,7 @@ import { ModalService } from './modal.service';
 })
 export class ModalComponent {
   inputValue: string = "";
+  inputValue2: string = "";
   modalData: any;
 
   constructor(private modalService: ModalService) {
@@ -20,9 +21,10 @@ export class ModalComponent {
   }
 
   saveAndCloseModal(): void {
-    this.modalService.setModalData(this.inputValue);
+    this.modalService.setModalData(this.inputValue, this.inputValue2);
     this.modalService.closeModalWithData();
 	this.inputValue = "";
+	this.inputValue2 = "";
   }
 
   isModalOpen(): boolean {
