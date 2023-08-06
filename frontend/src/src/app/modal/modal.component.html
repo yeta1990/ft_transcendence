@@ -10,11 +10,14 @@
 		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		  </div>
 		  <div class="modal-body">
+			<div class="mb-3">
           	<p>This channel is protected. To join it, introduce the password: </p>
-			<input type="text" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter password">
-			&nbsp;&nbsp;&nbsp;
+
+			<input type="password" class="form-control" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter password">
+   		    </div>
 
    		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Join</button>
+
       	  </div>
         </div>
       </ng-template>
