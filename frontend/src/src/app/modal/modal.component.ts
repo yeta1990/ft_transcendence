@@ -10,6 +10,7 @@ import { ModalService } from './modal.service';
 export class ModalComponent {
   inputValue: string = "";
   inputValue2: string = "";
+  checkboxInput: boolean = false;
   modalData: any;
 
   constructor(private modalService: ModalService) {

@@ -26,13 +26,22 @@
 		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		  </div>
 		  <div class="modal-body">
-          	<p>Introduce a name for the channel: </p>
-			<input type="text" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter name"><br/>
-			<input type="text" [(ngModel)]="inputValue2" (keydown.enter)="saveAndCloseModal()" placeholder="Enter password">
-			&nbsp;&nbsp;&nbsp;
-			<br />
+          	<form>
+				<div class="mb-3">
+    				<label for="channelName" class="form-label">New channel name:</label>
+    				<input type="text" class="form-control" id="channelName" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" name="channelName" >
+  				</div>
+  				  <div class="mb-3 form-check">
+					  <input type="checkbox" class="form-check-input" id="checkboxInput" [(ngModel)]="checkboxInput" name="checkboxInput">
+					<label class="form-check-label" for="checkboxInput">Private channel</label>
+  				  </div>
+				<div class="mb-3" *ngIf="checkboxInput">
+    				<label for="channelPass" class="form-label">Password for private channel:</label>
+    				<input type="password" class="form-control" id="channelPass" [(ngModel)]="inputValue2" (keydown.enter)="saveAndCloseModal()" name="channelPass">
+  				</div>
+			</form>
 
-   		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Join</button>
+   		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Create and join</button>
       	  </div>
         </div>
       </ng-template>
