@@ -306,7 +306,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template3', [nick, room]);
-	
 	}
 
+	banUser2UserModal(targetUser: string) {
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const banConfirmation = this.modalService.getModalData()[0];
+			this.chatService.banUser2User(targetUser)
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template4', targetUser);
+	}
 }

@@ -53,28 +53,37 @@
       <ng-template [ngSwitchCase]="'template3'">
         <div id="modal-content-template3">
 		  <div class="modal-header">
-		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Ban {{getModalData()[0]}} from channel {{getModalData()[1]}}?</h1>
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Ban @{{getModalData()[0][0]}} from {{getModalData()[0][1]}}?</h1>
 		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		  </div>
 		  <div class="modal-body">
 			<div class="mb-3">
           	<p>Are you sure?</p>
    		    </div>
-   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-light">Yes</button>
-   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">No</button>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
 
       	  </div>
         </div>
       </ng-template>
 
+      <ng-template [ngSwitchCase]="'template4'">
+        <div id="modal-content-template4">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Block user @{{getModalData()[0]}}?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          	<p>Neither you nor the user will be able to interact or see your messages in public channels. Are you sure you want to block the user?</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
 
-      <ng-template ngSwitchDefault>
-        <div>
-          <h2>Unknown Modal Template</h2>
-          <p>This is an unknown template.</p>
-          <button (click)="closeModal()">Close Modal</button>
+      	  </div>
         </div>
       </ng-template>
+
     </ng-container>
   </div>
 </div>

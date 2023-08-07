@@ -41,15 +41,12 @@ export class ModalService {
 	this.confirmationInput = data3;
   }
 
-  getModalData(): any {
+  getModalData(): Array<string>{
     return [this.modalData1, this.modalData2];
   }
 
   getCurrentModal(): string {
     return this.currentModal;
-  }
-
-  resetModalInput(): void {
   }
 }
 

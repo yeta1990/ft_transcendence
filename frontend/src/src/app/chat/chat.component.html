@@ -100,7 +100,7 @@
 								@{{nick}}
 							</div>
 							<div class="p-2">
-								<i class="bi bi-person-fill-slash">&nbsp;</i>
+								<i class="bi bi-person-fill-slash" (click)="banUser2UserModal(nick)">&nbsp;</i>
 								<i *ngIf="roomsMetaData.get(currentRoom)?.owner === myUser?.nick" class="bi bi-x-circle" (click)="banUserFromRoomModal(nick, currentRoom)"></i>
 							</div>
 						</li>

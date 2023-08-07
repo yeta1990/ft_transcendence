@@ -43,14 +43,14 @@ export class ModalComponent {
     return this.modalService.getCurrentModal();
   }
 
-  getModalData(): string {
+  getModalData(): Array<string> {
  	return this.modalService.getModalData(); 
   }
 
-  @HostListener('document:keydown.escape', ['$event']) // Escuchar el evento de tecla "Escape"
+  @HostListener('document:keydown.escape', ['$event']) 
   onKeydownHandler(event: KeyboardEvent): void {
     if (this.modalService.isModalOpen()) {
-      this.closeModal(); // Cerrar el modal si está abierto
+      this.closeModal(); 
     }
   }
 }
