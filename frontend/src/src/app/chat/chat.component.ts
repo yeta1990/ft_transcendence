@@ -78,6 +78,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	leaveRoom(room: string): void{
 		this.chatService.partFromRoom(room);	
+		this.messageList.delete(room);
 	}
 
 	//subscription to all events from the service
