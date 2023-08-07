@@ -11,6 +11,7 @@ export class ModalComponent {
   inputValue: string = "";
   inputValue2: string = "";
   checkboxInput: boolean = false;
+  confirmationInput: boolean = false;
   modalData: any;
 
   constructor(private modalService: ModalService) {
@@ -22,10 +23,16 @@ export class ModalComponent {
   }
 
   saveAndCloseModal(): void {
-    this.modalService.setModalData(this.inputValue, this.inputValue2);
+    this.modalService.setModalData(this.inputValue, this.inputValue2, this.confirmationInput);
     this.modalService.closeModalWithData();
 	this.inputValue = "";
 	this.inputValue2 = "";
+	this.confirmationInput = false;
+  }
+
+  confirmationButton(): void {
+ 	this.confirmationInput = true; 
+	this.saveAndCloseModal();
   }
 
   isModalOpen(): boolean {

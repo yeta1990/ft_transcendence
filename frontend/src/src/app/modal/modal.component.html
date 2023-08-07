@@ -52,11 +52,21 @@
 
       <ng-template [ngSwitchCase]="'template3'">
         <div id="modal-content-template3">
-          <h2>Modal Template 3</h2>
-          <p>This is the content of template 3.</p>
-          <button (click)="closeModal()">Close Modal</button>
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Ban {{getModalData()[0]}} from channel {{getModalData()[1]}}?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          	<p>Are you sure?</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-light">Yes</button>
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">No</button>
+
+      	  </div>
         </div>
       </ng-template>
+
 
       <ng-template ngSwitchDefault>
         <div>

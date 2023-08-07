@@ -8,7 +8,8 @@
 					{{room}} <i *ngIf="isPrivateRoom(room)" class="bi bi-lock"></i>	
 				  </div>
 				<div class="p-2">
-					<i class="bi bi-x-circle" (click)="leaveRoom(room)"></i>
+					<i class="bi bi-box-arrow-right" (click)="leaveRoom(room)"></i>
+
 				</div>
 			 </li>
       	  </div>
@@ -80,26 +81,33 @@
 			</div>
 		</ul>
 		<h2 class="column-heading">Channel administrators</h2>
-		<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
-      		<ul class="user-list">
+        <ul class="user-list">
+			<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
 				<div *ngFor="let nick of roomMetaData.value.admins" > 
 						<li *ngIf="roomMetaData.key === currentRoom">@{{nick}}</li>
 				</div>
-			</ul>
-		</div>
+			</div>
+		</ul>
 
 	<h2 class="column-heading">Channel users</h2>
-		<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
-      		<ul class="user-list">
+      	<ul class="channel-list">
+			<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
 				<div *ngFor="let nick of roomMetaData.value.users" > 
 						<li *ngIf="roomMetaData.key === currentRoom && 
 							!roomMetaData.value.admins.includes(nick) && 
-							roomMetaData.value.owner !== nick">
-							@{{nick}}
+							roomMetaData.value.owner !== nick" class="d-flex">
+							<div class="p-2 flex-grow-1 link-channel">
+								@{{nick}}
+							</div>
+							<div class="p-2">
+								<i class="bi bi-person-fill-slash">&nbsp;</i>
+								<i *ngIf="roomsMetaData.get(currentRoom)?.owner === myUser?.nick" class="bi bi-x-circle" (click)="banUserFromRoomModal(nick, currentRoom)"></i>
+							</div>
 						</li>
 				</div>
-			</ul>
-		</div>
+
+			</div>
+		</ul>
 	</div>
   </div>
 

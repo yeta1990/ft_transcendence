@@ -10,8 +10,7 @@ export class ModalService {
   private modalData1: any;
   private modalData2: any;
   private currentModal: string = "";
-  private inputValue: string = "";
-  private inputValue2: string = "";
+  private confirmationInput: boolean = false;
   private modalCloseSubject: Subject<void> = new Subject<void>();
 
   constructor() {}
@@ -36,9 +35,10 @@ export class ModalService {
 	this.modalCloseSubject.next();
   }
 
-  setModalData(data1: any, data2: any): void {
+  setModalData(data1: any, data2: any, data3: boolean): void {
     this.modalData1 = data1;
     this.modalData2 = data2;
+	this.confirmationInput = data3;
   }
 
   getModalData(): any {
@@ -49,17 +49,7 @@ export class ModalService {
     return this.currentModal;
   }
 
-  getInputvalue(): string {
- 	return this.inputValue; 
-  }
-
-  getInput2value(): string {
- 	return this.inputValue; 
-  }
-
   resetModalInput(): void {
- 	this.inputValue = ""; 
- 	this.inputValue2 = ""; 
   }
 }
 
