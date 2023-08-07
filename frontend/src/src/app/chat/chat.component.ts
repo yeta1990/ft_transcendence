@@ -31,6 +31,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	roomsMetaData: Map<string, RoomMetaData> = new Map<string, RoomMetaData>();
 	myUser: User | undefined;
 	private subscriptions = new Subscription();
+	myBlockedUsers: Array<string> = []
 
 	destroy: Subject<any> = new Subject();
 	private modalClosedSubscription: Subscription = {} as Subscription;
@@ -146,6 +147,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 						console.log(JSON.stringify(el))
 					}
 					console.log("-----end of rooms metadata-----")
+				}
+				else if (payload.event === events.BlockedUsers){
+					this.myBlockedUsers = payload.data;
 				}
         		this.scrollToBottom();
 			})
@@ -308,12 +312,21 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.modalService.openModal('template3', [nick, room]);
 	}
 
-	banUser2UserModal(targetUser: string) {
+	blockUserModal(targetUser: string) {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const banConfirmation = this.modalService.getModalData()[0];
 			this.chatService.banUser2User(targetUser)
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template4', targetUser);
+	}
+
+	unBlockUserModal(targetUser: string) {
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const banConfirmation = this.modalService.getModalData()[0];
+			this.chatService.noBanUser2User(targetUser)
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template5', targetUser);
 	}
 }

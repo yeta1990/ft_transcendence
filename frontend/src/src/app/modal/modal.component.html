@@ -75,7 +75,24 @@
 		  </div>
 		  <div class="modal-body">
 			<div class="mb-3">
-          	<p>Neither you nor the user will be able to interact or see your messages in public channels. Are you sure you want to block the user?</p>
+          		<p>Neither you nor @{{getModalData()[0]}} will be able to interact or see your messages in public channels. Are you sure you want to block the user?</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template5'">
+        <div id="modal-content-template5">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Unblock user @{{getModalData()[0]}}?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>If you unblock @{{getModalData()[0]}}, both will be able to interact or see your messages in public channels. Are you sure you want to unblock the user?</p>
    		    </div>
    		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
    		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>

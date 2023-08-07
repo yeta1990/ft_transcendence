@@ -60,6 +60,9 @@ export class SocketService {
 				this.message.next({event: events.ActiveUsers, data})
 //				console.log("active users: " + JSON.stringify(data));
 			})
+			.on(events.BlockedUsers, (data: Array<string>) => {
+				this.message.next({event: events.BlockedUsers, data})
+			})
 			.on('system', (data: ChatMessage) => {
 				this.message.next({event: 'system', data});
 			})

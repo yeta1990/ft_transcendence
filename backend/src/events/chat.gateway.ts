@@ -7,7 +7,6 @@ import { events, values } from '@shared/const';
 import { generateSocketErrorResponse, generateSocketInformationResponse } from '@shared/functions';
 import { generateJoinResponse } from '@shared/functions';
 import { ChatMessageService } from '../chat/chat-message/chat-message.service';
-import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
 import { RoomMessages, ChatUser } from '@shared/types';
 
@@ -16,7 +15,7 @@ import { RoomMessages, ChatUser } from '@shared/types';
 //extending BaseGateway to log the gateway creation in the terminal
 export class ChatGateway extends BaseGateway {
 
-  constructor(private userService: UserService, private chatMessageService: ChatMessageService) {
+  constructor(private chatMessageService: ChatMessageService) {
 	super(ChatGateway.name);
   }
 
@@ -314,7 +313,6 @@ export class ChatGateway extends BaseGateway {
 	  	.chatService
 	  	.banUserOfRoom(nick, payload.nick, payload.room);
 	  if (banOk){
-
 	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromNick(payload.nick);
 	  	if (targetSocketIds.length){
 
@@ -335,7 +333,7 @@ export class ChatGateway extends BaseGateway {
 			.getRoomMetaData(payload.room)
 	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
 	  	this.broadCastToRoom(banInfo.event, banInfo.data)
-		
+
   	  }
   }
 
@@ -354,20 +352,24 @@ export class ChatGateway extends BaseGateway {
   async banUser2User(client: Socket, payload: ChatMessage){
 	  const nick: string = client.handshake.query.nick as string;
 	  const banOk: boolean = await this.chatService.banUser2User(nick, payload.room)
-	  if (banOk)
+	  if (banOk){
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
 				`You've banned ${payload.room} successfully`).data)
+		this.sendBlockedUsers(client.id, nick)
+	  }
   }
 
   @SubscribeMessage('nobanuser')
   async nobanUser2User(client: Socket, payload: ChatMessage){
 	  const nick: string = client.handshake.query.nick as string;
 	  const noBanOk: boolean = await this.chatService.noBanUser2User(nick, payload.room)
-	  if (noBanOk)
+	  if (noBanOk){
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
 				`You've removed the ban of ${payload.room} successfully`).data)
+		this.sendBlockedUsers(client.id, nick)
+	  }
   }
 
   //part == to leave a room
