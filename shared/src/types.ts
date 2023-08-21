@@ -56,12 +56,14 @@ export type GameRoom = {
 	playerOneY: number;
 	playerOneW: number;
 	playerOneH: number;
+	playerOneS: number;
 
 	//PaddleTwoComponent
 	playerTwoX: number;
 	playerTwoY: number;
 	playerTwoW: number;
 	playerTwoH: number;
+	playerTwoS: number;
 
 	//Canvas
 	canvasheight: number;
@@ -79,4 +81,7 @@ export type GameRoom = {
 	//Scores
 	playerOneScore: number;
 	playerTwoScore: number;
+
+	//Mode
+	gameMode: number;
 }

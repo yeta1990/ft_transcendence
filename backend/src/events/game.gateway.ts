@@ -205,7 +205,7 @@ class Ball {
             game.playerOneScore += 1;
         }
     //check player collision
-        if(game.ballX <= game.playerOneX.x + game.playerOneW){
+        if(game.ballX <= game.playerOneX + game.playerOneW){
             if(game.ballY >= game.playerOneY && game.ballY + game.ballHeight <= game.playerOneY + game.playerOneH){
             game.ballXVel = 1;
             }

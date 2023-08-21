@@ -18,6 +18,7 @@ import { HttpModule } from '@nestjs/axios';
 import { EventsModule } from './events/events.module';
 import { ChatModule } from './chat/chat.module';
 import { HashService } from './hash/hash.service';
+import { PongModule } from './pong/pong.module';
  
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { HashService } from './hash/hash.service';
 	HttpModule,
 	EventsModule,
 	ChatModule,
+	PongModule,
   ],
   controllers: [AppController, UserController],
   providers: [AppService, HashService]
