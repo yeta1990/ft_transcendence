@@ -95,8 +95,8 @@ export class User {
 	losses: number;
 
 	@Column({
-		type: 'float',
-		default: 0
+		type: 'int',
+		default: 1000
 	})
 	elo: number;
 

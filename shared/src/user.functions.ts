@@ -35,7 +35,7 @@ export class ValidationFunctions {
 		return regex.test(value);
 	  }
 	
-	  UsernameValidator = (userName: string): Promise<boolean> => {
+	static UsernameValidator = (userName: string): Promise<boolean> => {
 		return new Promise((resolve) => {
 		  const isValid = validateUserName(userName);
 		  resolve(!isValid);

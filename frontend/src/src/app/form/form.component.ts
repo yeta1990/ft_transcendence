@@ -130,7 +130,7 @@ export class FormComponent implements OnInit {
 
 	async usernameValidator(control: AbstractControl): Promise<any> {
 		const userName = control.value;
-		const isValidLocal = await this.validators.UsernameValidator(userName);
+		const isValidLocal = await ValidationFunctions.UsernameValidator(userName);
 		if (!isValidLocal) {
 			return { userNameNotAvailable: true };
 		  }

@@ -54,6 +54,16 @@ services:
          networks:
            - ft_transcendence
 
+    tx_adminer:
+        image: adminer
+        container_name: tx_adminer
+        ports:
+            - "8080:8080"
+        tty: true
+        restart: on-failure
+        networks:
+            - ft_transcendence
+
 volumes:
     tx_nest_volume:
         driver: local

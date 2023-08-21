@@ -21,6 +21,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import { JwtService } from '@nestjs/jwt';
 
 import { ValidationFunctions } from '@shared/user.functions'
+import { Achievement } from '@shared/achievement';
 
 @Controller('user')
 export class UserController {
@@ -45,6 +46,13 @@ export class UserController {
 	public getUser(@Param('id', ParseIntPipe) id: number): Promise<User>{
 		return this.service.getUser(id);
 	}
+	
+	//@UseGuards(AuthGuard)
+	@Get(':id/achievements')
+	public getUserAchievements(@Param('id', ParseIntPipe) id: number): Promise<Achievement[]> {
+	  return this.service.getUserAchievements(id);
+	}
+
 
 	@Post()
 	public createUser(@Body() body: CreateUserDto): Promise<User>{
@@ -82,5 +90,7 @@ export class UserController {
 
 		return { isValid: isValidDB };
 	}
+
+	
 
 }

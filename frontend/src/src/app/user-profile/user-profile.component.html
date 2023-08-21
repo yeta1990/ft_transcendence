@@ -1,8 +1,61 @@
-<app-nav-bar/>
-<h1>{{user?.nick}}</h1>
-<div>User ID: {{user?.id}} </div>
-<div>Nick: {{user?.nick}} </div>
-<div>First name: {{user?.firstName}} </div>
-<div>Last name: {{user?.lastName}} </div>
-<div><img src={{user?.image}} /></div>
-<router-outlet>
+<div class="background">
+	<div class="profile-container">
+	  <div class="avatar-container">
+		<img class="avatar" [src]="user?.image" alt="User Avatar" />
+	  </div>
+	  <h1 class="username">{{ user?.nick }}</h1>
+
+	  <!-- Información sobre Estudiantes -->
+	  <div class="user-info">
+		<p class="user-info-text" *ngIf="user?.campus !== 'None' && user?.login">
+		  Campus: {{ user?.campus }} | Login: {{ user?.login }}
+		</p>
+		<p class="user-info-text" *ngIf="user?.campus === 'None'">
+		  Not a 42 student
+		</p>
+	  </div>
+	  <hr class="info-divider">
+	  <div class="progress-bar" [style.background-image]="'linear-gradient(.25turn, #d1434f ' + gradientStart + '%, #d4da5b ' + gradientEnd + '%)'">
+		<div class="trophy"></div>
+		<div class="wins"><span class="dynamic-number">{{ user?.wins }}</span> wins</div>
+  		<div class="losses">losses <span class="dynamic-number">{{ user?.losses }}</span></div>
+		</div>
+	  
+	  <!-- Elo Rank -->
+	  <div class="elo-rank">{{ userRank }}</div>
+	  <div class="elo-progress">
+		<div class="elo-progress-filled" [ngStyle]="progressStyles"></div>
+		<div class="elo-value">ELO: {{ user?.elo }}</div>
+	  </div>
+
+		<!-- Achievements -->
+		<div class="achievements">
+			<div class="achievements-text">Achievements ({{ userAchievements.length }}/{{ totalAchievements }})</div>
+			<div class="achievement-images">
+			<ng-container *ngFor="let achievement of achievementsStatus">
+				<div class="hexagon">
+				<img
+					[src]="achievement.achieved ? 'assets/achievements-images/' + achievement.name + '/achieved.png' : 'assets/achievements-images/' + achievement.name + '/not-achieved.png'"
+					[alt]="achievement.name"
+					[ngClass]="{'achieved': achievement.achieved, 'not-achieved': !achievement.achieved}"
+					class="achievement-image"
+				/>
+				</div>
+			</ng-container>
+			</div>
+		</div>
+  
+	  
+
+	  <!-- Botón de edición -->
+	  <button class="edit-button">EDIT PROFILE</button>
+	  
+	  <!-- Botón de salida -->
+	  <div class="close-button">
+		<button class="close-button-inner" (click)="goBack()">
+		  <span class="close-icon">+</span>
+		</button>
+	  <!-- Aquí irá el resto del contenido del perfil -->
+	</div>
+  </div>
+  

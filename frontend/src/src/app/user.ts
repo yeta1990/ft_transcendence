@@ -1,4 +1,5 @@
 import { UserStatus, Campuses } from '@shared/enum';
+import { Achievement } from '@shared/achievement';
 
 export class User {
 	id: number;
@@ -13,7 +14,7 @@ export class User {
 	mfaSecret: string;
 	image: string;
 	status: UserStatus;
-	achievements: number[];
+	achievements: Achievement[];
 	wins: number;
 	winningStreak: number;
 	losses: number;
