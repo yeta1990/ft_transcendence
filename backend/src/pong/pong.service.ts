@@ -18,16 +18,12 @@ export class PongService {
     //private subscriptions = new Subscription();
     //destroy: Subject<any> = new Subject();
     public game: GameRoom;
+    games: Map<string, GameRoom>;
 
-    constructor(
-        //private pongService: PongService,
-    ){
-        this.initGame();
-    }
-
-    initGame () {
+    initGame (name: string): GameRoom {
+        
         this.game = {
-            room: "GameRoom",
+            room: name,
 	        message: "Welcome",
 	        nick: "",
 	        date: null,
@@ -65,7 +61,9 @@ export class PongService {
 	        //Scores
 	        playerOneScore: 0,
 	        playerTwoScore: 0
-        }
+        };
+        this.games.set(name, this.game);
+        return (this.games.get(name));
     }
 
     initCanvas() {

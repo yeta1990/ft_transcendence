@@ -3,7 +3,7 @@ import { Subject, from, Observable } from  'rxjs';
 import { io } from "socket.io-client";
 import { events } from '@shared/const';
 import { environment } from '../environments/environment'
-import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
+import { ChatMessage, SocketPayload, RoomMetaData, GameRoom } from '@shared/types';
 
 export class SocketService {
 //https://auth0.com/blog/real-time-charts-using-angular-d3-and-socket-io/
@@ -67,9 +67,9 @@ export class SocketService {
 				this.message.next({event: 'direction', data});
 				console.log("direction: " + data);	
 			})
-			.on('gameStatus', (data: any) => {
-				console.log("join received: " + JSON.stringify(data));
-				this.message.next({event: 'join', data});
+			.on('gameStatus', (data: GameRoom) => {
+				console.log("join received: " + JSON.stringify(data.room));
+				this.message.next({event: 'gameStatus', data});
 			})
 
 	}

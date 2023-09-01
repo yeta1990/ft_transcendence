@@ -34,43 +34,6 @@ export class PongComponent implements AfterViewInit {
     constructor(
         //private pongService: PongService,
     ){
-        this.game = {
-            //room: string;
-	        //message: string;
-	        //nick: string;
-	        //date: Date;
-	        //y: number;
-	        //height: number;
-
-	        //PaddleOneComponent
-	        playerOneX: this.player1?.x,
-	        playerOneY: this.player1?.y,
-	        playerOneW: this.player1?.width,
-	        playerOneH: this.player1?.height,
-
-	        //PaddleTwoComponent
-	        playerTwoX: this.computerPlayer?.x,
-	        playerTwoY: this.computerPlayer?.y,
-	        playerTwoW: this.computerPlayer?.width,
-	        playerTwoH: this.computerPlayer?.height,
-
-	        //Canvas
-	        canvasheight: this.canvas.height,
-	        canvasWidth: this.canvas.width,
-
-	        //Ball
-	        //ballHeight: ;
-	        //ballWidth: number;
-	        //ballSpeed: number;
-	        //ballXVel: number;
-	        //ballYVel: number;
-	        //ballX: number;
-        	//ballY: number;
-
-	        //Scores
-	        playerOneScore: 0,
-	        playerTwoScore: 0
-        }
         console.log("Try join Room: #pongRoom");
         this.pongService.joinUserToRoom("#pongRoom");
         this.subscriptions.add(
@@ -79,8 +42,7 @@ export class PongComponent implements AfterViewInit {
         .pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
         .subscribe((payload: SocketPayload) => {
         if (payload.event === 'gameStatus')
-            this.playerOne = payload.data.player1;
-            console.log("PlayerOne: " + this.playerOne);
+            this.game = payload.data;
         }));
     }
 
@@ -95,8 +57,8 @@ export class PongComponent implements AfterViewInit {
             console.log("You are NOT Player 1");
         //this.pongService.joinUserToRoom("#pongRoom");
         PongComponent.init = false;
-        PongComponent.computerScore = 0;
-        PongComponent.playerScore = 0;
+        //PongComponent.computerScore = 0;
+        //PongComponent.playerScore = 0;
         this.canvas = this.gameCanvas?.nativeElement;
         this.gameContext = this.canvas?.getContext('2d');
 
