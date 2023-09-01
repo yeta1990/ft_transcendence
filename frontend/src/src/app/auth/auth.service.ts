@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { User } from './user';
+import { User } from '../user';
 import { Observable } from "rxjs";
 import { tap, shareReplay } from "rxjs/operators";
 import * as moment from "moment";
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
 import jwt_decode from 'jwt-decode';
 
@@ -74,7 +74,7 @@ export class AuthService {
     getExpiration() {
 		let expiration: number = 0;
 		try {
-			const decodedAccessToken = this.getDecodedAccessToken(localStorage.getItem("access_token") || "{}");
+			const decodedAccessToken = this.getDecodedAccessToken(this.getUserToken()!);
 
 			expiration = parseInt(decodedAccessToken.exp) * 1000;
 		} catch(Error) {

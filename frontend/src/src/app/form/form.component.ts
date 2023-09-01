@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, FormControl, Validators, AbstractControl, Valid
 import { FormService } from './form.service';
 import { User } from '../user';
 import { ValidationFunctions } from '@shared/user.functions'
-import { AuthService } from '../auth.service';
+import { AuthService } from '../auth/auth.service';
 import { Campuses } from '@shared/enum';
 import { HttpClient } from '@angular/common/http';
 

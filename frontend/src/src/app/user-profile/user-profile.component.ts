@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { User } from '../user';
 import { UserProfileService } from './user-profile.service';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../auth/auth.service';
 import { Campuses, EloRank } from '@shared/enum';
 import { getEloRank } from '@shared/functions';
 import { Achievement, AchievementsData } from '@shared/achievement'
 import { forkJoin } from 'rxjs';
 import { Location } from '@angular/common';
+import { UserModule } from '../user/user.module';
 
 
 @Component({
@@ -18,6 +19,7 @@ import { Location } from '@angular/common';
 export class UserProfileComponent implements OnInit {
 
   user: User | undefined;
+  adminPower = false; // HAY QUE AÑADIR QUE UN ADMIN PUEDA EDITAR TAMBIEN
   campusesTypes = Object.values(Campuses);
   editingField: string | null = null;
   editedFields: { [key: string]: any } = {};
@@ -60,14 +62,15 @@ export class UserProfileComponent implements OnInit {
 			this.achievementsStatus = this.getAchievementsStatus();
 			console.log('ALL Achievements:', this.achievementsStatus);
 		});
-
+		this.check_admin_level(userId);
 	  }
+
 	  editProfile() {
 		
 	  }
 
 	  editField(fieldName: string): void {
-		if (this.user) {
+		if (this.user && this.adminPower) {
 			this.editingField = fieldName;
 			this.editedFields[fieldName] = this.user[fieldName as keyof User];
 		  }
@@ -82,6 +85,12 @@ export class UserProfileComponent implements OnInit {
 	  cancelEdit() {
 		this.editingField = null;
 		this.editedFields = {};
+	  }
+
+	  check_admin_level(userId: number) {
+		const currentID = this.authService.getDecodedAccessToken(this.authService.getUserToken()!).id;
+		if (currentID == userId)
+			this.adminPower = true;
 	  }
 
 	  progressStyles: { [key: string]: string } = {};
