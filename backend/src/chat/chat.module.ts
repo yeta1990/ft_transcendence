@@ -12,7 +12,7 @@ import { ChatMessage } from './chat-message/chat-message.entity';
 
 @Module({
 	imports: [TypeOrmModule.forFeature([Room, User, ChatMessage]), HttpModule, UserModule],
-	exports: [ChatService],
+	exports: [RoomService, ChatService],
 	providers: [ChatService, HashService, RoomService, ChatMessageService]
 })
 export class ChatModule {

@@ -1,12 +1,14 @@
 import { Component, OnInit, AfterViewInit, QueryList, ElementRef, ViewChild, ViewChildren, OnDestroy} from '@angular/core';
 import { ChatService } from './chat.service';
 import { FormBuilder } from '@angular/forms';
-import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
-import { events } from '@shared/const';
+import { ChatMessage, SocketPayload, RoomMetaData, ToastData } from '@shared/types';
+import { events, ToastValues } from '@shared/const';
 import { takeUntil } from "rxjs/operators"
 import { Subject, Subscription, pipe } from "rxjs"
 import { User } from '../user';
 import { MyProfileService } from '../my-profile/my-profile.service';
+import { ToasterService } from '../toaster/toaster.service'
+import { ModalService } from '../modal/modal.service'
  
 @Component({
   selector: 'app-chat',
@@ -29,8 +31,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	roomsMetaData: Map<string, RoomMetaData> = new Map<string, RoomMetaData>();
 	myUser: User | undefined;
 	private subscriptions = new Subscription();
+	myBlockedUsers: Array<string> = []
 
 	destroy: Subject<any> = new Subject();
+	private modalClosedSubscription: Subscription = {} as Subscription;
 
 	messageToChat = this.formBuilder.group({
 		newMessage: ''
@@ -39,6 +43,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		private chatService: ChatService,
 		private formBuilder: FormBuilder,
 		private profileService: MyProfileService,
+		private modalService: ModalService,
+		private toasterService: ToasterService
    ) {
 		this.currentRoom = "";
 		this.messageList.set(this.currentRoom, new Array<ChatMessage>);
@@ -49,28 +55,31 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			);
    }
 
-   joinUserToRoom(rooms: string): void {
-   	   	//splitting the channels in case they come as a comma-separated list
-        //the command allows this structure: /join [#]channel[,channel] [pass]
-	    const splittedRooms: Array<string> = rooms.split(" ", 1)[0].split(",");
-	    let lastJoinedRoom: string = "";
-
+   joinUserToRoom(roomAndPass: string): void {
 	    //adding a # to those rooms who haven't it
-		splittedRooms.forEach((room) => {
-	  	  if (room.length > 0 && room[0] != '#'){
-			lastJoinedRoom = '#' + room;
-	  	  } else {
-	  	  	lastJoinedRoom = room;
-	  	  }
+	  	if (roomAndPass.length > 0 && roomAndPass[0] != '#') roomAndPass = '#' + roomAndPass;
    	      //in case the user was already in that channel
    	      //we want to preserve the historial of the room
-		  if (!this.messageList.get(lastJoinedRoom)){
-		    this.messageList.set(lastJoinedRoom, new Array<ChatMessage>);
-		  }
-		})
+		if (!this.messageList.get(roomAndPass)){
+			this.messageList.set(roomAndPass, new Array<ChatMessage>);
+		}
 		//sending only one signal to the server with the raw rooms string
-		this.chatService.joinUserToRoom(rooms);
+		this.chatService.joinUserToRoom(roomAndPass.trim());
    }
+	
+   banUserFromRoom(nick: string, room: string){
+	   this.chatService.banUserFromRoom(nick, room)
+   }
+
+   banUser2User(targetNick: string){
+  		this.chatService.banUser2User(targetNick) 
+   }
+
+
+	leaveRoom(room: string): void{
+		this.chatService.partFromRoom(room);	
+		this.messageList.delete(room);
+	}
 
 	//subscription to all events from the service
 	ngOnInit(): void {
@@ -84,7 +93,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					this.messageList.get(payload.data.room)!.push(payload.data);
 				}
 				else if (payload.event === events.ListAllRooms){
-					this.availableRoomsList = Array.from(payload.data);
+					this.availableRoomsList = Array.from(payload.data.map((r: any) => r.room));
+					payload.data.map((r: RoomMetaData) => {
+						if (r.room) this.roomsMetaData.set(r.room, r)
+					}
+					)
 				}
 				else if (payload.event === events.ListMyPrivateRooms){
 					this.myPrivateMessageRooms = Array.from(payload.data);
@@ -100,7 +113,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					}
 				}
 				else if (payload.event === 'system'){
-					this.messageList.get(this.currentRoom)!.push(payload.data);
+//					old method to log a message in the chat window
+//					this.messageList.get(this.currentRoom)!.push(payload.data);
+
+//					new method to log a message in a toaster
+					console.log(payload.data)
+					this.toasterService.launchToaster(ToastValues.INFO, payload.data.message)
+				}
+				else if (payload.event === 'system-error'){
+					this.toasterService.launchToaster(ToastValues.ERROR, payload.data.message)
 				}
 				else if (payload.event === 'join'){
 					this.currentRoom = payload.data.room;
@@ -120,12 +141,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				}
 				else if (payload.event === events.RoomMetaData){
 					console.log("-------rooms metadata--------")
+					console.log(payload.data)
 					this.roomsMetaData.set(payload.data.room, payload.data)
 					const it = this.roomsMetaData.entries();
 					for (const el of it){
 						console.log(JSON.stringify(el))
 					}
 					console.log("-----end of rooms metadata-----")
+				}
+				else if (payload.event === events.BlockedUsers){
+					this.myBlockedUsers = payload.data;
 				}
         		this.scrollToBottom();
 			})
@@ -245,5 +270,64 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	goToChatRoom(room: string): void{
 		console.log("go to chat room " + room);
 	}
- 
+
+	isPrivateRoom(room: string): boolean {
+		if (this.roomsMetaData.has(room)){
+			const b = this.roomsMetaData.get(room)!.hasPass;
+			return b;
+		}
+		return false
+	}
+
+	launchToast() {
+		this.toasterService.launchToaster(ToastValues.INFO, "my message")
+	}
+
+	askForChannelPasswordToJoin(room: string) {
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const introducedPass = this.modalService.getModalData()[0];
+			console.log(room + " " + introducedPass)
+			this.joinUserToRoom(room + " " + introducedPass);
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template1', room);
+	}
+
+	createChannelModal() {
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+			const receivedData = this.modalService.getModalData();
+			const room = receivedData[0]
+      		const pass = receivedData[1]
+			this.joinUserToRoom(room + " " + pass);
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template2');
+	}
+
+	banUserFromRoomModal(nick: string, room: string){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const banConfirmation = this.modalService.getModalData()[0];
+			this.banUserFromRoom(nick, room)
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template3', [nick, room]);
+	}
+
+	blockUserModal(targetUser: string) {
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const banConfirmation = this.modalService.getModalData()[0];
+			this.chatService.banUser2User(targetUser)
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template4', targetUser);
+	}
+
+	unBlockUserModal(targetUser: string) {
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const banConfirmation = this.modalService.getModalData()[0];
+			this.chatService.noBanUser2User(targetUser)
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template5', targetUser);
+	}
 }

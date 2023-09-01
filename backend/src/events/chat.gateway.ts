@@ -7,7 +7,6 @@ import { events, values } from '@shared/const';
 import { generateSocketErrorResponse, generateSocketInformationResponse } from '@shared/functions';
 import { generateJoinResponse } from '@shared/functions';
 import { ChatMessageService } from '../chat/chat-message/chat-message.service';
-import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
 import { RoomMessages, ChatUser } from '@shared/types';
 
@@ -16,9 +15,7 @@ import { RoomMessages, ChatUser } from '@shared/types';
 //extending BaseGateway to log the gateway creation in the terminal
 export class ChatGateway extends BaseGateway {
 
-
-	
-  constructor(private userService: UserService, private chatMessageService: ChatMessageService) {
+  constructor(private chatMessageService: ChatMessageService) {
 	super(ChatGateway.name);
   }
 
@@ -112,12 +109,12 @@ export class ChatGateway extends BaseGateway {
   	  if (room.length > 0 && room[0] == '@'){
 	  	  if (await this.userService
 	  			  .isUserBannedFromUser(room.substr(1, room.length - 1), nick)){
-	  			  return this.messageToClient(clientSocketId, "system", 
+	  			  return this.messageToClient(clientSocketId, "system-error", 
 	  					generateSocketErrorResponse("", `You can't open a private conversation with ${room.substr(1, room.length - 1)} because you are banned`).data);
 	      }
 		  room = await this.chatService.generatePrivateRoomName(nick, room.substr(1, room.length - 1))
-		  if (!room){ 
-			  return this.messageToClient(clientSocketId, "system", 
+		  if (!room){
+			  return this.messageToClient(clientSocketId, "system-error",
 	  		  	  generateSocketErrorResponse("", `Bad channel name`).data);
 	  	  }
   	  }
@@ -259,7 +256,7 @@ export class ChatGateway extends BaseGateway {
 
   @SubscribeMessage(events.ListAllRooms)
   async listRooms(client: Socket): Promise<WsResponse<unknown>>{
-	  return { event: events.ListAllRooms, data: await this.chatService.getAllRooms()}
+	  return { event: events.ListAllRooms, data: await this.roomService.getAllRoomsMetaData()}
   }
 
   @SubscribeMessage(events.ListMyPrivateRooms)
@@ -315,10 +312,7 @@ export class ChatGateway extends BaseGateway {
 	  const banOk: boolean = await this
 	  	.chatService
 	  	.banUserOfRoom(nick, payload.nick, payload.room);
-
-		console.log(banOk)
 	  if (banOk){
-
 	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromNick(payload.nick);
 	  	if (targetSocketIds.length){
 
@@ -335,8 +329,11 @@ export class ChatGateway extends BaseGateway {
 			.emit("system", generateSocketInformationResponse(payload.room, 
 				`You've banned ${payload.nick} in ${payload.room} successfully`).data)
 	    const banInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.nick} has been banned of ${payload.room}`)
+		let roomMetaData: RoomMetaData = await this.roomService
+			.getRoomMetaData(payload.room)
+	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
 	  	this.broadCastToRoom(banInfo.event, banInfo.data)
-		
+
   	  }
   }
 
@@ -355,20 +352,24 @@ export class ChatGateway extends BaseGateway {
   async banUser2User(client: Socket, payload: ChatMessage){
 	  const nick: string = client.handshake.query.nick as string;
 	  const banOk: boolean = await this.chatService.banUser2User(nick, payload.room)
-	  if (banOk)
+	  if (banOk){
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
 				`You've banned ${payload.room} successfully`).data)
+		this.sendBlockedUsers(client.id, nick)
+	  }
   }
 
   @SubscribeMessage('nobanuser')
   async nobanUser2User(client: Socket, payload: ChatMessage){
 	  const nick: string = client.handshake.query.nick as string;
 	  const noBanOk: boolean = await this.chatService.noBanUser2User(nick, payload.room)
-	  if (noBanOk)
+	  if (noBanOk){
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
 				`You've removed the ban of ${payload.room} successfully`).data)
+		this.sendBlockedUsers(client.id, nick)
+	  }
   }
 
   //part == to leave a room
