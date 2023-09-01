@@ -3,7 +3,7 @@ import { FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoginService } from './login.service';
 import { User } from '../user';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../auth/auth.service';
 import { environment } from '../../environments/environment';
 
 @Component({

@@ -24,6 +24,7 @@ import { ToasterComponent } from './toaster/toaster.component'
 import { ToasterService } from './toaster/toaster.service';
 import { ModalComponent } from './modal/modal.component'
 import { ModalService } from './modal/modal.service'
+import { ValidationFunctions } from '@shared/user.functions'
 
 
 @NgModule({
@@ -55,7 +56,8 @@ import { ModalService } from './modal/modal.service'
   providers: [
 	interceptorProviders,
 	ToasterService,
-	ModalService
+	ModalService, 
+    ValidationFunctions
   ],
   bootstrap: [AppComponent]
 })

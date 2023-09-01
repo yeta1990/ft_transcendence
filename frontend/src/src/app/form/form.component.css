@@ -1,0 +1,100 @@
+.form-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+	background-color: #f2f2f2;
+  }
+  
+  .form-wrapper {
+	background-color: white;
+	border-radius: 8px;
+	box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+	padding: 24px;
+	max-width: 400px;
+  }
+  
+  .form-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
+  }
+  
+  .form-header h2 {
+	font-size: 20px;
+	font-weight: bold;
+  }
+  
+  .form-divider {
+	height: 1px;
+	background-color: #ccc;
+	margin: 16px 0;
+  }
+  
+  .form-row {
+	display: flex;
+	justify-content: space-between;
+  }
+  
+  .form-column {
+	flex: 1;
+	margin-right: 8px;
+  }
+  
+  .form-input {
+	width: 100%;
+	margin-bottom: 16px;
+  }
+  
+  .form-select {
+	width: 100%;
+	margin-bottom: 16px;
+  }
+  
+  .form-error {
+	color: red;
+	margin-top: 4px;
+  }
+  
+  .form-actions {
+	text-align: center;
+	margin-top: 16px;
+  }
+  
+  .form-button {
+	width: 100%;
+	padding: 12px;
+	background-color: #007bff;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	font-weight: bold;
+	cursor: pointer;
+  }
+  
+  .form-button[disabled] {
+	opacity: 0.3; /* Reducir la opacidad del botón */
+	cursor: not-allowed; /* Cambiar el cursor cuando está deshabilitado */
+  }
+
+  .form-footer {
+	text-align: center;
+	margin-top: 16px;
+  }
+  
+  .form-footer p {
+	margin: 0;
+  }
+  
+  .form-secondary-button {
+	width: 100%;
+	padding: 12px;
+	background-color: #f2f2f2;
+	color: #007bff;
+	border: 1px solid #007bff;
+	border-radius: 4px;
+	font-weight: bold;
+	cursor: pointer;
+  }
+  

@@ -4,11 +4,14 @@ import { AppService } from './app.service';
 
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { DataSource, getConnection } from 'typeorm';
 
 import { AuthModule } from './auth/auth.module'
 
 import { User } from './user/user.entity'
+import { Friend } from './user/friend/friend.entity'
+import { Achievement } from './user/achievement/achievement.entity'
+import { AchievementService } from './user/achievement/achievement.service';
 import { Room } from './chat/room.entity'
 import { ChatMessage } from './chat/chat-message/chat-message.entity'
 import { UserController } from './user/user.controller';
@@ -33,7 +36,7 @@ import { HashService } from './hash/hash.service';
 		username: process.env.POSTGRES_USER,
 		password: process.env.POSTGRES_PASSWORD,
 		database: process.env.POSTGRES_DATABASE,
-		entities: [User, Room, ChatMessage],
+		entities: [User, Friend, Achievement, Room, ChatMessage],
 		synchronize: true, // creo que esto hay que cambiarlo para subirlo a producción
 		logging: false //useful for debugging errors in typeorm/postgres
 
@@ -41,8 +44,9 @@ import { HashService } from './hash/hash.service';
 	HttpModule,
 	EventsModule,
 	ChatModule,
+	TypeOrmModule.forFeature([Achievement]),
   ],
   controllers: [AppController, UserController],
-  providers: [AppService, HashService]
+  providers: [AppService, HashService, AchievementService]
 })
 export class AppModule {}

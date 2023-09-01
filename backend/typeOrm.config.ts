@@ -2,6 +2,8 @@ import { DataSource } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { config } from 'dotenv';
 import { User } from './src/user/user.entity'
+import { Friend } from './src/user/friend/friend.entity'
+import { Achievement } from './src/user/achievement/achievement.entity'
 import { Room } from './src/chat/room.entity';
 
 config();
@@ -15,5 +17,5 @@ export default new DataSource({
   username: configService.get('POSTGRES_USER'),
   password: configService.get('POSTGRES_PASSWORD'),
   database: configService.get('POSTGRES_DB'),
-  entities: [User, Room],
+  entities: [User, Friend, Achievement],
 });
