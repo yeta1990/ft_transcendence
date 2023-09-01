@@ -36,7 +36,7 @@ export class SocketService {
 				console.log("join private message received: " + JSON.stringify(data));
 				this.message.next({event: 'joinmp', data});
 			})
-			.on(events.ListAllRooms, (data: any) => {
+			.on(events.ListAllRooms, (data: Array<RoomMetaData>) => {
 				console.log("listRooms received: " + data);
 				this.message.next({event: events.ListAllRooms, data});
 			})
@@ -60,8 +60,14 @@ export class SocketService {
 				this.message.next({event: events.ActiveUsers, data})
 //				console.log("active users: " + JSON.stringify(data));
 			})
+			.on(events.BlockedUsers, (data: Array<string>) => {
+				this.message.next({event: events.BlockedUsers, data})
+			})
 			.on('system', (data: ChatMessage) => {
 				this.message.next({event: 'system', data});
+			})
+			.on('system-error', (data: ChatMessage) => {
+				this.message.next({event: 'system-error', data});
 			})
 	}
 

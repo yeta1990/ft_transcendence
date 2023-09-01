@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HttpService } from '@nestjs/axios';
 import { HashService } from '../hash/hash.service';
@@ -18,7 +18,9 @@ export class ChatService {
 	@InjectRepository(User)
 	private readonly userRepository: Repository<User>;
 
-	constructor(private httpService: HttpService, private hashService: HashService, private userService: UserService, private roomService: RoomService) {}
+	constructor(private httpService: HttpService, private hashService: HashService, private userService: UserService, 
+				@Inject(forwardRef(() => RoomService))
+				private roomService: RoomService) {}
 
 	public async createRoom(nick:string, room: string, hasPass: boolean, password: string | undefined): Promise<boolean>{
 		const roomAlreadyExists = await this.roomRepository.findOne({ where: {name: room}});

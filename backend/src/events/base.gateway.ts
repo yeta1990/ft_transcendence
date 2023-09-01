@@ -12,6 +12,7 @@ import { AuthService } from '../auth/auth.service';
 import { ChatService } from '../chat/chat.service';
 import { HashService } from '../hash/hash.service';
 import { RoomService } from '../chat/room/room.service';
+import { UserService} from '../user/user.service';
 import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
 import { generateSocketErrorResponse, generateSocketInformationResponse } from '@shared/functions';
 import { events, values } from '@shared/const';
@@ -43,6 +44,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   @Inject(RoomService)
   protected roomService: RoomService;
+
+  @Inject(UserService)
+  protected userService: UserService;
 
   constructor(name: string){
 	this.gatewayName = name;
@@ -79,6 +83,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   	    		.getActiveNicksInServer()
 			this.server.emit(events.ActiveUsers, activeNicksInServer)	
 		}
+		this.sendBlockedUsers(socket.id, nick)
 	}
 	else{
 		//disconnect
@@ -118,7 +123,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		this.rooms.delete(room);
 		await this.chatService.deleteRoom(room);
 	}
-    this.emit('listAllRooms', await this.chatService.getAllRooms());
+    this.emit(events.ListAllRooms, await this.roomService.getAllRoomsMetaData());
   }
 
 
@@ -227,7 +232,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		await this.server.in(clientId).socketsJoin(room);
 		const successfulJoin: boolean = await this.chatService.addUserToRoom(room, creatorNick);
 		if (!successfulJoin) return false;
-		this.emit('listAllRooms', await this.chatService.getAllRooms());
+		this.emit(events.ListAllRooms, await this.roomService.getAllRoomsMetaData());
 		this.logger.log("User " + clientId + "joined room " + room);
 		return true
   }
@@ -277,7 +282,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		  	  	const err: ChatMessage = {
 			  	   room: room,
 			  	   message: `Error: bad password provided for ${room}`,
-			  	   nick: "system",
+			  	   nick: "system-error",
 			  	   date: new Date()
 		      	}
 				let passwordChallengePassed: boolean = false;
@@ -285,7 +290,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 					passwordChallengePassed = await this.hashService.comparePassword(password, await this.chatService.getHashPassFromRoom(room));
 				}
 				if (!passwordChallengePassed){
-		  	  		this.messageToClient(clientId, "system", err);
+		  	  		this.messageToClient(clientId, "system-error", err);
 					return false;
 				}
 			}
@@ -311,6 +316,8 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  	if (hardJoin){
 	  		const socketInfo: SocketPayload = generateSocketInformationResponse(room, `user ${nick} has joined room ${room}`)
 			this.broadCastToRoomExceptForSomeUsers(socketInfo.event, socketInfo.data, [nick])
+			const joinFeedback: SocketPayload = generateSocketInformationResponse(room, `You have joined ${room}`)
+			this.server.to(clientId).emit("system", joinFeedback.data)
 		}
 		return true;
   }
@@ -338,6 +345,13 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   public getNumberOfConnectedUsers(): number{
 	return this.users.size;
+  }
+
+  public async sendBlockedUsers(clientId: string, nick: string): Promise<void>{
+		const blockedUsersByNick: Array<string> = (await this.userService
+			.getBannedUsersByNick(nick))
+			.map(m => m.nick)
+ 		this.server.to(clientId).emit(events.BlockedUsers, blockedUsersByNick) 
   }
 
 }

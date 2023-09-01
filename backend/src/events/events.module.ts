@@ -16,7 +16,7 @@ import { UserModule } from '../user/user.module';
 
 @Module({
 	imports: [TypeOrmModule.forFeature([Room, User, ChatMessage]), AuthModule, HttpModule, UserModule],
-  providers: [ChatService, ChatMessageService, ChatGateway, GameGateway, BaseGateway, HashService, RoomService]
+  	providers: [ChatService, RoomService, ChatMessageService, ChatGateway, GameGateway, BaseGateway, HashService]
 })
 
 export class EventsModule {}

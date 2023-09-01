@@ -1,5 +1,6 @@
 import { NgModule ,ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing-module/app-routing-module.module'
@@ -17,8 +18,12 @@ import { ErrorInterceptor } from './error-interception/error.interceptor';
 import { GlobalErrorHandler } from './error-interception/global-error-handler.service';
 import { interceptorProviders } from './app.interceptors';
 import { ChatComponent } from './chat/chat.component';
-import { PongComponent } from './pong/pong.component'
-import { environment } from '../environments/environment'
+import { environment } from '../environments/environment';
+import { PongComponent } from './pong/pong.component';
+import { ToasterComponent } from './toaster/toaster.component'
+import { ToasterService } from './toaster/toaster.service';
+import { ModalComponent } from './modal/modal.component'
+import { ModalService } from './modal/modal.service'
 import { ValidationFunctions } from '@shared/user.functions'
 
 
@@ -34,12 +39,15 @@ import { ValidationFunctions } from '@shared/user.functions'
     HomeComponent,
     EditProfileComponent,
     ChatComponent,
-    PongComponent
+    PongComponent,
+    ToasterComponent,
+    ModalComponent
 
   ],
   imports: [
     FormsModule,
     BrowserModule,
+    BrowserAnimationsModule,
     HttpClientModule,
     ReactiveFormsModule,
     AppRoutingModule,
@@ -47,7 +55,9 @@ import { ValidationFunctions } from '@shared/user.functions'
   ],
   providers: [
 	interceptorProviders,
-  ValidationFunctions,
+	ToasterService,
+	ModalService, 
+    ValidationFunctions
   ],
   bootstrap: [AppComponent]
 })

@@ -1,30 +1,40 @@
-
-
   <div class="container">
     <div class="left-column">
       <h2 class="column-heading">Joined channels</h2>
       <ul class="channel-list">
       	  <div *ngFor="let room of myJointRoomList">
-      	 	 <li *ngIf="room[0] === '#'">
-				<a href="javascript:void(0)" (click)="joinUserToRoom(room)">
-					{{room}}
-				</a>
+      	 	  <li *ngIf="room[0] === '#'" [class.active]="currentRoom ===room" class="d-flex"> 
+      	 	  	  <div class="p-2 flex-grow-1 link-channel" (click)="joinUserToRoom(room)">
+					{{room}} <i *ngIf="isPrivateRoom(room)" class="bi bi-lock"></i>	
+				  </div>
+				<div class="p-2">
+					<i class="bi bi-box-arrow-right" (click)="leaveRoom(room)"></i>
+
+				</div>
 			 </li>
       	  </div>
       </ul>
 
       <h2 class="column-heading">My private conversations</h2>
-	  <ul class="private-messages-list" *ngFor="let room of myPrivateMessageRooms">
-	  	<li><a href="javascript:void(0)" (click)="joinUserToRoom(room)">{{room}}</a></li>
+	  <ul class="channel-list"> 
+	  	  <div *ngFor="let room of myPrivateMessageRooms">
+	  	<li [class.active]="currentRoom === room" class="d-flex">
+	  		<div class="p-2 flex-grow-1 link-channel" (click)="joinUserToRoom(room)">{{room}}
+	  		</div>
+	  	</li>
+	  	  </div>
 	  </ul>
 
-      <h2 class="column-heading">Available channels</h2>
-      <ul class="available-channels-list">
+      <div class="d-flex"><div class="flex-grow-1"><span class="column-heading h2">Available channels</span></div><div class="flex-grow-1"><i class="bi bi-plus-circle-fill" (click)="createChannelModal()"></i></div></div>
+      <ul class="channel-list">
       	  <div *ngFor="let room of availableRoomsList">
-      	 	 <li *ngIf="room[0] === '#' && !myJointRoomList.includes(room)">
-				<a href="javascript:void(0)" (click)="joinUserToRoom(room)">
-					{{room}}
-				</a>
+      	 	 <li *ngIf="room && room[0] === '#' && !myJointRoomList.includes(room)" class="d-flex">
+      	 	 	<div class="p-2 flex-grow-1 link-channel" *ngIf="!isPrivateRoom(room)" (click)="joinUserToRoom(room)">
+					{{room}} 
+				</div>
+      	 	 	<div class="p-2  flex-grow-1 link-channel" *ngIf="isPrivateRoom(room)" (click)="askForChannelPasswordToJoin(room)">
+					{{room}} <i class="bi bi-lock"></i>	
+				</div>
       		</li>
       	  </div>
       </ul>
@@ -48,44 +58,75 @@
 
 	<!-- </div> -->
       </div>
-		<form [formGroup]="messageToChat" (ngSubmit)="processMessageToSend()">
-			<br />
-			<b>{{myUser?.nick}}&nbsp;&nbsp;&nbsp;</b>
-			<input class="input-message-chat" type="text" formControlName="newMessage" placeholder="Send new message...">
-		
-			<button class="button" type="submit">Submit</button>
-		</form>
+		 <br />
+ 		 <div class="row">
+ 		   	<form class="col d-flex align-items-center" [formGroup]="messageToChat" (ngSubmit)="processMessageToSend()" class="col d-flex">
+ 		    <div class="me-2 d-flex align-items-center">
+				<label class="m-0">{{myUser?.nick}}:</label>
+			</div>
+ 		   	<input class="form-control flex-grow-1 me-2" type="text" formControlName="newMessage" placeholder="Send new message...">
+ 		     <button type="submit" class="btn btn-outline-light">Enviar</button>
+ 		  </form>
+ 		 </div>
     </div>
 
 	<div class="right-column">
 		<h2 class="column-heading">Channel owner</h2>
-		<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
-      		<ul class="user-list">
-      			<span *ngIf="roomMetaData.key === currentRoom && roomMetaData.value.owner">@{{roomMetaData.value.owner}}</span>
-      			<span *ngIf="roomMetaData.key === currentRoom && !roomMetaData.value.owner">(none)</span>
-			</ul>
-		</div>
-		<h2 class="column-heading">Channel administrators</h2>
-		<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
-      		<ul class="user-list">
-				<div *ngFor="let nick of roomMetaData.value.admins" > 
-						<li *ngIf="roomMetaData.key === currentRoom">@{{nick}}</li>
+      	<ul class="channel-list">
+			<li *ngIf="roomsMetaData.get(currentRoom)?.owner" class="d-flex">
+				<div class="p-2 flex-grow-1 link-channel">
+					@{{roomsMetaData.get(currentRoom)?.owner}}
 				</div>
-			</ul>
-		</div>
+				<div class="p-2" *ngIf="myUser?.nick !== roomsMetaData.get(currentRoom)?.owner">
+						<i *ngIf="!myBlockedUsers.includes(roomsMetaData.get(currentRoom)!.owner)" class="bi bi-person-fill-slash" (click)="blockUserModal(roomsMetaData.get(currentRoom)!.owner)">&nbsp;</i>
+								<i *ngIf="myBlockedUsers.includes(roomsMetaData.get(currentRoom)!.owner)" class="bi bi-person-check-fill" (click)="unBlockUserModal(roomsMetaData.get(currentRoom)!.owner)">&nbsp;</i>
+				</div>
+			</li>
+			<li *ngIf="!roomsMetaData.get(currentRoom)?.owner">
+				<div class="p-2 flex-grow-1">
+					(none)
+				</div>
+			</li>
+
+		</ul>
+		<h2 class="column-heading">Channel administrators</h2>
+        <ul class="channel-list">
+			<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
+				<div *ngFor="let nick of roomMetaData.value.admins" > 
+						<li *ngIf="roomMetaData.key === currentRoom" class="d-flex">
+							<div class="p-2 flex-grow-1 link-channel">
+								@{{nick}}
+							</div>
+							<div class="p-2" *ngIf="myUser?.nick !== nick">
+								<i *ngIf="!myBlockedUsers.includes(nick)" class="bi bi-person-fill-slash" (click)="blockUserModal(nick)">&nbsp;</i>
+								<i *ngIf="myBlockedUsers.includes(nick)" class="bi bi-person-check-fill" (click)="unBlockUserModal(nick)">&nbsp;</i>
+								<i *ngIf="roomsMetaData.get(currentRoom)?.owner === myUser?.nick" class="bi bi-x-circle" (click)="banUserFromRoomModal(nick, currentRoom)"></i>
+							</div>
+						</li>
+				</div>
+			</div>
+		</ul>
 
 	<h2 class="column-heading">Channel users</h2>
-		<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
-      		<ul class="user-list">
+      	<ul class="channel-list">
+			<div *ngFor="let roomMetaData of roomsMetaData | keyvalue">
 				<div *ngFor="let nick of roomMetaData.value.users" > 
 						<li *ngIf="roomMetaData.key === currentRoom && 
 							!roomMetaData.value.admins.includes(nick) && 
-							roomMetaData.value.owner !== nick">
-							@{{nick}}
+							roomMetaData.value.owner !== nick" class="d-flex">
+							<div class="p-2 flex-grow-1 link-channel">
+								@{{nick}}
+							</div>
+							<div class="p-2" *ngIf="myUser?.nick !== nick">
+								<i *ngIf="!myBlockedUsers.includes(nick)" class="bi bi-person-fill-slash" (click)="blockUserModal(nick)">&nbsp;</i>
+								<i *ngIf="myBlockedUsers.includes(nick)" class="bi bi-person-check-fill" (click)="unBlockUserModal(nick)">&nbsp;</i>
+								<i *ngIf="roomsMetaData.get(currentRoom)?.owner === myUser?.nick" class="bi bi-x-circle" (click)="banUserFromRoomModal(nick, currentRoom)"></i>
+							</div>
 						</li>
 				</div>
-			</ul>
-		</div>
+
+			</div>
+		</ul>
 	</div>
   </div>
 

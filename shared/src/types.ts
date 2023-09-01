@@ -1,4 +1,3 @@
-
 export type ChatMessage = {
 	room: string;
 	message: string;
@@ -16,6 +15,7 @@ export type RoomMetaData = {
 	owner: string,
 	admins: Array<string>,
 	users: Array<string>,
+	hasPass: boolean
 }
 
 // type to handle relationships between
@@ -33,4 +33,11 @@ export class RoomMessages {
 		public name: string,
 		public messages: Array<ChatMessage>
 	){}
+}
+
+export interface ToastData {
+  status: boolean;
+  type: string;
+  message: string;
+  id: number;
 }
