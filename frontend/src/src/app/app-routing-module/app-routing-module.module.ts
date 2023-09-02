@@ -5,7 +5,7 @@ import { FormComponent } from '../form/form.component'
 import { LoginComponent } from '../login/login.component';
 import { CallbackComponent } from '../callback/callback.component';
 import { ChatComponent } from '../chat/chat.component';
-import { AuthGuardService as AuthGuard } from '../auth-guard.service';
+import { AuthGuardService as AuthGuard } from '../auth/auth-guard.service';
 import { AllUsersComponent } from '../all-users/all-users.component'
 import { UserProfileComponent } from '../user-profile/user-profile.component'
 import { HomeComponent } from '../home/home.component';

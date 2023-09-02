@@ -5,11 +5,15 @@ import { Repository, Connection } from 'typeorm';
 import { CreateUserDto } from './user.dto';
 import { User } from './user.entity';
 import { catchError, lastValueFrom, map } from 'rxjs';
+import { Achievement } from './achievement/achievement.entity';
 
 @Injectable()
 export class UserService {
 	@InjectRepository(User)
 	private readonly repository: Repository<User>;
+
+	@InjectRepository(Achievement)
+    private readonly achievementRepository: Repository<Achievement>;
 
 	constructor(private httpService: HttpService, @InjectConnection() private readonly connection: Connection) {}
 
@@ -102,5 +106,21 @@ export class UserService {
 	public async getAllUsers(): Promise<User[]> {
 		return await this.repository.find();
 	}
-}
 
+	public async getUserAchievements(id: number): Promise<Achievement[]> {
+		
+		const user = await this.repository
+			.createQueryBuilder("user")
+			.leftJoinAndSelect("user.achievements", "achievement")
+			.where("user.id = :id", { id: id })
+			.getOne();
+
+		if (user) {
+			console.log("User Achievements:", user.achievements);
+			return user.achievements;
+		} else {
+			console.log("User not found.");
+			return [] as Achievement[];
+		}
+	}
+}

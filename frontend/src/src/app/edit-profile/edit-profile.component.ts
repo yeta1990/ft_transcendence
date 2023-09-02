@@ -2,7 +2,7 @@ import { Component, OnInit, } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { EditProfileService } from './edit-profile.service';
 import { Router } from '@angular/router';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../auth/auth.service';
 import { User } from '../user';
 import { MyProfileService } from '../my-profile/my-profile.service';
 import { HttpHeaders, HttpClient, HttpErrorResponse } from '@angular/common/http';
