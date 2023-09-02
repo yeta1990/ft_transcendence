@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ChatMessage, SocketPayload, GameRoom } from '@shared/types';
+import { GameGateway } from 'src/events/game.gateway';
 @Injectable()
 export class PongService {
 
@@ -18,10 +19,14 @@ export class PongService {
     //private subscriptions = new Subscription();
     //destroy: Subject<any> = new Subject();
     public game: GameRoom;
+    public gameGateaway: GameGateway;
     games: Map<string, GameRoom> = new Map<string, GameRoom>;
 
-    initGame (name: string): GameRoom {
+    initGame (name: string, gameGateaway: GameGateway): GameRoom {
         
+        if (this.games.get(name))
+            return(this.games.get(name));
+        this.gameGateaway = gameGateaway;
         this.game = new GameRoom(
             name,               //room
 	        "Welcome",          //message
@@ -54,8 +59,9 @@ export class PongService {
 	        5,                  //ballSpeed
 	        0,                  //ballXVel
 	        0,                  //ballYVel
-	        700 - (20 + 20),    //ballX         //this.canvas.width / 2 - 10 / 2,
-        	400 /2 - 60 / 2,    //ballY         //this.canvas.height / 2 - 10 / 2,
+	        700 /2 - 10 / 2,    //ballX         //this.canvas.width / 2 - 10 / 2,
+        	400 /2 - 10 / 2,    //ballY         //this.canvas.height / 2 - 10 / 2,
+            0,                  //ballDir
 
 	        //Scores
 	        0,                  //playerOneScore
@@ -64,69 +70,126 @@ export class PongService {
             //Mode
             0,                  //gameMode
         );
+        this.randomDir();
         this.games.set(name, this.game);
+        //this.updateGame()
         return (this.games.get(name));
     }
 
-    // initCanvas() {
-    //     this.gameCanvas = {
-    //         width: this.game.canvasWidth,
-    //         height: this.game.canvasheight
-    //     }
-    //     if (this.playerOne)
-    //         console.log("You are Player 1");
-    //     else
-    //         console.log("You are NOT Player 1");
-    //     //this.pongService.joinUserToRoom("#pongRoom");
-    //     PongService.init = false;
-    //     PongService.computerScore = 0;
-    //     PongService.playerScore = 0;
-    //     this.canvas = this.gameCanvas?.nativeElement;
-    //     this.gameContext = this.canvas?.getContext('2d');
+    updateGame(){
+        this.game.gameMode = 1;
+        setInterval(()=>{
+            this.updateBall();
+        },250)
+            //console.log("Ball: " + this.game.ballX + " - " + this.game.ballY);
+        setInterval(()=>{
+            this.gameGateaway.getActiveUsersInRoom(this.game.room).map((chatUser) => {
+                this.gameGateaway.messageToClient(chatUser.client_id, 'gameStatus', this.game);
+            })           
+        },250)
+    }
 
-    //     if (this.gameContext && this.canvas) {
-    //         this.player1 = new PaddleComponent(
-    //             this.game.playerOneW, 
-    //             this.game.playerOneH,
-    //             this.game.playerOneX, 
-    //             this.game.playerOneY, 
-    //             this.game.playerOneS);
-    //         this.mode(1);
-    //         this.ball = new Ball(
-    //             this.game.ballWidth,
-    //             this.game.ballHeight, 
-    //             this.game.ballX,
-    //             this.game.ballY,
-    //             this.game.ballSpeed);
-    //         this.gameContext.font = '30px Orbitron';
+    randomDir() {
+        var randomDirection = Math.floor(Math.random() * 2) + 1; 
+        if(randomDirection % 2){
+            this.game.ballXVel = 1;
+        }else{
+            this.game.ballXVel = -1;
+        }
+        this.game.ballYVel = 1;
+    }
 
-    //         window.addEventListener('keydown', (e) => {
-    //             PongService.keysPressed[e.which] = true;
-    //         });
+    updateBall(){
+ 
+        //check top canvas bounds
+            if(this.game.ballY <= 10){
+              this.game.ballYVel = 1;
+            }
+        //check bottom canvas bounds
+            if(this.game.ballY + this.game.ballHeight >= this.game.canvasheight - 10){
+                this.game.ballYVel = -1;
+            }
+        //check left canvas bounds
+            if(this.game.ballX <= 0){  
+                this.game.ballX = this.game.canvasWidth / 2 - this.game.ballWidth / 2;
+                this.game.playerTwoScore += 1;
+            }
+        //check right canvas bounds
+            if(this.game.ballX + this.game.ballWidth >= this.game.canvasWidth){
+                this.game.ballX = this.game.canvasWidth / 2 - this.game.ballWidth / 2;
+                this.game.playerOneScore += 1;
+            }
+        //check player collision
+            if(this.game.ballX <= this.game.playerOneX + this.game.playerOneW){
+                if(this.game.ballY >= this.game.playerOneY && this.game.ballY  + this.game.ballHeight <= this.game.playerOneY + this.game.playerOneH){
+                this.game.ballXVel = 1;
+                }
+            }
+        //check computer collision
+            if(this.game.ballX + this.game.ballWidth >= this.game.playerTwoX){
+                if(this.game.ballY >= this.game.playerTwoY && this.game.ballY + this.game.ballHeight <= this.game.playerTwoY + this.game.playerTwoH){
+                    this.game.ballXVel = -1;
+                }
+            }
+            this.game.ballX += this.game.ballXVel * this.game.ballSpeed;
+            this.game.ballY += this.game.ballYVel * this.game.ballSpeed;
+        }
 
-    //         window.addEventListener('keyup', (e) => {
-    //             PongService.keysPressed[e.which] = false;
-    //         });
+    initCanvas() {
+        this.gameCanvas = {
+            width: this.game.canvasWidth,
+            height: this.game.canvasheight
+        }
+        //this.pongService.joinUserToRoom("#pongRoom");
+        PongService.init = false;
+        PongService.computerScore = 0;
+        PongService.playerScore = 0;
+        this.canvas = this.gameCanvas?.nativeElement;
+        this.gameContext = this.canvas?.getContext('2d');
 
-    //         window.addEventListener('keyup', (e) => {
-    //             if (e.which === 32) {
-    //                 if (!PongService.init) {
-    //                     PongService.init = true;
-    //                     requestAnimationFrame(this.gameLoop);
-    //                 }
-    //             }
-    //         });
+        if (this.gameContext && this.canvas) {
+            this.player1 = new PaddleComponent(
+                this.game.playerOneW, 
+                this.game.playerOneH,
+                this.game.playerOneX, 
+                this.game.playerOneY, 
+                this.game.playerOneS);
+            this.mode(1);
+            this.ball = new Ball(
+                this.game.ballWidth,
+                this.game.ballHeight, 
+                this.game.ballX,
+                this.game.ballY,
+                this.game.ballSpeed);
+            this.gameContext.font = '30px Orbitron';
 
-    //         window.addEventListener('keyup', (e) => {
-    //             if (e.which === 27 ) {
-    //                 PongService.init = false;
-    //                 this.gameContext!.fillStyle = "#57a639";
-    //                 this.gameContext!.fillText("PAUSE", 300, 150);
-    //             }
-    //         });   
-    //     }
-    //     requestAnimationFrame(this.gameLoop);       
-    // }
+            window.addEventListener('keydown', (e) => {
+                PongService.keysPressed[e.which] = true;
+            });
+
+            window.addEventListener('keyup', (e) => {
+                PongService.keysPressed[e.which] = false;
+            });
+
+            window.addEventListener('keyup', (e) => {
+                if (e.which === 32) {
+                    if (!PongService.init) {
+                        PongService.init = true;
+                        requestAnimationFrame(this.gameLoop);
+                    }
+                }
+            });
+
+            window.addEventListener('keyup', (e) => {
+                if (e.which === 27 ) {
+                    PongService.init = false;
+                    this.gameContext!.fillStyle = "#57a639";
+                    this.gameContext!.fillText("PAUSE", 300, 150);
+                }
+            });   
+        }
+        requestAnimationFrame(this.gameLoop);       
+    }
 
     mode(i: number) {
         this.restartScores();

@@ -78,6 +78,7 @@ export class GameRoom {
 	public ballYVel: number,
 	public ballX: number,
 	public ballY: number,
+	public ballDir: number,
 
 	//Scores
 	public playerOneScore: number,

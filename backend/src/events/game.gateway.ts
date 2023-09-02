@@ -99,7 +99,7 @@ export class GameGateway extends BaseGateway {
 
   		if (successfulJoin){
 			//const response: ChatMessage = generateJoinResponse(originalRoom);
-			const response: GameRoom = this.pongservice.initGame("#pongRoom");
+			const response: GameRoom = this.pongservice.initGame("#pongRoom", this);
 			var userInRoom = this.getActiveUsersInRoom('#pongRoom');
 			if (userInRoom.length == 1 || userInRoom[0].nick == nick) //Esto hay que hacer una funcion que lo compruebe siempre
 			{
@@ -119,8 +119,12 @@ export class GameGateway extends BaseGateway {
 					player1:false};
 			}
 			console.log("Join succed to: " + response.room);
+			
 			this.messageToClient(clientSocketId, 'gameStatus', response);
-
+			// setTimeout(()=>{response.gameMode = 1
+			// 				response.ballX = 150
+			// 	this.messageToClient(clientSocketId, 'gameStatus', response);},1000)
+			this.pongservice.updateGame();
 			//sending old messages of the room, except for those of users that banned
 			//the new user trying to join
 			if (!wasUserAlreadyActiveInRoom){

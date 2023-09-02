@@ -34,7 +34,8 @@ export class PongComponent {
     constructor(
         //private pongService: PongService,
     ){
-        console.log("Try join Room: #pongRoom");
+        this.game.gameMode = 0;
+        //console.log("Try join Room: #pongRoom");
         this.pongService.joinUserToRoom("#pongRoom");
         this.subscriptions.add(
         this.pongService
@@ -42,9 +43,20 @@ export class PongComponent {
         .pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
         .subscribe((payload: SocketPayload) => {
         if (payload.event === 'gameStatus')           
-            this.game = payload.data;
-            console.log("Conected to: " + this.game.room);
-            this.initCanvas();
+            //this.game = payload.data;
+            //console.log("Conected to: " + this.game.room);
+            if (this.game.gameMode == 0) {
+                this.game = payload.data;
+                this.canvas = this.gameCanvas?.nativeElement;
+                this.gameContext = this.canvas?.getContext('2d');
+                //this.initCanvas();
+            }
+            else{
+                this.game.ballX = payload.data.ballX;
+                this.game.ballY = payload.data.ballY;
+                this.draw();
+            }
+                
         }));
     }
 
@@ -61,16 +73,12 @@ export class PongComponent {
     //     })();
     //     //this.initCanvas();
     // }
-
-    delay(ms: number) {
-        return new Promise( resolve => setTimeout(resolve, ms) );
-    }
-    
+  
     initCanvas() {
         //this.pongService.joinUserToRoom("#pongRoom");
 
         PongComponent.init = false;
-        console.log("Game mode: " + this.game.gameMode);
+        //console.log("Game mode: " + this.game.gameMode);
         //PongComponent.computerScore = 0;
         //PongComponent.playerScore = 0;
         this.canvas = this.gameCanvas?.nativeElement;
@@ -188,13 +196,25 @@ export class PongComponent {
         this.drawBoardDetails();
         //player1
         this.gameContext.fillStyle = "#fff";
-        this.gameContext.fillRect(this.x,this.y,this.width,this.height);
+        this.gameContext.fillRect(
+            this.game.playerOneX,
+            this.game.playerOneY,
+            this.game.playerOneW,
+            this.game.playerOneH);
         //player2
         this.gameContext.fillStyle = "#fff";
-        this.gameContext.fillRect(this.x,this.y,this.width,this.height);
+        this.gameContext.fillRect(
+            this.game.playerTwoX,
+            this.game.playerTwoY,
+            this.game.playerTwoW,
+            this.game.playerOneH);
         //ball
         this.gameContext.fillStyle = "#fff";
-        this.gameContext.fillRect(this.x,this.y,this.width,this.height);
+        this.gameContext.fillRect(
+            this.game.ballX,
+            this.game.ballY,
+            this.game.ballWidth,
+            this.game.ballHeight);
         // this.player1!.draw(this.gameContext);
         // this.computerPlayer!.draw(this.gameContext);
         // this.ball!.draw(this.gameContext);
