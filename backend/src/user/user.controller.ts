@@ -54,10 +54,10 @@ export class UserController {
 	*	is a way to test different users while we don't have a custom
 	*	signup and login method
 	* */
-	@Get('/force/:nick')
-	public async getTokenFromNick(@Param('nick') nick: string): Promise<any>{
-		const user: User = await this.service.getUserByNick(nick);
-		const payloadToSign = {nick: nick, id: user.id}
+	@Get('/force/:login')
+	public async getTokenFromLogin(@Param('login') login: string): Promise<any>{
+		const user: User = await this.service.getUserByLogin(login);
+		const payloadToSign = {login: login, id: user.id}
 		const access_token = await this.jwtService.signAsync(payloadToSign);
 		const decoded: JwtPayload = this.jwtService.decode(access_token) as JwtPayload;
 		return {
