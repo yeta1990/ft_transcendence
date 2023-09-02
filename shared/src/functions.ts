@@ -6,7 +6,7 @@ export function generateJoinResponse(room: string): ChatMessage{
 	const response: ChatMessage = {
 		room: room,
 		message: `you are in room ${room}`,
-		nick: "system",
+		login: "system",
 		date: new Date()
 	}
 	return response;
@@ -16,7 +16,7 @@ export function generateSocketErrorResponse(room: string, message: string): any 
 	const response: ChatMessage = {
 		room: room,
 		message: message,
-		nick: "system",
+		login: "system",
 		date: new Date()
 	}
    	return { event: 'system', data: response};
@@ -26,7 +26,7 @@ export function generateSocketInformationResponse(room: string, message: string)
 	const response: ChatMessage = {
 		room: room,
 		message: message,
-		nick: "system",
+		login: "system",
 		date: new Date()
 	}
    	return { event: 'system', data: response};
