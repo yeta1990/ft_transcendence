@@ -71,7 +71,7 @@ export class GameGateway extends BaseGateway {
 			this.server.to(client.id)
 				.emit("system", generateSocketErrorResponse(room, 
 					`Invalid name for the channel ${room}, try other`).data)
-					console.log("Try join..");
+					console.log("Error joining");
 
 			return ;
 		} 
@@ -118,6 +118,7 @@ export class GameGateway extends BaseGateway {
 					date: new Date,
 					player1:false};
 			}
+			console.log("Join succed to: " + response.room);
 			this.messageToClient(clientSocketId, 'gameStatus', response);
 
 			//sending old messages of the room, except for those of users that banned

@@ -11,7 +11,7 @@ import { EntityComponent } from './entity/entity.component'
   selector: 'app-pong',
   templateUrl: './pong.component.html',
   styleUrls: ['./pong.component.css'],
-})
+}) 
 
 export class PongComponent implements AfterViewInit {
 
@@ -28,7 +28,7 @@ export class PongComponent implements AfterViewInit {
     public playerOne: boolean = false;
     private subscriptions = new Subscription();
     destroy: Subject<any> = new Subject();
-    public game: GameRoom;
+    public game: GameRoom = {} as GameRoom;
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
     constructor(
@@ -41,8 +41,9 @@ export class PongComponent implements AfterViewInit {
         .getMessage()
         .pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
         .subscribe((payload: SocketPayload) => {
-        if (payload.event === 'gameStatus')
+        if (payload.event === 'gameStatus')           
             this.game = payload.data;
+            console.log("Conected to: " + this.game.room);
         }));
     }
 
@@ -57,6 +58,7 @@ export class PongComponent implements AfterViewInit {
             console.log("You are NOT Player 1");
         //this.pongService.joinUserToRoom("#pongRoom");
         PongComponent.init = false;
+        console.log("Game mode: " + this.game.gameMode);
         //PongComponent.computerScore = 0;
         //PongComponent.playerScore = 0;
         this.canvas = this.gameCanvas?.nativeElement;

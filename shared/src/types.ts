@@ -43,45 +43,47 @@ export type GameStatus = {
 	player1:boolean; 
 }
 
-export type GameRoom = {
-	room: string;
-	message: string;
-	nick: string;
-	date: Date;
-	y: number;
-	height: number;
+export class GameRoom {
+	constructor(
+	public room: string,
+	public message: string,
+	public nick: string,
+	public date: Date,
+	public y: number,
+	public height: number,
 
 	//PaddleOneComponent
-	playerOneX: number;
-	playerOneY: number;
-	playerOneW: number;
-	playerOneH: number;
-	playerOneS: number;
+	public playerOneX: number,
+	public playerOneY: number,
+	public playerOneW: number,
+	public playerOneH: number,
+	public playerOneS: number,
 
 	//PaddleTwoComponent
-	playerTwoX: number;
-	playerTwoY: number;
-	playerTwoW: number;
-	playerTwoH: number;
-	playerTwoS: number;
+	public playerTwoX: number,
+	public playerTwoY: number,
+	public playerTwoW: number,
+	public playerTwoH: number,
+	public playerTwoS: number,
 
 	//Canvas
-	canvasheight: number;
-	canvasWidth: number;
+	public canvasheight: number,
+	public canvasWidth: number,
 
 	//Ball
-	ballHeight: number;
-	ballWidth: number;
-	ballSpeed: number;
-	ballXVel: number;
-	ballYVel: number;
-	ballX: number;
-	ballY: number;
+	public ballHeight: number,
+	public ballWidth: number,
+	public ballSpeed: number,
+	public ballXVel: number,
+	public ballYVel: number,
+	public ballX: number,
+	public ballY: number,
 
 	//Scores
-	playerOneScore: number;
-	playerTwoScore: number;
+	public playerOneScore: number,
+	public playerTwoScore: number,
 
 	//Mode
-	gameMode: number;
+	public gameMode: number //0 for pause or stopped
+	){}
 }

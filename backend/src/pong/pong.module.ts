@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PongService } from './pong/pong.service';
+import { PongService } from './pong.service';
 
 @Module({
   providers: [PongService]

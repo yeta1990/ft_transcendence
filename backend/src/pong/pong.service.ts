@@ -18,113 +18,115 @@ export class PongService {
     //private subscriptions = new Subscription();
     //destroy: Subject<any> = new Subject();
     public game: GameRoom;
-    games: Map<string, GameRoom>;
+    games: Map<string, GameRoom> = new Map<string, GameRoom>;
 
     initGame (name: string): GameRoom {
         
-        this.game = {
-            room: name,
-	        message: "Welcome",
-	        nick: "",
-	        date: null,
-	        y: 0,
-	        height: 0,
-            gameMode: 1,
+        this.game = new GameRoom(
+            name,
+	        "Welcome",
+	        "",
+	        null,
+	        0,
+	        0,            
 
 	        //PaddleOneComponent
-	        playerOneX: 20,
-	        playerOneY: this.canvas.height / 2 - 60 / 2,
-	        playerOneW: 20,
-	        playerOneH: 60,
-            playerOneS: 10,
+	        20,
+	        400 /2 - 60 / 2, //this.canvas.height / 2 - 60 / 2,
+	        20,
+	        60,
+            10,
 
 	        //PaddleTwoComponent
-	        playerTwoX: this.canvas.width - (20 + 20),
-	        playerTwoY: this.canvas.height / 2 - 60 / 2,
-	        playerTwoW: 20,
-	        playerTwoH: 60,
-            playerTwoS: 10,
+	        700 - (20 + 20), //this.canvas.width - (20 + 20),
+	        400 /2 - 60 / 2, //this.canvas.height / 2 - 60 / 2,
+	        20,
+	        60,
+            10,
 
 	        //Canvas
-	        canvasheight: 400,
-	        canvasWidth: 700,
+	        400,
+	        700,
 
 	        //Ball
-	        ballHeight: 10,
-	        ballWidth: 10,
-	        ballSpeed: 5,
-	        ballXVel: 0,
-	        ballYVel: 0,
-	        ballX: this.canvas.width / 2 - 10 / 2,
-        	ballY: this.canvas.height / 2 - 10 / 2,
+	        10,
+	        10,
+	        5,
+	        0,
+	        0,
+	        700 - (20 + 20), //this.canvas.width / 2 - 10 / 2,
+        	400 /2 - 60 / 2, //this.canvas.height / 2 - 10 / 2,
 
 	        //Scores
-	        playerOneScore: 0,
-	        playerTwoScore: 0
-        };
+	        0,
+	        0,
+
+            //Mode
+            0,
+        );
         this.games.set(name, this.game);
         return (this.games.get(name));
     }
 
-    initCanvas() {
-        this.gameCanvas = {
-            width: this.game.canvasWidth,
-            height: this.game.canvasheight
-        }
-        if (this.playerOne)
-            console.log("You are Player 1");
-        else
-            console.log("You are NOT Player 1");
-        //this.pongService.joinUserToRoom("#pongRoom");
-        PongService.init = false;
-        PongService.computerScore = 0;
-        PongService.playerScore = 0;
-        this.canvas = this.gameCanvas?.nativeElement;
-        this.gameContext = this.canvas?.getContext('2d');
+    // initCanvas() {
+    //     this.gameCanvas = {
+    //         width: this.game.canvasWidth,
+    //         height: this.game.canvasheight
+    //     }
+    //     if (this.playerOne)
+    //         console.log("You are Player 1");
+    //     else
+    //         console.log("You are NOT Player 1");
+    //     //this.pongService.joinUserToRoom("#pongRoom");
+    //     PongService.init = false;
+    //     PongService.computerScore = 0;
+    //     PongService.playerScore = 0;
+    //     this.canvas = this.gameCanvas?.nativeElement;
+    //     this.gameContext = this.canvas?.getContext('2d');
 
-        if (this.gameContext && this.canvas) {
-            this.player1 = new PaddleComponent(
-                this.game.playerOneW, 
-                this.game.playerOneH,
-                this.game.playerOneX, 
-                this.game.playerOneY, 
-                this.game.playerOneS);
-            this.mode(1);
-            this.ball = new Ball(
-                this.game.ballWidth,
-                this.game.ballHeight, 
-                this.game.ballX,
-                this.game.ballY,
-                this.game.ballSpeed);
-            this.gameContext.font = '30px Orbitron';
+    //     if (this.gameContext && this.canvas) {
+    //         this.player1 = new PaddleComponent(
+    //             this.game.playerOneW, 
+    //             this.game.playerOneH,
+    //             this.game.playerOneX, 
+    //             this.game.playerOneY, 
+    //             this.game.playerOneS);
+    //         this.mode(1);
+    //         this.ball = new Ball(
+    //             this.game.ballWidth,
+    //             this.game.ballHeight, 
+    //             this.game.ballX,
+    //             this.game.ballY,
+    //             this.game.ballSpeed);
+    //         this.gameContext.font = '30px Orbitron';
 
-            window.addEventListener('keydown', (e) => {
-                PongService.keysPressed[e.which] = true;
-            });
+    //         window.addEventListener('keydown', (e) => {
+    //             PongService.keysPressed[e.which] = true;
+    //         });
 
-            window.addEventListener('keyup', (e) => {
-                PongService.keysPressed[e.which] = false;
-            });
+    //         window.addEventListener('keyup', (e) => {
+    //             PongService.keysPressed[e.which] = false;
+    //         });
 
-            window.addEventListener('keyup', (e) => {
-                if (e.which === 32) {
-                    if (!PongService.init) {
-                        PongService.init = true;
-                        requestAnimationFrame(this.gameLoop);
-                    }
-                }
-            });
+    //         window.addEventListener('keyup', (e) => {
+    //             if (e.which === 32) {
+    //                 if (!PongService.init) {
+    //                     PongService.init = true;
+    //                     requestAnimationFrame(this.gameLoop);
+    //                 }
+    //             }
+    //         });
 
-            window.addEventListener('keyup', (e) => {
-                if (e.which === 27 ) {
-                    PongService.init = false;
-                    this.gameContext!.fillStyle = "#57a639";
-                    this.gameContext!.fillText("PAUSE", 300, 150);
-                }
-            });   
-        }
-        requestAnimationFrame(this.gameLoop);       
-    }
+    //         window.addEventListener('keyup', (e) => {
+    //             if (e.which === 27 ) {
+    //                 PongService.init = false;
+    //                 this.gameContext!.fillStyle = "#57a639";
+    //                 this.gameContext!.fillText("PAUSE", 300, 150);
+    //             }
+    //         });   
+    //     }
+    //     requestAnimationFrame(this.gameLoop);       
+    // }
 
     mode(i: number) {
         this.restartScores();
