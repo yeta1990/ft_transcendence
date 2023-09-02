@@ -1,11 +1,12 @@
 <app-nav-bar/>
 <button (click)="mode(1)">Normal</button>
 <button (click)="mode(2)">Insane</button>
-<canvas #gameCanvas width=700 height=400></canvas>
+<canvas #gameCanvas width={{game.canvasWidth}} height={{game.canvasheight}}></canvas>
 <h2>Instructions:</h2>
 <h4>Press space for start game</h4>
 <h4>Press escape for pause game</h4>
 <h4>Move left paddle up and down with the arrow keys</h4>
 <h4>Mode Insane, computer never loose.... WUHAHAHAHA!</h4>
-<h4>Actual game: {{ game.gameMode }}</h4>
+<h4>Actual game: {{ game.gameMode }} </h4>
+{{ game.canvasWidth}} - {{ game.canvasheight}}
 <script type="text/javascript" src="pong.component.ts"></script>

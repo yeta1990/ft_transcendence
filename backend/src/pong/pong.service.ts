@@ -23,46 +23,46 @@ export class PongService {
     initGame (name: string): GameRoom {
         
         this.game = new GameRoom(
-            name,
-	        "Welcome",
-	        "",
-	        null,
-	        0,
-	        0,            
+            name,               //room
+	        "Welcome",          //message
+	        "",                 //nick
+	        null,               //date
+	        0,                  //y
+	        0,                  //height           
 
 	        //PaddleOneComponent
-	        20,
-	        400 /2 - 60 / 2, //this.canvas.height / 2 - 60 / 2,
-	        20,
-	        60,
-            10,
+	        20,                 //playerOneX
+	        400 /2 - 60 / 2,    //playerOneY    //this.canvas.height / 2 - 60 / 2,
+	        20,                 //playerOneW
+	        60,                 //playerOneH
+            10,                 //playerOneS
 
 	        //PaddleTwoComponent
-	        700 - (20 + 20), //this.canvas.width - (20 + 20),
-	        400 /2 - 60 / 2, //this.canvas.height / 2 - 60 / 2,
-	        20,
-	        60,
-            10,
+	        700 - (20 + 20),    //playerTwoX    //this.canvas.width - (20 + 20),
+	        400 /2 - 60 / 2,    //playerTwoY    //this.canvas.height / 2 - 60 / 2,
+	        20,                 //playerTwoW
+	        60,                 //playerTwoH
+            10,                 //playerTwoS
 
 	        //Canvas
-	        400,
-	        700,
+	        400,                //canvasheight
+	        700,                //canvasWidth
 
 	        //Ball
-	        10,
-	        10,
-	        5,
-	        0,
-	        0,
-	        700 - (20 + 20), //this.canvas.width / 2 - 10 / 2,
-        	400 /2 - 60 / 2, //this.canvas.height / 2 - 10 / 2,
+	        10,                 //ballHeight
+	        10,                 //ballWidth
+	        5,                  //ballSpeed
+	        0,                  //ballXVel
+	        0,                  //ballYVel
+	        700 - (20 + 20),    //ballX         //this.canvas.width / 2 - 10 / 2,
+        	400 /2 - 60 / 2,    //ballY         //this.canvas.height / 2 - 10 / 2,
 
 	        //Scores
-	        0,
-	        0,
+	        0,                  //playerOneScore
+	        0,                  //playerTwoScore
 
             //Mode
-            0,
+            0,                  //gameMode
         );
         this.games.set(name, this.game);
         return (this.games.get(name));

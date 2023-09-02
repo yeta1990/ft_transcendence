@@ -13,7 +13,7 @@ import { EntityComponent } from './entity/entity.component'
   styleUrls: ['./pong.component.css'],
 }) 
 
-export class PongComponent implements AfterViewInit {
+export class PongComponent {
 
     private gameContext: any;
     private canvas: any;
@@ -44,19 +44,31 @@ export class PongComponent implements AfterViewInit {
         if (payload.event === 'gameStatus')           
             this.game = payload.data;
             console.log("Conected to: " + this.game.room);
+            this.initCanvas();
         }));
     }
 
-    ngAfterViewInit() {
-        this.initCanvas();
+    // ngAfterViewInit() {
+    //     (async () => { 
+    //         // Do something before delay
+    //         console.log('before delay')
+    
+    //         await this.delay(1000);
+    
+    //         // Do something after
+    //         console.log('after delay')
+    //         this.initCanvas();
+    //     })();
+    //     //this.initCanvas();
+    // }
+
+    delay(ms: number) {
+        return new Promise( resolve => setTimeout(resolve, ms) );
     }
     
     initCanvas() {
-        if (this.playerOne)
-            console.log("You are Player 1");
-        else
-            console.log("You are NOT Player 1");
         //this.pongService.joinUserToRoom("#pongRoom");
+
         PongComponent.init = false;
         console.log("Game mode: " + this.game.gameMode);
         //PongComponent.computerScore = 0;
@@ -65,9 +77,20 @@ export class PongComponent implements AfterViewInit {
         this.gameContext = this.canvas?.getContext('2d');
 
         if (this.gameContext && this.canvas) {
-            this.player1 = new PaddleComponent(20, 60, 20, this.canvas.height / 2 - 60 / 2, 10, this.pongService);
+            this.player1 = new PaddleComponent(
+                this.game.playerOneW,
+                this.game.playerOneH, 
+                this.game.playerOneX, 
+                this.game.playerOneY, 
+                this.game.playerOneS, 
+                this.pongService);
             this.mode(1);
-            this.ball = new Ball(10, 10, this.canvas.width / 2 - 10 / 2, this.canvas.height / 2 - 10 / 2, 5);
+            this.ball = new Ball(
+                this.game.ballHeight,
+                this.game.ballWidth, 
+                this.game.ballX,
+                this.game.ballY,
+                this.game.ballSpeed);
             this.gameContext.font = '30px Orbitron';
 
             window.addEventListener('keydown', (e) => {
@@ -101,7 +124,12 @@ export class PongComponent implements AfterViewInit {
     mode(i: number) {
         this.restartScores();
         if (i == 1) {
-            this.computerPlayer = new ComputerPaddle(20, 60, this.canvas.width - (20 + 20), this.canvas.height / 2 - 60 / 2, 10);
+            this.computerPlayer = new ComputerPaddle(
+                this.game.playerTwoW,
+                this.game.playerTwoH,
+                this.game.playerTwoX,
+                this.game.playerTwoY,
+                this.game.playerTwoS);
         } else if (i == 2) {
             this.computerPlayer = new ComputerPaddle(20, 60, this.canvas.width - (20 + 20), this.canvas.height / 2 - 60 / 2, 20);
         }
@@ -158,9 +186,18 @@ export class PongComponent implements AfterViewInit {
         this.gameContext!.fillStyle = "#000";
         this.gameContext!.fillRect(0,0,this.canvas.width, this.canvas.height);   
         this.drawBoardDetails();
-        this.player1!.draw(this.gameContext);
-        this.computerPlayer!.draw(this.gameContext);
-        this.ball!.draw(this.gameContext);
+        //player1
+        this.gameContext.fillStyle = "#fff";
+        this.gameContext.fillRect(this.x,this.y,this.width,this.height);
+        //player2
+        this.gameContext.fillStyle = "#fff";
+        this.gameContext.fillRect(this.x,this.y,this.width,this.height);
+        //ball
+        this.gameContext.fillStyle = "#fff";
+        this.gameContext.fillRect(this.x,this.y,this.width,this.height);
+        // this.player1!.draw(this.gameContext);
+        // this.computerPlayer!.draw(this.gameContext);
+        // this.ball!.draw(this.gameContext);
     }
 
     gameLoop = () => {
@@ -209,7 +246,6 @@ class ComputerPaddle extends EntityComponent{
         this.y += this.yVel * this.speed;
         //this.y += this.yVel * speed;
 
-
     }
 }
 
@@ -218,50 +254,50 @@ class Ball extends EntityComponent{
     //private speed:number = 5;
 
     constructor(w:number,h:number,x:number,y:number,speed:number){
-        super(w,h,x,y,speed);
-        var randomDirection = Math.floor(Math.random() * 2) + 1; 
-        if(randomDirection % 2){
-            this.xVel = 1;
-        }else{
-            this.xVel = -1;
-        }
-        this.yVel = 1;
+         super(w,h,x,y,speed);
+        // var randomDirection = Math.floor(Math.random() * 2) + 1; 
+        // if(randomDirection % 2){
+        //     this.xVel = 1;
+        // }else{
+        //     this.xVel = -1;
+        // }
+        //this.yVel = 1;
     }
 
     update(player:PaddleComponent,computer:ComputerPaddle,canvas: any){
  
-    //check top canvas bounds
-        if(this.y <= 10){
-          this.yVel = 1;
-        }
-    //check bottom canvas bounds
-        if(this.y + this.height >= canvas.height - 10){
-        this.yVel = -1;
-        }
-    //check left canvas bounds
-        if(this.x <= 0){  
-            this.x = canvas.width / 2 - this.width / 2;
-            PongComponent.computerScore += 1;
-        }
-    //check right canvas bounds
-        if(this.x + this.width >= canvas.width){
-            this.x = canvas.width / 2 - this.width / 2;
-            PongComponent.playerScore += 1;
-        }
-    //check player collision
-        if(this.x <= player.x + player.width){
-            if(this.y >= player.y && this.y + this.height <= player.y + player.height){
-            this.xVel = 1;
-            }
-        }
-    //check computer collision
-        if(this.x + this.width >= computer.x){
-            if(this.y >= computer.y && this.y + this.height <= computer.y + computer.height){
-                this.xVel = -1;
-            }
-        }
-    this.x += this.xVel * this.speed;
-    this.y += this.yVel * this.speed;
+    // //check top canvas bounds
+    //     if(this.y <= 10){
+    //       this.yVel = 1;
+    //     }
+    // //check bottom canvas bounds
+    //     if(this.y + this.height >= canvas.height - 10){
+    //     this.yVel = -1;
+    //     }
+    // //check left canvas bounds
+    //     if(this.x <= 0){  
+    //         this.x = canvas.width / 2 - this.width / 2;
+    //         PongComponent.computerScore += 1;
+    //     }
+    // //check right canvas bounds
+    //     if(this.x + this.width >= canvas.width){
+    //         this.x = canvas.width / 2 - this.width / 2;
+    //         PongComponent.playerScore += 1;
+    //     }
+    // //check player collision
+    //     if(this.x <= player.x + player.width){
+    //         if(this.y >= player.y && this.y + this.height <= player.y + player.height){
+    //         this.xVel = 1;
+    //         }
+    //     }
+    // //check computer collision
+    //     if(this.x + this.width >= computer.x){
+    //         if(this.y >= computer.y && this.y + this.height <= computer.y + computer.height){
+    //             this.xVel = -1;
+    //         }
+    //     }
+    // this.x += this.xVel * this.speed;
+    // this.y += this.yVel * this.speed;
     }
 }
 
