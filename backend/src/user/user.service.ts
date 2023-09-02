@@ -6,7 +6,7 @@ import { CreateUserDto } from './user.dto';
 import { User } from './user.entity';
 import { catchError, lastValueFrom, map } from 'rxjs';
 import { Achievement } from './achievement/achievement.entity';
-
+ 
 @Injectable()
 export class UserService {
 	@InjectRepository(User)

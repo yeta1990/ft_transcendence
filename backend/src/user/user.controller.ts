@@ -85,7 +85,7 @@ export class UserController {
 			return { isValid: false }; // Si el nombre de usuario no es válido en la lista local, devolver false
 		}
 		
-		const existingUser = await this.service.getUserByNick(username);
+		const existingUser = await this.service.getUserByLogin(username);
 		const isValidDB = !existingUser; // Si el usuario no existe, el nombre de usuario es válido en la base de datos
 
 		return { isValid: isValidDB };
