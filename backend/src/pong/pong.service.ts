@@ -11,8 +11,6 @@ export class PongService {
     public static playerScore: number = 0;
     public static computerScore: number = 0;
     private player1: PaddleComponent | null = null;
-    private computerPlayer: ComputerPaddle | null = null;
-    private ball: Ball | null = null;
     public static init: boolean = false;
     //pongService:PongService = new PongService();
     public playerOne: boolean = false;
@@ -79,14 +77,10 @@ export class PongService {
     updateGame(){
         this.game.gameMode = 1;
         setInterval(()=>{
-            this.updateBall();
+            this.updateBall()
+            this.updateComputer();
+            
         },33)
-            //console.log("Ball: " + this.game.ballX + " - " + this.game.ballY);
-        // setInterval(()=>{
-        //     this.gameGateaway.getActiveUsersInRoom(this.game.room).map((chatUser) => {
-        //         this.gameGateaway.messageToClient(chatUser.client_id, 'gameStatus', this.game);
-        //     })           
-        // },250)
     }
 
     getStatus(room: string){
@@ -139,75 +133,45 @@ export class PongService {
             }
             this.game.ballX += this.game.ballXVel * this.game.ballSpeed;
             this.game.ballY += this.game.ballYVel * this.game.ballSpeed;
+    }
+
+    updateComputer(){ 
+ 
+        //chase ball
+        var yVel = 0;
+        if(this.game.ballY < this.game.playerTwoY && this.game.ballXVel == 1){
+             yVel = -1; 
+      
+            if(this.game.playerTwoY <= 20){
+                yVel = 0;
+            }
         }
-
-    initCanvas() {
-        this.gameCanvas = {
-            width: this.game.canvasWidth,
-            height: this.game.canvasheight
+        else if(this.game.ballY > this.game.playerTwoY + this.game.playerTwoH && this.game.ballXVel == 1){
+            yVel = 1;
+            
+            if(this.game.playerTwoY + this.game.playerTwoH >= this.game.canvasheight - 20){
+                yVel = 0;
+            }
         }
-        //this.pongService.joinUserToRoom("#pongRoom");
-        PongService.init = false;
-        PongService.computerScore = 0;
-        PongService.playerScore = 0;
-        this.canvas = this.gameCanvas?.nativeElement;
-        this.gameContext = this.canvas?.getContext('2d');
-
-        if (this.gameContext && this.canvas) {
-            this.player1 = new PaddleComponent(
-                this.game.playerOneW, 
-                this.game.playerOneH,
-                this.game.playerOneX, 
-                this.game.playerOneY, 
-                this.game.playerOneS);
-            this.mode(1);
-            this.ball = new Ball(
-                this.game.ballWidth,
-                this.game.ballHeight, 
-                this.game.ballX,
-                this.game.ballY,
-                this.game.ballSpeed);
-            this.gameContext.font = '30px Orbitron';
-
-            window.addEventListener('keydown', (e) => {
-                PongService.keysPressed[e.which] = true;
-            });
-
-            window.addEventListener('keyup', (e) => {
-                PongService.keysPressed[e.which] = false;
-            });
-
-            window.addEventListener('keyup', (e) => {
-                if (e.which === 32) {
-                    if (!PongService.init) {
-                        PongService.init = true;
-                        requestAnimationFrame(this.gameLoop);
-                    }
-                }
-            });
-
-            window.addEventListener('keyup', (e) => {
-                if (e.which === 27 ) {
-                    PongService.init = false;
-                    this.gameContext!.fillStyle = "#57a639";
-                    this.gameContext!.fillText("PAUSE", 300, 150);
-                }
-            });   
-        }
-        requestAnimationFrame(this.gameLoop);       
+        else{
+            yVel = 0;
+        }  
+ 
+        this.game.playerTwoY += yVel * this.game.playerTwoS;
+        //this.y += this.yVel * speed;
     }
 
     mode(i: number) {
         this.restartScores();
         if (i == 1) {
-            this.computerPlayer = new ComputerPaddle(
-                this.game.playerTwoW,
-                this.game.playerTwoH,
-                this.game.playerTwoX,
-                this.game.playerTwoY,
-                this.game.playerTwoS);
+            // this.computerPlayer = new ComputerPaddle(
+            //     this.game.playerTwoW,
+            //     this.game.playerTwoH,
+            //     this.game.playerTwoX,
+            //     this.game.playerTwoY,
+            //     this.game.playerTwoS);
         } else if (i == 2) {
-            this.computerPlayer = new ComputerPaddle(20, 60, this.canvas.width - (20 + 20), this.canvas.height / 2 - 60 / 2, 20);
+            // this.computerPlayer = new ComputerPaddle(20, 60, this.canvas.width - (20 + 20), this.canvas.height / 2 - 60 / 2, 20);
         }
         PongService.init = true;
     }
@@ -218,27 +182,6 @@ export class PongService {
         this.game.playerOneScore = 0;
         PongService.computerScore = 0;
         this.game.playerTwoScore = 0;
-    }
-
-    update() {
-        if (this.player1) {
-            //this.player1.update(this.canvas);
-        }
-      
-        if (this.computerPlayer && this.ball && this.gameCanvas) {
-          this.computerPlayer.update(this.ball, this.canvas);
-          this.ball.update(this.player1!, this.computerPlayer, this.canvas);
-        }
-    }
-
-    gameLoop = () => {
-        
-        if (PongService.init) {
-            const self = this;
-            this.update();
-            //this.draw();
-            requestAnimationFrame(this.gameLoop);
-        }
     }
 }
 
@@ -269,92 +212,9 @@ export class EntityComponent {
       }
   }
 
-class ComputerPaddle extends EntityComponent{
 
-    //private speed:number = 10;
-    //private speed:number = 20; // never loose
 
-    constructor(w:number,h:number,x:number,y:number,speed:number){
-        super(w,h,x,y,speed);        
-    }
 
-    update(ball:Ball, canvas: any){ 
- 
-        //chase ball
-        if(ball.y < this.y && ball.xVel == 1){
-             this.yVel = -1; 
-      
-            if(this.y <= 20){
-            this.yVel = 0;
-            }
-        }
-        else if(ball.y > this.y + this.height && ball.xVel == 1){
-            this.yVel = 1;
-            
-            if(this.y + this.height >= canvas.height - 20){
-                this.yVel = 0;
-            }
-        }
-        else{
-            this.yVel = 0;
-        }  
- 
-        this.y += this.yVel * this.speed;
-        //this.y += this.yVel * speed;
-    }
-}
-
-class Ball extends EntityComponent{
-
-    //private speed:number = 5;
-
-    constructor(w:number,h:number,x:number,y:number,speed:number){
-        super(w,h,x,y,speed);
-        var randomDirection = Math.floor(Math.random() * 2) + 1; 
-        if(randomDirection % 2){
-            this.xVel = 1;
-        }else{
-            this.xVel = -1;
-        }
-        this.yVel = 1;
-    }
-
-    update(player:PaddleComponent,computer:ComputerPaddle,canvas: any){
- 
-    //check top canvas bounds
-        if(this.y <= 10){
-          this.yVel = 1;
-        }
-    //check bottom canvas bounds
-        if(this.y + this.height >= canvas.height - 10){
-        this.yVel = -1;
-        }
-    //check left canvas bounds
-        if(this.x <= 0){  
-            this.x = canvas.width / 2 - this.width / 2;
-            PongService.computerScore += 1;
-        }
-    //check right canvas bounds
-        if(this.x + this.width >= canvas.width){
-            this.x = canvas.width / 2 - this.width / 2;
-            PongService.playerScore += 1;
-        }
-    //check player collision
-        if(this.x <= player.x + player.width){
-            if(this.y >= player.y && this.y + this.height <= player.y + player.height){
-            this.xVel = 1;
-            }
-        }
-    //check computer collision
-        if(this.x + this.width >= computer.x){
-            if(this.y >= computer.y && this.y + this.height <= computer.y + computer.height){
-                this.xVel = -1;
-            }
-        }
-    this.x += this.xVel * this.speed;
-    this.y += this.yVel * this.speed;
-    }
-}
 
 export class PaddleComponent extends EntityComponent {
     move:string = "";
