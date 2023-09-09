@@ -71,7 +71,9 @@ export class SocketService {
 				//console.log("join received: " + JSON.stringify(data.room));
 				this.message.next({event: 'gameStatus', data});
 			})
-
+			.on('getStatus', (data: GameRoom) => {
+				this.message.next({event: 'getStatus', data});
+			})
 	}
 
   //https://socket.io/docs/v3/emitting-events/

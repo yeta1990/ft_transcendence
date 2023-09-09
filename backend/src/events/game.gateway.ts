@@ -46,7 +46,7 @@ export class GameGateway extends BaseGateway {
     console.log("Going down\n");
 	console.log("Going up\n");
 	const targetUsers: Array<ChatUser> = this
-	.getActiveUsersInRoom("#pongRoom")
+	.getActiveUsersInRoom("#pongRoom");
 	console.log("Down. " + targetUsers);
 	var yVel = 1;
 	if(payload.y + payload.height >= payload.canvasheight - 20)
@@ -55,6 +55,16 @@ export class GameGateway extends BaseGateway {
 	this.server.to(targetUsers[i].client_id).emit('getSignal', yVel)
 	}
     //return { event: 'getSignal', data: 1 };
+  }
+
+  @SubscribeMessage('updateGame')
+  handleGameUpdate(client: Socket, room: string) {
+	const response: GameRoom = this.pongservice.getStatus(room);
+	const targetUsers: Array<ChatUser> = this
+	.getActiveUsersInRoom("#pongRoom");
+	for (let i = 0; i < targetUsers.length; i++){
+		this.server.to(targetUsers[i].client_id).emit('getStatus', response);
+	}	
   }
 
   @SubscribeMessage('join')

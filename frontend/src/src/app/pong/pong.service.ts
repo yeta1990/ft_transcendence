@@ -26,4 +26,8 @@ export class PongService {
 		this.socketService.sendMessageToServer("join", room);
 	}
 
+  gameUpdate(room: string) {
+    this.socketService.sendMessageToServer("updateGame", room);
+  }
+
 }

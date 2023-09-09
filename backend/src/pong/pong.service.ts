@@ -72,7 +72,7 @@ export class PongService {
         );
         this.randomDir();
         this.games.set(name, this.game);
-        //this.updateGame()
+        this.updateGame()
         return (this.games.get(name));
     }
 
@@ -80,13 +80,19 @@ export class PongService {
         this.game.gameMode = 1;
         setInterval(()=>{
             this.updateBall();
-        },250)
+        },33)
             //console.log("Ball: " + this.game.ballX + " - " + this.game.ballY);
-        setInterval(()=>{
-            this.gameGateaway.getActiveUsersInRoom(this.game.room).map((chatUser) => {
-                this.gameGateaway.messageToClient(chatUser.client_id, 'gameStatus', this.game);
-            })           
-        },250)
+        // setInterval(()=>{
+        //     this.gameGateaway.getActiveUsersInRoom(this.game.room).map((chatUser) => {
+        //         this.gameGateaway.messageToClient(chatUser.client_id, 'gameStatus', this.game);
+        //     })           
+        // },250)
+    }
+
+    getStatus(room: string){
+        //this.game.gameMode = 1;
+        //this.updateBall();
+        return (this.games.get(room));
     }
 
     randomDir() {

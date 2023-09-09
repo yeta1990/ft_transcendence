@@ -42,13 +42,15 @@ export class PongComponent {
         .getMessage()
         .pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
         .subscribe((payload: SocketPayload) => {
-        if (payload.event === 'gameStatus')           
+        if (payload.event === 'gameStatus'){     
             //this.game = payload.data;
             //console.log("Conected to: " + this.game.room);
             if (this.game.gameMode == 0) {
                 this.game = payload.data;
                 this.canvas = this.gameCanvas?.nativeElement;
                 this.gameContext = this.canvas?.getContext('2d');
+                this.draw();
+                requestAnimationFrame(this.gameLoop);
                 //this.initCanvas();
             }
             else{
@@ -56,8 +58,13 @@ export class PongComponent {
                 this.game.ballY = payload.data.ballY;
                 this.draw();
             }
-                
+        }
+        if (payload.event === 'getStatus'){
+            this.game = payload.data;
+        }
+
         }));
+        //requestAnimationFrame(this.gameLoop);
     }
 
     // ngAfterViewInit() {
@@ -222,13 +229,16 @@ export class PongComponent {
 
     gameLoop = () => {
         
-        if (PongComponent.init) {
-            const self = this;
-            this.update();
-            this.draw();
-            requestAnimationFrame(this.gameLoop);
-        }
-        //requestAnimationFrame(this.gameLoop);
+        // if (PongComponent.init) {
+        //     const self = this;
+        //     this.update();
+        //     this.draw();
+        //     requestAnimationFrame(this.gameLoop);
+        // }
+        //console.log("I'M");
+        this.pongService.gameUpdate(this.game.room);
+        this.draw();
+        requestAnimationFrame(this.gameLoop);
     }
 }
 
