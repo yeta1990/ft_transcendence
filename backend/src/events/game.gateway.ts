@@ -26,36 +26,37 @@ export class GameGateway extends BaseGateway {
   }*/
    
   @SubscribeMessage('up')
-	handleUp(client: Socket, payload: GameRoom) {
+	handleUp(client: Socket, room: string) {
     console.log("Going up\n");
-	const targetUsers: Array<ChatUser> = this
-	.getActiveUsersInRoom("#pongRoom")
-	console.log("Up: " + targetUsers);
-	for (let i = 0; i < targetUsers.length; i++){
-	var yVel = -1;
-	if(payload.y <= 20)
-		yVel = 0
-	this.server.to(targetUsers[i].client_id).emit('getSignal', yVel)
+	this.pongservice.goUp(room);
+	// const targetUsers: Array<ChatUser> = this
+	// .getActiveUsersInRoom("#pongRoom")
+	// console.log("Up: " + targetUsers);
+	// for (let i = 0; i < targetUsers.length; i++){
+	// var yVel = -1;
+	// if(payload.y <= 20)
+	// 	yVel = 0
+	// this.server.to(targetUsers[i].client_id).emit('getSignal', yVel)
 	//this.messageToClient(targetUsers[i].client_id, 'getSignal', -1)
-	}
     //return { event: 'getSignal', data: -1 };
   }
 
   @SubscribeMessage('down')
-  handleDown(client: Socket, payload: GameRoom) {
+  handleDown(client: Socket, room: string) {
     console.log("Going down\n");
-	console.log("Going up\n");
-	const targetUsers: Array<ChatUser> = this
-	.getActiveUsersInRoom("#pongRoom");
-	console.log("Down. " + targetUsers);
-	var yVel = 1;
-	if(payload.y + payload.height >= payload.canvasheight - 20)
-		yVel = 0;
-	for (let i = 0; i < targetUsers.length; i++){
-	this.server.to(targetUsers[i].client_id).emit('getSignal', yVel)
-	}
-    //return { event: 'getSignal', data: 1 };
-  }
+	this.pongservice.goDown(room);
+// 	console.log("Going up\n");
+// 	const targetUsers: Array<ChatUser> = this
+// 	.getActiveUsersInRoom("#pongRoom");
+// 	console.log("Down. " + targetUsers);
+// 	var yVel = 1;
+// 	if(payload.y + payload.height >= payload.canvasheight - 20)
+// 		yVel = 0;
+// 	for (let i = 0; i < targetUsers.length; i++){
+// 	this.server.to(targetUsers[i].client_id).emit('getSignal', yVel)
+// 	}
+//     //return { event: 'getSignal', data: 1 };
+ }
 
   @SubscribeMessage('updateGame')
   handleGameUpdate(client: Socket, room: string) {

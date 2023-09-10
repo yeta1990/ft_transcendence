@@ -46,19 +46,19 @@ export class PaddleComponent extends EntityComponent {
   }
 
   update(canvas: any){
-      if( PongComponent.keysPressed[KeyBindings.UP] ){
-          this.pongService.sendSignal("up", "#pongRoom", "pong", this.y, this.height, canvas.height);
-      }else if(PongComponent.keysPressed[KeyBindings.DOWN]){
-          this.pongService.sendSignal("down", "pongRoom", "pong", this.y, this.height, canvas.height);
-      }else{
-          this.yVel = 0;
-      }
-  }
+  //     if( PongComponent.keysPressed[KeyBindings.UP] ){
+  //         this.pongService.sendSignal("up", "#pongRoom", "pong", this.y, this.height, canvas.height);
+  //     }else if(PongComponent.keysPressed[KeyBindings.DOWN]){
+  //         this.pongService.sendSignal("down", "pongRoom", "pong", this.y, this.height, canvas.height);
+  //     }else{
+  //         this.yVel = 0;
+  //     }
+  // }
 }
 
-enum KeyBindings{
-  UP = 38,
-  DOWN = 40,
-  SPACE = 32,
-  ESCAPE = 27
+// enum KeyBindings{
+//   UP = 38,
+//   DOWN = 40,
+//   SPACE = 32,
+//   ESCAPE = 27
 }

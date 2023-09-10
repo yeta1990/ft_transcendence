@@ -64,7 +64,33 @@ export class PongComponent {
         }
 
         }));
-        //requestAnimationFrame(this.gameLoop);
+
+        window.addEventListener('keydown', (e) => {         
+            PongComponent.keysPressed[e.which] = true;
+            if( PongComponent.keysPressed[KeyBindings.W] && PongComponent.keysPressed[e.which] == true){
+                console.log("up");
+                this.pongService.sendSignal("up", this.game.room);
+            } else if( PongComponent.keysPressed[KeyBindings.S] && PongComponent.keysPressed[e.which] == true){
+                console.log("down");
+                this.pongService.sendSignal("down", this.game.room);
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            PongComponent.keysPressed[e.which] = false;
+        });
+
+        // window.addEventListener('keyup', (e) => {
+        //     if (e.which === 87) {
+        //         console.log("up");
+        //         this.pongService.sendSignal("up", this.game.room);    
+        //     }ww
+        // });
+        //requestAnimationFrame(this.gameLoop);        
+        if( PongComponent.keysPressed[KeyBindings.W] ){
+            console.log("up");
+            this.pongService.sendSignal("up", this.game.room);
+        }   
     }
 
     // ngAfterViewInit() {
@@ -91,21 +117,21 @@ export class PongComponent {
         this.canvas = this.gameCanvas?.nativeElement;
         this.gameContext = this.canvas?.getContext('2d');
 
-        if (this.gameContext && this.canvas) {
-            this.player1 = new PaddleComponent(
-                this.game.playerOneW,
-                this.game.playerOneH, 
-                this.game.playerOneX, 
-                this.game.playerOneY, 
-                this.game.playerOneS, 
-                this.pongService);
-            this.mode(1);
-            this.ball = new Ball(
-                this.game.ballHeight,
-                this.game.ballWidth, 
-                this.game.ballX,
-                this.game.ballY,
-                this.game.ballSpeed);
+         if (this.gameContext && this.canvas) {
+        //     this.player1 = new PaddleComponent(
+        //         this.game.playerOneW,
+        //         this.game.playerOneH, 
+        //         this.game.playerOneX, 
+        //         this.game.playerOneY, 
+        //         this.game.playerOneS, 
+        //         this.pongService);
+        //     this.mode(1);
+        //     this.ball = new Ball(
+        //         this.game.ballHeight,
+        //         this.game.ballWidth, 
+        //         this.game.ballX,
+        //         this.game.ballY,
+        //         this.game.ballSpeed);
             this.gameContext.font = '30px Orbitron';
 
             window.addEventListener('keydown', (e) => {
@@ -117,11 +143,17 @@ export class PongComponent {
             });
 
             window.addEventListener('keyup', (e) => {
+                if (e.which === 87) {
+                    console.log("up");
+                    this.pongService.sendSignal("up", this.game.room);    
+                }
+            });
+            window.addEventListener('keyup', (e) => {
                 if (e.which === 32) {
-                    if (!PongComponent.init) {
-                        PongComponent.init = true;
-                        requestAnimationFrame(this.gameLoop);
-                    }
+                    // if (!PongComponent.init) {
+                    //     PongComponent.init = true;
+                    //     requestAnimationFrame(this.gameLoop);
+                    // }
                 }
             });
 
@@ -335,5 +367,7 @@ enum KeyBindings{
   UP = 38,
   DOWN = 40,
   SPACE = 32,
-  ESCAPE = 27
+  ESCAPE = 27,
+  W = 87,
+  S = 83
 }

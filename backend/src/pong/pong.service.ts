@@ -38,7 +38,7 @@ export class PongService {
 	        400 /2 - 60 / 2,    //playerOneY    //this.canvas.height / 2 - 60 / 2,
 	        20,                 //playerOneW
 	        60,                 //playerOneH
-            10,                 //playerOneS
+            30,                 //playerOneS 10
 
 	        //PaddleTwoComponent
 	        700 - (20 + 20),    //playerTwoX    //this.canvas.width - (20 + 20),
@@ -159,6 +159,22 @@ export class PongService {
  
         this.game.playerTwoY += yVel * this.game.playerTwoS;
         //this.y += this.yVel * speed;
+    }
+
+    goUp(room: string) {
+        //this.game = this.games.get(room);
+        var yVel = -1;
+	    if(this.game.playerOneY <= 20)
+		    yVel = 0
+        this.game.playerOneY += yVel * this.game.playerOneS;
+    }
+
+    goDown(room: string) {
+        //this.game = this.games.get(room);
+        var yVel = 1;
+        if(this.game.playerOneY + this.game.playerOneH >= this.game.canvasheight - 20)
+		    yVel = 0
+        this.game.playerOneY += yVel * this.game.playerOneS;
     }
 
     mode(i: number) {

@@ -15,11 +15,11 @@ export class PongService {
 		return this.socketService.getMessage();
 	}
 
-  sendSignal(type: string, room: string, message: string, y: number, height: number, canvasheight:number) {
-    const date: Date = new Date();
+  sendSignal(type: string, room: string) {
+    //const date: Date = new Date();
 		//const payloadToSend: ChatMessage = { room, message, nick: "", date}
-    // const payloadToSend: GameRoom = { room:room, message:message, nick: "", date:date, y:y, height:height, canvasheight:canvasheight}
-		// this.socketService.sendSignal(type, payloadToSend);
+    //const payloadToSend: GameRoom = { room:room }
+		this.socketService.sendMessageToServer(type, room);
 	}
 
   joinUserToRoom(room: string){
