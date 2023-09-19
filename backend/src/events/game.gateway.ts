@@ -25,10 +25,10 @@ export class GameGateway extends BaseGateway {
     return { event: 'message', data: payload};
   }*/
    
-  @SubscribeMessage('up')
-	handleUp(client: Socket, room: string) {
-    console.log("Going up\n");
-	this.pongservice.goUp(room);
+//   @SubscribeMessage('up')
+// 	handleUp(client: Socket, room: string) {
+//     console.log("Going up\n");
+// 	this.pongservice.goUp(room);
 	// const targetUsers: Array<ChatUser> = this
 	// .getActiveUsersInRoom("#pongRoom")
 	// console.log("Up: " + targetUsers);
@@ -39,12 +39,12 @@ export class GameGateway extends BaseGateway {
 	// this.server.to(targetUsers[i].client_id).emit('getSignal', yVel)
 	//this.messageToClient(targetUsers[i].client_id, 'getSignal', -1)
     //return { event: 'getSignal', data: -1 };
-  }
+//   }
 
-  @SubscribeMessage('down')
-  handleDown(client: Socket, room: string) {
-    console.log("Going down\n");
-	this.pongservice.goDown(room);
+//   @SubscribeMessage('down')
+//   handleDown(client: Socket, room: string) {
+//     console.log("Going down\n");
+// 	this.pongservice.goDown(room);
 // 	console.log("Going up\n");
 // 	const targetUsers: Array<ChatUser> = this
 // 	.getActiveUsersInRoom("#pongRoom");
@@ -56,7 +56,18 @@ export class GameGateway extends BaseGateway {
 // 	this.server.to(targetUsers[i].client_id).emit('getSignal', yVel)
 // 	}
 //     //return { event: 'getSignal', data: 1 };
+//  }
+@SubscribeMessage('keydown')
+ handleMove(client: Socket, room:string, key:number){
+	this.pongservice.keyStatus(room, key);
  }
+
+ @SubscribeMessage('keydown')
+ handleMoveStop(client: Socket, room:string, key:number){
+	this.pongservice.keyStatus(room, 0);
+ }
+
+
 
   @SubscribeMessage('updateGame')
   handleGameUpdate(client: Socket, room: string) {
@@ -135,7 +146,7 @@ export class GameGateway extends BaseGateway {
 			// setTimeout(()=>{response.gameMode = 1
 			// 				response.ballX = 150
 			// 	this.messageToClient(clientSocketId, 'gameStatus', response);},1000)
-			this.pongservice.updateGame();
+			//this.pongservice.updateGame();
 			//sending old messages of the room, except for those of users that banned
 			//the new user trying to join
 			if (!wasUserAlreadyActiveInRoom){

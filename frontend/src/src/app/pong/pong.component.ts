@@ -49,14 +49,14 @@ export class PongComponent {
                 this.game = payload.data;
                 this.canvas = this.gameCanvas?.nativeElement;
                 this.gameContext = this.canvas?.getContext('2d');
-                this.draw();
+                //this.draw();
                 requestAnimationFrame(this.gameLoop);
                 //this.initCanvas();
             }
             else{
                 this.game.ballX = payload.data.ballX;
                 this.game.ballY = payload.data.ballY;
-                this.draw();
+                //this.draw();
             }
         }
         if (payload.event === 'getStatus'){
@@ -64,33 +64,42 @@ export class PongComponent {
         }
 
         }));
-
-        window.addEventListener('keydown', (e) => {         
-            PongComponent.keysPressed[e.which] = true;
-            if( PongComponent.keysPressed[KeyBindings.W] && PongComponent.keysPressed[e.which] == true){
-                console.log("up");
-                this.pongService.sendSignal("up", this.game.room);
-            } else if( PongComponent.keysPressed[KeyBindings.S] && PongComponent.keysPressed[e.which] == true){
-                console.log("down");
-                this.pongService.sendSignal("down", this.game.room);
-            }
+        window.addEventListener('keydown', (e) => {     
+            this.pongService.sendSignal("keydown", this.game.room, e.which);
         });
 
         window.addEventListener('keyup', (e) => {
-            PongComponent.keysPressed[e.which] = false;
+            // PongComponent.keysPressed[e.which] = false;
+            this.pongService.sendSignal("keyup", this.game.room, e.which);
         });
+
+        // window.addEventListener('keydown', (e) => {         
+        //     PongComponent.keysPressed[e.which] = true;
+        //     if( PongComponent.keysPressed[KeyBindings.W] && PongComponent.keysPressed[e.which] == true){
+        //         console.log("up");
+        //         this.pongService.sendSignal("up", this.game.room);
+        //     } else if( PongComponent.keysPressed[KeyBindings.S] && PongComponent.keysPressed[e.which] == true){
+        //         console.log("down");
+        //         this.pongService.sendSignal("down", this.game.room);
+        //     }
+        // });
+
+        // window.addEventListener('keyup', (e) => {
+        //     PongComponent.keysPressed[e.which] = false;
+        // });
 
         // window.addEventListener('keyup', (e) => {
         //     if (e.which === 87) {
         //         console.log("up");
         //         this.pongService.sendSignal("up", this.game.room);    
-        //     }ww
+        //     }
         // });
         //requestAnimationFrame(this.gameLoop);        
-        if( PongComponent.keysPressed[KeyBindings.W] ){
-            console.log("up");
-            this.pongService.sendSignal("up", this.game.room);
-        }   
+        // if( PongComponent.keysPressed[KeyBindings.W] ){
+        //     console.log("up");
+        //     this.pongService.sendSignal("up", this.game.room);
+        // }
+        //this.initCanvas();   
     }
 
     // ngAfterViewInit() {
@@ -114,8 +123,8 @@ export class PongComponent {
         //console.log("Game mode: " + this.game.gameMode);
         //PongComponent.computerScore = 0;
         //PongComponent.playerScore = 0;
-        this.canvas = this.gameCanvas?.nativeElement;
-        this.gameContext = this.canvas?.getContext('2d');
+        // this.canvas = this.gameCanvas?.nativeElement;
+        // this.gameContext = this.canvas?.getContext('2d');
 
          if (this.gameContext && this.canvas) {
         //     this.player1 = new PaddleComponent(
@@ -134,36 +143,45 @@ export class PongComponent {
         //         this.game.ballSpeed);
             this.gameContext.font = '30px Orbitron';
 
-            window.addEventListener('keydown', (e) => {
-                PongComponent.keysPressed[e.which] = true;
-            });
-
-            window.addEventListener('keyup', (e) => {
-                PongComponent.keysPressed[e.which] = false;
-            });
-
-            window.addEventListener('keyup', (e) => {
-                if (e.which === 87) {
-                    console.log("up");
-                    this.pongService.sendSignal("up", this.game.room);    
-                }
-            });
-            window.addEventListener('keyup', (e) => {
-                if (e.which === 32) {
-                    // if (!PongComponent.init) {
-                    //     PongComponent.init = true;
-                    //     requestAnimationFrame(this.gameLoop);
+            window.addEventListener('keydown', (e) => {     
+                this.pongService.sendSignal("keydown", this.game.room, e.which);
+                    // PongComponent.keysPressed[e.which] = true;
+                    // if( PongComponent.keysPressed[KeyBindings.W] && PongComponent.keysPressed[e.which] == true){
+                    //     console.log("up");
+                    //     this.pongService.sendSignal("move", this.game.room, e.which);
+                    // } else if( PongComponent.keysPressed[KeyBindings.S] && PongComponent.keysPressed[e.which] == true){
+                    //     console.log("down");
+                    //     this.pongService.sendSignal("down", this.game.room);
                     // }
-                }
             });
 
             window.addEventListener('keyup', (e) => {
-                if (e.which === 27 ) {
-                    PongComponent.init = false;
-                    this.gameContext!.fillStyle = "#57a639";
-                    this.gameContext!.fillText("PAUSE", 300, 150);
-                }
-            });   
+                // PongComponent.keysPressed[e.which] = false;
+                this.pongService.sendSignal("keyup", this.game.room, e.which);
+            });
+
+            // window.addEventListener('keyup', (e) => {
+            //     if (e.which === 87) {
+            //         console.log("up");
+            //         this.pongService.sendSignal("up", this.game.room);    
+            //     }
+            // });
+            // window.addEventListener('keyup', (e) => {
+            //     if (e.which === 32) {
+            //         // if (!PongComponent.init) {
+            //         //     PongComponent.init = true;
+            //         //     requestAnimationFrame(this.gameLoop);
+            //         // }
+            //     }
+            // });
+
+            // window.addEventListener('keyup', (e) => {
+            //     if (e.which === 27 ) {
+            //         PongComponent.init = false;
+            //         this.gameContext!.fillStyle = "#57a639";
+            //         this.gameContext!.fillText("PAUSE", 300, 150);
+            //     }
+            // });   
         }
         requestAnimationFrame(this.gameLoop);
     }
@@ -268,7 +286,7 @@ export class PongComponent {
         //     requestAnimationFrame(this.gameLoop);
         // }
         //console.log("I'M");
-        this.pongService.gameUpdate(this.game.room);
+        //this.pongService.gameUpdate(this.game.room);
         this.draw();
         requestAnimationFrame(this.gameLoop);
     }

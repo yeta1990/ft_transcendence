@@ -101,4 +101,8 @@ export class SocketService {
   sendSignal(type: string, payload: ChatMessage){
 	this.socket.emit(type, payload);
   }
+
+  sendMove(type: string, room: string, key: number){
+	this.socket.emit(type, room, key);
+  }
 }

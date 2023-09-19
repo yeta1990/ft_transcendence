@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ChatMessage, SocketPayload, GameRoom } from '@shared/types';
+import { ChatMessage, SocketPayload, GameRoom, ChatUser } from '@shared/types';
 import { GameGateway } from 'src/events/game.gateway';
 @Injectable()
 export class PongService {
@@ -19,6 +19,7 @@ export class PongService {
     public game: GameRoom;
     public gameGateaway: GameGateway;
     games: Map<string, GameRoom> = new Map<string, GameRoom>;
+    public playerOneVel: number = 0;
 
     initGame (name: string, gameGateaway: GameGateway): GameRoom {
         
@@ -70,17 +71,23 @@ export class PongService {
         );
         this.randomDir();
         this.games.set(name, this.game);
-        this.updateGame()
+        this.updateGame(gameGateaway)
         return (this.games.get(name));
     }
 
-    updateGame(){
+    updateGame(gameGateway :GameGateway){
         this.game.gameMode = 1;
         setInterval(()=>{
             this.updateBall()
             this.updateComputer();
+            this.move();
+            const targetUsers: Array<ChatUser> = gameGateway
+	.getActiveUsersInRoom("#pongRoom");
+	for (let i = 0; i < targetUsers.length; i++){
+		gameGateway.server.to(targetUsers[i].client_id).emit('getStatus', this.games.get(this.game.room));
+	}
             
-        },33)
+        },1000/64)
     }
 
     getStatus(room: string){
@@ -175,6 +182,27 @@ export class PongService {
         if(this.game.playerOneY + this.game.playerOneH >= this.game.canvasheight - 20)
 		    yVel = 0
         this.game.playerOneY += yVel * this.game.playerOneS;
+    }
+
+    move(){
+        this.game.playerOneY += this.playerOneVel * this.game.playerOneS;
+        if(this.game.playerOneY <= 20) {
+            this.playerOneVel = 0;
+        }else if (this.game.playerOneY + this.game.playerOneH >= this.game.canvasheight - 20){
+            this.playerOneVel = 0;
+        }           
+        //this.game.playerOneY += this.playerOneVel * this.game.playerOneS;
+    }
+
+    keyStatus(room: string, key: number){
+        if (key === 87 ){ //w
+            this.playerOneVel = -1;
+        } else if ( key === 83) {//s
+            this.playerOneVel = 1;
+        } else {
+            this.playerOneVel = 0;
+        }
+
     }
 
     mode(i: number) {
