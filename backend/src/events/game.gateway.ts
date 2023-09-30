@@ -22,12 +22,14 @@ export class GameGateway extends BaseGateway {
 
 @SubscribeMessage('keydown')
  handleMove(client: Socket, payload: any){
-	this.pongservice.keyStatus(payload.room, payload.key);
+	const nick: string = client.handshake.query.nick as string;
+	this.pongservice.keyStatus(payload.room, payload.key, nick);
  }
 
  @SubscribeMessage('keyup')
  handleMoveStop(client: Socket, payload: any){
-	this.pongservice.keyStatus(payload.room, 0);
+	const nick: string = client.handshake.query.nick as string;
+	this.pongservice.keyStatus(payload.room, 0, nick);
  }
 
 
@@ -88,9 +90,7 @@ export class GameGateway extends BaseGateway {
 			console.log("nick " + nick);
 			const response: GameRoom = this.pongservice.initGame("#pongRoom", this, userInRoom.length, nick);
 			//var userInRoom = this.getActiveUsersInRoom('#pongRoom');
-			console.log("users: " + userInRoom.length)
-			if (userInRoom.length == 2)
-				this.pongservice.setPlayerTwo(nick);
+			this.pongservice.setPlayer("#pongRoom", nick);			
 			console.log("Join succed to: " + response.room);
 			
 			this.messageToClient(clientSocketId, 'gameStatus', response);
@@ -133,4 +133,16 @@ export class GameGateway extends BaseGateway {
 		} catch {}
 		return (false)
 	}
+	@SubscribeMessage(events.SoftDisconnect)
+  softDisconnect(client: Socket): void{
+	console.log("HERE DISCONECT");
+  	  const activeRooms: Array<string> = this.getActiveRooms()
+	  console.log("ACTIVE ROOMS: " + activeRooms);
+  	  for (const room of activeRooms){
+		this.server.in(client.id).socketsLeave(room);			
+  	  }
+		const nick: string = client.handshake.query.nick as string;
+		this.pongservice.disconectPlayer("#pongRoom", nick);
+
+  }
 }

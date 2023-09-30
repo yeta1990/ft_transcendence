@@ -30,4 +30,8 @@ export class PongService {
     this.socketService.sendMessageToServer("updateGame", room);
   }
 
+  disconnectClient(){
+		this.socketService.disconnectClient();
+	}
+
 }

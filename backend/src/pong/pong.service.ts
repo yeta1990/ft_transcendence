@@ -20,6 +20,7 @@ export class PongService {
     public gameGateaway: GameGateway;
     games: Map<string, GameRoom> = new Map<string, GameRoom>;
     public playerOneVel: number = 0;
+    public playerTwoVel: number = 0;
 
     initGame (name: string, gameGateaway: GameGateway, viwer: number, nick:string): GameRoom {
         
@@ -71,7 +72,7 @@ export class PongService {
 
             //Viwer
             viwer,              //viwer
-            nick,               //playerOne
+            "",               //playerOne
             ""                  //playerTwo
         );
         this.randomDir();
@@ -84,7 +85,9 @@ export class PongService {
         this.game.gameMode = 1;
         setInterval(()=>{
             this.updateBall()
-            this.updateComputer();
+            if (this.game.playerTwo == "") {
+                this.updateComputer();
+            }              
             this.move();
             const targetUsers: Array<ChatUser> = gameGateway
 	.getActiveUsersInRoom("#pongRoom");
@@ -176,18 +179,44 @@ export class PongService {
             this.playerOneVel = 0;
         }else if (this.game.playerOneY + this.game.playerOneH >= this.game.canvasheight - 20){
             this.playerOneVel = 0;
+        }
+        if (this.game.playerTwo != ""){
+            this.game.playerTwoY += this.playerTwoVel * this.game.playerTwoS;
+            if(this.game.playerTwoY <= 20) {
+                this.playerTwoVel = 0;
+            }else if (this.game.playerTwoY + this.game.playerTwoH >= this.game.canvasheight - 20){
+                this.playerTwoVel = 0;
+            }
         }           
-        //this.game.playerOneY += this.playerOneVel * this.game.playerOneS;
     }
 
-    keyStatus(room: string, key: number){
-        if (key === 87 && (this.game.playerOneY > 20)){ //w
-            this.playerOneVel = -1;
-        } else if ( key === 83 && (this.game.playerOneY + this.game.playerOneH < this.game.canvasheight - 20)) {//s
-            this.playerOneVel = 1;
-        } else {
-            this.playerOneVel = 0;
+    keyStatus(room: string, key: number, nick:string){
+        //this.game = this.games.get(room);
+        if (nick == this.game.playerOne) {
+            if (key === 87 && (this.game.playerOneY > 20)){ //w
+                this.playerOneVel = -1;
+            } else if ( key === 83 && (this.game.playerOneY + this.game.playerOneH < this.game.canvasheight - 20)) {//s
+                this.playerOneVel = 1;
+            } else {
+                this.playerOneVel = 0;
+            }
         }
+        if (nick == this.game.playerTwo){
+            if (key === 87 && (this.game.playerTwoY > 20)){ //w
+                this.playerTwoVel = -1;
+            } else if ( key === 83 && (this.game.playerTwoY + this.game.playerTwoH < this.game.canvasheight - 20)) {//s
+                this.playerTwoVel = 1;
+            } else {
+                this.playerTwoVel = 0;
+            }
+        }
+        // if (key === 87 && (this.game.playerOneY > 20)){ //w
+        //     this.playerOneVel = -1;
+        // } else if ( key === 83 && (this.game.playerOneY + this.game.playerOneH < this.game.canvasheight - 20)) {//s
+        //     this.playerOneVel = 1;
+        // } else {
+        //     this.playerOneVel = 0;
+        // }
 
     }
 
@@ -217,6 +246,27 @@ export class PongService {
     setPlayerTwo(nick:string){
         this.game.playerTwo = nick;
       }
+    
+    setPlayer(room:string, nick:string) {
+        this.game = this.games.get(room)
+        if (this.game.playerOne == ""){
+            this.game.playerOne = nick;
+        }          
+        if (this.game.playerTwo == "" && this.game.playerOne != "" && this.game.playerOne != nick){
+            this.game.playerTwo = nick;
+        }           
+    }
+
+    disconectPlayer(room:string, nick:string) {
+        this.game = this.games.get(room)
+        if (this.game.playerOne == nick){
+            this.game.playerOne = "";
+        }         
+        if (this.game.playerTwo == nick){
+            this.game.playerTwo = "";
+        }
+            
+    }
 }
 
 export class EntityComponent {
