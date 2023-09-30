@@ -1,13 +1,13 @@
 #!/bin/sh
-cd /usr/src/app
+cd /usr/src/app/src
 
 export NG_CLI_ANALYTICS="false"
 
-npm install -g npm@9.6.2
-npm install -g @angular/cli
-ng analytics off
+#npm install -g npm@9.6.2
+#npm install -g @angular/cli
 
-cd src
+ng analytics off
 npm install
+echo "eoooooo"
 npm run start
 #ng serve --host 0.0.0.0 --port 4200
