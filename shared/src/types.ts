@@ -85,6 +85,12 @@ export class GameRoom {
 	public playerTwoScore: number,
 
 	//Mode
-	public gameMode: number //0 for pause or stopped
+	public gameMode: number, //0 for pause or stopped
+
+	//Viwer
+	public viwer:number,
+	public playerOne:string,
+	public playerTwo:string,
+
 	){}
 }

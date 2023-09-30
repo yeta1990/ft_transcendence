@@ -21,7 +21,7 @@ export class PongService {
     games: Map<string, GameRoom> = new Map<string, GameRoom>;
     public playerOneVel: number = 0;
 
-    initGame (name: string, gameGateaway: GameGateway): GameRoom {
+    initGame (name: string, gameGateaway: GameGateway, viwer: number, nick:string): GameRoom {
         
         if (this.games.get(name))
             return(this.games.get(name));
@@ -39,7 +39,7 @@ export class PongService {
 	        400 /2 - 60 / 2,    //playerOneY    //this.canvas.height / 2 - 60 / 2,
 	        20,                 //playerOneW
 	        60,                 //playerOneH
-            30,                 //playerOneS 10
+            10,                 //playerOneS 10
 
 	        //PaddleTwoComponent
 	        700 - (20 + 20),    //playerTwoX    //this.canvas.width - (20 + 20),
@@ -68,6 +68,11 @@ export class PongService {
 
             //Mode
             0,                  //gameMode
+
+            //Viwer
+            viwer,              //viwer
+            nick,               //playerOne
+            ""                  //playerTwo
         );
         this.randomDir();
         this.games.set(name, this.game);
@@ -85,14 +90,11 @@ export class PongService {
 	.getActiveUsersInRoom("#pongRoom");
 	for (let i = 0; i < targetUsers.length; i++){
 		gameGateway.server.to(targetUsers[i].client_id).emit('getStatus', this.games.get(this.game.room));
-	}
-            
+	}            
         },1000/64)
     }
 
     getStatus(room: string){
-        //this.game.gameMode = 1;
-        //this.updateBall();
         return (this.games.get(room));
     }
 
@@ -168,22 +170,6 @@ export class PongService {
         //this.y += this.yVel * speed;
     }
 
-    goUp(room: string) {
-        //this.game = this.games.get(room);
-        var yVel = -1;
-	    if(this.game.playerOneY <= 20)
-		    yVel = 0
-        this.game.playerOneY += yVel * this.game.playerOneS;
-    }
-
-    goDown(room: string) {
-        //this.game = this.games.get(room);
-        var yVel = 1;
-        if(this.game.playerOneY + this.game.playerOneH >= this.game.canvasheight - 20)
-		    yVel = 0
-        this.game.playerOneY += yVel * this.game.playerOneS;
-    }
-
     move(){
         this.game.playerOneY += this.playerOneVel * this.game.playerOneS;
         if(this.game.playerOneY <= 20) {
@@ -195,9 +181,9 @@ export class PongService {
     }
 
     keyStatus(room: string, key: number){
-        if (key === 87 ){ //w
+        if (key === 87 && (this.game.playerOneY > 20)){ //w
             this.playerOneVel = -1;
-        } else if ( key === 83) {//s
+        } else if ( key === 83 && (this.game.playerOneY + this.game.playerOneH < this.game.canvasheight - 20)) {//s
             this.playerOneVel = 1;
         } else {
             this.playerOneVel = 0;
@@ -227,6 +213,10 @@ export class PongService {
         PongService.computerScore = 0;
         this.game.playerTwoScore = 0;
     }
+
+    setPlayerTwo(nick:string){
+        this.game.playerTwo = nick;
+      }
 }
 
 export class EntityComponent {

@@ -1,4 +1,4 @@
-FROM postgres
+FROM postgres:12-bullseye
 
 RUN mkdir -p /data
 RUN mkdir -p ~/data

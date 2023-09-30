@@ -19,52 +19,15 @@ export class GameGateway extends BaseGateway {
   }
 
   async afterInit(): Promise<void> {}
-  /*
-  @SubscribeMessage('message')
-  async handleMessage(client: Socket, payload: ChatMessage): Promise<void> {
-    return { event: 'message', data: payload};
-  }*/
-   
-//   @SubscribeMessage('up')
-// 	handleUp(client: Socket, room: string) {
-//     console.log("Going up\n");
-// 	this.pongservice.goUp(room);
-	// const targetUsers: Array<ChatUser> = this
-	// .getActiveUsersInRoom("#pongRoom")
-	// console.log("Up: " + targetUsers);
-	// for (let i = 0; i < targetUsers.length; i++){
-	// var yVel = -1;
-	// if(payload.y <= 20)
-	// 	yVel = 0
-	// this.server.to(targetUsers[i].client_id).emit('getSignal', yVel)
-	//this.messageToClient(targetUsers[i].client_id, 'getSignal', -1)
-    //return { event: 'getSignal', data: -1 };
-//   }
 
-//   @SubscribeMessage('down')
-//   handleDown(client: Socket, room: string) {
-//     console.log("Going down\n");
-// 	this.pongservice.goDown(room);
-// 	console.log("Going up\n");
-// 	const targetUsers: Array<ChatUser> = this
-// 	.getActiveUsersInRoom("#pongRoom");
-// 	console.log("Down. " + targetUsers);
-// 	var yVel = 1;
-// 	if(payload.y + payload.height >= payload.canvasheight - 20)
-// 		yVel = 0;
-// 	for (let i = 0; i < targetUsers.length; i++){
-// 	this.server.to(targetUsers[i].client_id).emit('getSignal', yVel)
-// 	}
-//     //return { event: 'getSignal', data: 1 };
-//  }
 @SubscribeMessage('keydown')
- handleMove(client: Socket, room:string, key:number){
-	this.pongservice.keyStatus(room, key);
+ handleMove(client: Socket, payload: any){
+	this.pongservice.keyStatus(payload.room, payload.key);
  }
 
- @SubscribeMessage('keydown')
- handleMoveStop(client: Socket, room:string, key:number){
-	this.pongservice.keyStatus(room, 0);
+ @SubscribeMessage('keyup')
+ handleMoveStop(client: Socket, payload: any){
+	this.pongservice.keyStatus(payload.room, 0);
  }
 
 
@@ -121,32 +84,17 @@ export class GameGateway extends BaseGateway {
 
   		if (successfulJoin){
 			//const response: ChatMessage = generateJoinResponse(originalRoom);
-			const response: GameRoom = this.pongservice.initGame("#pongRoom", this);
 			var userInRoom = this.getActiveUsersInRoom('#pongRoom');
-			if (userInRoom.length == 1 || userInRoom[0].nick == nick) //Esto hay que hacer una funcion que lo compruebe siempre
-			{
-				let gameStatus:GameStatus = { 
-					room: '#pongRoom',
-					message: '',
-					nick: nick,
-					date: new Date,
-					player1:true};
-				}	
-			else{
-				let gameStatus:GameStatus = { 
-					room: '#pongRoom',
-					message: '',
-					nick: nick,
-					date: new Date,
-					player1:false};
-			}
+			console.log("nick " + nick);
+			const response: GameRoom = this.pongservice.initGame("#pongRoom", this, userInRoom.length, nick);
+			//var userInRoom = this.getActiveUsersInRoom('#pongRoom');
+			console.log("users: " + userInRoom.length)
+			if (userInRoom.length == 2)
+				this.pongservice.setPlayerTwo(nick);
 			console.log("Join succed to: " + response.room);
 			
 			this.messageToClient(clientSocketId, 'gameStatus', response);
-			// setTimeout(()=>{response.gameMode = 1
-			// 				response.ballX = 150
-			// 	this.messageToClient(clientSocketId, 'gameStatus', response);},1000)
-			//this.pongservice.updateGame();
+
 			//sending old messages of the room, except for those of users that banned
 			//the new user trying to join
 			if (!wasUserAlreadyActiveInRoom){

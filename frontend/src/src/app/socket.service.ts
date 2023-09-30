@@ -103,6 +103,6 @@ export class SocketService {
   }
 
   sendMove(type: string, room: string, key: number){
-	this.socket.emit(type, room, key);
+	this.socket.emit(type, {room, key});
   }
 }

@@ -6,6 +6,8 @@ import { takeUntil } from "rxjs/operators"
 import { ChatMessage, SocketPayload, GameRoom } from '@shared/types';
 import { PaddleComponent }  from './paddle/paddle.component'
 import { EntityComponent } from './entity/entity.component'
+import { MyProfileService } from '../my-profile/my-profile.service';
+import { User } from '../user';
 
 @Component({
   selector: 'app-pong',
@@ -13,7 +15,7 @@ import { EntityComponent } from './entity/entity.component'
   styleUrls: ['./pong.component.css'],
 }) 
 
-export class PongComponent {
+export class PongComponent implements OnInit{
 
     private gameContext: any;
     private canvas: any;
@@ -26,14 +28,18 @@ export class PongComponent {
     public static init: boolean = false;
     pongService:PongService = new PongService();
     public playerOne: boolean = false;
+    public playerTwo: boolean = false;
     private subscriptions = new Subscription();
     destroy: Subject<any> = new Subject();
     public game: GameRoom = {} as GameRoom;
+    public playerNick:string = "";
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
     constructor(
+        private myProfileService: MyProfileService,
         //private pongService: PongService,
-    ){
+    ){      
+ 
         this.game.gameMode = 0;
         //console.log("Try join Room: #pongRoom");
         this.pongService.joinUserToRoom("#pongRoom");
@@ -42,21 +48,23 @@ export class PongComponent {
         .getMessage()
         .pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
         .subscribe((payload: SocketPayload) => {
-        if (payload.event === 'gameStatus'){     
-            //this.game = payload.data;
-            //console.log("Conected to: " + this.game.room);
-            if (this.game.gameMode == 0) {
+        if (payload.event === 'gameStatus'){           
+            if (this.game.gameMode == 0) {                
                 this.game = payload.data;
                 this.canvas = this.gameCanvas?.nativeElement;
                 this.gameContext = this.canvas?.getContext('2d');
-                //this.draw();
                 requestAnimationFrame(this.gameLoop);
-                //this.initCanvas();
+                if (this.game.playerOne == this.playerNick){
+                    //console.log("Player ONE");
+                    this.playerOne = true;
+                } else if (this.game.playerTwo == this.playerNick){
+                    console.log("Player TWO");
+                    this.playerTwo = true;
+                }                   
             }
             else{
                 this.game.ballX = payload.data.ballX;
                 this.game.ballY = payload.data.ballY;
-                //this.draw();
             }
         }
         if (payload.event === 'getStatus'){
@@ -64,126 +72,22 @@ export class PongComponent {
         }
 
         }));
-        window.addEventListener('keydown', (e) => {     
-            this.pongService.sendSignal("keydown", this.game.room, e.which);
+        window.addEventListener('keydown', (e) => {
+            if(this.playerOne)     
+                this.pongService.sendSignal("keydown", this.game.room, e.which);
         });
 
         window.addEventListener('keyup', (e) => {
-            // PongComponent.keysPressed[e.which] = false;
-            this.pongService.sendSignal("keyup", this.game.room, e.which);
-        });
-
-        // window.addEventListener('keydown', (e) => {         
-        //     PongComponent.keysPressed[e.which] = true;
-        //     if( PongComponent.keysPressed[KeyBindings.W] && PongComponent.keysPressed[e.which] == true){
-        //         console.log("up");
-        //         this.pongService.sendSignal("up", this.game.room);
-        //     } else if( PongComponent.keysPressed[KeyBindings.S] && PongComponent.keysPressed[e.which] == true){
-        //         console.log("down");
-        //         this.pongService.sendSignal("down", this.game.room);
-        //     }
-        // });
-
-        // window.addEventListener('keyup', (e) => {
-        //     PongComponent.keysPressed[e.which] = false;
-        // });
-
-        // window.addEventListener('keyup', (e) => {
-        //     if (e.which === 87) {
-        //         console.log("up");
-        //         this.pongService.sendSignal("up", this.game.room);    
-        //     }
-        // });
-        //requestAnimationFrame(this.gameLoop);        
-        // if( PongComponent.keysPressed[KeyBindings.W] ){
-        //     console.log("up");
-        //     this.pongService.sendSignal("up", this.game.room);
-        // }
-        //this.initCanvas();   
+            if(this.playerOne)
+                this.pongService.sendSignal("keyup", this.game.room, e.which);
+        });       
     }
 
-    // ngAfterViewInit() {
-    //     (async () => { 
-    //         // Do something before delay
-    //         console.log('before delay')
-    
-    //         await this.delay(1000);
-    
-    //         // Do something after
-    //         console.log('after delay')
-    //         this.initCanvas();
-    //     })();
-    //     //this.initCanvas();
-    // }
-  
-    initCanvas() {
-        //this.pongService.joinUserToRoom("#pongRoom");
-
-        PongComponent.init = false;
-        //console.log("Game mode: " + this.game.gameMode);
-        //PongComponent.computerScore = 0;
-        //PongComponent.playerScore = 0;
-        // this.canvas = this.gameCanvas?.nativeElement;
-        // this.gameContext = this.canvas?.getContext('2d');
-
-         if (this.gameContext && this.canvas) {
-        //     this.player1 = new PaddleComponent(
-        //         this.game.playerOneW,
-        //         this.game.playerOneH, 
-        //         this.game.playerOneX, 
-        //         this.game.playerOneY, 
-        //         this.game.playerOneS, 
-        //         this.pongService);
-        //     this.mode(1);
-        //     this.ball = new Ball(
-        //         this.game.ballHeight,
-        //         this.game.ballWidth, 
-        //         this.game.ballX,
-        //         this.game.ballY,
-        //         this.game.ballSpeed);
-            this.gameContext.font = '30px Orbitron';
-
-            window.addEventListener('keydown', (e) => {     
-                this.pongService.sendSignal("keydown", this.game.room, e.which);
-                    // PongComponent.keysPressed[e.which] = true;
-                    // if( PongComponent.keysPressed[KeyBindings.W] && PongComponent.keysPressed[e.which] == true){
-                    //     console.log("up");
-                    //     this.pongService.sendSignal("move", this.game.room, e.which);
-                    // } else if( PongComponent.keysPressed[KeyBindings.S] && PongComponent.keysPressed[e.which] == true){
-                    //     console.log("down");
-                    //     this.pongService.sendSignal("down", this.game.room);
-                    // }
-            });
-
-            window.addEventListener('keyup', (e) => {
-                // PongComponent.keysPressed[e.which] = false;
-                this.pongService.sendSignal("keyup", this.game.room, e.which);
-            });
-
-            // window.addEventListener('keyup', (e) => {
-            //     if (e.which === 87) {
-            //         console.log("up");
-            //         this.pongService.sendSignal("up", this.game.room);    
-            //     }
-            // });
-            // window.addEventListener('keyup', (e) => {
-            //     if (e.which === 32) {
-            //         // if (!PongComponent.init) {
-            //         //     PongComponent.init = true;
-            //         //     requestAnimationFrame(this.gameLoop);
-            //         // }
-            //     }
-            // });
-
-            // window.addEventListener('keyup', (e) => {
-            //     if (e.which === 27 ) {
-            //         PongComponent.init = false;
-            //         this.gameContext!.fillStyle = "#57a639";
-            //         this.gameContext!.fillText("PAUSE", 300, 150);
-            //     }
-            // });   
-        }
-        requestAnimationFrame(this.gameLoop);
+    async ngOnInit() {
+        await this.myProfileService.getUserDetails()
+        .subscribe((response: User) => { 
+          this.playerNick = response.nick;
+        });
     }
 
     mode(i: number) {

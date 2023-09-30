@@ -15,4 +15,6 @@ export class MyProfileService {
 	getUserDetails(): Observable<User> {
 		return this.httpClient.get<User>(environment.apiUrl + '/user')
 	}
+
+	
 }
