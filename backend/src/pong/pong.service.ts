@@ -69,6 +69,8 @@ export class PongService {
 
             //Mode
             0,                  //gameMode
+            true,
+            false,
 
             //Viwer
             viwer,              //viwer
@@ -84,7 +86,7 @@ export class PongService {
     updateGame(gameGateway :GameGateway){
         this.game.gameMode = 1;
         setInterval(()=>{
-            this.updateBall()
+            this.updateBall() 
             if (this.game.playerTwo == "") {
                 this.updateComputer();
             }              
@@ -112,7 +114,9 @@ export class PongService {
     }
 
     updateBall(){
- 
+        if(this.game.pause){
+            return;
+        }
         //check top canvas bounds
             if(this.game.ballY <= 10){
               this.game.ballYVel = 1;
@@ -125,11 +129,13 @@ export class PongService {
             if(this.game.ballX <= 0){  
                 this.game.ballX = this.game.canvasWidth / 2 - this.game.ballWidth / 2;
                 this.game.playerTwoScore += 1;
+                this.checkScores();
             }
         //check right canvas bounds
             if(this.game.ballX + this.game.ballWidth >= this.game.canvasWidth){
                 this.game.ballX = this.game.canvasWidth / 2 - this.game.ballWidth / 2;
                 this.game.playerOneScore += 1;
+                this.checkScores();
             }
         //check player collision
             if(this.game.ballX <= this.game.playerOneX + this.game.playerOneW){
@@ -145,6 +151,12 @@ export class PongService {
             }
             this.game.ballX += this.game.ballXVel * this.game.ballSpeed;
             this.game.ballY += this.game.ballYVel * this.game.ballSpeed;
+    }
+    checkScores(){
+        if (this.game.playerOneScore >= 3 || this.game.playerTwoScore >= 3){
+            this.game.pause = true;
+            this.game.finish = true;
+        }
     }
 
     updateComputer(){ 
@@ -191,6 +203,20 @@ export class PongService {
     }
 
     keyStatus(room: string, key: number, nick:string){
+        if ((nick == this.game.playerOne) || (nick == this.game.playerTwo)){
+            if(key == 27){
+                if (this.game.pause == true){
+                    if(this.game.finish){
+                        this.restartScores();
+                    }
+                    this.game.pause = false;
+                }
+                else {                    
+                    this.game.pause = true
+                }
+                return;
+            }
+        }
         //this.game = this.games.get(room);
         if (nick == this.game.playerOne) {
             if (key === 87 && (this.game.playerOneY > 20)){ //w
@@ -236,10 +262,8 @@ export class PongService {
     }
 
     restartScores() {
-        PongService.init = false;
-        PongService.playerScore = 0;
+        this.game.finish = false
         this.game.playerOneScore = 0;
-        PongService.computerScore = 0;
         this.game.playerTwoScore = 0;
     }
 

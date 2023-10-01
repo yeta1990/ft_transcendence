@@ -86,6 +86,8 @@ export class GameRoom {
 
 	//Mode
 	public gameMode: number, //0 for pause or stopped
+	public pause: boolean,
+	public finish: boolean,
 
 	//Viwer
 	public viwer:number,

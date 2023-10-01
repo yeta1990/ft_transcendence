@@ -116,28 +116,34 @@ export class PongComponent implements OnInit, OnDestroy {
                 this.gameContext!.fillStyle = "#fff";
                 this.gameContext!.fillRect(canvas.width / 2 - 1, i + 10, 2, 20);
             }
-        }
-    
+        }  
         //draw scores and check end game
         this.gameContext!.font = '36px Arial';
         this.gameContext!.fillText(this.game.playerOneScore, 175, 50);
         this.gameContext!.fillText(this.game.playerTwoScore, 525, 50);
-        if (PongComponent.playerScore >= 300) { //POINTS
-            this.restartScores();
+        if (this.game.playerOneScore >= 3) { //POINTS
+            //this.restartScores();
             this.gameContext!.fillStyle = "#00FF00";
-            this.gameContext!.fillText("YOU WON!", 280, 200);
-        } else if (PongComponent.computerScore >= 300) { //POINTS
-            this.restartScores();
+            let winner = this.game.playerOne + " WON!"
+            this.gameContext!.fillText(winner, 250, 200);
+        } else if (this.game.playerTwoScore >= 3) { //POINTS
+            //this.restartScores();
             this.gameContext!.fillStyle = "#FF0000";
-            this.gameContext!.fillText("YOU LOOSE!", 260, 200);
+            let winner;
+            if (this.game.playerTwo != "") {
+                winner = this.game.playerTwo + " WON!"
+            } else{
+                winner =  "Computer WON!"
+            }          
+            this.gameContext!.fillText(winner, 250, 200);
+        }
+        //draw pause if not finish game
+        if (this.game.pause && !this.game.finish) {
+            this.gameContext!.fillStyle = "#00FF00";
+            this.gameContext!.fillText("PAUSE", 290, 200);
         }
     }
 
-    restartScores() {
-        PongComponent.init = false;
-        PongComponent.playerScore = 0;
-        PongComponent.computerScore = 0;
-    }
 
     // update() {
     //     if (this.player1) {
@@ -181,15 +187,6 @@ export class PongComponent implements OnInit, OnDestroy {
     }
 
     gameLoop = () => {
-        
-        // if (PongComponent.init) {
-        //     const self = this;
-        //     this.update();
-        //     this.draw();
-        //     requestAnimationFrame(this.gameLoop);
-        // }
-        //console.log("I'M");
-        //this.pongService.gameUpdate(this.game.room);
         this.draw();
         requestAnimationFrame(this.gameLoop);
     }
