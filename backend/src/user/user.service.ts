@@ -25,6 +25,16 @@ export class UserService {
     	})
 	}
 
+	public async getUserIdByLogin(login: string): Promise<number | undefined> {
+		const user = await this.repository.findOne({
+		  where: {
+			login: login,
+		  },
+		  select: ["id"],
+		});
+		return user ? user.id : undefined;
+	  }
+
 	public async getBannedUsersByNick(nick: string): Promise<User[] | undefined> {
 		const user: User = await this.getUserByNick(nick);
 		if (!user) return null;

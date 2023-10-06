@@ -47,22 +47,23 @@ export class UserProfileComponent implements OnInit {
 	}
 
 	ngOnInit() {
-
-		const userId = parseInt(this.activateroute.snapshot.paramMap.get('id') || '0');
-
-		forkJoin([
-			this.profileService.getUserProfile(userId),
-			this.profileService.getUserAchievements(userId)
-		]).subscribe(([userProfile, userAchievements]: [User, Achievement[]]) => {
-			this.user = userProfile;
-			this.userAchievements = userAchievements;
-			console.log('User:', this.user);
-			console.log('User Achievements:', this.userAchievements);
-			this.calculateProgressStyles(this.user);
-			this.achievementsStatus = this.getAchievementsStatus();
-			console.log('ALL Achievements:', this.achievementsStatus);
-		});
-		this.check_admin_level(userId);
+		const login = this.activateroute.snapshot.paramMap.get('login');
+		if ( login !== null )
+			this.profileService.getUserIDByLogin(login).subscribe((userId: number) => {
+				forkJoin([
+					this.profileService.getUserProfile(userId),
+					this.profileService.getUserAchievements(userId)
+				]).subscribe(([userProfile, userAchievements]: [User, Achievement[]]) => {
+					this.user = userProfile;
+					this.userAchievements = userAchievements;
+					console.log('User:', this.user);
+					console.log('User Achievements:', this.userAchievements);
+					this.calculateProgressStyles(this.user);
+					this.achievementsStatus = this.getAchievementsStatus();
+					console.log('ALL Achievements:', this.achievementsStatus);
+				});
+				this.check_admin_level(userId);
+			});
 	  }
 
 	  editProfile() {

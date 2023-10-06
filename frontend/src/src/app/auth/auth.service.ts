@@ -91,4 +91,16 @@ export class AuthService {
 		return ;
 	}
 
+	getUserNameFromToken(): string | null {
+		const token = this.getUserToken();
+		console.log("I have a token");
+		console.log(token);
+		if (token) {
+		  const decodedToken = this.getDecodedAccessToken(token);
+		  console.log("My username is: " + decodedToken.login);
+		  const userName = decodedToken?.login;
+			return userName || null;
+		}
+		return null;
+	  }
 }

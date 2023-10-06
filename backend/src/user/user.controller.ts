@@ -48,6 +48,12 @@ export class UserController {
 	}
 	
 	//@UseGuards(AuthGuard)
+	@Get('id/:login')
+	public getUserIdByLogin(@Param('login') login: string): Promise<number> {
+	  return this.service.getUserIdByLogin(login);
+	}
+
+	//@UseGuards(AuthGuard)
 	@Get(':id/achievements')
 	public getUserAchievements(@Param('id', ParseIntPipe) id: number): Promise<Achievement[]> {
 	  return this.service.getUserAchievements(id);

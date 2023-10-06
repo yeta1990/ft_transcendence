@@ -13,6 +13,10 @@ export class UserProfileService {
 
   constructor(private httpClient: HttpClient) {}
 
+  getUserIDByLogin(login: string): Observable<number> {
+		return this.httpClient.get<number>(environment.apiUrl + '/user/id/' + login)
+	}
+
   getUserProfile(id: number): Observable<User> {
 		return this.httpClient.get<User>(environment.apiUrl + '/user/' + id)
 	}
