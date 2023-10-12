@@ -19,8 +19,9 @@ export class PongService {
     public game: GameRoom;
     public gameGateaway: GameGateway;
     games: Map<string, GameRoom> = new Map<string, GameRoom>;
-    public playerOneVel: number = 0;
-    public playerTwoVel: number = 0;
+    //public playerOneVel: number = 0;
+    //public playerTwoVel: number = 0;
+    public numberOfGames: number = 0;
 
     initGame (name: string, gameGateaway: GameGateway, viwer: number, nick:string): GameRoom {
         
@@ -41,6 +42,7 @@ export class PongService {
 	        20,                 //playerOneW
 	        60,                 //playerOneH
             10,                 //playerOneS 10
+            0,                  //playerOneVel
 
 	        //PaddleTwoComponent
 	        700 - (20 + 20),    //playerTwoX    //this.canvas.width - (20 + 20),
@@ -48,6 +50,7 @@ export class PongService {
 	        20,                 //playerTwoW
 	        60,                 //playerTwoH
             10,                 //playerTwoS
+            0,                  //playerTwoVel
 
 	        //Canvas
 	        400,                //canvasheight
@@ -74,30 +77,49 @@ export class PongService {
 
             //Viwer
             viwer,              //viwer
-            "",               //playerOne
+            "",                 //playerOne
             ""                  //playerTwo
         );
         this.randomDir();
         this.games.set(name, this.game);
-        this.updateGame(gameGateaway)
+        this.numberOfGames++;
+        if (this.numberOfGames == 1){
+            this.updateGame(gameGateaway)
+        }
         return (this.games.get(name));
     }
 
     updateGame(gameGateway :GameGateway){
-        this.game.gameMode = 1;
-        setInterval(()=>{
-            this.updateBall() 
-            if (this.game.playerTwo == "") {
-                this.updateComputer();
-            }              
-            this.move();
-            const targetUsers: Array<ChatUser> = gameGateway
-	.getActiveUsersInRoom("#pongRoom");
-	for (let i = 0; i < targetUsers.length; i++){
-		gameGateway.server.to(targetUsers[i].client_id).emit('getStatus', this.games.get(this.game.room));
-	}            
-        },1000/64)
-    }
+        this.games.forEach(element => {
+            element.gameMode = 1;
+            setInterval(()=>{
+                this.updateBall(element.room) 
+                if (element.playerTwo == "") {
+                    this.updateComputer(element);
+                }              
+                this.move(element);
+                const targetUsers: Array<ChatUser> = gameGateway
+	            .getActiveUsersInRoom("#pongRoom");
+	            for (let i = 0; i < targetUsers.length; i++){
+		            gameGateway.server.to(targetUsers[i].client_id).emit('getStatus', this.games.get(this.game.room));
+	            }            
+            },1000/64)
+        }
+    //     });
+    //     this.game.gameMode = 1;
+    //     setInterval(()=>{
+    //         this.updateBall() 
+    //         if (this.game.playerTwo == "") {
+    //             this.updateComputer();
+    //         }              
+    //         this.move();
+    //         const targetUsers: Array<ChatUser> = gameGateway
+	// .getActiveUsersInRoom("#pongRoom");
+	// for (let i = 0; i < targetUsers.length; i++){
+	// 	gameGateway.server.to(targetUsers[i].client_id).emit('getStatus', this.games.get(this.game.room));
+	// }            
+    //     },1000/64)
+    )}
 
     getStatus(room: string){
         return (this.games.get(room));
@@ -113,67 +135,68 @@ export class PongService {
         this.game.ballYVel = 1;
     }
 
-    updateBall(){
-        if(this.game.pause){
+    updateBall(room:string){
+        var g = this.games.get(room);
+        if(g.pause){
             return;
         }
         //check top canvas bounds
-            if(this.game.ballY <= 10){
-              this.game.ballYVel = 1;
+            if(g.ballY <= 10){
+              g.ballYVel = 1;
             }
         //check bottom canvas bounds
-            if(this.game.ballY + this.game.ballHeight >= this.game.canvasheight - 10){
-                this.game.ballYVel = -1;
+            if(g.ballY + g.ballHeight >= g.canvasheight - 10){
+                g.ballYVel = -1;
             }
         //check left canvas bounds
-            if(this.game.ballX <= 0){  
-                this.game.ballX = this.game.canvasWidth / 2 - this.game.ballWidth / 2;
-                this.game.playerTwoScore += 1;
-                this.checkScores();
+            if(g.ballX <= 0){  
+                g.ballX = g.canvasWidth / 2 - g.ballWidth / 2;
+                g.playerTwoScore += 1;
+                this.checkScores(g);
             }
         //check right canvas bounds
-            if(this.game.ballX + this.game.ballWidth >= this.game.canvasWidth){
-                this.game.ballX = this.game.canvasWidth / 2 - this.game.ballWidth / 2;
-                this.game.playerOneScore += 1;
-                this.checkScores();
+            if(g.ballX + g.ballWidth >= g.canvasWidth){
+                g.ballX = g.canvasWidth / 2 - g.ballWidth / 2;
+                g.playerOneScore += 1;
+                this.checkScores(g);
             }
         //check player collision
-            if(this.game.ballX <= this.game.playerOneX + this.game.playerOneW){
-                if(this.game.ballY >= this.game.playerOneY && this.game.ballY  + this.game.ballHeight <= this.game.playerOneY + this.game.playerOneH){
-                this.game.ballXVel = 1;
+            if(g.ballX <= g.playerOneX + g.playerOneW){
+                if(g.ballY >= g.playerOneY && g.ballY  + g.ballHeight <= g.playerOneY + g.playerOneH){
+                g.ballXVel = 1;
                 }
             }
         //check computer collision
-            if(this.game.ballX + this.game.ballWidth >= this.game.playerTwoX){
-                if(this.game.ballY >= this.game.playerTwoY && this.game.ballY + this.game.ballHeight <= this.game.playerTwoY + this.game.playerTwoH){
-                    this.game.ballXVel = -1;
+            if(g.ballX + g.ballWidth >= g.playerTwoX){
+                if(g.ballY >= g.playerTwoY && g.ballY + g.ballHeight <= g.playerTwoY + g.playerTwoH){
+                    g.ballXVel = -1;
                 }
             }
-            this.game.ballX += this.game.ballXVel * this.game.ballSpeed;
-            this.game.ballY += this.game.ballYVel * this.game.ballSpeed;
+            g.ballX += g.ballXVel * g.ballSpeed;
+            g.ballY += g.ballYVel * g.ballSpeed;
     }
-    checkScores(){
-        if (this.game.playerOneScore >= 3 || this.game.playerTwoScore >= 3){
-            this.game.pause = true;
-            this.game.finish = true;
+    checkScores(g: GameRoom){
+        if (g.playerOneScore >= 3 || g.playerTwoScore >= 3){
+            g.pause = true;
+            g.finish = true;
         }
     }
 
-    updateComputer(){ 
+    updateComputer(g: GameRoom){ 
  
         //chase ball
         var yVel = 0;
-        if(this.game.ballY < this.game.playerTwoY && this.game.ballXVel == 1){
+        if(g.ballY < g.playerTwoY && g.ballXVel == 1){
              yVel = -1; 
       
-            if(this.game.playerTwoY <= 20){
+            if(g.playerTwoY <= 20){
                 yVel = 0;
             }
         }
-        else if(this.game.ballY > this.game.playerTwoY + this.game.playerTwoH && this.game.ballXVel == 1){
+        else if(g.ballY > g.playerTwoY + g.playerTwoH && g.ballXVel == 1){
             yVel = 1;
             
-            if(this.game.playerTwoY + this.game.playerTwoH >= this.game.canvasheight - 20){
+            if(g.playerTwoY + g.playerTwoH >= g.canvasheight - 20){
                 yVel = 0;
             }
         }
@@ -181,90 +204,83 @@ export class PongService {
             yVel = 0;
         }  
  
-        this.game.playerTwoY += yVel * this.game.playerTwoS;
+        g.playerTwoY += yVel * g.playerTwoS;
         //this.y += this.yVel * speed;
     }
 
-    move(){
-        this.game.playerOneY += this.playerOneVel * this.game.playerOneS;
-        if(this.game.playerOneY <= 20) {
-            this.playerOneVel = 0;
-        }else if (this.game.playerOneY + this.game.playerOneH >= this.game.canvasheight - 20){
-            this.playerOneVel = 0;
+    move(g: GameRoom){
+        g.playerOneY += g.playerOneVel * g.playerOneS;
+        if(g.playerOneY <= 20) {
+            g.playerOneVel = 0;
+        }else if (g.playerOneY + g.playerOneH >= g.canvasheight - 20){
+            g.playerOneVel = 0;
         }
-        if (this.game.playerTwo != ""){
-            this.game.playerTwoY += this.playerTwoVel * this.game.playerTwoS;
-            if(this.game.playerTwoY <= 20) {
-                this.playerTwoVel = 0;
-            }else if (this.game.playerTwoY + this.game.playerTwoH >= this.game.canvasheight - 20){
-                this.playerTwoVel = 0;
+        if (g.playerTwo != ""){
+            g.playerTwoY += g.playerTwoVel * g.playerTwoS;
+            if(g.playerTwoY <= 20) {
+                g.playerTwoVel = 0;
+            }else if (g.playerTwoY + g.playerTwoH >= g.canvasheight - 20){
+                g.playerTwoVel = 0;
             }
         }           
     }
 
     keyStatus(room: string, key: number, nick:string){
-        if ((nick == this.game.playerOne) || (nick == this.game.playerTwo)){
+        var g = this.games.get(room);
+        if ((nick == g.playerOne) || (nick == g.playerTwo)){
             if(key == 27){
-                if (this.game.pause == true){
-                    if(this.game.finish){
-                        this.restartScores();
+                if (g.pause == true){
+                    if(g.finish){
+                        this.restartScores(g);
                     }
-                    this.game.pause = false;
+                    g.pause = false;
                 }
                 else {                    
-                    this.game.pause = true
+                    g.pause = true
                 }
                 return;
             }
         }
         //this.game = this.games.get(room);
-        if (nick == this.game.playerOne) {
-            if (key === 87 && (this.game.playerOneY > 20)){ //w
-                this.playerOneVel = -1;
-            } else if ( key === 83 && (this.game.playerOneY + this.game.playerOneH < this.game.canvasheight - 20)) {//s
-                this.playerOneVel = 1;
+        if (nick == g.playerOne) {
+            if (key === 87 && (g.playerOneY > 20)){ //w
+                g.playerOneVel = -1;
+            } else if ( key === 83 && (g.playerOneY + g.playerOneH < g.canvasheight - 20)) {//s
+                g.playerOneVel = 1;
             } else {
-                this.playerOneVel = 0;
+                g.playerOneVel = 0;
             }
         }
-        if (nick == this.game.playerTwo){
-            if (key === 87 && (this.game.playerTwoY > 20)){ //w
-                this.playerTwoVel = -1;
-            } else if ( key === 83 && (this.game.playerTwoY + this.game.playerTwoH < this.game.canvasheight - 20)) {//s
-                this.playerTwoVel = 1;
+        if (nick == g.playerTwo){
+            if (key === 87 && (g.playerTwoY > 20)){ //w
+                g.playerTwoVel = -1;
+            } else if ( key === 83 && (g.playerTwoY + g.playerTwoH < g.canvasheight - 20)) {//s
+                g.playerTwoVel = 1;
             } else {
-                this.playerTwoVel = 0;
+                g.playerTwoVel = 0;
             }
         }
-        // if (key === 87 && (this.game.playerOneY > 20)){ //w
-        //     this.playerOneVel = -1;
-        // } else if ( key === 83 && (this.game.playerOneY + this.game.playerOneH < this.game.canvasheight - 20)) {//s
-        //     this.playerOneVel = 1;
-        // } else {
-        //     this.playerOneVel = 0;
-        // }
-
     }
 
     mode(i: number) {
-        this.restartScores();
-        if (i == 1) {
-            // this.computerPlayer = new ComputerPaddle(
-            //     this.game.playerTwoW,
-            //     this.game.playerTwoH,
-            //     this.game.playerTwoX,
-            //     this.game.playerTwoY,
-            //     this.game.playerTwoS);
-        } else if (i == 2) {
-            // this.computerPlayer = new ComputerPaddle(20, 60, this.canvas.width - (20 + 20), this.canvas.height / 2 - 60 / 2, 20);
-        }
-        PongService.init = true;
+        // this.restartScores();
+        // if (i == 1) {
+        //     // this.computerPlayer = new ComputerPaddle(
+        //     //     this.game.playerTwoW,
+        //     //     this.game.playerTwoH,
+        //     //     this.game.playerTwoX,
+        //     //     this.game.playerTwoY,
+        //     //     this.game.playerTwoS);
+        // } else if (i == 2) {
+        //     // this.computerPlayer = new ComputerPaddle(20, 60, this.canvas.width - (20 + 20), this.canvas.height / 2 - 60 / 2, 20);
+        // }
+        // PongService.init = true;
     }
 
-    restartScores() {
-        this.game.finish = false
-        this.game.playerOneScore = 0;
-        this.game.playerTwoScore = 0;
+    restartScores(g: GameRoom) {
+        g.finish = false
+        g.playerOneScore = 0;
+        g.playerTwoScore = 0;
     }
 
     setPlayerTwo(nick:string){
@@ -272,23 +288,37 @@ export class PongService {
       }
     
     setPlayer(room:string, nick:string) {
-        this.game = this.games.get(room)
-        if (this.game.playerOne == ""){
-            this.game.playerOne = nick;
+        var g = this.games.get(room)
+        if (g.playerOne == ""){
+            g.playerOne = nick;
         }          
-        if (this.game.playerTwo == "" && this.game.playerOne != "" && this.game.playerOne != nick){
-            this.game.playerTwo = nick;
-        }           
+        if (g.playerTwo == "" && g.playerOne != "" && g.playerOne != nick){
+            g.playerTwo = nick;
+        }     
+        // this.game = this.games.get(room)
+        // if (this.game.playerOne == ""){
+        //     this.game.playerOne = nick;
+        // }          
+        // if (this.game.playerTwo == "" && this.game.playerOne != "" && this.game.playerOne != nick){
+        //     this.game.playerTwo = nick;
+        // }           
     }
 
     disconectPlayer(room:string, nick:string) {
-        this.game = this.games.get(room)
-        if (this.game.playerOne == nick){
-            this.game.playerOne = "";
+        var g = this.games.get(room)
+        if (g.playerOne == nick){
+            g.playerOne = "";
         }         
-        if (this.game.playerTwo == nick){
-            this.game.playerTwo = "";
+        if (g.playerTwo == nick){
+            g.playerTwo = "";
         }
+        // this.game = this.games.get(room)
+        // if (this.game.playerOne == nick){
+        //     this.game.playerOne = "";
+        // }         
+        // if (this.game.playerTwo == nick){
+        //     this.game.playerTwo = "";
+        // }
             
     }
 }

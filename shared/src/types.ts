@@ -58,6 +58,7 @@ export class GameRoom {
 	public playerOneW: number,
 	public playerOneH: number,
 	public playerOneS: number,
+	public playerOneVel:number,
 
 	//PaddleTwoComponent
 	public playerTwoX: number,
@@ -65,6 +66,7 @@ export class GameRoom {
 	public playerTwoW: number,
 	public playerTwoH: number,
 	public playerTwoS: number,
+	public playerTwoVel: number,
 
 	//Canvas
 	public canvasheight: number,
