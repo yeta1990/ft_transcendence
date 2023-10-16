@@ -6,6 +6,17 @@ export const enum UserStatus {
 	SPECTATING
 }
 
+export const enum UserRole {
+	VISITOR,
+	REGISTRED,
+	USER,
+	PREMIUM,
+	MODERATOR,
+	ADMIN,
+	DEVELOPER,
+	ROOT
+}
+
 export const enum ChannelRole {
 	USER,
 	MODERATOR,

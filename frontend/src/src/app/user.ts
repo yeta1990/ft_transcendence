@@ -1,4 +1,4 @@
-import { UserStatus, Campuses } from '@shared/enum';
+import { UserStatus, Campuses, UserRole } from '@shared/enum';
 import { Achievement } from '@shared/achievement';
 
 export class User {
@@ -10,6 +10,7 @@ export class User {
 	login: string;
 	tokenHash: string;
 	campus: Campuses;
+	role: UserRole;
 	mfa: boolean;
 	mfaSecret: string;
 	image: string;
@@ -29,6 +30,7 @@ export class User {
 		this.login = model && model.login;
 		this.tokenHash = model && model.tokenHash;
 		this.campus = model && model.campus;
+		this.role = model && model.role;
 		this.mfa = model && model.mfa;
 		this.mfaSecret = model && model.mfaSecret;
 		this.image = model && model.image;

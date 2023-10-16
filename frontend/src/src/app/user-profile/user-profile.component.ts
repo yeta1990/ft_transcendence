@@ -21,8 +21,6 @@ export class UserProfileComponent implements OnInit {
   user: User | undefined;
   adminPower = false; // HAY QUE AÑADIR QUE UN ADMIN PUEDA EDITAR TAMBIEN
   campusesTypes = Object.values(Campuses);
-  editingField: string | null = null;
-  editedFields: { [key: string]: any } = {};
   gradientStart = 0;
   gradientEnd = 0;
   userRank: string = '';
@@ -30,6 +28,8 @@ export class UserProfileComponent implements OnInit {
   totalAchievements: number = AchievementsData.length;
   allAchievements: Achievement[] = AchievementsData;
   achievementsStatus: { name: string; achieved: boolean }[] = [];
+  editingField: string | null = null;
+  editedFields: { [key: string]: any } = {};
 
 
 
@@ -66,33 +66,18 @@ export class UserProfileComponent implements OnInit {
 			});
 	  }
 
-	  editProfile() {
-		
-	  }
-
-	  editField(fieldName: string): void {
-		if (this.user && this.adminPower) {
-			this.editingField = fieldName;
-			this.editedFields[fieldName] = this.user[fieldName as keyof User];
-		  }
-	  }
-	
-	  saveField(fieldName: string): void {
-		// Aquí debes implementar la lógica para guardar los cambios en el backend
-		console.log(`Guardando campo ${fieldName}: ${this.editedFields[fieldName]}`);
-		this.cancelEdit();
-	  }
-	
-	  cancelEdit() {
-		this.editingField = null;
-		this.editedFields = {};
-	  }
-
 	  check_admin_level(userId: number) {
 		const currentID = this.authService.getDecodedAccessToken(this.authService.getUserToken()!).id;
 		if (currentID == userId)
 			this.adminPower = true;
 	  }
+
+	  editField(fieldName: string): void {
+		if (this.user && this.adminPower) {
+		  this.editingField = fieldName;
+		  this.editedFields[fieldName] = this.user[fieldName as keyof User];
+		  }
+		}
 
 	  progressStyles: { [key: string]: string } = {};
 
@@ -132,6 +117,14 @@ export class UserProfileComponent implements OnInit {
 		  achievementsStatus.push({ name: achievement.name, achieved: hasAchievement });
 		}
 		return achievementsStatus;
+	  }
+
+	  goEdit(): void {
+		if (this.user) {
+		  const login = this.user.login; // Obtén el login del usuario actual
+		  console.log("Going to: '/user-profile/" + login + "/edit'");
+		  this.router.navigate(['/user-profile', login, 'edit']); // Carga la URL ":login/edit"
+		}
 	  }
 	  
 	  goBack(): void {

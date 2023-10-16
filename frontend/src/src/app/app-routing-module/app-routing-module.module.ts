@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { MyProfileComponent } from '../my-profile/my-profile.component'
 import { FormComponent } from '../form/form.component'
 import { LoginComponent } from '../login/login.component';
 import { CallbackComponent } from '../callback/callback.component';
@@ -44,16 +43,14 @@ const routes: Routes = [
 		component: UserProfileComponent, 
 		canActivate: [AuthGuard] 
 	},
-	{	
-		path: 'my-profile', 
-		component: MyProfileComponent, 
-		canActivate: [AuthGuard] 
-	},
-	{	
-		path: 'my-profile/edit', 
-		component: EditProfileComponent, 
-		canActivate: [AuthGuard] 
-	},
+	{
+		path: 'user-profile/:login/edit',
+		component: EditProfileComponent,
+		canActivate: [AuthGuard],
+		data: {
+		  bothCheck: true
+		},
+	  },
 	{
 		path: 'play',
 		component: PongComponent,

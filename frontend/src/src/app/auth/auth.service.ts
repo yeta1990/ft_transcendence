@@ -43,7 +43,7 @@ export class AuthService {
     }
 
 	redirectToHome() {
-        this.router.navigateByUrl('/my-profile');
+        this.router.navigateByUrl('/');
     }
 
 	private setSession(authResult: any) {
