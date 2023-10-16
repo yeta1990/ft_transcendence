@@ -7,14 +7,14 @@ export const enum UserStatus {
 }
 
 export const enum UserRole {
-	VISITOR,
-	REGISTRED,
-	USER,
-	PREMIUM,
-	MODERATOR,
-	ADMIN,
-	DEVELOPER,
-	ROOT
+	VISITOR, // Visitante no registrado
+	REGISTRED, // Usuario registrado, sin confirmación de cuenta
+	USER, // Usuario registrado e identificado
+	PREMIUM, // Usuario de pago (Siempre pensando en monetizar)
+	MODERATOR, // MOD
+	ADMIN, // ADMIN
+	OWNER, // OWNER ADMIN
+	DEVELOPER // Por si fuera necesario para hacer pruebas
 }
 
 export const enum ChannelRole {
