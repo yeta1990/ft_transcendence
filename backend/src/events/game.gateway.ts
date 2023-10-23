@@ -38,7 +38,7 @@ export class GameGateway extends BaseGateway {
   handleGameUpdate(client: Socket, room: string) {
 	const response: GameRoom = this.pongservice.getStatus(room);
 	const targetUsers: Array<ChatUser> = this
-	.getActiveUsersInRoom("#pongRoom");
+	.getActiveUsersInRoom(room);
 	for (let i = 0; i < targetUsers.length; i++){
 		this.server.to(targetUsers[i].client_id).emit('getStatus', response);
 	}	
@@ -69,6 +69,7 @@ export class GameGateway extends BaseGateway {
   }
 
   async joinRoutine(clientSocketId: string, nick: string, room: string, pass: string, typeOfJoin: string){
+	room +=  "_" + nick;
 	const originalRoom = room;
 	console.log("Try join..");
 		if (room.length > 0 && room[0] == '@'){
@@ -86,11 +87,11 @@ export class GameGateway extends BaseGateway {
 
   		if (successfulJoin){
 			//const response: ChatMessage = generateJoinResponse(originalRoom);
-			var userInRoom = this.getActiveUsersInRoom('#pongRoom');
+			var userInRoom = this.getActiveUsersInRoom(room);
 			console.log("nick " + nick);
-			const response: GameRoom = this.pongservice.initGame("#pongRoom", this, userInRoom.length, nick);
+			const response: GameRoom = this.pongservice.initGame(room, this, userInRoom.length, nick);
 			//var userInRoom = this.getActiveUsersInRoom('#pongRoom');
-			this.pongservice.setPlayer("#pongRoom", nick);			
+			this.pongservice.setPlayer(room, nick);			
 			console.log("Join succed to: " + response.room);
 			
 			this.messageToClient(clientSocketId, 'gameStatus', response);
@@ -142,7 +143,7 @@ export class GameGateway extends BaseGateway {
 		this.server.in(client.id).socketsLeave(room);			
   	  }
 		const nick: string = client.handshake.query.nick as string;
-		this.pongservice.disconectPlayer("#pongRoom", nick);
+		this.pongservice.disconectPlayer("#pongRoom_" + nick, nick);
 
   }
 }

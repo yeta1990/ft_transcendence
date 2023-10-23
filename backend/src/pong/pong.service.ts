@@ -4,29 +4,16 @@ import { GameGateway } from 'src/events/game.gateway';
 @Injectable()
 export class PongService {
 
-    private gameContext: any;
-    private canvas: any;
-    private gameCanvas: any;
-    public static keysPressed: boolean[] = [];
-    public static playerScore: number = 0;
-    public static computerScore: number = 0;
-    private player1: PaddleComponent | null = null;
-    public static init: boolean = false;
-    //pongService:PongService = new PongService();
-    public playerOne: boolean = false;
-    //private subscriptions = new Subscription();
-    //destroy: Subject<any> = new Subject();
     public game: GameRoom;
     public gameGateaway: GameGateway;
     games: Map<string, GameRoom> = new Map<string, GameRoom>;
-    //public playerOneVel: number = 0;
-    //public playerTwoVel: number = 0;
     public numberOfGames: number = 0;
 
     initGame (name: string, gameGateaway: GameGateway, viwer: number, nick:string): GameRoom {
         
         if (this.games.get(name))
             return(this.games.get(name));
+        console.log("Init -> " + name);
         this.gameGateaway = gameGateaway;
         this.game = new GameRoom(
             name,               //room
@@ -80,59 +67,53 @@ export class PongService {
             "",                 //playerOne
             ""                  //playerTwo
         );
-        this.randomDir();
+        
         this.games.set(name, this.game);
+        this.randomDir(name);
         this.numberOfGames++;
-        if (this.numberOfGames == 1){
-            this.updateGame(gameGateaway)
-        }
+
+        this.updateGame(gameGateaway, this.game)
+        // if (this.numberOfGames == 1){
+        //     this.updateGame(gameGateaway)
+        // }
         return (this.games.get(name));
     }
 
-    updateGame(gameGateway :GameGateway){
-        this.games.forEach(element => {
-            element.gameMode = 1;
+    updateGame(gameGateway :GameGateway, game: GameRoom){
+        //this.games.forEach(element => {
+            //element.gameMode = 1;
+            //console.log("Update -> " + element.room);
+            game.gameMode = 1;
             setInterval(()=>{
-                this.updateBall(element.room) 
-                if (element.playerTwo == "") {
-                    this.updateComputer(element);
+                //this.updateBall(element.room)
+                this.updateBall(game.room)  
+                if (game.playerTwo == "") {
+                    this.updateComputer(game);
                 }              
-                this.move(element);
+                this.move(game);
                 const targetUsers: Array<ChatUser> = gameGateway
-	            .getActiveUsersInRoom("#pongRoom");
+	            .getActiveUsersInRoom(game.room);
 	            for (let i = 0; i < targetUsers.length; i++){
-		            gameGateway.server.to(targetUsers[i].client_id).emit('getStatus', this.games.get(this.game.room));
+                    //console.log("\t-> " + targetUsers[i].nick + " in " + element.room);
+		            gameGateway.server.to(targetUsers[i].client_id).emit('getStatus', game);
 	            }            
             },1000/64)
-        }
-    //     });
-    //     this.game.gameMode = 1;
-    //     setInterval(()=>{
-    //         this.updateBall() 
-    //         if (this.game.playerTwo == "") {
-    //             this.updateComputer();
-    //         }              
-    //         this.move();
-    //         const targetUsers: Array<ChatUser> = gameGateway
-	// .getActiveUsersInRoom("#pongRoom");
-	// for (let i = 0; i < targetUsers.length; i++){
-	// 	gameGateway.server.to(targetUsers[i].client_id).emit('getStatus', this.games.get(this.game.room));
-	// }            
-    //     },1000/64)
-    )}
+        //})
+    }
 
     getStatus(room: string){
         return (this.games.get(room));
     }
 
-    randomDir() {
+    randomDir(room: string) {
+        var g = this.games.get(room);
         var randomDirection = Math.floor(Math.random() * 2) + 1; 
         if(randomDirection % 2){
-            this.game.ballXVel = 1;
+            g.ballXVel = 1;
         }else{
-            this.game.ballXVel = -1;
+            g.ballXVel = -1;
         }
-        this.game.ballYVel = 1;
+        g.ballYVel = 1;
     }
 
     updateBall(room:string){
@@ -205,7 +186,6 @@ export class PongService {
         }  
  
         g.playerTwoY += yVel * g.playerTwoS;
-        //this.y += this.yVel * speed;
     }
 
     move(g: GameRoom){
@@ -241,7 +221,6 @@ export class PongService {
                 return;
             }
         }
-        //this.game = this.games.get(room);
         if (nick == g.playerOne) {
             if (key === 87 && (g.playerOneY > 20)){ //w
                 g.playerOneVel = -1;
@@ -294,14 +273,7 @@ export class PongService {
         }          
         if (g.playerTwo == "" && g.playerOne != "" && g.playerOne != nick){
             g.playerTwo = nick;
-        }     
-        // this.game = this.games.get(room)
-        // if (this.game.playerOne == ""){
-        //     this.game.playerOne = nick;
-        // }          
-        // if (this.game.playerTwo == "" && this.game.playerOne != "" && this.game.playerOne != nick){
-        //     this.game.playerTwo = nick;
-        // }           
+        }             
     }
 
     disconectPlayer(room:string, nick:string) {
@@ -312,74 +284,5 @@ export class PongService {
         if (g.playerTwo == nick){
             g.playerTwo = "";
         }
-        // this.game = this.games.get(room)
-        // if (this.game.playerOne == nick){
-        //     this.game.playerOne = "";
-        // }         
-        // if (this.game.playerTwo == nick){
-        //     this.game.playerTwo = "";
-        // }
-            
     }
 }
-
-export class EntityComponent {
-  
-    width:number;
-      height:number;
-      x:number;
-      y:number;
-      xVel:number = 0;
-      yVel:number = 0;
-      speed:number;
-      constructor(
-        w:number,
-        h:number,
-        x:number,
-        y:number,
-        speed:number){       
-          this.width = w;
-          this.height = h;
-          this.x = x;
-          this.y = y;
-          this.speed = speed;
-      }
-      draw(context: any){
-          context.fillStyle = "#fff";
-          context.fillRect(this.x,this.y,this.width,this.height);
-      }
-  }
-
-
-
-
-
-export class PaddleComponent extends EntityComponent {
-    move:string = "";
-  
-    constructor(
-      w:number,
-      h:number,
-      x:number,
-      y:number,
-      speed:number){   
-        super(w,h,x,y,speed);
-        }
-  /*
-    update(canvas: any){
-        if( PongService.keysPressed[KeyBindings.UP] ){
-            this.pongService.sendSignal("up", "#pongRoom", "pong", this.y, this.height, canvas.height);
-        }else if(PongService.keysPressed[KeyBindings.DOWN]){
-            this.pongService.sendSignal("down", "pongRoom", "pong", this.y, this.height, canvas.height);
-        }else{
-            this.yVel = 0;
-        }
-    }*/
-}
-
-enum KeyBindings{
-    UP = 38,
-    DOWN = 40,
-    SPACE = 32,
-    ESCAPE = 27
-  }

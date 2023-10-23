@@ -71,7 +71,8 @@ export class PongComponent implements OnInit, OnDestroy {
 
         }));
         window.addEventListener('keydown', (e) => {
-            if(this.playerOne || this.playerTwo)     
+            if(this.playerOne || this.playerTwo)
+            console.log(this.playerNick + " keydown in " + this.game.room);     
                 this.pongService.sendSignal("keydown", this.game.room, e.which);
         });
 
