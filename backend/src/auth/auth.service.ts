@@ -78,11 +78,6 @@ export class AuthService {
 		return (decoded.login)
 	}
 
-	getLoginFromJwt(token: string): string{
-		const decoded: JwtPayload = this.jwtService.decode(token) as JwtPayload;
-		return (decoded.login)
-	}
-
 	async verifyJwt(token: string): Promise<boolean> {
     	if (!token) {
     	  throw new UnauthorizedException();
