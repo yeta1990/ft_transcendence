@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { User } from './user';
+import { User } from '../user';
 import { Observable } from "rxjs";
 import { tap, shareReplay } from "rxjs/operators";
 import * as moment from "moment";
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
 import jwt_decode from 'jwt-decode';
 
@@ -43,10 +43,11 @@ export class AuthService {
     }
 
 	redirectToHome() {
-        this.router.navigateByUrl('/my-profile');
+        this.router.navigateByUrl('/');
     }
 
 	private setSession(authResult: any) {
+		console.log("Consigo entrar en setSession");
         localStorage.setItem("access_token", authResult.access_token);
         localStorage.setItem("expires_at", authResult.expires_at);
     }
@@ -74,7 +75,7 @@ export class AuthService {
     getExpiration() {
 		let expiration: number = 0;
 		try {
-			const decodedAccessToken = this.getDecodedAccessToken(localStorage.getItem("access_token") || "{}");
+			const decodedAccessToken = this.getDecodedAccessToken(this.getUserToken()!);
 
 			expiration = parseInt(decodedAccessToken.exp) * 1000;
 		} catch(Error) {
@@ -90,5 +91,18 @@ export class AuthService {
 		}
 		return ;
 	}
+
+	getUserNameFromToken(): string | null {
+		const token = this.getUserToken();
+		console.log("I have a token");
+		console.log(token);
+		if (token) {
+		  const decodedToken = this.getDecodedAccessToken(token);
+		  console.log("My username is: " + decodedToken.login);
+		  const userName = decodedToken?.login;
+			return userName || null;
+		}
+		return null;
+	  }
 
 }

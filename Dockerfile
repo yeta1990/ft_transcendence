@@ -10,6 +10,7 @@ COPY ./backend/package.json /usr/src/app
 
 RUN npm install -g npm@9.6.2
 RUN npm i -g @nestjs/cli
+RUN npm install -g ts-node --save-dev
 #RUN npm install
 
 COPY ./scripts/install_node_dependencies.sh /

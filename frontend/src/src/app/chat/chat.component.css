@@ -59,13 +59,12 @@ display:none;
       justify-content: space-between;
 	  padding: 20px;
       margin: 20px;
-  	  background-color: #f2f2f2;
+      background: var(--bs-body-bg);
 }
     
 .left-column,
 .center-column,
 .right-column {
-      background-color: #ffffff;
       padding: 20px;
       border-radius: 4px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -86,6 +85,7 @@ display:none;
 .column-heading {
       font-size: 18px;
       margin-top: 0;
+      color: #ffffff;
 }
     
 ul {
@@ -95,20 +95,32 @@ ul {
 }
     
 .channel-list,
-.private-messages-list,
-.available-channels-list,
 .user-list {
-	margin-top: 10px;
+	margin-top: 5px;
 }
     
+
+.link-channel {
+	color: #ffffff;
+}
+
+
 li {
-	padding: 5px;
+	padding: 2px;
    	cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.5s ease;
 }
     
+li.active {
+	background-color: var(--bs-gray-800);
+} 
+
 li:hover {
-      background-color: #f5f5f5;
+      background-color: var(--bs-gray-800);
+}
+
+i {
+	cursor: pointer;
 }
     
 .conversation {

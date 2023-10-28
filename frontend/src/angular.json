@@ -25,17 +25,22 @@
               "src/assets"
             ],
             "styles": [
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [
+  				"node_modules/jquery/dist/jquery.min.js",
+  				"node_modules/@popperjs/core/dist/umd/popper.min.js",
+  				"node_modules/bootstrap/dist/js/bootstrap.min.js"
+			]
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumWarning": "1mb",
+                  "maximumError": "5mb"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -43,7 +48,21 @@
                   "maximumError": "4kb"
                 }
               ],
-              "outputHashing": "all"
+			  "optimization": {
+                  "scripts": true,
+                  "styles": {
+                       "minify": true,
+                       "inlineCritical": false
+                       },
+                  "fonts": true
+              },
+              "outputHashing": "all",
+              "sourceMap": false,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true
             },
             "development": {
               "buildOptimizer": false,

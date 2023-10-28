@@ -37,7 +37,7 @@ fbuild: ## Builds images before starting containers. NO-CACHE option.
 
 composeup: ## Starts and runs containers in the background, print new container names.
 	@echo "\n$(GR)[$(B)'$(NAME)': $(GR)Starting Containers in background. Please wait...]${END}"
-	@docker-compose up -d
+	@docker-compose up -d tx_front tx_nest tx_postgres
 	@echo "\n$(G)[$(B)'$(NAME)': $(G)All containers started and running. Enjoy          ]${END}\n"
 
 up: ## Removes unused containers and starts and runs containers in the background.
@@ -85,7 +85,7 @@ space: ## Display disk usage of Docker resources.
 	@echo "\n$(GR)[                   $(B)'$(NAME)'$(GR)RESOURCES                       ]${END}"
 	@docker system df
 
-re: fclean build ## Remove all and rebuild.
+re: fclean build composeup ## Remove all and rebuild.
 
 front: ## Builds and runs frontend container in the background.
 	@echo "\n$(GR)[$(B)'$(NAME)': $(GR)Building Frontend Docker-Compose. Please wait... ]${END}"
@@ -103,6 +103,13 @@ ls: ## Shows images and ALL Containers.
 ps: ## Shows Containers.
 	@echo "\n$(GR)[                  $(B)'$(NAME)'$(GR)CONTAINERS                       ]${END}"
 	@docker ps
+
+debug: fclean build ## Starts FT_TRASCENDENCE in debug mode.
+	@echo "\n$(GR)[$(B)'$(NAME)': $(GR)Starting all services including tx_adminer in debug mode. Please wait...]${END}"
+	@docker-compose up -d
+	@echo "\n$(G)[$(B)'$(NAME)': $(G)All services started and running. Debug mode.       ]${END}\n"
+
+reset: down fclean clean prune ## [Develop] Use this when experiencing CORS or login problems.
 
 help: ## Shows help and Usage
 	@echo "\n$(LB)_______________________________ $(NAME) _______________________________$(END)"

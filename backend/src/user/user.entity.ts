@@ -1,17 +1,9 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn, ManyToMany, JoinTable } from 'typeorm';
-
+import { Friend } from './friend/friend.entity'
+import { UserStatus, Campuses, UserRole } from '@shared/enum';
+import { Achievement } from './achievement/achievement.entity'
 import { Room } from '../chat/room.entity';
-export enum UserStatus {
-	OFFLINE,
-	ONLINE,
-	LOBBY,
-	PLAYING,
-	SPECTATING
-}
 
-function validateStringLength(value: string, min: number, max: number): boolean {
-	return value.length <= max && value.length >= min;
-  }
 
 @Entity()
 export class User {
@@ -19,11 +11,17 @@ export class User {
 	id: number;
 
 	// IDENTIFICACION -------------------------------------
+
 	@Column({
 		unique: true,
 	})
 	nick: string;
 
+	@Column({
+		unique: true,
+	})
+	email: string;
+	
 	@Column()
 	firstName: string;
 
@@ -36,47 +34,91 @@ export class User {
 	})
 	login: string;
 
-	/**
-	 * PASS??? (HASH???)
-	 */
-
-	// PERSONALIZACION -------------------------------------
 	@Column({
-		default: '' //Poner ruta de imagen por defecto
+		nullable: true,
+		default: undefined,
 	})
-	image: string;
+	tokenHash: string;
 
-	// ESTADISTICAS Y JUEGO ---------------------------------
 	@Column({
-		default: UserStatus.OFFLINE
+		nullable: true,
+		default: Campuses.Madrid
 	})
-	status: UserStatus;
+	campus: Campuses;
 
-	/**
-	 * ACHIEVEMENTS
-	 * WINS
-	 * LOOSES
-	 * ELO
-	 * CREATION DATA
-	 * LAST LOGIN
-	 * DAYS ON A ROW (para achievement)
-	 */
-
-	// VALIDACION Y SEGURIDAD --------------------------------
 	@Column({
-		unique: true,
+		nullable: false,
+		default: UserRole.REGISTRED
 	})
-	email: string;
+	userRole: UserRole;
 
 	@Column({
 		default:false
 	})
 	mfa: boolean;
 
-	@OneToMany(() => Room, (room) => room.owner)
-	ownedRooms: Room[]
+	@Column({
+		nullable: true,
+		default: undefined,
+	})
+	mfaSecret: string;
 
-	@ManyToMany(() => Room, (room) => room.users)
+	@Column('text',{ 
+		array: true,
+		nullable: true,
+		default: [] })
+	recoveryCodes: string[];
+
+	// PERSONALIZACION -------------------------------------
+
+	@Column({
+		default: '' //Poner ruta de imagen por defecto
+	})
+	image: string;
+
+	// ESTADISTICAS Y JUEGO ---------------------------------
+
+	@Column({
+		default: UserStatus.OFFLINE
+	})
+	status: UserStatus;
+
+	@ManyToMany(() => Achievement)
+	@JoinTable()
+	achievements: Achievement[];
+
+	@Column({
+		type: 'int',
+		unsigned: true,
+		default: 0
+	})
+	wins: number;
+
+	@Column({ default: 0 })
+	winningStreak: number;
+
+	@Column({
+		type: 'int',
+		unsigned: true,
+		default: 0
+	})
+	losses: number;
+
+	@Column({
+		type: 'int',
+		default: 1000
+	})
+	elo: number;
+
+
+	// VALIDACION Y SEGURIDAD --------------------------------
+    
+    // CHATS -------------------------------------------------
+	
+    @OneToMany(() => Room, (room) => room.owner)
+	ownedRooms: Room[]
+    
+    @ManyToMany(() => Room, (room) => room.users)
 	joinedRooms: Room[];
 
 	@ManyToMany(() => Room, (room) => room.admins)
@@ -90,31 +132,26 @@ export class User {
 	bannedUsers: User[];
 
 
-//	@OneToMany(() => User, (user) => user.bannedUsers)
-//	bannedBy: User[];
 
-//	@ManyToMany(() => User, (user) => user.bannedBy)
-//	bannedUsers: User[];
+	// AMIGOS ------------------------------------------------
 
-//	@ManyToMany(() => User, (user) => user.bannedUsers)
-//	bannedBy: User[];
- 
-	// FUNCIONES ---------------------------------------------
-
-	validateEmail() {
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (!emailRegex.test(this.email)) {
-		  throw new Error('Value of the "email" field is not valid');
+	@ManyToMany(() => Friend)
+	@JoinTable({
+		name: 'user_friends',
+		joinColumns: [
+		{
+			name: 'user_id',
+			referencedColumnName: 'id',
 		}
-	  }
-
-	  validateLength( str: string, field: string, min: number, max: number) {
-		if (!validateStringLength(str, min, max)) {
-			if (min === max)
-		  		throw new Error(`Lenght of ${field} must be ${min} characters`);
-			else
-				throw new Error(`Lenght of ${field} must be between ${min} and ${max} characters`)
+		],
+		inverseJoinColumns: [
+		{
+			name: 'friend_id',
+			referencedColumnName: 'id',
 		}
-	}
+		],
+	})
+	friends: Friend[];
+
 }
 

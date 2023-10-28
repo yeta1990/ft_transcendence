@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { User } from '../user';
 import { MyProfileService } from './my-profile.service';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-my-profile',
@@ -35,8 +35,13 @@ export class MyProfileComponent implements OnInit {
 		this.router.navigateByUrl('/login');
 	}
 	ngOnInit(): void {	
-
+		const userName = this.authService.getUserNameFromToken();
+		console.log("The username is: " + userName);
+		if (userName) {
+			this.router.navigate(['/user-profile', userName]);
+		}
 	}
+
 	allUsers(): void {
 		console.log("All users login list:");
 		this.router.navigateByUrl('/all-users');

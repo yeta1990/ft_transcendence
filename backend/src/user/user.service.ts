@@ -5,11 +5,15 @@ import { Repository, Connection } from 'typeorm';
 import { CreateUserDto } from './user.dto';
 import { User } from './user.entity';
 import { catchError, lastValueFrom, map } from 'rxjs';
-
+import { Achievement } from './achievement/achievement.entity';
+ 
 @Injectable()
 export class UserService {
 	@InjectRepository(User)
 	private readonly repository: Repository<User>;
+
+	@InjectRepository(Achievement)
+    private readonly achievementRepository: Repository<Achievement>;
 
 	constructor(private httpService: HttpService, @InjectConnection() private readonly connection: Connection) {}
 
@@ -21,47 +25,57 @@ export class UserService {
     	})
 	}
 
-	public async getBannedUsersByNick(nick: string): Promise<User[] | undefined> {
-		const user: User = await this.getUserByNick(nick);
+	public async getUserIdByLogin(login: string): Promise<number | undefined> {
+		const user = await this.repository.findOne({
+		  where: {
+			login: login,
+		  },
+		  select: ["id"],
+		});
+		return user ? user.id : undefined;
+	  }
+
+	public async getBannedUsersByLogin(login: string): Promise<User[] | undefined> {
+		const user: User = await this.getUserByLogin(login);
 		if (!user) return null;
 	    return await this.connection.query(
-	    	`SELECT f."userId_2" as id, nick
+	    	`SELECT f."userId_2" as id, login
 	    	FROM user_banned_users_user f
 	    	LEFT JOIN public.user ON f."userId_2" = public.user.id 
 	    	WHERE (f."userId_1" = $1)`, [user.id]);
 	}
 
-	public async getUsersThatHaveBannedAnother(nick: string): Promise<User[]> {
-		const user: User = await this.getUserByNick(nick);
+	public async getUsersThatHaveBannedAnother(login: string): Promise<User[]> {
+		const user: User = await this.getUserByLogin(login);
 	    return await this.connection.query(
-	    	`SELECT f."userId_1" as id, nick
+	    	`SELECT f."userId_1" as id, login
 	    	FROM user_banned_users_user f
 	    	LEFT JOIN public.user ON f."userId_1" = public.user.id 
 	    	WHERE (f."userId_2" = $1)`, [user.id]);
 	}
 
 	public async isUserBannedFromUser(executor: string, banned: string): Promise<boolean>{
-		const bannedUsers = await this.getBannedUsersByNick(executor);
+		const bannedUsers = await this.getBannedUsersByLogin(executor);
 		if (!bannedUsers) return false;
 		for (let i = 0; i < bannedUsers.length; i++){
-			if (bannedUsers[i].nick === banned) return true;
+			if (bannedUsers[i].login === banned) return true;
 		}
 		return false;
 	}
 
-	public async getUserByNick(nick: string): Promise<User | undefined>{
+	public async getUserByLogin(login: string): Promise<User | undefined>{
 		return this.repository.findOne({
 			relations: ['ownedRooms', 'bannedUsers'],
     		where: {
-        		nick: nick,
+        		login: login,
     		},
     	})
 	}
 
-	public async getUserByNickWithRooms(nick: string): Promise<User | undefined>{
+	public async getUserByLoginWithRooms(login: string): Promise<User | undefined>{
 		return this.repository.findOne({
     		where: {
-        		nick: nick,
+        		login: login,
     		},
     		relations: {
 				ownedRooms: true
@@ -70,7 +84,7 @@ export class UserService {
 	}
 
 	public async createUser(body: CreateUserDto): Promise<User>{
-		const alreadyRegisteredUser: User = await this.getUserByNick(body.nick);
+		const alreadyRegisteredUser: User = await this.getUserByLogin(body.login);
 		if (alreadyRegisteredUser)
 			return (alreadyRegisteredUser)
 
@@ -82,6 +96,10 @@ export class UserService {
 //		user.firstName = body.first
 		return this.repository.save(body);
 	};
+
+	async saveUser(user: User): Promise<User> {
+		return await this.repository.save(user);
+	}
 
 	public async whoAmI(token: string): Promise<any>
 	{
@@ -100,7 +118,26 @@ export class UserService {
 	}
 
 	public async getAllUsers(): Promise<User[]> {
-		return await this.repository.find();
+		return await this.repository.find({
+			order: {
+			  id: 'ASC', // Ordena por ID de manera ascendente (también puedes usar 'DESC' para descendente)
+			}});
+	}
+
+	public async getUserAchievements(id: number): Promise<Achievement[]> {
+		
+		const user = await this.repository
+			.createQueryBuilder("user")
+			.leftJoinAndSelect("user.achievements", "achievement")
+			.where("user.id = :id", { id: id })
+			.getOne();
+
+		if (user) {
+			console.log("User Achievements:", user.achievements);
+			return user.achievements;
+		} else {
+			console.log("User not found.");
+			return [] as Achievement[];
+		}
 	}
 }
-

@@ -1,0 +1,107 @@
+<div class="modal fade" id="exampleModal" tabindex="-1" [ngClass]="{ 'show': isModalOpen(), 'd-block': isModalOpen() }">
+<div class="modal-overlay modal-dialog modal-dialog-centered">
+  <div class="modal-content">
+    <ng-container [ngSwitch]="getCurrentModal()">
+      <!-- Template 1 -->
+      <ng-template [ngSwitchCase]="'template1'">
+        <div id="modal-content-template1">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Channel {{getModalData()}} protected by password</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          	<p>This channel is protected. To join it, introduce the password: </p>
+
+			<input type="password" class="form-control" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter password">
+   		    </div>
+
+   		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Join</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template2'">
+        <div id="modal-content-template2">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Create new channel</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+          	<form>
+				<div class="mb-3">
+    				<label for="channelName" class="form-label">New channel name:</label>
+    				<input type="text" class="form-control" id="channelName" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" name="channelName" >
+  				</div>
+  				  <div class="mb-3 form-check">
+					  <input type="checkbox" class="form-check-input" id="checkboxInput" [(ngModel)]="checkboxInput" name="checkboxInput">
+					<label class="form-check-label" for="checkboxInput">Private channel</label>
+  				  </div>
+				<div class="mb-3" *ngIf="checkboxInput">
+    				<label for="channelPass" class="form-label">Password for private channel:</label>
+    				<input type="password" class="form-control" id="channelPass" [(ngModel)]="inputValue2" (keydown.enter)="saveAndCloseModal()" name="channelPass">
+  				</div>
+			</form>
+
+   		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Create and join</button>
+      	  </div>
+        </div>
+      </ng-template>
+
+
+      <ng-template [ngSwitchCase]="'template3'">
+        <div id="modal-content-template3">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Ban @{{getModalData()[0][0]}} from {{getModalData()[0][1]}}?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          	<p>Are you sure?</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template4'">
+        <div id="modal-content-template4">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Block user @{{getModalData()[0]}}?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>@{{getModalData()[0]}} won't be able to interact with you nor see your messages in public channels. Are you sure you want to block the user?</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template5'">
+        <div id="modal-content-template5">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Unblock user @{{getModalData()[0]}}?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>If you unblock @{{getModalData()[0]}}, both will be able to interact or see your messages in public channels. Are you sure you want to unblock the user?</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+    </ng-container>
+  </div>
+</div>
+</div>

@@ -12,6 +12,7 @@ import { AuthService } from '../auth/auth.service';
 import { ChatService } from '../chat/chat.service';
 import { HashService } from '../hash/hash.service';
 import { RoomService } from '../chat/room/room.service';
+import { UserService} from '../user/user.service';
 import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
 import { generateSocketErrorResponse, generateSocketInformationResponse } from '@shared/functions';
 import { events, values } from '@shared/const';
@@ -44,6 +45,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   @Inject(RoomService)
   protected roomService: RoomService;
 
+  @Inject(UserService)
+  protected userService: UserService;
+
   constructor(name: string){
 	this.gatewayName = name;
 	this.logger = new Logger(this.gatewayName);
@@ -63,22 +67,23 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
     const isUserVerified = await this.authService.verifyJwt(socket.handshake.auth.token);
  
 	if (isUserVerified){
-		const nick = this.authService.getNickFromJwt(socket.handshake.auth.token)
-  	    const isHardConnect: boolean = this.getClientSocketIdsFromNick(nick).length > 0 ? false : true
-		this.setNick(socket);
+		const login = this.authService.getLoginFromJwt(socket.handshake.auth.token)
+  	    const isHardConnect: boolean = this.getClientSocketIdsFromLogin(login).length > 0 ? false : true
+		this.setLogin(socket);
 		this.logger.log(`Socket client connected: ${socket.id}`)
 		this.users.set(socket.id, new ChatUser(
 			 socket.id,
 			 this.authService.getIdFromJwt(socket.handshake.auth.token),
-			 nick)
+			 login)
 		);
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
 
   	    if (isHardConnect){
-  	    	const activeNicksInServer: Array<string> = this
-  	    		.getActiveNicksInServer()
-			this.server.emit(events.ActiveUsers, activeNicksInServer)	
+  	    	const activeLoginsInServer: Array<string> = this
+  	    		.getActiveLoginsInServer()
+			this.server.emit(events.ActiveUsers, activeLoginsInServer)	
 		}
+		this.sendBlockedUsers(socket.id, login)
 	}
 	else{
 		//disconnect
@@ -90,19 +95,19 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   // if the provided token is valid, we take the nick from the decoded jwt. 
   // by placing the nick in the handshake, the value remains during the whole connection
   // between server and client
-  setNick(socket: Socket): void{
+  setLogin(socket: Socket): void{
 		const decodedToken: JwtPayload = this.jwtService.decode(socket.handshake.auth.token) as JwtPayload;
-		socket.handshake.query.nick = decodedToken.nick;
+		socket.handshake.query.login = decodedToken.login;
 
   }
 
-  async removeUserFromRoom(room: string, nick: string): Promise<boolean> {
+  async removeUserFromRoom(room: string, login: string): Promise<boolean> {
   	  //updating relationships and entities in db
-  	  const result: boolean = await this.chatService.removeUserFromRoom(room, nick)
+  	  const result: boolean = await this.chatService.removeUserFromRoom(room, login)
   	  if (result){
-	    const socketIdsByNick: Array<string> = this.getClientSocketIdsFromNick(nick);
+	    const socketIdsByLogin: Array<string> = this.getClientSocketIdsFromLogin(login);
   	  	//unsubscribe user from socket service
-  	  	for (const clientId of socketIdsByNick){
+  	  	for (const clientId of socketIdsByLogin){
 	    	this.server.in(clientId).socketsLeave(room);
 	    }
 	    //removing empty rooms
@@ -118,24 +123,24 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		this.rooms.delete(room);
 		await this.chatService.deleteRoom(room);
 	}
-    this.emit('listAllRooms', await this.chatService.getAllRooms());
+    this.emit(events.ListAllRooms, await this.roomService.getAllRoomsMetaData());
   }
 
 
   async handleDisconnect(socket: Socket): Promise<void> {
-  	  const nick: string = this.users.get(socket.id).nick
+  	  const login: string = this.users.get(socket.id).login
 	  this.logger.log(`Socket client disconnected: ${socket.id}`)
 	  this.users.delete(socket.id);
 	  this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
 
-  	  //check if all clients of same nick has been disconnected or not
-  	  const isHardDisconnect: boolean = this.getClientSocketIdsFromNick(nick).length > 0 ? false : true
+  	  //check if all clients of same login has been disconnected or not
+  	  const isHardDisconnect: boolean = this.getClientSocketIdsFromLogin(login).length > 0 ? false : true
   	  if (isHardDisconnect){
 		  const allJoinedRoomsByUser: Array<string> = await this.chatService
-		  	  .getAllJoinedRoomsByOneUser(nick);
-  	   	  const activeNicksInServer: Array<string> = this
-  	    	  .getActiveNicksInServer()
-		  this.server.emit(events.ActiveUsers, activeNicksInServer)	
+		  	  .getAllJoinedRoomsByOneUser(login);
+  	   	  const activeLoginsInServer: Array<string> = this
+  	    	  .getActiveLoginsInServer()
+		  this.server.emit(events.ActiveUsers, activeLoginsInServer)	
 		  for (let room of allJoinedRoomsByUser){
 	  		  let roomMetaData: RoomMetaData = await this.roomService
 	  		    .getRoomMetaData(room)
@@ -157,15 +162,15 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	return ([]);
   }
 
-  getActiveNicksInServer(): Array<string>{
+  getActiveLoginsInServer(): Array<string>{
 	const clientsIterator = this.users.entries();
-	let nicks: Array<string> = []	
+	let logins: Array<string> = []	
 	let connectedClient = clientsIterator.next()
 	while (!connectedClient.done){
-		nicks.push(connectedClient.value[1].nick)
+		logins.push(connectedClient.value[1].login)
 		connectedClient = clientsIterator.next()
 	}
-	return [...new Set(nicks)];
+	return [...new Set(logins)];
   }
 
   //getting the currently connected users
@@ -182,14 +187,14 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
     return (usersWithCompleteData);
   }
 
-getClientSocketIdsFromNick(nick: string): Array<string>{
-	console.log("get client ids " + nick);
+  getClientSocketIdsFromLogin(login: string): Array<string>{
+	console.log("get client ids " + login);
 	const clientsIterator = this.users.entries();
 	const clientSocketIds = []
 
 	let connectedClient = clientsIterator.next()
 	while (!connectedClient.done){
-		if (connectedClient.value[1].nick === nick){
+		if (connectedClient.value[1].login === login){
 			clientSocketIds.push(connectedClient.value[0])
 		}
 		connectedClient = clientsIterator.next()
@@ -197,12 +202,12 @@ getClientSocketIdsFromNick(nick: string): Array<string>{
 	return clientSocketIds;
   }
   
-  async isUserInRoom(room: string, clientNick: string): Promise<boolean> {
+  async isUserInRoom(room: string, clientLogin: string): Promise<boolean> {
 	const allUsersInRoom: Array<string> = await this.chatService.getAllUsersInRoom(room);
 
-	for (const nick of allUsersInRoom)
+	for (const login of allUsersInRoom)
 	{
-		if (nick === clientNick){ 
+		if (login === clientLogin){ 
 			return (true);
 		}
 	}
@@ -219,21 +224,21 @@ getClientSocketIdsFromNick(nick: string): Array<string>{
   	  this.server.emit(event, data);
   }
 
-  public async createNewRoomAndJoin(clientId: string, creatorNick: string, room: string, password: string | undefined): Promise<boolean>{
+  public async createNewRoomAndJoin(clientId: string, creatorLogin: string, room: string, password: string | undefined): Promise<boolean>{
 		const hasPass:boolean = password != undefined ? true : false;
 		await this
 			.chatService
-			.createRoom(creatorNick, room, hasPass, password);
+			.createRoom(creatorLogin, room, hasPass, password);
 		await this.rooms.add(room);
 		await this.server.in(clientId).socketsJoin(room);
-		const successfulJoin: boolean = await this.chatService.addUserToRoom(room, creatorNick);
+		const successfulJoin: boolean = await this.chatService.addUserToRoom(room, creatorLogin);
 		if (!successfulJoin) return false;
-		this.emit('listAllRooms', await this.chatService.getAllRooms());
+		this.emit(events.ListAllRooms, await this.roomService.getAllRoomsMetaData());
 		this.logger.log("User " + clientId + "joined room " + room);
 		return true
   }
 
-  public async joinUserToRoom(clientId: string, nick: string, room: string, password: string | undefined): Promise<boolean>{
+  public async joinUserToRoom(clientId: string, login: string, room: string, password: string | undefined): Promise<boolean>{
 	    //different status of the user regarding a chat room:
 	  	// 1. connected to a room:  member of a room and currently online (bd + socket active)
 	  	// 2. member of a room but offline (only bd)
@@ -254,21 +259,21 @@ getClientSocketIdsFromNick(nick: string): Array<string>{
 		//   4. user is joined in socket.io and saved in db
 		//   
 
-		let hardJoin: boolean = true; //nick wasn't in channel with other client
+		let hardJoin: boolean = true; //login wasn't in channel with other client
 	  	const roomExists: boolean = await this.chatService.isRoomCreated(room);
 		if (!roomExists){
-			const successfulCreatedAndJoin: boolean = await this.createNewRoomAndJoin(clientId, nick, room, password)
+			const successfulCreatedAndJoin: boolean = await this.createNewRoomAndJoin(clientId, login, room, password)
 			if (!successfulCreatedAndJoin) return false;
 		}
-		else if (roomExists && !(await this.isUserInRoom(room, nick))){
+		else if (roomExists && !(await this.isUserInRoom(room, login))){
 			const isRoomProtectedByPassword: boolean = await this
 				.chatService
 				.isProtectedByPassword(room);
-			if (await this.chatService.isBannedOfRoom(nick, room)){
+			if (await this.chatService.isBannedOfRoom(login, room)){
 		  	  	const err: ChatMessage = {
 			  	   room: room,
 			  	   message: `Error: you are banned from ${room}`,
-			  	   nick: "system",
+			  	   login: "system",
 			  	   date: new Date()
 		      	}
 		  	  	this.messageToClient(clientId, "system", err);
@@ -278,7 +283,7 @@ getClientSocketIdsFromNick(nick: string): Array<string>{
 		  	  	const err: ChatMessage = {
 			  	   room: room,
 			  	   message: `Error: bad password provided for ${room}`,
-			  	   nick: "system",
+			  	   login: "system-error",
 			  	   date: new Date()
 		      	}
 				let passwordChallengePassed: boolean = false;
@@ -286,32 +291,34 @@ getClientSocketIdsFromNick(nick: string): Array<string>{
 					passwordChallengePassed = await this.hashService.comparePassword(password, await this.chatService.getHashPassFromRoom(room));
 				}
 				if (!passwordChallengePassed){
-		  	  		this.messageToClient(clientId, "system", err);
+		  	  		this.messageToClient(clientId, "system-error", err);
 					return false;
 				}
 			}
 
-			const successfulJoin: boolean = await this.chatService.addUserToRoom(room, nick);
+			const successfulJoin: boolean = await this.chatService.addUserToRoom(room, login);
 			if (!successfulJoin) return false;
 
 		}
 		else hardJoin = false;
 
 		this.logger.log("User " + clientId + "joined room " + room);
-		//confirm join to all the connected clients with the same nick
-	    const socketIdsByNick = this.getClientSocketIdsFromNick(nick);
-	    const joinedRoomsByNick: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(nick);
-	    const privateRoomsByNick: Array<string> = await this.chatService.getMyPrivateRooms(nick);
-	  	socketIdsByNick.forEach(socketId => {
+		//confirm join to all the connected clients with the same login 
+	    const socketIdsByLogin = this.getClientSocketIdsFromLogin(login);
+	    const joinedRoomsByLogin: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(login);
+	    const privateRoomsByLogin: Array<string> = await this.chatService.getMyPrivateRooms(login);
+	  	socketIdsByLogin.forEach(socketId => {
 	  	  this.server.in(socketId).socketsJoin(room)
-		  this.server.to(socketId).emit(events.ListMyJoinedRooms, joinedRoomsByNick);
-		  this.server.to(socketId).emit(events.ListMyPrivateRooms, privateRoomsByNick);
+		  this.server.to(socketId).emit(events.ListMyJoinedRooms, joinedRoomsByLogin);
+		  this.server.to(socketId).emit(events.ListMyPrivateRooms, privateRoomsByLogin);
 	  	});
 
 	  	//announce the rest of the channel a new user has joined
 	  	if (hardJoin){
-	  		const socketInfo: SocketPayload = generateSocketInformationResponse(room, `user ${nick} has joined room ${room}`)
-			this.broadCastToRoomExceptForSomeUsers(socketInfo.event, socketInfo.data, [nick])
+	  		const socketInfo: SocketPayload = generateSocketInformationResponse(room, `user ${login} has joined room ${room}`)
+			this.broadCastToRoomExceptForSomeUsers(socketInfo.event, socketInfo.data, [login])
+			const joinFeedback: SocketPayload = generateSocketInformationResponse(room, `You have joined ${room}`)
+			this.server.to(clientId).emit("system", joinFeedback.data)
 		}
 		return true;
   }
@@ -319,7 +326,7 @@ getClientSocketIdsFromNick(nick: string): Array<string>{
   public broadCastToRoomExceptForSomeUsers(event: string, payload: ChatMessage, excludedUsers: Array<string>): void {
 		const targetUsers: Array<ChatUser> = this
 			.getActiveUsersInRoom(payload.room)
-			.filter(u => !(excludedUsers.includes(u.nick)))
+			.filter(u => !(excludedUsers.includes(u.login)))
 		for (let i = 0; i < targetUsers.length; i++){
 			this.messageToClient(targetUsers[i].client_id, event, payload)
 		}
@@ -335,10 +342,18 @@ getClientSocketIdsFromNick(nick: string): Array<string>{
 
   public messageToClient(clientId: string, event: string, payload: ChatMessage): void{
 	  this.server.to(clientId).emit(event, payload)
+
   }
 
   public getNumberOfConnectedUsers(): number{
 	return this.users.size;
+  }
+
+  public async sendBlockedUsers(clientId: string, login: string): Promise<void>{
+		const blockedUsersByLogin: Array<string> = (await this.userService
+			.getBannedUsersByLogin(login))
+			.map(m => m.login)
+ 		this.server.to(clientId).emit(events.BlockedUsers, blockedUsersByLogin) 
   }
 
 }

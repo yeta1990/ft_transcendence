@@ -1,11 +1,11 @@
 import { NgModule ,ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing-module/app-routing-module.module'
 import { AppComponent } from './app.component';
 import { FormComponent } from './form/form.component';
-import { MyProfileComponent } from './my-profile/my-profile.component';
 import { LoginComponent } from './login/login.component';
 import { CallbackComponent } from './callback/callback.component';
 import { AllUsersComponent } from './all-users/all-users.component';
@@ -19,6 +19,11 @@ import { interceptorProviders } from './app.interceptors';
 import { ChatComponent } from './chat/chat.component';
 import { environment } from '../environments/environment';
 import { PongComponent } from './pong/pong.component';
+import { ToasterComponent } from './toaster/toaster.component'
+import { ToasterService } from './toaster/toaster.service';
+import { ModalComponent } from './modal/modal.component'
+import { ModalService } from './modal/modal.service'
+import { ValidationFunctions } from '@shared/user.functions'
 import { PaddleComponent } from './pong/paddle/paddle.component';
 import { EntityComponent } from './pong/entity/entity.component';
 import { RoomComponent } from './pong/room/room.component'
@@ -28,7 +33,6 @@ import { RoomComponent } from './pong/room/room.component'
   declarations: [
     AppComponent,
     FormComponent,
-    MyProfileComponent,
     LoginComponent,
     CallbackComponent,
     AllUsersComponent,
@@ -37,6 +41,8 @@ import { RoomComponent } from './pong/room/room.component'
     EditProfileComponent,
     ChatComponent,
     PongComponent,
+    ToasterComponent,
+    ModalComponent
     PaddleComponent,
     EntityComponent,
     RoomComponent
@@ -45,6 +51,7 @@ import { RoomComponent } from './pong/room/room.component'
   imports: [
     FormsModule,
     BrowserModule,
+    BrowserAnimationsModule,
     HttpClientModule,
     ReactiveFormsModule,
     AppRoutingModule,
@@ -52,6 +59,9 @@ import { RoomComponent } from './pong/room/room.component'
   ],
   providers: [
 	interceptorProviders,
+	ToasterService,
+	ModalService, 
+    ValidationFunctions
   ],
   bootstrap: [AppComponent]
 })

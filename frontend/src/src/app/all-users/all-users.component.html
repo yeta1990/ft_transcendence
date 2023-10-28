@@ -18,12 +18,12 @@
 <p>Users:</p>
 <frame class="frame">
    <ul>
-      <ul *ngFor="let u of users"><div (click)="getId(u.id)">
+      <ul *ngFor="let u of users"><div (click)="getUserLogin(u.login)">
          <div class="avatar_column">
             <img class="rect avatar" src={{u?.image}} alt=''/>
          </div>
          <div class ="nick_column">
-            <button class="user" (click)="getId(u.id)">{{u.nick}}</button>
+            <button class="user" (click)="getUserLogin(u.login)">{{u.nick}}</button>
          </div>
       </div></ul>
    </ul>
