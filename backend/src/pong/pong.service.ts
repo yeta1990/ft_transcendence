@@ -78,7 +78,7 @@ export class PongService {
         this.randomDir(name);
         this.numberOfGames++;
 
-        this.updateGame(gameGateaway, this.game)
+        this.updateGame(gameGateaway, this.games.get(name))
         // if (this.numberOfGames == 1){
         //     this.updateGame(gameGateaway)
         // }
@@ -90,7 +90,7 @@ export class PongService {
             //element.gameMode = 1;
             console.log("Update -> " + game.room);
             game.gameMode = 1;
-            game.interval = setInterval(()=>{
+            setInterval(()=>{
                 //this.updateBall(element.room)
                 this.updateBall(game.room)  
                 if (game.playerTwo == "") {
@@ -100,7 +100,7 @@ export class PongService {
                 const targetUsers: Array<ChatUser> = gameGateway
 	            .getActiveUsersInRoom(game.room);
 	            for (let i = 0; i < targetUsers.length; i++){
-                    //console.log("\t-> " + targetUsers[i].nick + " in " + element.room);
+                    console.log("\t-> " + targetUsers[i].login + " in " + game.room);
 		            gameGateway.server.to(targetUsers[i].client_id).emit('getStatus', game);
 	            }            
             },1000/64)
@@ -213,7 +213,9 @@ export class PongService {
     }
 
     keyStatus(room: string, key: number, nick:string){
+    	console.log("key status " + room)
         var g = this.games.get(room);
+        console.log(g.playerOne)
         if ((nick == g.playerOne) || (nick == g.playerTwo)){
             if(key == 27){
                 if (g.pause == true){
@@ -310,17 +312,17 @@ export class PongService {
 
     disconectPlayer(room:string, login:string) {
         var g = this.games.get(room)
-        if (g.playerOne == login){
-            g.playerOne = "";
-        }         
-        if (g.playerTwo == login){
-            g.playerTwo = "";
-        }
+//        if (g.playerOne == login){
+//            g.playerOne = "";
+//        }         
+//        if (g.playerTwo == login){
+//            g.playerTwo = "";
+//        }
         console.log("disconnect player: " + room)
         this.gameGateaway.removeUserFromRoom(room, login) 
 //         if (g.playerOne == "" && g.playerTwo == "") {
 //             this.games.delete(room);
 //         }
-        clearInterval(g.interval);
+//        clearInterval(g.interval);
     }
 }
