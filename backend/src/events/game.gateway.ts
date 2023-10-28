@@ -50,11 +50,12 @@ export class GameGateway extends BaseGateway {
   	@SubscribeMessage('join')
   	async handleJoinRoom(client: Socket, roomAndPassword: string): Promise<void>{
 		let room: string = roomAndPassword.split(" ", 2)[0];
-		const pass: string | undefined = roomAndPassword.split(" ", 2)[1];
+		//const pass: string | undefined = roomAndPassword.split(" ", 2)[1];
+		const online: string | undefined = roomAndPassword.split(" ", 2)[1];
 		const nick: string = client.handshake.query.nick as string;
 		console.log("Try join.");
 		if (room.length > 0 && room[0] != '#' && room[0] != '@'){
-  	  	room = '#' + room;
+  	  		room = '#' + room;
   		}
 	  	for (const c of values.forbiddenChatRoomCharacters){
 			if (room.substr(1, room.length - 1).includes(c)){
@@ -67,25 +68,27 @@ export class GameGateway extends BaseGateway {
 			} 
 	  	} 	  
   	  //check if user is banned from channel
-  	  await this.joinRoutine(client.id, nick, room, pass, "join")
+  	  await this.joinRoutine(client.id, nick, room, online, "join")
   	}
 
-  	async joinRoutine(clientSocketId: string, nick: string, room: string, pass: string, typeOfJoin: string){
-	room +=  "_" + nick;
-	const originalRoom = room;
-	console.log("Try join..");
-	if (room.length > 0 && room[0] == '@'){
-		if (await this.userService
-			.isUserBannedFromUser(room.substr(1, room.length - 1), nick)){
-				return this.messageToClient(clientSocketId, "system", 
-				generateSocketErrorResponse("", `You can't open a private conversation with ${room.substr(1, room.length - 1)} because you are banned`).data);
-	  		}	
-	  	room = await this.chatService.generatePrivateRoomName(nick, room.substr(1, room.length - 1))
-	}
+  	async joinRoutine(clientSocketId: string, nick: string, room: string, online: string, typeOfJoin: string){
+		if (online == 'alone')
+			room +=  "_" + nick;
+		const originalRoom = room;
+		console.log("ROOM: "  + room);
+		console.log("Try join..");
+		// if (room.length > 0 && room[0] == '@'){
+		// 	if (await this.userService
+		// 		.isUserBannedFromUser(room.substr(1, room.length - 1), nick)){
+		// 			return this.messageToClient(clientSocketId, "system", 
+		// 			generateSocketErrorResponse("", `You can't open a private conversation with ${room.substr(1, room.length - 1)} because you are banned`).data);
+		//   		}	
+		//   	room = await this.chatService.generatePrivateRoomName(nick, room.substr(1, room.length - 1))
+		// }
 
-  	const wasUserAlreadyActiveInRoom: boolean = await this.isUserAlreadyActiveInRoom(clientSocketId, room);
-  	const successfulJoin = await 
-		  this.joinUserToRoom(clientSocketId, nick, room, pass);
+  		const wasUserAlreadyActiveInRoom: boolean = await this.isUserAlreadyActiveInRoom(clientSocketId, room);
+  		const successfulJoin = await 
+		  this.joinUserToRoom(clientSocketId, nick, room, "");
 
   		if (successfulJoin){
 			//const response: ChatMessage = generateJoinResponse(originalRoom);

@@ -182,7 +182,8 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
     return (usersWithCompleteData);
   }
 
-  getClientSocketIdsFromNick(nick: string): Array<string>{
+getClientSocketIdsFromNick(nick: string): Array<string>{
+	console.log("get client ids " + nick);
 	const clientsIterator = this.users.entries();
 	const clientSocketIds = []
 

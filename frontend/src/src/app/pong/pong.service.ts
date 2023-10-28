@@ -23,6 +23,7 @@ export class PongService {
 	}
 
   joinUserToRoom(room: string){
+    room += " alone"; //alone para saber que juega solo
 		this.socketService.sendMessageToServer("join", room);
 	}
 
