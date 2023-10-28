@@ -122,6 +122,7 @@ export class PongService {
 
     updateBall(room:string){
         var g = this.games.get(room);
+        if (!g) {return; }
         if(g.pause){
             return;
         }
@@ -285,24 +286,24 @@ export class PongService {
         if (this.matchMaking.includes(login)) { return; }
         this.matchMaking.push(login);
         console.log("Waiting list: " + this.matchMaking);
-        if (this.matchMaking.length >= 2){
-            this.disconectPlayer("#pongRoom_" + this.matchMaking[0], this.matchMaking[0]);
-            this.disconectPlayer("#pongRoom_" + this.matchMaking[1], this.matchMaking[1]);
-            const room: string = "#pongRoom_" + this.matchMaking[0] + "+" + this.matchMaking[1];
-            const idsPlayerOne: Array<string> = this.gameGateaway.getClientSocketIdsFromNick(this.matchMaking[0]);
-            const idsPlayerTwo: Array<string> = this.gameGateaway.getClientSocketIdsFromNick(this.matchMaking[1]);
+        // if (this.matchMaking.length >= 2){
+        //     this.disconectPlayer("#pongRoom_" + this.matchMaking[0], this.matchMaking[0]);
+        //     this.disconectPlayer("#pongRoom_" + this.matchMaking[1], this.matchMaking[1]);
+        //     const room: string = "#pongRoom_" + this.matchMaking[0] + "+" + this.matchMaking[1];
+        //     const idsPlayerOne: Array<string> = this.gameGateaway.getClientSocketIdsFromNick(this.matchMaking[0]);
+        //     const idsPlayerTwo: Array<string> = this.gameGateaway.getClientSocketIdsFromNick(this.matchMaking[1]);
             
-            for (let element of idsPlayerOne) {
-                await this.gameGateaway.joinRoutine(element, this.matchMaking[0], room, "", "join")
-            }
+        //     for (let element of idsPlayerOne) {
+        //         await this.gameGateaway.joinRoutine(element, this.matchMaking[0], room, "", "join")
+        //     }
             
-            for (let element of idsPlayerTwo) {
-                await this.gameGateaway.joinRoutine(element, this.matchMaking[1], room, "", "join")
-            }
-            //Remove both 
-            this.matchMaking.shift();
-            this.matchMaking.shift();
-        }
+        //     for (let element of idsPlayerTwo) {
+        //         await this.gameGateaway.joinRoutine(element, this.matchMaking[1], room, "", "join")
+        //     }
+        //     //Remove both 
+        //     this.matchMaking.shift();
+        //     this.matchMaking.shift();
+        // }
     }
 
     disconectPlayer(room:string, nick:string) {
@@ -313,8 +314,8 @@ export class PongService {
         if (g.playerTwo == nick){
             g.playerTwo = "";
         }
-        if (g.playerOne == "" && g.playerTwo == "") {
-            this.games.delete(room);
-        }
+        // if (g.playerOne == "" && g.playerTwo == "") {
+        //     this.games.delete(room);
+        // }
     }
 }
