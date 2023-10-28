@@ -56,23 +56,10 @@ export class AuthService {
 		}
 
 		//get user data from 42
-//		console.log(data.access_token);
 		const allUserData42 = await this.userService.whoAmI(data.access_token);
-//		console.log(allUserData42);	
-
-		//check if user exists in db: getByNick.
-//		const registeredUser = await this.userService.getUserByNick(allUserData42.login)
-
-		//if it doesn't exist, create user
-		//create payload with nick and id, sign it and send back to client
-
-//		const user: User = this.userService.getUser(
-//		const user = { nick: login, id: 1 };
-
 		const payloadToCreateUser = { nick: allUserData42.login, email: allUserData42.email, firstName: allUserData42.first_name, lastName: allUserData42.last_name, login: allUserData42.login, image: allUserData42.image.versions.medium }; //all requests from the frontend will contain this info
 		const createdUser = await this.userService.createUser(payloadToCreateUser);
-
-		const payloadToSign = {nick: createdUser.nick, id: createdUser.id}
+		const payloadToSign = {login: createdUser.login, id: createdUser.id}
 		const access_token = await this.jwtService.signAsync(payloadToSign);
 		const decoded: JwtPayload = this.jwtService.decode(access_token) as JwtPayload;
 		return {
@@ -86,9 +73,9 @@ export class AuthService {
 		return parseInt(decoded.id)
 	}
 
-	getNickFromJwt(token: string): string{
+	getLoginFromJwt(token: string): string{
 		const decoded: JwtPayload = this.jwtService.decode(token) as JwtPayload;
-		return (decoded.nick)
+		return (decoded.login)
 	}
 
 	async verifyJwt(token: string): Promise<boolean> {

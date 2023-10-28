@@ -22,13 +22,13 @@ export class ChatService {
 
 	sendMessageToChat(type: string, room: string, message: string) {
 		const date: Date = new Date();
-		const payloadToSend: ChatMessage = { room, message, nick: "", date}
+		const payloadToSend: ChatMessage = { room, message, login: "", date}
 		this.socketService.sendMessageToChat(type, payloadToSend);
 	}
 
-	sendPrivateMessage(destinationNick: string, message: string) {
+	sendPrivateMessage(destinationLogin: string, message: string) {
 		const date: Date = new Date();
-		const payloadToSend: ChatMessage = { room: destinationNick, message, nick: "", date}
+		const payloadToSend: ChatMessage = { room: destinationLogin, message, login: "", date}
 		this.socketService.sendMessageToChat("mp", payloadToSend);
 	}
 
@@ -46,43 +46,43 @@ export class ChatService {
 		this.socketService.sendMessageToServer("part", room);
 	}
 
-	makeRoomAdmin(nick: string, room: string){
-		const payloadToSend: ChatMessage = { room: room, message: "" , nick: nick, date: new Date() }
+	makeRoomAdmin(login: string, room: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
 		this.socketService.sendMessageToServer("admin", payloadToSend);
 	}
 
-	removeRoomAdmin(nick: string, room: string){
-		const payloadToSend: ChatMessage = { room: room, message: "" , nick: nick, date: new Date() }
+	removeRoomAdmin(login: string, room: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
 		this.socketService.sendMessageToServer("noadmin", payloadToSend);
 	}
 
-	banUserFromRoom(nick:string, room: string){
-		const payloadToSend: ChatMessage = { room: room, message: "" , nick: nick, date: new Date() }
+	banUserFromRoom(login:string, room: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
 		this.socketService.sendMessageToServer("ban", payloadToSend);
 	}
 
-	banUser2User(targetNick:string){
-		const payloadToSend: ChatMessage = { room: targetNick, message: "" , nick: "", date: new Date() }
+	banUser2User(targetLogin:string){
+		const payloadToSend: ChatMessage = { room: targetLogin, message: "" , login: "", date: new Date() }
 		this.socketService.sendMessageToServer("banuser", payloadToSend);
 	}
 
-	noBanUser2User(targetNick:string){
-		const payloadToSend: ChatMessage = { room: targetNick, message: "" , nick: "", date: new Date() }
+	noBanUser2User(targetLogin:string){
+		const payloadToSend: ChatMessage = { room: targetLogin, message: "" , login: "", date: new Date() }
 		this.socketService.sendMessageToServer("nobanuser", payloadToSend);
 	}
 
-	removeBanFromRoom(nick: string, room: string){
-		const payloadToSend: ChatMessage = { room: room, message: "" , nick: nick, date: new Date() }
+	removeBanFromRoom(login: string, room: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
 		this.socketService.sendMessageToServer("noban", payloadToSend);
 	}
 
 	addPassToRoom(room: string, pass: string){
-		const payloadToSend: ChatMessage = { room: room, message: pass, nick: "", date: new Date() }
+		const payloadToSend: ChatMessage = { room: room, message: pass, login: "", date: new Date() }
 		this.socketService.sendMessageToServer(events.Pass, payloadToSend);
 	}
 
 	removePassOfRoom(room: string){
-		const payloadToSend: ChatMessage = { room: room, message: "" , nick: "", date: new Date() }
+		const payloadToSend: ChatMessage = { room: room, message: "" , login: "", date: new Date() }
 		this.socketService.sendMessageToServer(events.RemovePass, payloadToSend);
 	}
 

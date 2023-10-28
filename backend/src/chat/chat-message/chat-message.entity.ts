@@ -16,7 +16,7 @@ export class ChatMessage {
 	message: string;
 
 	@Column()
-	nick: string;
+	login: string;
 
 	@Column()
 	date: Date;
