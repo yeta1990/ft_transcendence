@@ -42,7 +42,7 @@ import { RoomComponent } from './pong/room/room.component'
     ChatComponent,
     PongComponent,
     ToasterComponent,
-    ModalComponent
+    ModalComponent,
     PaddleComponent,
     EntityComponent,
     RoomComponent

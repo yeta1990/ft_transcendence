@@ -30,7 +30,7 @@ export class PongComponent implements OnInit, OnDestroy {
     private subscriptions = new Subscription();
     destroy: Subject<any> = new Subject();
     public game: GameRoom = {} as GameRoom;
-    public playerNick:string = "";
+    public playerLogin:string = "";
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
     constructor(
@@ -39,7 +39,7 @@ export class PongComponent implements OnInit, OnDestroy {
     ){
 
         this.game.gameMode = 0;
-        //console.log("Try join Room: #pongRoom");
+        console.log("Try join Room: #pongRoom");
         this.pongService.joinUserToRoom("#pongRoom");
         this.subscriptions.add(
         this.pongService
@@ -52,10 +52,10 @@ export class PongComponent implements OnInit, OnDestroy {
                 this.canvas = this.gameCanvas?.nativeElement;
                 this.gameContext = this.canvas?.getContext('2d');
                 requestAnimationFrame(this.gameLoop);
-                if (this.game.playerOne == this.playerNick){
+                if (this.game.playerOne == this.playerLogin){
                     console.log("Player ONE");
                     this.playerOne = true;
-                } else if (this.game.playerTwo == this.playerNick){
+                } else if (this.game.playerTwo == this.playerLogin){
                     console.log("Player TWO");
                     this.playerTwo = true;
                 }
@@ -72,7 +72,7 @@ export class PongComponent implements OnInit, OnDestroy {
         }));
         window.addEventListener('keydown', (e) => {
             if(this.playerOne || this.playerTwo)
-            console.log(this.playerNick + " keydown in " + this.game.room);
+            console.log(this.playerLogin + " keydown in " + this.game.room);
                 this.pongService.sendSignal("keydown", this.game.room, e.which);
         });
 
@@ -85,14 +85,14 @@ export class PongComponent implements OnInit, OnDestroy {
     async ngOnInit() {
         await this.myProfileService.getUserDetails()
         .subscribe((response: User) => {
-          this.playerNick = response.nick;
+          this.playerLogin = response.login;
         });
     }
 
     mode(m: string) {
         if (m == "on-line"){
-            console.log(this.playerNick + " join match making list ");
-            this.pongService.playOnLine(this.playerNick);
+            console.log(this.playerLogin + " join match making list ");
+            this.pongService.playOnLine(this.playerLogin);
         }
     }
 

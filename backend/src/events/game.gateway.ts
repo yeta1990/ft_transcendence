@@ -14,9 +14,10 @@ import { PongService } from 'src/pong/pong.service';
 @WebSocketGateway({ namespace: '/game', cors: true } )
 export class GameGateway extends BaseGateway {
 
-  constructor(private userService: UserService, private chatMessageService: ChatMessageService, private pongservice:PongService) {
+  constructor(private chatMessageService: ChatMessageService, private pongservice:PongService) {
 	super(GameGateway.name);
   }
+
 
   async afterInit(): Promise<void> {}
 
@@ -27,14 +28,14 @@ export class GameGateway extends BaseGateway {
 	
 	@SubscribeMessage('keydown')
  	handleMove(client: Socket, payload: any){
-		const nick: string = client.handshake.query.nick as string;
-		this.pongservice.keyStatus(payload.room, payload.key, nick);
+		const login: string = client.handshake.query.login as string;
+		this.pongservice.keyStatus(payload.room, payload.key, login);
  	}
 
 	@SubscribeMessage('keyup')
  	handleMoveStop(client: Socket, payload: any){
-		const nick: string = client.handshake.query.nick as string;
-		this.pongservice.keyStatus(payload.room, 0, nick);
+		const login: string = client.handshake.query.login as string;
+		this.pongservice.keyStatus(payload.room, 0, login);
  	}
 
 
@@ -52,8 +53,7 @@ export class GameGateway extends BaseGateway {
 		let room: string = roomAndPassword.split(" ", 2)[0];
 		//const pass: string | undefined = roomAndPassword.split(" ", 2)[1];
 		const online: string | undefined = roomAndPassword.split(" ", 2)[1];
-		const nick: string = client.handshake.query.nick as string;
-		console.log("Try join.");
+		const login: string = client.handshake.query.login as string;
 		if (room.length > 0 && room[0] != '#' && room[0] != '@'){
   	  		room = '#' + room;
   		}
@@ -68,35 +68,35 @@ export class GameGateway extends BaseGateway {
 			} 
 	  	} 	  
   	  //check if user is banned from channel
-  	  await this.joinRoutine(client.id, nick, room, online, "join")
+  	  await this.joinRoutine(client.id, login, room, online, "join")
   	}
 
-  	async joinRoutine(clientSocketId: string, nick: string, room: string, online: string, typeOfJoin: string){
+  	async joinRoutine(clientSocketId: string, login: string, room: string, online: string, typeOfJoin: string){
 		if (online == 'alone')
-			room +=  "_" + nick;
+			room +=  "_" + login;
 		const originalRoom = room;
 		console.log("ROOM: "  + room);
 		console.log("Try join..");
 		// if (room.length > 0 && room[0] == '@'){
 		// 	if (await this.userService
-		// 		.isUserBannedFromUser(room.substr(1, room.length - 1), nick)){
+		// 		.isUserBannedFromUser(room.substr(1, room.length - 1), login)){
 		// 			return this.messageToClient(clientSocketId, "system", 
 		// 			generateSocketErrorResponse("", `You can't open a private conversation with ${room.substr(1, room.length - 1)} because you are banned`).data);
 		//   		}	
-		//   	room = await this.chatService.generatePrivateRoomName(nick, room.substr(1, room.length - 1))
+		//   	room = await this.chatService.generatePrivateRoomName(login, room.substr(1, room.length - 1))
 		// }
 
   		const wasUserAlreadyActiveInRoom: boolean = await this.isUserAlreadyActiveInRoom(clientSocketId, room);
   		const successfulJoin = await 
-		  this.joinUserToRoom(clientSocketId, nick, room, "");
+		  this.joinUserToRoom(clientSocketId, login, room, "");
 
   		if (successfulJoin){
 			//const response: ChatMessage = generateJoinResponse(originalRoom);
 			var userInRoom = this.getActiveUsersInRoom(room);
-			console.log("nick " + nick);
-			const response: GameRoom = this.pongservice.initGame(room, this, userInRoom.length, nick);
+			console.log("login " + login);
+			const response: GameRoom = this.pongservice.initGame(room, this, userInRoom.length, login);
 			//var userInRoom = this.getActiveUsersInRoom('#pongRoom');
-			this.pongservice.setPlayer(room, nick);			
+			this.pongservice.setPlayer(room, login);			
 			console.log("Join succed to: " + response.room);
 			
 			this.messageToClient(clientSocketId, 'gameStatus', response);
@@ -106,21 +106,21 @@ export class GameGateway extends BaseGateway {
 			if (!wasUserAlreadyActiveInRoom){
 				let oldMessagesInRoom: RoomMessages = await this.chatMessageService.getAllMessagesFromRoom(room);
 
-				//get all u2u bans to 'nick'
-				//on every message, check the nick of the sender, if it's one of
+				//get all u2u bans to 'login'
+				//on every message, check the login of the sender, if it's one of
 				//the users that have banned the one trying to join,
 				//the message isn't send
-				const usersThatHaveBanned: Array<string> = (await this.userService.getUsersThatHaveBannedAnother(nick)).map(u => u.nick)
+				const usersThatHaveBanned: Array<string> = (await this.userService.getUsersThatHaveBannedAnother(login)).map(u => u.login)
 
 				//using originalRoom is a way to handle the names of private rooms:
-				//in db are #2-8, for instance, but we send @nick to the client as 
+				//in db are #2-8, for instance, but we send @login to the client as 
 				//a room name
 				if (originalRoom !== room){
 					oldMessagesInRoom.name = originalRoom
 					oldMessagesInRoom.messages.map(m => m.room = originalRoom)
 				}
 				for (let message of oldMessagesInRoom.messages){
-					if (!usersThatHaveBanned.includes(message.nick)){
+					if (!usersThatHaveBanned.includes(message.login)){
 						this.messageToClient(clientSocketId, "message", message)
 					}
 				}
@@ -146,8 +146,8 @@ export class GameGateway extends BaseGateway {
   	  for (const room of activeRooms){
 		this.server.in(client.id).socketsLeave(room);			
   	  }
-		const nick: string = client.handshake.query.nick as string;
-		this.pongservice.disconectPlayer("#pongRoom_" + nick, nick);
+		const login: string = client.handshake.query.login as string;
+		this.pongservice.disconectPlayer("#pongRoom_" + login, login);
 
   }
 }

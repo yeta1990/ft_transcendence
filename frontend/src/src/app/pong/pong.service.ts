@@ -24,7 +24,9 @@ export class PongService {
 
   joinUserToRoom(room: string){
     room += " alone"; //alone para saber que juega solo
+		console.log(room)
 		this.socketService.sendMessageToServer("join", room);
+		console.log("enviando join")
 	}
 
   gameUpdate(room: string) {

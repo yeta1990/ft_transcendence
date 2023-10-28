@@ -10,6 +10,7 @@ export class PongService {
     //public baseGateway: BaseGateway;
     games: Map<string, GameRoom> = new Map<string, GameRoom>;
     public numberOfGames: number = 0;
+    public interval: any = 0;
 
     private matchMaking: Array<string> = new Array<string>;
 
@@ -69,7 +70,8 @@ export class PongService {
             //Viwer
             viwer,              //viwer
             "",                 //playerOne
-            ""                  //playerTwo
+            "",                 //playerTwo
+			0
         );
         
         this.games.set(name, this.game);
@@ -86,9 +88,9 @@ export class PongService {
     updateGame(gameGateway :GameGateway, game: GameRoom){
         //this.games.forEach(element => {
             //element.gameMode = 1;
-            //console.log("Update -> " + element.room);
+            console.log("Update -> " + game.room);
             game.gameMode = 1;
-            setInterval(()=>{
+            game.interval = setInterval(()=>{
                 //this.updateBall(element.room)
                 this.updateBall(game.room)  
                 if (game.playerTwo == "") {
@@ -306,16 +308,19 @@ export class PongService {
         // }
     }
 
-    disconectPlayer(room:string, nick:string) {
+    disconectPlayer(room:string, login:string) {
         var g = this.games.get(room)
-        if (g.playerOne == nick){
+        if (g.playerOne == login){
             g.playerOne = "";
         }         
-        if (g.playerTwo == nick){
+        if (g.playerTwo == login){
             g.playerTwo = "";
         }
-        // if (g.playerOne == "" && g.playerTwo == "") {
-        //     this.games.delete(room);
-        // }
+        console.log("disconnect player: " + room)
+        this.gameGateaway.removeUserFromRoom(room, login) 
+//         if (g.playerOne == "" && g.playerTwo == "") {
+//             this.games.delete(room);
+//         }
+        clearInterval(g.interval);
     }
 }

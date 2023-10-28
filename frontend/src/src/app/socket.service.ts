@@ -97,6 +97,7 @@ export class SocketService {
   }
 
   disconnectClient(){
+  	  console.log("sending disconnect")
 	this.socket.emit(events.SoftDisconnect);
   }
 

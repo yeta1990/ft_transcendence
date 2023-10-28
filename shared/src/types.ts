@@ -54,7 +54,7 @@ export class GameRoom {
 	constructor(
 	public room: string,
 	public message: string,
-	public nick: string,
+	public login: string,
 	public date: Date,
 	public y: number,
 	public height: number,
@@ -103,5 +103,8 @@ export class GameRoom {
 	public playerOne:string,
 	public playerTwo:string,
 
+	//Interval 
+	public interval: any
+ 
 	){}
 }
