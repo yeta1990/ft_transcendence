@@ -34,4 +34,8 @@ export class PongService {
 		this.socketService.disconnectClient();
 	}
 
+  playOnLine(login: string) {
+    this.socketService.sendMessageToServer("on-line", login);
+  }
+
 }

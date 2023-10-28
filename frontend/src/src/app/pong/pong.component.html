@@ -1,11 +1,12 @@
 <app-nav-bar/>
 <!--button (click)="mode(1)">Normal</button>
 <button (click)="mode(2)">Insane</button-->
+<button (click)="mode('on-line')">On-line</button>
 <canvas #gameCanvas width={{game.canvasWidth}} height={{game.canvasheight}}></canvas>
 <h2>Instructions:</h2>
-<h4>Press space for start game</h4>
-<h4>Press escape for pause game</h4>
-<h4>Move left paddle up and down with the arrow keys</h4>
+<h4>Press scape for start game</h4>
+<h4>Press scape for pause game</h4>
+<h4>Move your paddle up and down with W and S keys</h4>
 <h4>Mode Insane, computer never loose.... WUHAHAHAHA!</h4>
 <h4>Actual game: {{ game.gameMode }} </h4>
 <h4>Player one: {{ game.playerOne }}</h4>

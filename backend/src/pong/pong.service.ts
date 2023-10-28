@@ -9,6 +9,8 @@ export class PongService {
     games: Map<string, GameRoom> = new Map<string, GameRoom>;
     public numberOfGames: number = 0;
 
+    private matchMaking: Array<string> = new Array<string>;
+
     initGame (name: string, gameGateaway: GameGateway, viwer: number, nick:string): GameRoom {
         
         if (this.games.get(name))
@@ -59,8 +61,8 @@ export class PongService {
 
             //Mode
             0,                  //gameMode
-            true,
-            false,
+            true,               //pause
+            false,              //finish
 
             //Viwer
             viwer,              //viwer
@@ -221,6 +223,7 @@ export class PongService {
                 return;
             }
         }
+        if (g.pause) { return;}
         if (nick == g.playerOne) {
             if (key === 87 && (g.playerOneY > 20)){ //w
                 g.playerOneVel = -1;
@@ -274,6 +277,13 @@ export class PongService {
         if (g.playerTwo == "" && g.playerOne != "" && g.playerOne != nick){
             g.playerTwo = nick;
         }             
+    }
+
+    addUserToList(login: string) {
+        this.matchMaking.push(login);
+        if (this.matchMaking.length >= 2){
+            
+        }
     }
 
     disconectPlayer(room:string, nick:string) {

@@ -13,7 +13,7 @@ import { User } from '../user';
   selector: 'app-pong',
   templateUrl: './pong.component.html',
   styleUrls: ['./pong.component.css'],
-}) 
+})
 
 export class PongComponent implements OnInit, OnDestroy {
 
@@ -36,8 +36,8 @@ export class PongComponent implements OnInit, OnDestroy {
     constructor(
         private myProfileService: MyProfileService,
         //private pongService: PongService,
-    ){      
- 
+    ){
+
         this.game.gameMode = 0;
         //console.log("Try join Room: #pongRoom");
         this.pongService.joinUserToRoom("#pongRoom");
@@ -46,8 +46,8 @@ export class PongComponent implements OnInit, OnDestroy {
         .getMessage()
         .pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
         .subscribe((payload: SocketPayload) => {
-        if (payload.event === 'gameStatus'){           
-            if (this.game.gameMode == 0) {                
+        if (payload.event === 'gameStatus'){
+            if (this.game.gameMode == 0) {
                 this.game = payload.data;
                 this.canvas = this.gameCanvas?.nativeElement;
                 this.gameContext = this.canvas?.getContext('2d');
@@ -58,7 +58,7 @@ export class PongComponent implements OnInit, OnDestroy {
                 } else if (this.game.playerTwo == this.playerNick){
                     console.log("Player TWO");
                     this.playerTwo = true;
-                }                   
+                }
             }
             else{
                 this.game.ballX = payload.data.ballX;
@@ -72,44 +72,36 @@ export class PongComponent implements OnInit, OnDestroy {
         }));
         window.addEventListener('keydown', (e) => {
             if(this.playerOne || this.playerTwo)
-            console.log(this.playerNick + " keydown in " + this.game.room);     
+            console.log(this.playerNick + " keydown in " + this.game.room);
                 this.pongService.sendSignal("keydown", this.game.room, e.which);
         });
 
         window.addEventListener('keyup', (e) => {
             if(this.playerOne|| this.playerTwo)
                 this.pongService.sendSignal("keyup", this.game.room, e.which);
-        });       
+        });
     }
 
     async ngOnInit() {
         await this.myProfileService.getUserDetails()
-        .subscribe((response: User) => { 
+        .subscribe((response: User) => {
           this.playerNick = response.nick;
         });
     }
 
-    // mode(i: number) {
-    //     this.restartScores();
-    //     if (i == 1) {
-    //         this.computerPlayer = new ComputerPaddle(
-    //             this.game.playerTwoW,
-    //             this.game.playerTwoH,
-    //             this.game.playerTwoX,
-    //             this.game.playerTwoY,
-    //             this.game.playerTwoS);
-    //     } else if (i == 2) {
-    //         this.computerPlayer = new ComputerPaddle(20, 60, this.canvas.width - (20 + 20), this.canvas.height / 2 - 60 / 2, 20);
-    //     }
-    //     PongComponent.init = true;
-    // }
+    mode(m: string) {
+        if (m == "on-line"){
+            console.log(this.playerNick + " join match making list ");
+            this.pongService.playOnLine(this.playerNick);
+        }
+    }
 
     drawBoardDetails(){
 
         this.gameContext.strokeStyle = "#fff";
         this.gameContext.lineWidth = 5;
         this.gameContext.strokeRect(10,10,this.canvas.width - 20 ,this.canvas.height - 20);
-        
+
         //draw center lines
         if (this.gameCanvas) {
             const canvas = this.gameCanvas.nativeElement;
@@ -117,7 +109,7 @@ export class PongComponent implements OnInit, OnDestroy {
                 this.gameContext!.fillStyle = "#fff";
                 this.gameContext!.fillRect(canvas.width / 2 - 1, i + 10, 2, 20);
             }
-        }  
+        }
         //draw scores and check end game
         this.gameContext!.font = '36px Arial';
         this.gameContext!.fillText(this.game.playerOneScore, 175, 50);
@@ -135,7 +127,7 @@ export class PongComponent implements OnInit, OnDestroy {
                 winner = this.game.playerTwo + " WON!"
             } else{
                 winner =  "Computer WON!"
-            }          
+            }
             this.gameContext!.fillText(winner, 250, 200);
         }
         //draw pause if not finish game
@@ -150,16 +142,16 @@ export class PongComponent implements OnInit, OnDestroy {
     //     if (this.player1) {
     //         this.player1.update(this.canvas);
     //     }
-      
+
     //     if (this.computerPlayer && this.ball && this.gameCanvas) {
     //       this.computerPlayer.update(this.ball, this.canvas);
     //       this.ball.update(this.player1!, this.computerPlayer, this.canvas);
     //     }
     // }
     draw(){
-        
+
         this.gameContext!.fillStyle = "#000";
-        this.gameContext!.fillRect(0,0,this.canvas.width, this.canvas.height);   
+        this.gameContext!.fillRect(0,0,this.canvas.width, this.canvas.height);
         this.drawBoardDetails();
         //player1
         this.gameContext.fillStyle = "#fff";
