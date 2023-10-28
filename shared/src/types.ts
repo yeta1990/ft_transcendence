@@ -1,7 +1,7 @@
 export type ChatMessage = {
 	room: string;
 	message: string;
-	nick: string;
+	login: string;
 	date: Date;
 }
 
@@ -24,7 +24,7 @@ export class ChatUser {
 	constructor (
 		public client_id: string, 
 		public user_id: number, 
-		public nick: string
+		public login: string
 	){ }
 };
 

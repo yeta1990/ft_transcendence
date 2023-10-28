@@ -70,10 +70,10 @@ export class UserController {
 	*	is a way to test different users while we don't have a custom
 	*	signup and login method
 	* */
-	@Get('/force/:nick')
-	public async getTokenFromNick(@Param('nick') nick: string): Promise<any>{
-		const user: User = await this.service.getUserByNick(nick);
-		const payloadToSign = {nick: nick, id: user.id}
+	@Get('/force/:login')
+	public async getTokenFromLogin(@Param('login') login: string): Promise<any>{
+		const user: User = await this.service.getUserByLogin(login);
+		const payloadToSign = {login: login, id: user.id}
 		const access_token = await this.jwtService.signAsync(payloadToSign);
 		const decoded: JwtPayload = this.jwtService.decode(access_token) as JwtPayload;
 		return {
@@ -91,7 +91,7 @@ export class UserController {
 			return { isValid: false }; // Si el nombre de usuario no es válido en la lista local, devolver false
 		}
 		
-		const existingUser = await this.service.getUserByNick(username);
+		const existingUser = await this.service.getUserByLogin(username);
 		const isValidDB = !existingUser; // Si el usuario no existe, el nombre de usuario es válido en la base de datos
 
 		return { isValid: isValidDB };

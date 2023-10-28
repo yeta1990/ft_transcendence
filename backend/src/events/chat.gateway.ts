@@ -23,30 +23,30 @@ export class ChatGateway extends BaseGateway {
   async afterInit(): Promise<void> {}
 
   async handlePrivateMessage(client:Socket, payload: ChatMessage){
-	  const emisorNick: string = client.handshake.query.nick as string;
-	  const destinationNick: string = payload.room.substr(1, payload.room.length - 1)
+	  const emisorLogin: string = client.handshake.query.login as string;
+	  const destinationLogin: string = payload.room.substr(1, payload.room.length - 1)
 	  if (await this.userService
-	  	  .isUserBannedFromUser(destinationNick, emisorNick)){
+	  	  .isUserBannedFromUser(destinationLogin, emisorLogin)){
 	  	  return this.messageToClient(client.id, "system", 
-	  			generateSocketErrorResponse("", `You can't send a private message because you are banned from: ${destinationNick}`).data);
+	  			generateSocketErrorResponse("", `You can't send a private message because you are banned from: ${destinationLogin}`).data);
 	  }
-	  const realRoomName: string = await this.chatService.generatePrivateRoomName(emisorNick, destinationNick)
+	  const realRoomName: string = await this.chatService.generatePrivateRoomName(emisorLogin, destinationLogin)
 
-	  const emisorSocketIds = this.getClientSocketIdsFromNick(emisorNick);
-	  const destinationSocketIds = this.getClientSocketIdsFromNick(destinationNick);
-	  let emisorNickWithAt;
-	  let destinationNickWithAt;
-  	  if (emisorNick.length > 0 && emisorNick[0] != '@'){
-  	  	emisorNickWithAt = '@' + emisorNick;
+	  const emisorSocketIds = this.getClientSocketIdsFromLogin(emisorLogin);
+	  const destinationSocketIds = this.getClientSocketIdsFromLogin(destinationLogin);
+	  let emisorLoginWithAt;
+	  let destinationLoginWithAt;
+  	  if (emisorLogin.length > 0 && emisorLogin[0] != '@'){
+  	  	emisorLoginWithAt = '@' + emisorLogin;
   	  }
-  	  if (destinationNick.length > 0 && destinationNick[0] != '@'){
-  	  	destinationNickWithAt = '@' + destinationNick;
+  	  if (destinationLogin.length > 0 && destinationLogin[0] != '@'){
+  	  	destinationLoginWithAt = '@' + destinationLogin;
   	  }
-	  payload.room = destinationNickWithAt;
+	  payload.room = destinationLoginWithAt;
 	  for (let i = 0; i < emisorSocketIds.length; i++){
 		this.messageToClient(emisorSocketIds[i], "message", payload)	
 	  }
-	  payload.room = emisorNickWithAt;
+	  payload.room = emisorLoginWithAt;
 	  for (let i = 0; i < destinationSocketIds.length; i++){
 		this.messageToClient(destinationSocketIds[i], "message", payload)	
 	  }
@@ -59,17 +59,17 @@ export class ChatGateway extends BaseGateway {
   // - data: the content
   @SubscribeMessage('message')
   async handleMessage(client: Socket, payload: ChatMessage): Promise<void> { 
-	const nick: string = client.handshake.query.nick as string;
-   	payload.nick = client.handshake.query.nick as string;
+	const login: string = client.handshake.query.login as string;
+   	payload.login = client.handshake.query.login as string;
 	if (payload.room.length > 0 && payload.room[0] === '@'){
 		this.handlePrivateMessage(client, payload)
 	}
-	else if (await this.chatService.isUserInRoom(payload.room, nick)){
+	else if (await this.chatService.isUserInRoom(payload.room, login)){
 
 		//check if user is banned from the channel
 		const isBannedOfRoom: boolean = await this
 			.chatService
-			.isBannedOfRoom(nick, payload.room)
+			.isBannedOfRoom(login, payload.room)
 		if (isBannedOfRoom)	{
 			return this.messageToClient(client.id, "system",
 				generateSocketErrorResponse("", `You can't send a message to channel ${payload.room} because you are banned`).data);
@@ -79,11 +79,11 @@ export class ChatGateway extends BaseGateway {
 		const bannedUsersBySender: Array<string> = 
 			(await this
 			.userService
-			.getBannedUsersByNick(nick))
-			.map(m => m.nick)
+			.getBannedUsersByLogin(login))
+			.map(m => m.login)
 		const activeUsersInRoom: Array<ChatUser> = this
 			.getActiveUsersInRoom(payload.room)
-			.filter(u => !(bannedUsersBySender.includes(u.nick)))
+			.filter(u => !(bannedUsersBySender.includes(u.login)))
 		for (let i = 0; i < activeUsersInRoom.length; i++){
 			this.messageToClient(activeUsersInRoom[i].client_id, "message", payload)
 		}
@@ -98,21 +98,21 @@ export class ChatGateway extends BaseGateway {
 	const response: ChatMessage = {
 		room: payload.room,
 		message: "help response",
-		nick: "system",
+		login: "system",
 		date: new Date()
 	}
 	return { event: 'system', data: response};
   }
 
-  async joinRoutine(clientSocketId: string, nick: string, room: string, pass: string, typeOfJoin: string){
+  async joinRoutine(clientSocketId: string, login: string, room: string, pass: string, typeOfJoin: string){
   	  const originalRoom = room;
   	  if (room.length > 0 && room[0] == '@'){
 	  	  if (await this.userService
-	  			  .isUserBannedFromUser(room.substr(1, room.length - 1), nick)){
+	  			  .isUserBannedFromUser(room.substr(1, room.length - 1), login)){
 	  			  return this.messageToClient(clientSocketId, "system-error", 
 	  					generateSocketErrorResponse("", `You can't open a private conversation with ${room.substr(1, room.length - 1)} because you are banned`).data);
 	      }
-		  room = await this.chatService.generatePrivateRoomName(nick, room.substr(1, room.length - 1))
+		  room = await this.chatService.generatePrivateRoomName(login, room.substr(1, room.length - 1))
 		  if (!room){
 			  return this.messageToClient(clientSocketId, "system-error",
 	  		  	  generateSocketErrorResponse("", `Bad channel name`).data);
@@ -121,7 +121,7 @@ export class ChatGateway extends BaseGateway {
 
 	  const wasUserAlreadyActiveInRoom: boolean = await this.isUserAlreadyActiveInRoom(clientSocketId, room);
 	  const successfulJoin = await 
-	  		this.joinUserToRoom(clientSocketId, nick, room, pass);
+	  		this.joinUserToRoom(clientSocketId, login, room, pass);
 
 	  if (successfulJoin){
 	  	const response: ChatMessage = generateJoinResponse(originalRoom);
@@ -138,21 +138,21 @@ export class ChatGateway extends BaseGateway {
 			let oldMessagesInRoom: RoomMessages = 
 				await this.chatMessageService.getAllMessagesFromRoom(room);
 
-			//get all u2u bans to 'nick'
-			//on every message, check the nick of the sender, if it's one of
+			//get all u2u bans to 'login'
+			//on every message, check the login of the sender, if it's one of
 			//the users that have banned the one trying to join,
 			//the message isn't send
-			const usersThatHaveBanned: Array<string> = (await this.userService.getUsersThatHaveBannedAnother(nick)).map(u => u.nick)
+			const usersThatHaveBanned: Array<string> = (await this.userService.getUsersThatHaveBannedAnother(login)).map(u => u.login)
 
 			//using originalRoom is a way to handle the names of private rooms:
-			//in db are #2-8, for instance, but we send @nick to the client as 
+			//in db are #2-8, for instance, but we send @login to the client as 
 			//a room name
 			if (originalRoom !== room){
 				oldMessagesInRoom.name = originalRoom
 				oldMessagesInRoom.messages.map(m => m.room = originalRoom)
 			}
 			for (let message of oldMessagesInRoom.messages){
-				if (!usersThatHaveBanned.includes(message.nick)){
+				if (!usersThatHaveBanned.includes(message.login)){
 					this.messageToClient(clientSocketId, "message", message)
 				}
 			}
@@ -180,7 +180,7 @@ export class ChatGateway extends BaseGateway {
   async handleJoinRoom(client: Socket, roomAndPassword: string): Promise<void>{
 	  let room: string = roomAndPassword.split(" ", 2)[0];
 	  const pass: string | undefined = roomAndPassword.split(" ", 2)[1];
-	  const nick: string = client.handshake.query.nick as string;
+	  const login: string = client.handshake.query.login as string;
 
   	  if (room.length > 0 && room[0] != '#' && room[0] != '@'){
   	  	room = '#' + room;
@@ -196,7 +196,7 @@ export class ChatGateway extends BaseGateway {
 	  }
 
   	  //check if user is banned from channel
-  	  await this.joinRoutine(client.id, nick, room, pass, "join")
+  	  await this.joinRoutine(client.id, login, room, pass, "join")
   }
 
   ////////////////////////////
@@ -217,38 +217,38 @@ export class ChatGateway extends BaseGateway {
 
   @SubscribeMessage('mp')
   async mp(client: Socket, payload: ChatMessage): Promise<void> {
-	  const nick: string = client.handshake.query.nick as string;
-	  let destinationNick: string = payload.room;
-	  const destinationUser = await this.userService.getUserByNick(destinationNick);
+	  const login: string = client.handshake.query.login as string;
+	  let destinationLogin: string = payload.room;
+	  const destinationUser = await this.userService.getUserByLogin(destinationLogin);
 	  if (!destinationUser)
-	  	  return generateSocketErrorResponse("", `User not found: ${destinationNick}`);
-	  if (await this.userService.isUserBannedFromUser(destinationNick, nick))
-	  	  return generateSocketErrorResponse("", `You are banned from: ${destinationNick}`);
-	  const privateRoomName: string = await this.chatService.generatePrivateRoomName(nick, destinationNick)
-	  const emisorSocketIds = this.getClientSocketIdsFromNick(nick);
-	  const destinationSocketIds = this.getClientSocketIdsFromNick(destinationNick);
-	  let emisorNickWithAt;
-	  let destinationNickWithAt;
+	  	  return generateSocketErrorResponse("", `User not found: ${destinationLogin}`);
+	  if (await this.userService.isUserBannedFromUser(destinationLogin, login))
+	  	  return generateSocketErrorResponse("", `You are banned from: ${destinationLogin}`);
+	  const privateRoomName: string = await this.chatService.generatePrivateRoomName(login, destinationLogin)
+	  const emisorSocketIds = this.getClientSocketIdsFromLogin(login);
+	  const destinationSocketIds = this.getClientSocketIdsFromLogin(destinationLogin);
+	  let emisorLoginWithAt;
+	  let destinationLoginWithAt;
 
-  	  if (nick.length > 0 && nick[0] != '@'){
-  	  	emisorNickWithAt = '@' + nick;
+  	  if (login.length > 0 && login[0] != '@'){
+  	  	emisorLoginWithAt = '@' + login;
   	  }
 
-  	  if (destinationNick.length > 0 && destinationNick[0] != '@'){
-  	  	destinationNickWithAt = '@' + destinationNick;
+  	  if (destinationLogin.length > 0 && destinationLogin[0] != '@'){
+  	  	destinationLoginWithAt = '@' + destinationLogin;
   	  }
 
 	  for (let i = 0; i < emisorSocketIds.length; i++){
-  	  	await this.joinRoutine(emisorSocketIds[i], nick, destinationNickWithAt, undefined, "join")
+  	  	await this.joinRoutine(emisorSocketIds[i], login, destinationLoginWithAt, undefined, "join")
 	  }
 	  for (let i = 0; i < destinationSocketIds.length; i++){
-  	  	await this.joinRoutine(destinationSocketIds[i], destinationNick, emisorNickWithAt, undefined, "joinmp")
+  	  	await this.joinRoutine(destinationSocketIds[i], destinationLogin, emisorLoginWithAt, undefined, "joinmp")
 	  }
 
    	  const messagePayload: ChatMessage = {
-    	room: destinationNickWithAt,
+    	room: destinationLoginWithAt,
     	message: payload.message,
-    	nick: nick,
+    	login: login,
     	date: new Date()
       }
 	  await this.handleMessage(client, messagePayload)
@@ -261,59 +261,59 @@ export class ChatGateway extends BaseGateway {
 
   @SubscribeMessage(events.ListMyPrivateRooms)
   async listMyPrivateRooms(client: Socket): Promise<WsResponse<unknown>>{
-	  const nick: string = client.handshake.query.nick as string;
-	  return { event: events.ListMyPrivateRooms, data: await this.chatService.getMyPrivateRooms(nick)}
+	  const login: string = client.handshake.query.login as string;
+	  return { event: events.ListMyPrivateRooms, data: await this.chatService.getMyPrivateRooms(login)}
   }
 
   @SubscribeMessage(events.ListMyJoinedRooms)
   async listMyJoinedRooms(client: Socket): Promise<WsResponse<unknown>>{
-	  const nick: string = client.handshake.query.nick as string;
-	  return { event: events.ListMyJoinedRooms, data: await this.chatService.getAllJoinedRoomsByOneUser(nick)}
+	  const login: string = client.handshake.query.login as string;
+	  return { event: events.ListMyJoinedRooms, data: await this.chatService.getAllJoinedRoomsByOneUser(login)}
   }
 
   @SubscribeMessage('admin')
   async makeRoomAdmin(client: Socket, payload: ChatMessage){
-	  const nick: string = client.handshake.query.nick as string;
-	  const adminOk: boolean = await this.chatService.makeRoomAdmin(nick, payload.nick, payload.room);
+	  const login: string = client.handshake.query.login as string;
+	  const adminOk: boolean = await this.chatService.makeRoomAdmin(login, payload.login, payload.room);
 	  if (adminOk){
-	    const roomInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.nick} is now admin of room ${payload.room}`)
+	    const roomInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.login} is now admin of room ${payload.room}`)
 	  	this.broadCastToRoom(roomInfo.event, roomInfo.data)
 	  }
   }
 
   @SubscribeMessage('noadmin')
   async removeRoomAdmin(client: Socket, payload: ChatMessage){
-	  const nick: string = client.handshake.query.nick as string;
-	  const adminRemoved: boolean = await this.chatService.removeRoomAdmin(nick, payload.nick, payload.room);
+	  const login: string = client.handshake.query.login as string;
+	  const adminRemoved: boolean = await this.chatService.removeRoomAdmin(login, payload.login, payload.room);
 	  console.log(adminRemoved)
 	  if (adminRemoved){
-	    const roomInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.nick} isn't admin of room ${payload.room} anymore`)
+	    const roomInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.login} isn't admin of room ${payload.room} anymore`)
 	  	this.broadCastToRoom(roomInfo.event, roomInfo.data)
 	  }
   } 
 
   @SubscribeMessage(events.Pass)
   async addPassToRoom(client: Socket, payload: ChatMessage){
-	  const nick: string = client.handshake.query.nick as string;
-	  this.chatService.addPassToRoom(nick, payload.room, payload.message);
+	  const login: string = client.handshake.query.login as string;
+	  this.chatService.addPassToRoom(login, payload.room, payload.message);
   }
 
   @SubscribeMessage(events.RemovePass)
   async removePassOfRoom(client: Socket, payload: ChatMessage){
-	  const nick: string = client.handshake.query.nick as string;
-	  this.chatService.removePassOfRoom(nick, payload.room);
+	  const login: string = client.handshake.query.login as string;
+	  this.chatService.removePassOfRoom(login, payload.room);
   }
 
 
   @SubscribeMessage('ban')
   async banUserOfRoom(client: Socket, payload: ChatMessage){
-	  const nick: string = client.handshake.query.nick as string;
+	  const login: string = client.handshake.query.login as string;
 	  const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(payload.room);
 	  const banOk: boolean = await this
 	  	.chatService
-	  	.banUserOfRoom(nick, payload.nick, payload.room);
+	  	.banUserOfRoom(login, payload.login, payload.room);
 	  if (banOk){
-	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromNick(payload.nick);
+	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(payload.login);
 	  	if (targetSocketIds.length){
 
 			const err: ChatMessage = generateSocketErrorResponse(payload.room, 
@@ -322,13 +322,13 @@ export class ChatGateway extends BaseGateway {
 			for (let i = 0; i < targetSocketIds.length; i++){
 				this.messageToClient(targetSocketIds[i], "system", err);
 				this.server.to(targetSocketIds[i])
-					.emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(payload.nick));
+					.emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(payload.login));
 			}
 		}
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
-				`You've banned ${payload.nick} in ${payload.room} successfully`).data)
-	    const banInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.nick} has been banned of ${payload.room}`)
+				`You've banned ${payload.login} in ${payload.room} successfully`).data)
+	    const banInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.login} has been banned of ${payload.room}`)
 		let roomMetaData: RoomMetaData = await this.roomService
 			.getRoomMetaData(payload.room)
 	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
@@ -339,57 +339,57 @@ export class ChatGateway extends BaseGateway {
 
   @SubscribeMessage('noban')
   async removeBanOfRoom(client: Socket, payload: ChatMessage){
-	  const nick: string = client.handshake.query.nick as string;
-	  const banRemoved: boolean = await this.chatService.removeBanOfRoom(nick, payload.nick, payload.room);
+	  const login: string = client.handshake.query.login as string;
+	  const banRemoved: boolean = await this.chatService.removeBanOfRoom(login, payload.login, payload.room);
 	  if (banRemoved)
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
-				`You've removed the ban of ${payload.nick} in ${payload.room} successfully`).data)
+				`You've removed the ban of ${payload.login} in ${payload.room} successfully`).data)
 		
   }
 
   @SubscribeMessage('banuser')
   async banUser2User(client: Socket, payload: ChatMessage){
-	  const nick: string = client.handshake.query.nick as string;
-	  const banOk: boolean = await this.chatService.banUser2User(nick, payload.room)
+	  const login: string = client.handshake.query.login as string;
+	  const banOk: boolean = await this.chatService.banUser2User(login, payload.room)
 	  if (banOk){
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
 				`You've banned ${payload.room} successfully`).data)
-		this.sendBlockedUsers(client.id, nick)
+		this.sendBlockedUsers(client.id, login)
 	  }
   }
 
   @SubscribeMessage('nobanuser')
   async nobanUser2User(client: Socket, payload: ChatMessage){
-	  const nick: string = client.handshake.query.nick as string;
-	  const noBanOk: boolean = await this.chatService.noBanUser2User(nick, payload.room)
+	  const login: string = client.handshake.query.login as string;
+	  const noBanOk: boolean = await this.chatService.noBanUser2User(login, payload.room)
 	  if (noBanOk){
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
 				`You've removed the ban of ${payload.room} successfully`).data)
-		this.sendBlockedUsers(client.id, nick)
+		this.sendBlockedUsers(client.id, login)
 	  }
   }
 
   //part == to leave a room
   @SubscribeMessage('part')
   async part(client: Socket, room: string): Promise<void>{
-	const nick: string = client.handshake.query.nick as string;
-	const socketIdsByNick: Array<string> = this.getClientSocketIdsFromNick(nick);
-	if (socketIdsByNick.length === 0)
+	const login: string = client.handshake.query.login as string;
+	const socketIdsByLogin: Array<string> = this.getClientSocketIdsFromLogin(login);
+	if (socketIdsByLogin.length === 0)
 		return generateSocketErrorResponse(room, `Error`)
-	const successfulPart: boolean = await this.removeUserFromRoom(room, nick);
+	const successfulPart: boolean = await this.removeUserFromRoom(room, login);
 	if (successfulPart){
-	    const joinedRoomsByNick: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(nick);
-	    const privateRoomsByNick: Array<string> = await this.chatService.getMyPrivateRooms(nick);
-	  	socketIdsByNick.forEach(socketId => {
-		  this.server.to(socketId).emit(events.ListMyJoinedRooms, joinedRoomsByNick);
-		  this.server.to(socketId).emit(events.ListMyPrivateRooms, privateRoomsByNick);
+	    const joinedRoomsByLogin: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(login);
+	    const privateRoomsByLogin: Array<string> = await this.chatService.getMyPrivateRooms(login);
+	  	socketIdsByLogin.forEach(socketId => {
+		  this.server.to(socketId).emit(events.ListMyJoinedRooms, joinedRoomsByLogin);
+		  this.server.to(socketId).emit(events.ListMyPrivateRooms, privateRoomsByLogin);
 		  this.server.to(socketId).emit("system", generateSocketInformationResponse(room, `you've left ${room}`).data);
 	  	});
 
-	 	const roomInfo: SocketPayload = generateSocketInformationResponse(room, `user ${nick} has left room ${room}`)
+	 	const roomInfo: SocketPayload = generateSocketInformationResponse(room, `user ${login} has left room ${room}`)
 	  	this.broadCastToRoom(roomInfo.event, roomInfo.data)
 	}
 	else{

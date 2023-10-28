@@ -22,14 +22,14 @@ export class ChatService {
 				@Inject(forwardRef(() => RoomService))
 				private roomService: RoomService) {}
 
-	public async createRoom(nick:string, room: string, hasPass: boolean, password: string | undefined): Promise<boolean>{
+	public async createRoom(login: string, room: string, hasPass: boolean, password: string | undefined): Promise<boolean>{
 		const roomAlreadyExists = await this.roomRepository.findOne({ where: {name: room}});
 
 		if (roomAlreadyExists){ 
 			return true; 
 		} else { 
 			const hashedPass = hasPass ? await this.hashService.hashPassword(password) : undefined;
-			const user: User = await this.userService.getUserByNick(nick);
+			const user: User = await this.userService.getUserByLogin(login);
 			const roomToCreate: Room = await this.roomRepository.create({
 				name: room,
 				hasPass: hasPass,
@@ -53,7 +53,7 @@ export class ChatService {
 		return false;
 	}
 
-	public async getRoomMaskOfPrivateRoom(room: string, myNick: string): Promise<string>{
+	public async getRoomMaskOfPrivateRoom(room: string, myLogin: string): Promise<string>{
 		if (room.includes(":")){
 			const userIds: Array<number> = room
 				.replace("#", "")
@@ -61,10 +61,10 @@ export class ChatService {
 				.map(n => parseInt(n));
 			const user1: User = await this.userService.getUser(userIds[0])
 			const user2: User = await this.userService.getUser(userIds[1])
-			if (user1.nick === myNick){
-				return "@" + user2.nick
+			if (user1.login === myLogin){
+				return "@" + user2.login
 			}
-			return "@" + user1.nick
+			return "@" + user1.login
 		}
 		return room
 	}
@@ -80,17 +80,17 @@ export class ChatService {
 		return (allRooms);
 	}
 
-	public async getMyPrivateRooms(nick: string): Promise<string []>{
-		const allMyJoinedRooms: Array<string> = await this.getAllJoinedRoomsByOneUser(nick)
+	public async getMyPrivateRooms(login: string): Promise<string []>{
+		const allMyJoinedRooms: Array<string> = await this.getAllJoinedRoomsByOneUser(login)
 		return allMyJoinedRooms.filter(r => r.includes("@"))
 	}
 
-	public async getAllJoinedRoomsByOneUser(nick: string): Promise<string[]>{
+	public async getAllJoinedRoomsByOneUser(login: string): Promise<string[]>{
 		let allRooms: string[] = [];
 		const foundUser = await this.userRepository
 			.findOne({
 				relations: ['joinedRooms'],
-				where: { nick: nick}
+				where: { login: login}
 			})
 		if (!foundUser){
 			return [];
@@ -98,7 +98,7 @@ export class ChatService {
 		const joinedRoomsRaw = foundUser.joinedRooms;
 		for (let i = 0; i < joinedRoomsRaw.length; i++){
 			if (joinedRoomsRaw[i].name.includes(":")){
-				allRooms.push(await this.getRoomMaskOfPrivateRoom(joinedRoomsRaw[i].name, nick))
+				allRooms.push(await this.getRoomMaskOfPrivateRoom(joinedRoomsRaw[i].name, login))
 			}
 			else{
 				allRooms.push(joinedRoomsRaw[i].name)
@@ -119,28 +119,28 @@ export class ChatService {
 		*/
 	}
 
-	public async addUserToRoom(room: string, nick: string): Promise<boolean>{
-		const isBannedOfRoom: boolean = await this.isBannedOfRoom(nick, room)
+	public async addUserToRoom(room: string, login: string): Promise<boolean>{
+		const isBannedOfRoom: boolean = await this.isBannedOfRoom(login, room)
 		if (isBannedOfRoom) return false;
 		const foundRoom = await this.getRoom(room);
-		const foundUser = await this.userService.getUserByNick(nick);
+		const foundUser = await this.userService.getUserByLogin(login);
 		foundRoom.users.push(foundUser);
 		await this.roomRepository.save(foundRoom);
 		return true;
 	}
 
-	public async removeUserFromRoom(room: string, nick: string): Promise<boolean> {
+	public async removeUserFromRoom(room: string, login: string): Promise<boolean> {
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) { return false; }
 		const oldUserSize: number = foundRoom.users.length;
 		foundRoom.users = foundRoom.users.filter(user => {
-			return user.nick != nick;
+			return user.login != login;
 		})
 		await this.roomRepository.save(foundRoom);
 		if (oldUserSize === foundRoom.users.length){ 
 			return false;
 		}
-		const isOwnerOfRoom: boolean = await this.isOwnerOfRoom(nick, room)
+		const isOwnerOfRoom: boolean = await this.isOwnerOfRoom(login, room)
 		if (isOwnerOfRoom) {
 			await this.removeOwnerFromRoom(room)
 		}
@@ -156,14 +156,14 @@ export class ChatService {
 			})
 			.then(r => r ? r.users : null )
 		if (usersRaw){
-			usersRaw.map(u => allUsersInRoom.push(u.nick))
+			usersRaw.map(u => allUsersInRoom.push(u.login))
 		}
 		return allUsersInRoom;
 	}
 
-	public async isUserInRoom(room: string, nick: string): Promise<boolean>{
+	public async isUserInRoom(room: string, login: string): Promise<boolean>{
 		const usersInRoom: string[] = await this.getAllUsersInRoom(room);
-		return usersInRoom.includes(nick);
+		return usersInRoom.includes(login);
 	}
 
 	public async isRoomEmpty(room: string): Promise<boolean>{
@@ -174,20 +174,20 @@ export class ChatService {
 		return (false)
 	}
 
-	public async isOwnerOfRoom(nick: string, room: string): Promise<boolean>{
+	public async isOwnerOfRoom(login: string, room: string): Promise<boolean>{
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom || !foundRoom.owner) return false;
-		if (foundRoom.owner.nick === nick) return true;
+		if (foundRoom.owner.login === login) return true;
 		return false;
 	}
 
 	public async removeOwnerFromRoom(room: string): Promise<boolean>{
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) return false;
-		const nick: string = foundRoom.owner.nick;
+		const login: string = foundRoom.owner.login;
 		foundRoom.owner = undefined;
 		await this.roomRepository.save(foundRoom);
-		const user: User = await this.userService.getUserByNick(nick);
+		const user: User = await this.userService.getUserByLogin(login);
 		user.ownedRooms = user.ownedRooms.filter(r => {
 			return r.name != room;
 		})
@@ -195,42 +195,42 @@ export class ChatService {
 		return true;
 	}
 
-	public async makeRoomAdmin(executorNick: string, nick: string, room: string): Promise<boolean>{
-		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorNick, room);
+	public async makeRoomAdmin(executorLogin: string, login: string, room: string): Promise<boolean>{
+		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorLogin, room);
 		if (!executorIsOwnerOfRoom) return false;
-		const isBannedOfRoom: boolean = await this.isBannedOfRoom(nick, room)
+		const isBannedOfRoom: boolean = await this.isBannedOfRoom(login, room)
 		if (isBannedOfRoom) return false;
 
 		const foundRoom: Room = await this.getRoom(room)
 		const roomAdmins: User[] = foundRoom.admins;
 		for (let admin of roomAdmins){
-			if (admin.nick === nick) return false;
+			if (admin.login === login) return false;
 		}
-		const userToMakeAdmin: User | undefined = await this.userService.getUserByNick(nick);
+		const userToMakeAdmin: User | undefined = await this.userService.getUserByLogin(login);
 		if (!userToMakeAdmin) return false;
 		foundRoom.admins.push(userToMakeAdmin);
 		await this.roomRepository.save(foundRoom)
 		return true;
 	}
 
-	public async isAdminOfRoom(nick: string, room: string): Promise<boolean>{
+	public async isAdminOfRoom(login: string, room: string): Promise<boolean>{
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) return false;
 		const adminsOfRoom: User[] = foundRoom.admins;
 		for (let admin of adminsOfRoom){
-			if (admin.nick === nick) return true;
+			if (admin.login === login) return true;
 		}
 		return false;
 	}
 
-	public async removeRoomAdmin(executorNick: string, nick: string, room: string): Promise<boolean>{
+	public async removeRoomAdmin(executorLogin: string, login: string, room: string): Promise<boolean>{
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) return false;
-		const isOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorNick, room);
+		const isOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorLogin, room);
 		if (!isOwnerOfRoom) return false;
 		const oldAdminSize: number = foundRoom.admins.length;
 		foundRoom.admins = foundRoom.admins.filter(user => {
-			return user.nick != nick;
+			return user.login != login;
 		})
 		await this.roomRepository.save(foundRoom);
 		if (oldAdminSize === foundRoom.admins.length){ 
@@ -243,62 +243,62 @@ export class ChatService {
 	// - owner can ban and remove ban of admins and users
 	// - admins can ban and remove ban of users
 	// - nobody can ban himself
-	public async banUserOfRoom(executorNick: string, nick: string, room: string): Promise<boolean>{
+	public async banUserOfRoom(executorLogin: string, login: string, room: string): Promise<boolean>{
 		//check privileges
-		console.log(executorNick, nick, room)
-		if (executorNick === nick) return false;
-		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorNick, room);
-		const executorIsAdminOfRoom: boolean = await this.isAdminOfRoom(executorNick, room);
+		console.log(executorLogin, login, room)
+		if (executorLogin === login) return false;
+		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorLogin, room);
+		const executorIsAdminOfRoom: boolean = await this.isAdminOfRoom(executorLogin, room);
 		if (!executorIsOwnerOfRoom && !executorIsAdminOfRoom) return false;
-		const targetIsAlreadyBanned: boolean = await this.isBannedOfRoom(nick, room)
+		const targetIsAlreadyBanned: boolean = await this.isBannedOfRoom(login, room)
 		if (targetIsAlreadyBanned) return false;
-		const targetIsAdminOfRoom: boolean = await this.isAdminOfRoom(nick, room)
+		const targetIsAdminOfRoom: boolean = await this.isAdminOfRoom(login, room)
 		if (!executorIsOwnerOfRoom && executorIsAdminOfRoom && targetIsAdminOfRoom) return false;
-		const targetIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(nick, room)
+		const targetIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(login, room)
 		if (executorIsAdminOfRoom && targetIsOwnerOfRoom) return false;
 		if (executorIsOwnerOfRoom && targetIsOwnerOfRoom) return false;
 
 		//remove privileges and ban
-		await this.removeRoomAdmin(executorNick, nick, room);
+		await this.removeRoomAdmin(executorLogin, login, room);
 		const foundRoom: Room = await this.getRoom(room)
 		if (!foundRoom) return false;
 		const roomBanned: User[] = foundRoom.banned;
 		for (let banned of roomBanned){
-			if (banned.nick === nick) return true;
+			if (banned.login === login) return true;
 		}
-		const userToBan: User | undefined = await this.userService.getUserByNick(nick);
+		const userToBan: User | undefined = await this.userService.getUserByLogin(login);
 		if (!userToBan) return false;
 		foundRoom.banned.push(userToBan);
 		await this.roomRepository.save(foundRoom)
 
 		//remove user from room where has been banned
-		await this.removeUserFromRoom(room, nick)
+		await this.removeUserFromRoom(room, login)
 		return true;
 	}
 
-	public async isBannedOfRoom(nick: string, room: string): Promise<boolean>{
+	public async isBannedOfRoom(login: string, room: string): Promise<boolean>{
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) return false;
 		const bannedOfRoom: User[] = foundRoom.banned;
 		for (let i = 0; i < bannedOfRoom.length; i++){
-			if (bannedOfRoom[i].nick === nick) return true;
+			if (bannedOfRoom[i].login === login) return true;
 		}
 		return false;
 	}
 
-	public async removeBanOfRoom(executorNick: string, nick: string, room: string): Promise<boolean>{
-		if (executorNick === nick) return false;
+	public async removeBanOfRoom(executorLogin: string, login: string, room: string): Promise<boolean>{
+		if (executorLogin === login) return false;
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) return false;
-		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorNick, room); 
-		const executorIsAdminOfRoom: boolean = await this.isAdminOfRoom(executorNick, room);
+		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorLogin, room); 
+		const executorIsAdminOfRoom: boolean = await this.isAdminOfRoom(executorLogin, room);
 		if (!executorIsOwnerOfRoom && !executorIsAdminOfRoom) return false;
-		const isTargetBanned: boolean = await this.isBannedOfRoom(nick, room)
+		const isTargetBanned: boolean = await this.isBannedOfRoom(login, room)
 		if (!isTargetBanned) return false;
 
 		const oldBannedSize: number = foundRoom.users.length;
 		foundRoom.banned = foundRoom.banned.filter(user => {
-			return user.nick != nick;
+			return user.login != login;
 		})
 		await this.roomRepository.save(foundRoom);
 		if (oldBannedSize === foundRoom.banned.length){ 
@@ -308,10 +308,10 @@ export class ChatService {
 	}
 
 
-	public async addPassToRoom(nick: string, room: string, pass: string){
+	public async addPassToRoom(login: string, room: string, pass: string){
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) return false;
-		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(nick, room); 
+		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(login, room); 
 		if (!executorIsOwnerOfRoom) return false;
 		const hashedPass = await this.hashService.hashPassword(pass);
 		foundRoom.hasPass = true;
@@ -320,10 +320,10 @@ export class ChatService {
 		return true
 	}
 
-	public async removePassOfRoom(nick: string, room: string){
+	public async removePassOfRoom(login: string, room: string){
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) return false;
-		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(nick, room); 
+		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(login, room); 
 		if (!executorIsOwnerOfRoom) return false;
 		foundRoom.hasPass = false;
 		foundRoom.password = null;
@@ -332,9 +332,9 @@ export class ChatService {
 	}
 
 
-	async generatePrivateRoomName(originNick: string, destinationNick: string): Promise<string | undefined>{
-		const originUser: User = await this.userService.getUserByNick(originNick);
-		const destinationUser: User = await this.userService.getUserByNick(destinationNick);
+	async generatePrivateRoomName(originLogin: string, destinationLogin: string): Promise<string | undefined>{
+		const originUser: User = await this.userService.getUserByLogin(originLogin);
+		const destinationUser: User = await this.userService.getUserByLogin(destinationLogin);
 
 		if (!originUser || !destinationUser){
 			return undefined
@@ -347,17 +347,17 @@ export class ChatService {
 		return "#" + destinationUserId + ":" + originUserId;
 	}
 
-	public async banUser2User(emisorNick: string, targetNick: string): Promise<boolean>{
+	public async banUser2User(emisorLogin: string, targetLogin: string): Promise<boolean>{
 
-		const bannedUsers = await this.userService.getBannedUsersByNick(emisorNick)
+		const bannedUsers = await this.userService.getBannedUsersByLogin(emisorLogin)
 		// check if user is already banned
 		for (let i = 0; i < bannedUsers.length; i++){
-			if (bannedUsers[i].nick == targetNick) return true;
+			if (bannedUsers[i].login == targetLogin) return true;
 		}
-		const foundEmisor = await this.userService.getUserByNick(emisorNick);
+		const foundEmisor = await this.userService.getUserByLogin(emisorLogin);
 		if (foundEmisor === undefined) 
 			return false
-		const foundTarget = await this.userService.getUserByNick(targetNick);
+		const foundTarget = await this.userService.getUserByLogin(targetLogin);
 		if (foundTarget === undefined)
 			return false
 		foundEmisor.bannedUsers.push(foundTarget)
@@ -365,11 +365,11 @@ export class ChatService {
 		return true
 	}
 
-	public async noBanUser2User(emisorNick: string, targetNick: string): Promise<boolean>{
-		let foundEmisor = await this.userService.getUserByNick(emisorNick);
+	public async noBanUser2User(emisorLogin: string, targetLogin: string): Promise<boolean>{
+		let foundEmisor = await this.userService.getUserByLogin(emisorLogin);
 		if (foundEmisor === undefined) 
 			return false
-		const newBannedUsers: Array<User> = foundEmisor.bannedUsers.filter(u => u.nick !== targetNick)
+		const newBannedUsers: Array<User> = foundEmisor.bannedUsers.filter(u => u.login !== targetLogin)
 		if (foundEmisor.bannedUsers.length === newBannedUsers.length) return false;
 		foundEmisor.bannedUsers = newBannedUsers;
 		await this.userRepository.save(foundEmisor)
