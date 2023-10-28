@@ -348,10 +348,12 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   public async sendBlockedUsers(clientId: string, nick: string): Promise<void>{
+	if (map) {
 		const blockedUsersByNick: Array<string> = (await this.userService
 			.getBannedUsersByNick(nick))
 			.map(m => m.nick)
- 		this.server.to(clientId).emit(events.BlockedUsers, blockedUsersByNick) 
+ 		this.server.to(clientId).emit(events.BlockedUsers, blockedUsersByNick)
+		}
   }
 
 }

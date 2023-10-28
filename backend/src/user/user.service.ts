@@ -97,6 +97,10 @@ export class UserService {
 		return this.repository.save(body);
 	};
 
+	async saveUser(user: User): Promise<User> {
+		return await this.repository.save(user);
+	}
+
 	public async whoAmI(token: string): Promise<any>
 	{
 		const data  = await lastValueFrom(
@@ -114,7 +118,10 @@ export class UserService {
 	}
 
 	public async getAllUsers(): Promise<User[]> {
-		return await this.repository.find();
+		return await this.repository.find({
+			order: {
+			  id: 'ASC', // Ordena por ID de manera ascendente (también puedes usar 'DESC' para descendente)
+			}});
 	}
 
 	public async getUserAchievements(id: number): Promise<Achievement[]> {

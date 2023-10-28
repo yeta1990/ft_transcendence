@@ -63,7 +63,11 @@ export class User {
 	})
 	mfaSecret: string;
 
-
+	@Column('text',{ 
+		array: true,
+		nullable: true,
+		default: [] })
+	recoveryCodes: string[];
 
 	// PERSONALIZACION -------------------------------------
 

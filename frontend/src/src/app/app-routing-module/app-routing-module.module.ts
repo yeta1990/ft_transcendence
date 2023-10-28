@@ -79,7 +79,10 @@ const routes: Routes = [
 	{
 		path: 'play',
 		component: PongComponent,
-		canActivate: [AuthGuard] 
+		canActivate: [AuthGuard],
+		data: {
+			logCheck: true
+		  },
 	}
 ];
 
