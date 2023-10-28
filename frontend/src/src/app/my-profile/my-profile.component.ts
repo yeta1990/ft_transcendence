@@ -35,8 +35,13 @@ export class MyProfileComponent implements OnInit {
 		this.router.navigateByUrl('/login');
 	}
 	ngOnInit(): void {	
-
+		const userName = this.authService.getUserNameFromToken();
+		console.log("The username is: " + userName);
+		if (userName) {
+			this.router.navigate(['/user-profile', userName]);
+		}
 	}
+
 	allUsers(): void {
 		console.log("All users login list:");
 		this.router.navigateByUrl('/all-users');

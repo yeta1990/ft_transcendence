@@ -43,10 +43,11 @@ export class AuthService {
     }
 
 	redirectToHome() {
-        this.router.navigateByUrl('/my-profile');
+        this.router.navigateByUrl('/');
     }
 
 	private setSession(authResult: any) {
+		console.log("Consigo entrar en setSession");
         localStorage.setItem("access_token", authResult.access_token);
         localStorage.setItem("expires_at", authResult.expires_at);
     }
@@ -90,5 +91,18 @@ export class AuthService {
 		}
 		return ;
 	}
+
+	getUserNameFromToken(): string | null {
+		const token = this.getUserToken();
+		console.log("I have a token");
+		console.log(token);
+		if (token) {
+		  const decodedToken = this.getDecodedAccessToken(token);
+		  console.log("My username is: " + decodedToken.login);
+		  const userName = decodedToken?.login;
+			return userName || null;
+		}
+		return null;
+	  }
 
 }

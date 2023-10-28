@@ -48,7 +48,7 @@
 	  
 
 	  <!-- Botón de edición -->
-	  <button class="edit-button" *ngIf="adminPower">EDIT PROFILE</button>
+	  <button class="edit-button" (click)="goEdit()" *ngIf="adminPower">EDIT PROFILE</button>
 	  
 	  <!-- Botón de salida -->
 	  <div class="close-button">

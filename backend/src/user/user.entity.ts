@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn, ManyToMany, JoinTable } from 'typeorm';
 import { Friend } from './friend/friend.entity'
-import { UserStatus, Campuses } from '@shared/enum';
+import { UserStatus, Campuses, UserRole } from '@shared/enum';
 import { Achievement } from './achievement/achievement.entity'
 import { Room } from '../chat/room.entity';
 
@@ -34,7 +34,7 @@ export class User {
 	})
 	login: string;
 
-		@Column({
+	@Column({
 		nullable: true,
 		default: undefined,
 	})
@@ -47,6 +47,12 @@ export class User {
 	campus: Campuses;
 
 	@Column({
+		nullable: false,
+		default: UserRole.REGISTRED
+	})
+	userRole: UserRole;
+
+	@Column({
 		default:false
 	})
 	mfa: boolean;
@@ -57,7 +63,11 @@ export class User {
 	})
 	mfaSecret: string;
 
-
+	@Column('text',{ 
+		array: true,
+		nullable: true,
+		default: [] })
+	recoveryCodes: string[];
 
 	// PERSONALIZACION -------------------------------------
 

@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { MyProfileComponent } from '../my-profile/my-profile.component'
 import { FormComponent } from '../form/form.component'
 import { LoginComponent } from '../login/login.component';
 import { CallbackComponent } from '../callback/callback.component';
@@ -24,40 +23,66 @@ import { PongComponent } from '../pong/pong.component';
 // - With an unauthorized error (401) response from the backend, 
 // the user will be redirected to login page
 const routes: Routes = [
-	{	path: '',  component: HomeComponent, canActivate: [AuthGuard] },
-	{	path: 'home',  component: HomeComponent, canActivate: [AuthGuard] },
-	{	path: 'signup', component: FormComponent } ,
+	{	path: '',
+		component: HomeComponent,
+		canActivate: [AuthGuard],
+		data: {
+			logCheck: true
+		},
+	},
+	{	path: 'home',
+		component: HomeComponent,
+		canActivate: [AuthGuard],
+		data: {
+			logCheck: true
+		},
+	},
+	{	path: 'signup',
+		component: FormComponent
+	} ,
 	{	
 		path: 'chat', 
 		component: ChatComponent, 
-		canActivate: [AuthGuard] 
+		canActivate: [AuthGuard],
+		data: {
+			logCheck: true
+		},
 	},
-	{	path: 'login', component: LoginComponent },
+	{	path: 'login',
+		component: LoginComponent
+	},
 	{	path: 'callback', component: CallbackComponent },
 	{	
 		path: 'all-users', 
 		component: AllUsersComponent, 
-		canActivate: [AuthGuard] 
+		canActivate: [AuthGuard],
+		data: {
+			logCheck: true
+		},
 	},
 	{	
-		path: 'user-profile/:id', 
+		path: 'user-profile/:login', 
 		component: UserProfileComponent, 
-		canActivate: [AuthGuard] 
+		canActivate: [AuthGuard],
+		data: {
+			logCheck: true
+		},
 	},
-	{	
-		path: 'my-profile', 
-		component: MyProfileComponent, 
-		canActivate: [AuthGuard] 
-	},
-	{	
-		path: 'my-profile/edit', 
-		component: EditProfileComponent, 
-		canActivate: [AuthGuard] 
-	},
+	{
+		path: 'user-profile/:login/edit',
+		component: EditProfileComponent,
+		canActivate: [AuthGuard],
+		data: {
+		  bothCheck: true
+		},
+	  },
 	{
 		path: 'play',
 		component: PongComponent,
-		canActivate: [AuthGuard] 
+		canActivate: [AuthGuard],
+		data: {
+			logCheck: true
+		  },
 	}
 ];
 

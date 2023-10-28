@@ -161,7 +161,7 @@
 .progress-bar .losses {
 	font-family: "Roboto", sans-serif;
   position: absolute;
-  top: 15%; /* Ajusta la posición vertical */
+  top: 0%; /* Ajusta la posición vertical */
   color: white;
   font-size: 30px;
   z-index: 2;
