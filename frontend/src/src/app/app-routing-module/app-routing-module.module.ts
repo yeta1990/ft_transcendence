@@ -23,25 +23,50 @@ import { PongComponent } from '../pong/pong.component';
 // - With an unauthorized error (401) response from the backend, 
 // the user will be redirected to login page
 const routes: Routes = [
-	{	path: '',  component: HomeComponent, canActivate: [AuthGuard] },
-	{	path: 'home',  component: HomeComponent, canActivate: [AuthGuard] },
-	{	path: 'signup', component: FormComponent } ,
+	{	path: '',
+		component: HomeComponent,
+		canActivate: [AuthGuard],
+		data: {
+			logCheck: true
+		},
+	},
+	{	path: 'home',
+		component: HomeComponent,
+		canActivate: [AuthGuard],
+		data: {
+			logCheck: true
+		},
+	},
+	{	path: 'signup',
+		component: FormComponent
+	} ,
 	{	
 		path: 'chat', 
 		component: ChatComponent, 
-		canActivate: [AuthGuard] 
+		canActivate: [AuthGuard],
+		data: {
+			logCheck: true
+		},
 	},
-	{	path: 'login', component: LoginComponent },
+	{	path: 'login',
+		component: LoginComponent
+	},
 	{	path: 'callback', component: CallbackComponent },
 	{	
 		path: 'all-users', 
 		component: AllUsersComponent, 
-		canActivate: [AuthGuard] 
+		canActivate: [AuthGuard],
+		data: {
+			logCheck: true
+		},
 	},
 	{	
 		path: 'user-profile/:login', 
 		component: UserProfileComponent, 
-		canActivate: [AuthGuard] 
+		canActivate: [AuthGuard],
+		data: {
+			logCheck: true
+		},
 	},
 	{
 		path: 'user-profile/:login/edit',

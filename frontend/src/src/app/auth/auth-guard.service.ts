@@ -37,12 +37,16 @@ export class AuthGuardService  {
 			console.log("Me has pedido que compruebe userCheck");
 			return this.checkUserPermissions(route);
 		}
-		
-		if (!this.auth.isLoggedIn()) {
-			console.log("OJO! el usuario no está identificado");
-			return of(true)
+
+		if (route.data && route.data['logCheck']) {
+			console.log("Me has pedido que compruebe si el usuario está loggeado");
+			if (this.auth.isLoggedIn()) {
+				return of(true);
+			} else {
+				console.log("OJO! el usuario no está identificado");
+				return of(this.router.createUrlTree(['/login']));
+			}
 		}
-		// Por defecto, redirige a la página de inicio de sesión si no se especifica ningún tipo de verificación
 		return of(true);
 	}
 

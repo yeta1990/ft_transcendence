@@ -107,8 +107,9 @@ ps: ## Shows Containers.
 debug: fclean build ## Starts FT_TRASCENDENCE in debug mode.
 	@echo "\n$(GR)[$(B)'$(NAME)': $(GR)Starting all services including tx_adminer in debug mode. Please wait...]${END}"
 	@docker-compose up -d
-	@echo "\n$(G)[$(B)'$(NAME)': $(G)All services started and running. Debug mode.          ]${END}\n"
+	@echo "\n$(G)[$(B)'$(NAME)': $(G)All services started and running. Debug mode.       ]${END}\n"
 
+reset: down fclean clean prune ## [Develop] Use this when experiencing CORS or login problems.
 
 help: ## Shows help and Usage
 	@echo "\n$(LB)_______________________________ $(NAME) _______________________________$(END)"

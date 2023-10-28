@@ -47,6 +47,7 @@ export class AuthService {
     }
 
 	private setSession(authResult: any) {
+		console.log("Consigo entrar en setSession");
         localStorage.setItem("access_token", authResult.access_token);
         localStorage.setItem("expires_at", authResult.expires_at);
     }
@@ -103,4 +104,5 @@ export class AuthService {
 		}
 		return null;
 	  }
+
 }
