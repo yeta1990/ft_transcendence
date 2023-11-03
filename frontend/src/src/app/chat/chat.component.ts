@@ -71,6 +71,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	   this.chatService.banUserFromRoom(nick, room)
    }
 
+   unBanUserFromRoom(nick: string, room: string){
+	   this.chatService.removeBanFromRoom(nick, room)
+   }
+
    banUser2User(targetNick: string){
   		this.chatService.banUser2User(targetNick) 
    }
@@ -311,6 +315,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template3', [nick, room]);
+	}
+
+	unBanUserFromRoomModal(nick: string, room: string){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const banConfirmation = this.modalService.getModalData()[0];
+			this.unBanUserFromRoom(nick, room)
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template3b', [nick, room]);
 	}
 
 	blockUserModal(targetUser: string) {

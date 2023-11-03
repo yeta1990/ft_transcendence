@@ -272,8 +272,7 @@ export class ChatService {
 		await this.roomRepository.save(foundRoom)
 
 		//remove user from room where has been banned
-		await this.removeUserFromRoom(room, login)
-		return true;
+		return await this.removeUserFromRoom(room, login)
 	}
 
 	public async isBannedOfRoom(login: string, room: string): Promise<boolean>{

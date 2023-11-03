@@ -315,11 +315,12 @@ export class ChatGateway extends BaseGateway {
 	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(payload.login);
 	  	if (targetSocketIds.length){
 
-			const err: ChatMessage = generateSocketErrorResponse(payload.room, 
+			const err: SocketPayload = generateSocketInformationResponse(payload.room, 
 				`Information: you have been banned from ${payload.room}`)
+			console.log(err.data)
 
 			for (let i = 0; i < targetSocketIds.length; i++){
-				this.messageToClient(targetSocketIds[i], "system", err);
+				this.server.to(targetSocketIds[i]).emit("system", err.data)
 				this.server.to(targetSocketIds[i])
 					.emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(payload.login));
 			}
@@ -331,7 +332,7 @@ export class ChatGateway extends BaseGateway {
 		let roomMetaData: RoomMetaData = await this.roomService
 			.getRoomMetaData(payload.room)
 	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
-	  	this.broadCastToRoom(banInfo.event, banInfo.data)
+	  	this.broadCastToRoomExceptForSomeUsers(banInfo.event, banInfo.data, [payload.login, login])
 
   	  }
   }
@@ -340,11 +341,14 @@ export class ChatGateway extends BaseGateway {
   async removeBanOfRoom(client: Socket, payload: ChatMessage){
 	  const login: string = client.handshake.query.login as string;
 	  const banRemoved: boolean = await this.chatService.removeBanOfRoom(login, payload.login, payload.room);
-	  if (banRemoved)
+	  if (banRemoved){
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
 				`You've removed the ban of ${payload.login} in ${payload.room} successfully`).data)
-		
+		let roomMetaData: RoomMetaData = await this.roomService
+			.getRoomMetaData(payload.room)
+	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
+	  }
   }
 
   @SubscribeMessage('banuser')

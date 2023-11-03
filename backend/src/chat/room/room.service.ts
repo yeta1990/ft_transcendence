@@ -44,6 +44,7 @@ export class RoomService {
 		data.owner = roomData.owner ? roomData.owner.nick : null;
 		data.admins = [...new Set(roomData.admins.map(a => a.nick))];
 		data.users = [...new Set(roomData.users.map(u => u.nick))];
+		data.banned = [...new Set(roomData.banned.map(u => u.nick))];
 		data.hasPass = roomData.hasPass;
 		return data;
 	}

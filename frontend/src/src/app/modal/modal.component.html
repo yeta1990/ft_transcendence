@@ -67,6 +67,23 @@
         </div>
       </ng-template>
 
+      <ng-template [ngSwitchCase]="'template3b'">
+        <div id="modal-content-template3b">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Remove ban @{{getModalData()[0][0]}} from {{getModalData()[0][1]}}?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          	<p>Are you sure?</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
       <ng-template [ngSwitchCase]="'template4'">
         <div id="modal-content-template4">
 		  <div class="modal-header">
