@@ -185,7 +185,6 @@ export class ChatGateway extends BaseGateway {
   	  if (room.length > 0 && room[0] != '#' && room[0] != '@'){
   	  	room = '#' + room;
   	  }
-
 	  for (const c of values.forbiddenChatRoomCharacters){
 		if (room.substr(1, room.length - 1).includes(c)){
 			this.server.to(client.id)

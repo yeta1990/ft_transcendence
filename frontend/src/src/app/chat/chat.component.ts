@@ -57,7 +57,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
    joinUserToRoom(roomAndPass: string): void {
 	    //adding a # to those rooms who haven't it
-	  	if (roomAndPass.length > 0 && roomAndPass[0] != '#') roomAndPass = '#' + roomAndPass;
+	  	if (roomAndPass.length > 0 && roomAndPass[0] != '#' && roomAndPass[0] != '@') roomAndPass = '#' + roomAndPass;
    	      //in case the user was already in that channel
    	      //we want to preserve the historial of the room
 		if (!this.messageList.get(roomAndPass)){
