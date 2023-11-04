@@ -144,6 +144,10 @@ export class ChatService {
 		if (isOwnerOfRoom) {
 			await this.removeOwnerFromRoom(room)
 		}
+		const isAdminOfRoom: boolean = await this.isAdminOfRoom(login, room)
+		if (isAdminOfRoom) {
+			await this.forceRemoveRoomAdmin(login, room)
+		}
 		return true;
 	}
 
@@ -228,6 +232,21 @@ export class ChatService {
 		if (!foundRoom) return false;
 		const isOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorLogin, room);
 		if (!isOwnerOfRoom) return false;
+		const oldAdminSize: number = foundRoom.admins.length;
+		foundRoom.admins = foundRoom.admins.filter(user => {
+			return user.login != login;
+		})
+		await this.roomRepository.save(foundRoom);
+		if (oldAdminSize === foundRoom.admins.length){ 
+			return false;
+		}
+		return true;
+	}
+
+	public async forceRemoveRoomAdmin(login: string, room:string) {
+		const foundRoom: Room = await this.getRoom(room);
+		if (!foundRoom) return false;
+
 		const oldAdminSize: number = foundRoom.admins.length;
 		foundRoom.admins = foundRoom.admins.filter(user => {
 			return user.login != login;
