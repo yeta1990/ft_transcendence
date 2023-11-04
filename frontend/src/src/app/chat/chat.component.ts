@@ -79,6 +79,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	   this.chatService.banUserFromRoom(nick, room)
    }
 
+   silenceUserFromRoom(nick: string, room: string){
+		this.chatService.silenceUserFromRoom(nick, room)
+   }
+
+   unSilenceUserFromRoom(nick: string, room: string){
+   	   this.chatService.unSilenceUserFromRoom(nick, room)
+   }
+
    unBanUserFromRoom(nick: string, room: string){
 	   this.chatService.removeBanFromRoom(nick, room)
    }

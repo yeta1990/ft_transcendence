@@ -8,7 +8,9 @@ export const events = {
 	RoomMetaData: "roomMetaData",
 	ActiveUsers: "activeUsers",
 	SoftDisconnect: "softDisconnect",
-	BlockedUsers: "blockedUsers"
+	BlockedUsers: "blockedUsers",
+	SilenceUser: "silence",
+	UnSilenceUser: "nosilence"
 }
 
 export const values = {

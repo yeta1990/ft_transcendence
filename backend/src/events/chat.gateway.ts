@@ -66,6 +66,13 @@ export class ChatGateway extends BaseGateway {
 	}
 	else if (await this.chatService.isUserInRoom(payload.room, login)){
 
+		const isSilencedOfRoom: boolean = await this
+			.chatService
+			.isSilencedOfRoom(login, payload.room)
+		if (isSilencedOfRoom){
+			return this.messageToClient(client.id, "system",
+				generateSocketErrorResponse("", `You can't send a message to channel ${payload.room} because you are silenced`).data);
+		}
 		//check if user is banned from the channel
 		const isBannedOfRoom: boolean = await this
 			.chatService
@@ -369,6 +376,49 @@ export class ChatGateway extends BaseGateway {
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
 				`You've removed the ban of ${payload.login} in ${payload.room} successfully`).data)
+		let roomMetaData: RoomMetaData = await this.roomService
+			.getRoomMetaData(payload.room)
+	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
+	  }
+  }
+
+  @SubscribeMessage(events.SilenceUser)
+  async silenceUserOfRoom(client: Socket, payload: ChatMessage){
+	  const login: string = client.handshake.query.login as string;
+	  const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(payload.room);
+	  const silenceOk: boolean = await this
+	  	.chatService
+	  	.silenceUserOfRoom(login, payload.login, payload.room);
+	  if (silenceOk){
+	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(payload.login);
+	  	if (targetSocketIds.length){
+
+			const err: SocketPayload = generateSocketInformationResponse(payload.room, 
+				`Information: you have been silenced from ${payload.room}`)
+
+			for (let i = 0; i < targetSocketIds.length; i++){
+				this.server.to(targetSocketIds[i]).emit("system", err.data)
+			}
+		}
+		this.server.to(client.id)
+			.emit("system", generateSocketInformationResponse(payload.room, 
+				`You've silenced ${payload.login} in ${payload.room} successfully`).data)
+	    const silenceInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.login} has been silenced of ${payload.room}`)
+		let roomMetaData: RoomMetaData = await this.roomService
+			.getRoomMetaData(payload.room)
+	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
+	  	this.broadCastToRoomExceptForSomeUsers(silenceInfo.event, silenceInfo.data, [payload.login, login])
+  	  }
+  }
+
+  @SubscribeMessage(events.UnSilenceUser)
+  async removeSilenceOfRoom(client: Socket, payload: ChatMessage){
+	  const login: string = client.handshake.query.login as string;
+	  const silenceRemoved: boolean = await this.chatService.removeSilenceOfRoom(login, payload.login, payload.room);
+	  if (silenceRemoved){
+		this.server.to(client.id)
+			.emit("system", generateSocketInformationResponse(payload.room, 
+				`You've removed the silence of ${payload.login} in ${payload.room} successfully`).data)
 		let roomMetaData: RoomMetaData = await this.roomService
 			.getRoomMetaData(payload.room)
 	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);

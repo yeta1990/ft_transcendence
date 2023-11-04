@@ -61,6 +61,16 @@ export class ChatService {
 		this.socketService.sendMessageToServer("ban", payloadToSend);
 	}
 
+	silenceUserFromRoom(login:string, room: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
+		this.socketService.sendMessageToServer(events.SilenceUser, payloadToSend);
+	}
+
+	unSilenceUserFromRoom(login: string, room: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
+		this.socketService.sendMessageToServer(events.UnSilenceUser, payloadToSend);
+	}
+
 	banUser2User(targetLogin:string){
 		const payloadToSend: ChatMessage = { room: targetLogin, message: "" , login: "", date: new Date() }
 		this.socketService.sendMessageToServer("banuser", payloadToSend);

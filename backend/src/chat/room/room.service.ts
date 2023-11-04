@@ -29,7 +29,7 @@ export class RoomService {
 	public async getRoom(room: string): Promise<Room>{
 		const foundRoom = await this.repository
 			.findOne({
-				relations: ['owner', 'users', 'admins', 'banned'],
+				relations: ['owner', 'users', 'admins', 'banned', 'silenced'],
 				where: { name: room}
 			});
 		return foundRoom;
@@ -45,6 +45,7 @@ export class RoomService {
 		data.admins = [...new Set(roomData.admins.map(a => a.nick))];
 		data.users = [...new Set(roomData.users.map(u => u.nick))];
 		data.banned = [...new Set(roomData.banned.map(u => u.nick))];
+		data.silenced = [...new Set(roomData.silenced.map(u => u.nick))];
 		data.hasPass = roomData.hasPass;
 		return data;
 	}

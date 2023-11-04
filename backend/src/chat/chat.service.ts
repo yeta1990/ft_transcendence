@@ -324,6 +324,67 @@ export class ChatService {
 		return true;
 	}
 
+	public async silenceUserOfRoom(executorLogin: string, login: string, room: string): Promise<boolean>{
+		//check privileges
+		console.log(executorLogin, login, room)
+		if (executorLogin === login) return false;
+		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorLogin, room);
+		const executorIsAdminOfRoom: boolean = await this.isAdminOfRoom(executorLogin, room);
+		if (!executorIsOwnerOfRoom && !executorIsAdminOfRoom) return false;
+		const targetIsAlreadySilenced: boolean = await this.isSilencedOfRoom(login, room)
+		if (targetIsAlreadySilenced) return false;
+		const targetIsAdminOfRoom: boolean = await this.isAdminOfRoom(login, room)
+		const targetIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(login, room)
+		if (executorIsAdminOfRoom && targetIsOwnerOfRoom) return false;
+		if (executorIsOwnerOfRoom && targetIsOwnerOfRoom) return false;
+
+		//remove privileges and ban
+		const foundRoom: Room = await this.getRoom(room)
+		if (!foundRoom) return false;
+		const roomSilenced: User[] = foundRoom.silenced;
+		for (let silenced of roomSilenced){
+			if (silenced.login === login) return true;
+		}
+		const userToSilence: User | undefined = await this.userService.getUserByLogin(login);
+		if (!userToSilence) return false;
+		foundRoom.silenced.push(userToSilence);
+		await this.roomRepository.save(foundRoom)
+
+		return true;
+	}
+
+	public async removeSilenceOfRoom(executorLogin: string, login: string, room: string): Promise<boolean>{
+		if (executorLogin === login) return false;
+		const foundRoom: Room = await this.getRoom(room);
+		if (!foundRoom) return false;
+		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorLogin, room); 
+		const executorIsAdminOfRoom: boolean = await this.isAdminOfRoom(executorLogin, room);
+		if (!executorIsOwnerOfRoom && !executorIsAdminOfRoom) return false;
+		const isTargetSilenced: boolean = await this.isSilencedOfRoom(login, room)
+		if (!isTargetSilenced) return false;
+
+		const oldSilencedSize: number = foundRoom.users.length;
+		foundRoom.silenced = foundRoom.silenced.filter(user => {
+			return user.login != login;
+		})
+		await this.roomRepository.save(foundRoom);
+		if (oldSilencedSize === foundRoom.silenced.length){ 
+			return false;
+		}
+		return true;
+	}
+
+
+	public async isSilencedOfRoom(login: string, room: string): Promise<boolean>{
+		const foundRoom: Room = await this.getRoom(room);
+		if (!foundRoom) return false;
+		const silencedOfRoom: User[] = foundRoom.silenced;
+		for (let i = 0; i < silencedOfRoom.length; i++){
+			if (silencedOfRoom[i].login === login) return true;
+		}
+		return false;
+	}
+
 	public async addPassToRoom(login: string, room: string, pass: string){
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) return false;

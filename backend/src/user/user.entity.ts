@@ -127,6 +127,9 @@ export class User {
 	@ManyToMany(() => Room, (room) => room.banned)
 	bannedRooms: Room[];
 
+	@ManyToMany(() => Room, (room) => room.silenced)
+	silencedRooms: Room[];
+
 	@ManyToMany(type => User)
 	@JoinTable()
 	bannedUsers: User[];
