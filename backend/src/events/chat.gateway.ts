@@ -88,9 +88,16 @@ export class ChatGateway extends BaseGateway {
 			.userService
 			.getBannedUsersByLogin(login))
 			.map(m => m.login)
+
+		const receiversThatHaveBannedSender: Array<string> = (await this
+			.userService
+			.getUsersThatHaveBannedAnother(login))
+			.map(m => m.login)
+
 		const activeUsersInRoom: Array<ChatUser> = this
 			.getActiveUsersInRoom(payload.room)
 			.filter(u => !(bannedUsersBySender.includes(u.login)))
+			.filter(u => !(receiversThatHaveBannedSender.includes(u.login)))
 		for (let i = 0; i < activeUsersInRoom.length; i++){
 			this.messageToClient(activeUsersInRoom[i].client_id, "message", payload)
 		}
