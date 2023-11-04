@@ -272,7 +272,6 @@ export class ChatService {
 		const targetIsAlreadyBanned: boolean = await this.isBannedOfRoom(login, room)
 		if (targetIsAlreadyBanned) return false;
 		const targetIsAdminOfRoom: boolean = await this.isAdminOfRoom(login, room)
-		if (!executorIsOwnerOfRoom && executorIsAdminOfRoom && targetIsAdminOfRoom) return false;
 		const targetIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(login, room)
 		if (executorIsAdminOfRoom && targetIsOwnerOfRoom) return false;
 		if (executorIsOwnerOfRoom && targetIsOwnerOfRoom) return false;

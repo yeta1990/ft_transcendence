@@ -160,7 +160,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				else if (payload.event === events.RoomMetaData){
 					console.log("-------rooms metadata--------")
 					console.log(payload.data)
-					this.roomsMetaData.set(payload.data.room, payload.data)
+					if (payload.data.room.includes(":")){
+						this.roomsMetaData.set('@'+payload.data.users.filter((v: string) => v!== this.myUser?.login)[0], payload.data)
+					} else {
+						this.roomsMetaData.set(payload.data.room, payload.data)
+					}
 					const it = this.roomsMetaData.entries();
 					for (const el of it){
 						console.log(JSON.stringify(el))
