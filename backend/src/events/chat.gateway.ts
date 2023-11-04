@@ -277,6 +277,9 @@ export class ChatGateway extends BaseGateway {
 	  if (adminOk){
 	    const roomInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.login} is now admin of room ${payload.room}`)
 	  	this.broadCastToRoom(roomInfo.event, roomInfo.data)
+		let roomMetaData: RoomMetaData = await this.roomService
+			.getRoomMetaData(payload.room)
+	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
 	  }
   }
 
@@ -288,6 +291,9 @@ export class ChatGateway extends BaseGateway {
 	  if (adminRemoved){
 	    const roomInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.login} isn't admin of room ${payload.room} anymore`)
 	  	this.broadCastToRoom(roomInfo.event, roomInfo.data)
+		let roomMetaData: RoomMetaData = await this.roomService
+			.getRoomMetaData(payload.room)
+	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
 	  }
   } 
 

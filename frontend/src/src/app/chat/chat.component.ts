@@ -66,6 +66,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		//sending only one signal to the server with the raw rooms string
 		this.chatService.joinUserToRoom(roomAndPass.trim());
    }
+
+	makeRoomAdmin(login:string, room: string){
+			this.chatService.makeRoomAdmin(login, room)
+	}
+
+	removeRoomAdmin(login: string, room:string){
+			this.chatService.removeRoomAdmin(login, room)
+	}
 	
    banUserFromRoom(nick: string, room: string){
 	   this.chatService.banUserFromRoom(nick, room)
@@ -343,4 +351,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     	});
 		this.modalService.openModal('template5', targetUser);
 	}
+
+
+
 }
