@@ -19,7 +19,12 @@ export class ModalComponent {
   }
 
   closeModal(): void {
+
     this.modalService.closeModal();
+	this.inputValue = "";
+	this.inputValue2 = "";
+	this.checkboxInput = false;
+	this.confirmationInput = false;
   }
 
   saveAndCloseModal(): void {
@@ -27,6 +32,7 @@ export class ModalComponent {
     this.modalService.closeModalWithData();
 	this.inputValue = "";
 	this.inputValue2 = "";
+	this.checkboxInput = false;
 	this.confirmationInput = false;
   }
 

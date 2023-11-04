@@ -86,7 +86,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
    banUser2User(targetNick: string){
   		this.chatService.banUser2User(targetNick) 
    }
-
+	
+   addPassToRoom(room: string, pass: string){
+		this.chatService.addPassToRoom(room, pass)
+	}
+   removePassOfRoom(room: string){
+		this.chatService.removePassOfRoom(room)
+	}
 
 	leaveRoom(room: string): void{
 		this.chatService.partFromRoom(room);	
@@ -316,6 +322,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.modalService.openModal('template2');
 	}
 
+
+
 	banUserFromRoomModal(nick: string, room: string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const banConfirmation = this.modalService.getModalData()[0];
@@ -352,6 +360,32 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.modalService.openModal('template5', targetUser);
 	}
 
+	changePassToRoomModal(room:string){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const pass = this.modalService.getModalData()[0];
+			this.addPassToRoom(room, pass)
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template6', room);
+	}
 
+	addPassToRoomModal(room:string){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const pass = this.modalService.getModalData()[0];
+			this.addPassToRoom(room, pass)
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template8', room);
+	}
+
+	removePassOfRoomModal(room: string) {
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const removePassConfirmation = this.modalService.getModalData()[0];
+			this.removePassOfRoom(room)
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template7', room);
+
+	}
 
 }

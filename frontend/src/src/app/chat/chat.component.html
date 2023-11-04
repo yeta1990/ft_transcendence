@@ -47,10 +47,36 @@
     </div>
 
     <div class="center-column">
-      	<h2 class="column-heading" *ngIf="currentRoom.length > 0">{{currentRoom}}</h2>
+    	<div class="d-flex">
+    	<div *ngIf="currentRoom.length > 0">
+      	<span class="column-heading" >{{currentRoom}}</span> 
+<!--      	<a class="btn disabled" aria-disabled="true" role="button" data-bs-toggle="button">Disabled toggle link</a>
+-->
+
+      	<span class="p-2" *ngIf="!isPrivateRoom(currentRoom)"> (public chat room)
+		<button type="button" class="p-2 btn btn-outline-light" *ngIf="myUser?.login === roomsMetaData.get(currentRoom)?.owner" (click)="addPassToRoomModal(currentRoom)" > Make channel private
+      	</button>
+      	</span>
+      	<span class="p-2" *ngIf="isPrivateRoom(currentRoom)"> (private chat room)&nbsp;
+			<span *ngIf="myUser?.login === roomsMetaData.get(currentRoom)?.owner" > 
+			<button type="button" class="p-2 btn btn-outline-light" (click)="changePassToRoomModal(currentRoom)">
+					Change pass
+			</button>
+				&nbsp;
+			<button type="button" class="p-2 btn btn-outline-light" (click)="removePassOfRoomModal(currentRoom)">
+					Make channel public 
+			</button>
+
+
+		</span>
+		</span>
+		</div>
+
       	<h2 class="column-heading" *ngIf="currentRoom.length === 0">
 			Welcome! Choose one channel from the list
       	</h2>
+		</div>
+
       <div class="chat-box-body">
 	  <!-- <div class="chat-box-body"> -->
 	<div #chatBox class="chat-logs">

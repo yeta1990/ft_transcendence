@@ -306,7 +306,6 @@ export class ChatService {
 		return true;
 	}
 
-
 	public async addPassToRoom(login: string, room: string, pass: string){
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) return false;

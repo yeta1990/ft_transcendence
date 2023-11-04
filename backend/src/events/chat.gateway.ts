@@ -300,13 +300,31 @@ export class ChatGateway extends BaseGateway {
   @SubscribeMessage(events.Pass)
   async addPassToRoom(client: Socket, payload: ChatMessage){
 	  const login: string = client.handshake.query.login as string;
-	  this.chatService.addPassToRoom(login, payload.room, payload.message);
+	  const passAdded: boolean = await this.chatService.addPassToRoom(login, payload.room, payload.message);
+	  if (passAdded)
+	 	{
+		this.server.to(client.id)
+			.emit("system", generateSocketInformationResponse(payload.room, 
+				`You've set a password to chat room ${payload.room} successfully`).data)
+
+		let roomMetaData: RoomMetaData = await this.roomService
+			.getRoomMetaData(payload.room)
+	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
+	 	}
   }
 
   @SubscribeMessage(events.RemovePass)
   async removePassOfRoom(client: Socket, payload: ChatMessage){
 	  const login: string = client.handshake.query.login as string;
-	  this.chatService.removePassOfRoom(login, payload.room);
+	  const passRemoved: boolean = await this.chatService.removePassOfRoom(login, payload.room);
+	  if (passRemoved){
+		this.server.to(client.id)
+			.emit("system", generateSocketInformationResponse(payload.room, 
+				`You've made chat room ${payload.room} public`).data)
+		let roomMetaData: RoomMetaData = await this.roomService
+			.getRoomMetaData(payload.room)
+	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
+	  }
   }
 
 

@@ -118,6 +118,61 @@
         </div>
       </ng-template>
 
+      <ng-template [ngSwitchCase]="'template7'">
+        <div id="modal-content-template7">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Make channel {{getModalData()[0]}} public?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>If you make the chat room {{getModalData()[0]}} public, everyone will be able to join without providing a password. Do you want to make the room public?</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template6'">
+        <div id="modal-content-template6">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Change passwordof channel {{getModalData()}}</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          	<p>This channel is already protected. If you want to change the password just type it here: </p>
+
+			<input type="password" class="form-control" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter password">
+   		    </div>
+
+   		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Change password</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template8'">
+        <div id="modal-content-template8">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Make channel {{getModalData()}} private</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          	<p>Currently the channel is public. Only users knowing the password or users already in the channel will be able to join it. If you want to add a password just type it here: </p>
+
+			<input type="password" class="form-control" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter password">
+   		    </div>
+
+   		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Set a password</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
     </ng-container>
   </div>
 </div>
