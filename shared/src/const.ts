@@ -6,13 +6,16 @@ export const events = {
 	Pass: "pass",
 	RemovePass: "nopass",
 	RoomMetaData: "roomMetaData",
+	AllRoomsMetaData: "allRoomsMetaData",
 	ActiveUsers: "activeUsers",
 	SoftDisconnect: "softDisconnect",
 	BlockedUsers: "blockedUsers",
 	SilenceUser: "silence",
 	UnSilenceUser: "nosilence",
 	KickUser: "kickUser",
-	Kicked: "kicked"
+	Kicked: "kicked",
+	AllHistoricalMessages: "allHistoricalMessages",
+	AdminJoin: "adminJoin"
 }
 
 export const values = {

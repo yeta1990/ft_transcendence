@@ -24,7 +24,8 @@ import { ToasterService } from './toaster/toaster.service';
 import { ModalComponent } from './modal/modal.component'
 import { ModalService } from './modal/modal.service'
 import { ValidationFunctions } from '@shared/user.functions';
-import { AdminPageComponent } from './admin-page/admin-page.component'
+import { AdminPageComponent } from './admin-page/admin-page.component';
+import { AdminChatPageComponent } from './admin-chat-page/admin-chat-page.component'
 
 
 @NgModule({
@@ -41,7 +42,8 @@ import { AdminPageComponent } from './admin-page/admin-page.component'
     PongComponent,
     ToasterComponent,
     ModalComponent,
-    AdminPageComponent
+    AdminPageComponent,
+    AdminChatPageComponent
 
   ],
   imports: [

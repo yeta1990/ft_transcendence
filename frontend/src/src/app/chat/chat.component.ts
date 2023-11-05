@@ -189,6 +189,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				else if (payload.event === events.Kicked){
 					this.authService.logout()	
 				}
+				else if (payload.event === events.AllHistoricalMessages){
+					
+				}
         		this.scrollToBottom();
 			})
 		);

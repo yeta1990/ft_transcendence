@@ -1,0 +1,52 @@
+<app-nav-bar/>
+
+	<div class="container">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Chat rooms</th>
+        <th>live chat</th>
+        <th>owner</th>
+        <th>admins</th>
+        <th>users</th>
+        <th>banned</th>
+        <th>Destroy</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let room of messageList | keyvalue">
+        <td>{{ room.key }}</td>
+        <td>
+          <div class="scrollable-textbox p-2">
+          	  <div *ngFor="let message of room.value">{{message.login}} ({{message.date}}): {{ message.message}}</div>
+          </div>
+        </td>
+        <td>
+        	{{roomsMetaData.get(room.key)?.owner}}
+        </td>
+        <td>
+        	<div *ngFor="let admin of roomsMetaData.get(room.key)?.admins">
+        		{{admin}}
+        	</div>
+
+        </td>
+        <td>
+        	<div *ngFor="let user of roomsMetaData.get(room.key)?.users">
+        		{{user}}
+        	</div>
+        </td>
+        <td>
+        	<div *ngFor="let ban of roomsMetaData.get(room.key)?.banned">
+        		{{ban}}
+        	</div>
+
+        </td>
+        <td>
+          <button class="btn btn-danger" (click)="destroyRoom(room.key)">Destruir Canal</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+

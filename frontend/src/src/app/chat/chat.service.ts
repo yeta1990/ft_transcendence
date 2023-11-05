@@ -113,5 +113,8 @@ export class ChatService {
 		this.socketService.forceDisconnect();
 	}
 
+	adminJoin() {
+		this.socketService.adminJoin()
+	}
 
 }

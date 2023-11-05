@@ -5,6 +5,7 @@ import { events } from '@shared/const';
 import { environment } from '../environments/environment'
 import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
 import { Location } from '@angular/common';
+import {RoomMessages } from '@shared/types'
 
 @Injectable({
   providedIn: 'root',
@@ -23,10 +24,6 @@ export class SocketService {
 		console.log(this.location.path())
 		if (this.location.path().includes('callback') || this.location.path() === '/login' || this.location.path() === ''){
         } else if (this.socket == undefined){
-        	if (this.socket)
-        		console.log("ya tengo uno!")
-        	console.log(this.socket)
-        	console.log("y lo inicializo")
 
   		this.socket = io(environment.apiUrl + namespace, 
   			{
@@ -69,7 +66,9 @@ export class SocketService {
 			})
 			.on(events.RoomMetaData, (data: RoomMetaData) => {
 				this.message.next({event: events.RoomMetaData, data})
-//				console.log("room metadata: " + JSON.stringify(data));
+			})
+			.on(events.AllRoomsMetaData, (data: Array<RoomMetaData>) => {
+				this.message.next({event: events.AllRoomsMetaData, data})
 			})
 			.on(events.ActiveUsers, (data: Array<string>) => {
 				this.message.next({event: events.ActiveUsers, data})
@@ -88,6 +87,9 @@ export class SocketService {
 			})
 			.on('system-error', (data: ChatMessage) => {
 				this.message.next({event: 'system-error', data});
+			})
+			.on(events.AllHistoricalMessages, (data: any) => {
+				this.message.next({event: events.AllHistoricalMessages, data});
 			})
 		}
 
@@ -122,4 +124,10 @@ export class SocketService {
   getMessage(): Observable<SocketPayload>{
 	return this.messageObservable;
   }
+
+  adminJoin(){
+	this.socket.emit(events.AdminJoin)
+  }
+
+
 }

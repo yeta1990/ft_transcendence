@@ -11,6 +11,7 @@ import { HomeComponent } from '../home/home.component';
 import { EditProfileComponent } from '../edit-profile/edit-profile.component';
 import { PongComponent } from '../pong/pong.component';
 import { AdminPageComponent } from '../admin-page/admin-page.component';
+import {AdminChatPageComponent } from '../admin-chat-page/admin-chat-page.component';
 
 
 //routes are doubly protected:
@@ -92,7 +93,16 @@ const routes: Routes = [
 		data: {
 			adminCheck: true
 		  },
-	}
+	},
+	{
+		path: 'admin-chat',
+		component: AdminChatPageComponent,
+		canActivate: [AuthGuard],
+		data: {
+			adminCheck: true
+		  },
+	},
+
 ];
 
 @NgModule({

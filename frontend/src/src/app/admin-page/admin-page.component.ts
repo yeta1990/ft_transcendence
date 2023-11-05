@@ -88,7 +88,4 @@ export class AdminPageComponent {
 			.subscribe(
 				(response:User[]) => {this.allUsers = response; console.log(response)})
 	}
-
-
-
 }

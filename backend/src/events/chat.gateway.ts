@@ -101,6 +101,8 @@ export class ChatGateway extends BaseGateway {
 		for (let i = 0; i < activeUsersInRoom.length; i++){
 			this.messageToClient(activeUsersInRoom[i].client_id, "message", payload)
 		}
+		//TBD
+		//send message to admins
 
 		await this.chatMessageService.saveMessage(payload)
 	} 
@@ -301,7 +303,6 @@ export class ChatGateway extends BaseGateway {
   async removeRoomAdmin(client: Socket, payload: ChatMessage){
 	  const login: string = client.handshake.query.login as string;
 	  const adminRemoved: boolean = await this.chatService.removeRoomAdmin(login, payload.login, payload.room);
-	  console.log(adminRemoved)
 	  if (adminRemoved){
 	    const roomInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.login} isn't admin of room ${payload.room} anymore`)
 	  	this.broadCastToRoom(roomInfo.event, roomInfo.data)
@@ -355,7 +356,6 @@ export class ChatGateway extends BaseGateway {
 
 			const err: SocketPayload = generateSocketInformationResponse(payload.room, 
 				`Information: you have been banned from ${payload.room}`)
-			console.log(err.data)
 
 			for (let i = 0; i < targetSocketIds.length; i++){
 				this.server.to(targetSocketIds[i]).emit("system", err.data)
@@ -510,7 +510,6 @@ export class ChatGateway extends BaseGateway {
 
 			const err: SocketPayload = generateSocketInformationResponse("", 
 				`Information: you have been banned of the website`)
-			console.log(err.data)
 
 			for (let i = 0; i < targetSocketIds.length; i++){
 				this.server.to(targetSocketIds[i]).emit("system", err.data)
@@ -519,5 +518,19 @@ export class ChatGateway extends BaseGateway {
 			}
 		}
 		await this.kickAndDisconnect(login)
+  }
+
+  @SubscribeMessage(events.AdminJoin)
+  async adminJoin(client: Socket): Promise<WsResponse<unknown>> {
+		const emisorLogin: string = client.handshake.query.login as string;
+		const hasExecutorPrivileges: boolean = (await this.userService.getUserByLogin(emisorLogin)).userRole >= 5 ? true : false
+		if (!hasExecutorPrivileges) return ;
+
+		
+		this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
+		const allHistoricalMessages: Array<RoomMessages> = await this.chatMessageService.getAllMessagesFromAllRooms()
+
+		return { event: events.AllHistoricalMessages, data: allHistoricalMessages};
+
   }
 }

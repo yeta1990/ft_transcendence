@@ -66,9 +66,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   async handleConnection(socket: Socket): Promise<void>{
 
     const isUserVerified = await this.authService.verifyJwt(socket.handshake.auth.token);
-	console.log("trying to connect " + isUserVerified) 
 	if (isUserVerified){
-		console.log("is user verified")
 		const login = this.authService.getLoginFromJwt(socket.handshake.auth.token)
   	    const isHardConnect: boolean = this.getClientSocketIdsFromLogin(login).length > 0 ? false : true
 		this.setLogin(socket);
@@ -81,7 +79,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
 
   	    if (isHardConnect){
-  	    	console.log("is hard connect")
   	    	const activeLoginsInServer: Array<string> = this
   	    		.getActiveLoginsInServer()
 			this.server.emit(events.ActiveUsers, activeLoginsInServer)	
@@ -368,7 +365,5 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 				socket.disconnect(true); 
 			}
 		}
-
-//		for (const [socketId, socket] of this.server.sockets.sockets
   }
 }
