@@ -54,6 +54,7 @@ export class AuthService {
 
     public isLoggedIn() {
     	let a:boolean = moment().isBefore(this.getExpiration());
+		
     	return a;
     }
 
