@@ -5,6 +5,7 @@ import { Subscription } from "rxjs"
 import { ToasterService } from '../toaster/toaster.service'
 import { ModalService } from '../modal/modal.service'
 import { AdminPageService} from './admin-page.service' 
+import { ChatService } from '../chat/chat.service'
 
 @Component({
   selector: 'app-admin-page',
@@ -17,11 +18,14 @@ export class AdminPageComponent {
 	constructor(private allUsersService: AllUsersService, 
 				private adminPageService: AdminPageService,
 		private modalService: ModalService,
-		private toasterService: ToasterService) {
+		private toasterService: ToasterService,
+		private chatService: ChatService
+			   ) {
 
 		this.allUsersService.getUsers()
 			.subscribe(
 				(response:User[]) => {this.allUsers = response; console.log(response)})
+		this.chatService.forceInit()
 	}
 
 	grantAdminModal(login: string, userRole: number){
@@ -76,6 +80,7 @@ export class AdminPageComponent {
 		this.adminPageService.banUser(login)
 			.subscribe(
 				(response:User[]) => {this.allUsers = response; console.log(response)})
+		this.chatService.kickUser(login)
 	}
 
 	removeBanUser(login: string) {

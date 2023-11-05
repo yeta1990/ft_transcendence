@@ -9,6 +9,7 @@ import { User } from '../user';
 import { MyProfileService } from '../my-profile/my-profile.service';
 import { ToasterService } from '../toaster/toaster.service'
 import { ModalService } from '../modal/modal.service'
+import { AuthService } from '../auth/auth.service'
  
 @Component({
   selector: 'app-chat',
@@ -44,7 +45,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		private formBuilder: FormBuilder,
 		private profileService: MyProfileService,
 		private modalService: ModalService,
-		private toasterService: ToasterService
+		private toasterService: ToasterService,
+		private authService: AuthService
+
    ) {
 		this.currentRoom = "";
 		this.messageList.set(this.currentRoom, new Array<ChatMessage>);
@@ -109,6 +112,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	//subscription to all events from the service
 	ngOnInit(): void {
+		this.chatService.forceInit();
 		this.profileService.getUserDetails()
 		this.subscriptions.add(
 			this.chatService
@@ -181,6 +185,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				}
 				else if (payload.event === events.BlockedUsers){
 					this.myBlockedUsers = payload.data;
+				}
+				else if (payload.event === events.Kicked){
+					this.authService.logout()	
 				}
         		this.scrollToBottom();
 			})

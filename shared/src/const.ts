@@ -10,7 +10,9 @@ export const events = {
 	SoftDisconnect: "softDisconnect",
 	BlockedUsers: "blockedUsers",
 	SilenceUser: "silence",
-	UnSilenceUser: "nosilence"
+	UnSilenceUser: "nosilence",
+	KickUser: "kickUser",
+	Kicked: "kicked"
 }
 
 export const values = {

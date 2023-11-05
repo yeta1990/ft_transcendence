@@ -7,6 +7,7 @@ import * as moment from "moment";
 import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
 import jwt_decode from 'jwt-decode';
+import { ChatService } from '../chat/chat.service'
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,9 @@ export class AuthService {
 
 	constructor(
         private http: HttpClient,
-        private router: Router,) { }
+        private router: Router,
+		private chatService: ChatService
+    ) { }
 
 /*
  *  old login function
@@ -39,11 +42,12 @@ export class AuthService {
 	logout() {
         localStorage.removeItem("access_token");
         localStorage.removeItem("expires_at");
+		this.chatService.forceDisconnect();
         this.router.navigateByUrl('/login');
     }
 
 	redirectToHome() {
-        this.router.navigateByUrl('/');
+        this.router.navigateByUrl('/home');
     }
 
 	private setSession(authResult: any) {

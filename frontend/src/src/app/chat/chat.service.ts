@@ -13,8 +13,13 @@ import { ChatMessage, SocketPayload } from '@shared/types';
 export class ChatService {
 //https://auth0.com/blog/real-time-charts-using-angular-d3-and-socket-io/
 
-	private socketService: SocketService = new SocketService("/chat");
-	constructor() {}
+//	private socketService: SocketService = new SocketService("/chat");
+	constructor(private socketService: SocketService) {
+	}
+
+	forceInit() {
+		if (!this.socketService.isConnected()) this.socketService.initializeSocket("/chat")
+	}
 
 	getMessage(): Observable<SocketPayload>{
 		return this.socketService.getMessage();
@@ -96,8 +101,16 @@ export class ChatService {
 		this.socketService.sendMessageToServer(events.RemovePass, payloadToSend);
 	}
 
+	kickUser(login: string){
+		this.socketService.sendMessageToServer(events.KickUser, login);
+	}
+
 	disconnectClient(){
 		this.socketService.disconnectClient();
+	}
+
+	forceDisconnect() {
+		this.socketService.forceDisconnect();
 	}
 
 

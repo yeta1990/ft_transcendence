@@ -493,4 +493,31 @@ export class ChatGateway extends BaseGateway {
 		this.server.in(client.id).socketsLeave(room);
   	  }
   }
+
+  //ban user of all the website
+  //we use this event to kick the user from the chat in the same moment it's banned
+  @SubscribeMessage(events.KickUser)
+  async kickUser(client: Socket, login: string): Promise<void> {
+
+		const emisorLogin: string = client.handshake.query.login as string;
+		const hasExecutorPrivileges: boolean = (await this.userService.getUserByLogin(emisorLogin)).userRole >= 5 ? true : false
+		if (!hasExecutorPrivileges) return ;
+		const isTargetOwner: boolean = (await this.userService.getUserByLogin(login)).userRole >= 6 ? true : false
+		if (isTargetOwner) return ;
+
+	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(login);
+	  	if (targetSocketIds.length){
+
+			const err: SocketPayload = generateSocketInformationResponse("", 
+				`Information: you have been banned of the website`)
+			console.log(err.data)
+
+			for (let i = 0; i < targetSocketIds.length; i++){
+				this.server.to(targetSocketIds[i]).emit("system", err.data)
+				this.server.to(targetSocketIds[i])
+					.emit(events.Kicked, "");
+			}
+		}
+		await this.kickAndDisconnect(login)
+  }
 }

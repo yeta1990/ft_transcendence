@@ -65,8 +65,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   async handleConnection(socket: Socket): Promise<void>{
 
     const isUserVerified = await this.authService.verifyJwt(socket.handshake.auth.token);
- 
+	console.log("trying to connect " + isUserVerified) 
 	if (isUserVerified){
+		console.log("is user verified")
 		const login = this.authService.getLoginFromJwt(socket.handshake.auth.token)
   	    const isHardConnect: boolean = this.getClientSocketIdsFromLogin(login).length > 0 ? false : true
 		this.setLogin(socket);
@@ -79,6 +80,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
 
   	    if (isHardConnect){
+  	    	console.log("is hard connect")
   	    	const activeLoginsInServer: Array<string> = this
   	    		.getActiveLoginsInServer()
 			this.server.emit(events.ActiveUsers, activeLoginsInServer)	
@@ -126,9 +128,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
     this.emit(events.ListAllRooms, await this.roomService.getAllRoomsMetaData());
   }
 
-
   async handleDisconnect(socket: Socket): Promise<void> {
-  	  const login: string = this.users.get(socket.id).login
+  	  const login: string = this.users.get(socket.id)?.login
+  	  if (!login) return;
 	  this.logger.log(`Socket client disconnected: ${socket.id}`)
 	  this.users.delete(socket.id);
 	  this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
@@ -214,7 +216,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   private disconnect(socket: Socket) {
-    socket.emit('Error', new UnauthorizedException());
     socket.disconnect();
   }
 
@@ -355,4 +356,15 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
  		this.server.to(clientId).emit(events.BlockedUsers, blockedUsersByLogin) 
   }
 
+  public async kickAndDisconnect(login: string): Promise<void> {
+  	    const socketIds: Array<string> = this.getClientSocketIdsFromLogin(login)
+		const sockets = await this.server.fetchSockets()
+		for (const socket of sockets) {
+			if (socketIds.includes(socket.id)){ 
+				socket.disconnect(true); 
+			}
+		}
+
+//		for (const [socketId, socket] of this.server.sockets.sockets
+  }
 }

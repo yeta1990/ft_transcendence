@@ -1,18 +1,33 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Optional } from '@angular/core';
 import { Subject, from, Observable } from  'rxjs';
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import { events } from '@shared/const';
 import { environment } from '../environments/environment'
 import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
+import { Location } from '@angular/common';
+
+@Injectable({
+  providedIn: 'root',
+})
 
 export class SocketService {
 //https://auth0.com/blog/real-time-charts-using-angular-d3-and-socket-io/
 
-	private socket: any;
+	private socket!: Socket;
 	private message = new Subject<SocketPayload>();
 	private messageObservable: Observable<SocketPayload> = new Observable<SocketPayload>();
 
-	constructor(namespace: string = "") {
+	constructor(@Optional() private location: Location  ) {	}
+
+	initializeSocket(namespace: string = "") {
+		console.log(this.location.path())
+		if (this.location.path().includes('callback') || this.location.path() === '/login' || this.location.path() === ''){
+        } else if (this.socket == undefined){
+        	if (this.socket)
+        		console.log("ya tengo uno!")
+        	console.log(this.socket)
+        	console.log("y lo inicializo")
+
   		this.socket = io(environment.apiUrl + namespace, 
   			{
   				auth: 
@@ -63,14 +78,24 @@ export class SocketService {
 			.on(events.BlockedUsers, (data: Array<string>) => {
 				this.message.next({event: events.BlockedUsers, data})
 			})
+			.on(events.Kicked, (data: string) => {
+				this.message.next({event: events.Kicked, data})
+				this.disconnectClient()
+				this.forceDisconnect()
+			})
 			.on('system', (data: ChatMessage) => {
 				this.message.next({event: 'system', data});
 			})
 			.on('system-error', (data: ChatMessage) => {
 				this.message.next({event: 'system-error', data});
 			})
+		}
+
 	}
 
+	isConnected(): boolean {
+		return this.socket && this.socket.connected;
+	}
   //https://socket.io/docs/v3/emitting-events/
   //emit has two parameters:
   // - category of the message
@@ -85,8 +110,13 @@ export class SocketService {
 	this.socket.emit(type, payload);
   }
 
+  forceDisconnect(){
+	if (this.socket) this.socket.disconnect();
+
+  }
+
   disconnectClient(){
-	this.socket.emit(events.SoftDisconnect);
+	if (this.socket) this.socket.emit(events.SoftDisconnect);
   }
 
   getMessage(): Observable<SocketPayload>{
