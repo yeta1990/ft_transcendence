@@ -43,7 +43,8 @@ export class UserController {
 	public async grantAdmin(@Query('login') login: string, @UserId() id: number): Promise<User[]>{
 		const hasExecutorPrivileges: boolean = (await this.service.getUser(id)).userRole >= 5 ? true : false
 		if (!hasExecutorPrivileges) return [] as User[]
-			console.log(login)
+		const isTargetOwner: boolean = (await this.service.getUserByLogin(login)).userRole >= 6 ? true : false
+		if (isTargetOwner) return [] as User[]
 		return this.service.grantAdmin(login);
 	}
 
@@ -52,8 +53,29 @@ export class UserController {
 	public async removeAdmin(@UserId() id: number, @Query('login') login: string): Promise<User[]>{
 		const hasExecutorPrivileges: boolean = (await this.service.getUser(id)).userRole >= 5 ? true : false
 		if (!hasExecutorPrivileges) return [] as User[]
-		
+		const isTargetOwner: boolean = (await this.service.getUserByLogin(login)).userRole >= 6 ? true : false
+		if (isTargetOwner) return [] as User[]
 		return this.service.removeAdmin(login);
+	}
+
+	@UseGuards(AuthGuard)
+	@Post('ban')
+	public async banUserFromWebsite(@UserId() id: number, @Query('login') login: string): Promise<User[]>{
+		const hasExecutorPrivileges: boolean = (await this.service.getUser(id)).userRole >= 5 ? true : false
+		if (!hasExecutorPrivileges) return [] as User[]
+		const isTargetOwner: boolean = (await this.service.getUserByLogin(login)).userRole >= 6 ? true : false
+		if (isTargetOwner) return [] as User[]
+		return this.service.banUserFromWebsite(login);
+	}
+
+	@UseGuards(AuthGuard)
+	@Post('unban')
+	public async removeBanUserFromWebsite(@UserId() id: number, @Query('login') login: string): Promise<User[]>{
+		const hasExecutorPrivileges: boolean = (await this.service.getUser(id)).userRole >= 5 ? true : false
+		if (!hasExecutorPrivileges) return [] as User[]
+		const isTargetOwner: boolean = (await this.service.getUserByLogin(login)).userRole >= 6 ? true : false
+		if (isTargetOwner) return [] as User[]
+		return this.service.removeBanUserFromWebsite(login);
 	}
  
 	@Get('all')

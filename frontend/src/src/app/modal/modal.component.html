@@ -240,6 +240,23 @@
         </div>
       </ng-template>
 
+      <ng-template [ngSwitchCase]="'template13'">
+        <div id="modal-content-template13">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Remove ban of @{{getModalData()[0]}}?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>If you remove ban of {{getModalData()[0]}}, the user will be able to login in the site again.</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
     </ng-container>
   </div>
 </div>

@@ -18,17 +18,17 @@
         <td>
           <button
             *ngIf="user.userRole < 6"
-            (click)="changeUserRoleModal(user.login, user.userRole)"
+            (click)="user.userRole === 5 ? removeAdminModal(user.login, user.userRole) : grantAdminModal(user.login, user.userRole)"
             class="btn btn-outline-light"
           >
             {{ user.userRole === 5 ? 'Remove Admin privileges' : 'Grant Admin privileges' }}
           </button>
           <button
             *ngIf="user.userRole !== 6"
-            (click)="banUserModal(user.login)"
+            (click)="user.isBanned ? removeBanUserModal(user.login) : banUserModal(user.login)"
             class="btn btn-outline-danger"
           >
-            Banear
+          {{ user.isBanned ? 'Remove ban' : 'Ban' }}
           </button>
         </td>
       </tr>

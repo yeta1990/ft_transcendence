@@ -156,5 +156,12 @@ export class User {
 	})
 	friends: Friend[];
 
+
+	//Baneo de usuario de la web
+	@Column({
+		default:false
+	})
+	isBanned: boolean
+
 }
 

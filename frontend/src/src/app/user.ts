@@ -20,6 +20,7 @@ export class User {
 	winningStreak: number;
 	losses: number;
 	elo: number;
+	isBanned: boolean;
 
 	constructor(model: User) {
 		this.id = model && model.id;
@@ -40,5 +41,6 @@ export class User {
 		this.winningStreak = model && model.winningStreak;
 		this.losses = model && model.losses;
 		this.elo = model && model.elo;
+		this.isBanned = model && model.isBanned;
 	}
 }

@@ -22,7 +22,10 @@ export class AdminPageService {
 	}
 
 	banUser(login: string): Observable<User[]> {
-		const options = { params: new HttpParams().set('login' , login)}
-		return this.httpClient.post<User[]>(environment.apiUrl + '/user/ban', options)
+		return this.httpClient.post<User[]>(environment.apiUrl + '/user/ban?login='+login, "")
+	}
+
+	removeBanUser(login: string): Observable<User[]> {
+		return this.httpClient.post<User[]>(environment.apiUrl + '/user/unban?login='+login, "")
 	}
 }

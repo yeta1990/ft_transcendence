@@ -27,8 +27,6 @@ export class InvalidateTokensService {
 				token: token
 			}
 		})
-		console.log("is valid?")
-		console.log(t)
 		if (t !== null) return false;
 		const tokenPrivileges: string | undefined  = UserRole[this.authService.getUserRoleFromJwt(token)]
 		const tokenLogin = this.authService.getLoginFromJwt(token)

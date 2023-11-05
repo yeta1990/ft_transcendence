@@ -24,25 +24,40 @@ export class AdminPageComponent {
 				(response:User[]) => {this.allUsers = response; console.log(response)})
 	}
 
-	changeUserRoleModal(login: string, userRole: number){
+	grantAdminModal(login: string, userRole: number){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-      		const pass = this.modalService.getModalData()[0];
-      		this.changeUserRole(login, userRole);
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm) this.changeUserRole(login, userRole);
 			this.modalClosedSubscription.unsubscribe();
     	});
-    	if (userRole < 5){
-			this.modalService.openModal('template10', login);
-		} else if (userRole === 5){
-			this.modalService.openModal('template11', login);
-		}
+		this.modalService.openModal('template10', login);
 	}
+
+	removeAdminModal(login: string, userRole: number){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm) this.changeUserRole(login, userRole);
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template11', login);
+	}
+	
 	banUserModal(login: string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-      		const pass = this.modalService.getModalData()[0];
-      		this.banUser(login);
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm) this.banUser(login);
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template12', login);
+	}
+
+	removeBanUserModal(login: string){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm) this.removeBanUser(login);
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template13', login);
 	}
 
 	changeUserRole(login: string, userRole:number) {
@@ -63,6 +78,11 @@ export class AdminPageComponent {
 				(response:User[]) => {this.allUsers = response; console.log(response)})
 	}
 
+	removeBanUser(login: string) {
+		this.adminPageService.removeBanUser(login)
+			.subscribe(
+				(response:User[]) => {this.allUsers = response; console.log(response)})
+	}
 
 
 

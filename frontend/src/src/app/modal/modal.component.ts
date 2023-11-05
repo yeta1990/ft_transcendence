@@ -19,12 +19,11 @@ export class ModalComponent {
   }
 
   closeModal(): void {
-
-    this.modalService.closeModal();
 	this.inputValue = "";
 	this.inputValue2 = "";
 	this.checkboxInput = false;
 	this.confirmationInput = false;
+    this.modalService.closeModal();
   }
 
   saveAndCloseModal(): void {
@@ -51,6 +50,10 @@ export class ModalComponent {
 
   getModalData(): Array<string> {
  	return this.modalService.getModalData(); 
+  }
+
+  getConfirmationInput(): boolean {
+  	  return this.modalService.getConfirmationInput();
   }
 
   @HostListener('document:keydown.escape', ['$event']) 

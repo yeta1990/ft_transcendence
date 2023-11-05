@@ -26,6 +26,12 @@ export class UserService {
     	})
 	}
 
+	public async isUserBannedFromWebsite(login: string): Promise<boolean> {
+		const user: User = await this.getUserByLogin(login)
+		if (user === null || user === undefined) return false;
+		return user.isBanned
+	}
+
 	public async getUserIdByLogin(login: string): Promise<number | undefined> {
 		const user = await this.repository.findOne({
 		  where: {
@@ -36,6 +42,7 @@ export class UserService {
 		return user ? user.id : undefined;
 	  }
 
+	  //ban user2user
 	public async getBannedUsersByLogin(login: string): Promise<User[] | undefined> {
 		const user: User = await this.getUserByLogin(login);
 		if (!user) return null;
@@ -46,6 +53,7 @@ export class UserService {
 	    	WHERE (f."userId_1" = $1)`, [user.id]);
 	}
 
+	  //ban user2user
 	public async getUsersThatHaveBannedAnother(login: string): Promise<User[]> {
 		const user: User = await this.getUserByLogin(login);
 	    return await this.connection.query(
@@ -55,6 +63,7 @@ export class UserService {
 	    	WHERE (f."userId_2" = $1)`, [user.id]);
 	}
 
+	  //ban user2user
 	public async isUserBannedFromUser(executor: string, banned: string): Promise<boolean>{
 		const bannedUsers = await this.getBannedUsersByLogin(executor);
 		if (!bannedUsers) return false;
@@ -98,6 +107,28 @@ export class UserService {
 		await this.saveUser(user)
 		return this.getAllUsers()
 	}
+
+	public async banUserFromWebsite(login: string): Promise<User[]>{
+		const user: User = await this.getUserByLogin(login)
+		//by changing the role, we force to logout that user
+		user.userRole = UserRole.VISITOR
+		user.isBanned = true;
+
+		await this.saveUser(user)
+		return this.getAllUsers()
+	}
+
+	public async removeBanUserFromWebsite(login: string): Promise<User[]>{
+		const user: User = await this.getUserByLogin(login)
+		//by changing the role, we force to logout that user
+		user.userRole = UserRole.REGISTRED
+		user.isBanned = false;
+
+		await this.saveUser(user)
+		return this.getAllUsers()
+	}
+
+
 
 	public async createUser(body: CreateUserDto): Promise<User>{
 		const alreadyRegisteredUser: User = await this.getUserByLogin(body.login);
