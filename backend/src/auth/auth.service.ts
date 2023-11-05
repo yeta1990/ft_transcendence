@@ -59,7 +59,7 @@ export class AuthService {
 		const allUserData42 = await this.userService.whoAmI(data.access_token);
 		const payloadToCreateUser = { nick: allUserData42.login, email: allUserData42.email, firstName: allUserData42.first_name, lastName: allUserData42.last_name, login: allUserData42.login, image: allUserData42.image.versions.medium }; //all requests from the frontend will contain this info
 		const createdUser = await this.userService.createUser(payloadToCreateUser);
-		const payloadToSign = {login: createdUser.login, id: createdUser.id}
+		const payloadToSign = {login: createdUser.login, id: createdUser.id, role: createdUser.userRole}
 		const access_token = await this.jwtService.signAsync(payloadToSign);
 		const decoded: JwtPayload = this.jwtService.decode(access_token) as JwtPayload;
 		return {

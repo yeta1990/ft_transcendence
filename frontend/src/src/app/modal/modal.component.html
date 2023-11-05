@@ -172,6 +172,22 @@
       	  </div>
         </div>
       </ng-template>
+      <ng-template [ngSwitchCase]="'template9'">
+        <div id="modal-content-template9">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Challenge @{{getModalData()[0]}} a pong match?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>If you want to play a pong match with {{getModalData()[0]}} just press the "Yes" button. Once the player accepts the proposal, the match will start.</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
 
     </ng-container>
   </div>

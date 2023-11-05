@@ -23,7 +23,8 @@ import { ToasterComponent } from './toaster/toaster.component'
 import { ToasterService } from './toaster/toaster.service';
 import { ModalComponent } from './modal/modal.component'
 import { ModalService } from './modal/modal.service'
-import { ValidationFunctions } from '@shared/user.functions'
+import { ValidationFunctions } from '@shared/user.functions';
+import { AdminPageComponent } from './admin-page/admin-page.component'
 
 
 @NgModule({
@@ -39,7 +40,8 @@ import { ValidationFunctions } from '@shared/user.functions'
     ChatComponent,
     PongComponent,
     ToasterComponent,
-    ModalComponent
+    ModalComponent,
+    AdminPageComponent
 
   ],
   imports: [

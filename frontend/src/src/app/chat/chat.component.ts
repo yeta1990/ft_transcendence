@@ -323,6 +323,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.modalService.openModal('template1', room);
 	}
 
+	challengeMatchModal(login: string){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const challengeConfirmation = this.modalService.getModalData()[0];
+      		//to be done!!!
+      		//a function to drive the user to a wait room or something ...
+			console.log("match challenge")
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template9', login);
+
+	} 
+
 	createChannelModal() {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
 			const receivedData = this.modalService.getModalData();

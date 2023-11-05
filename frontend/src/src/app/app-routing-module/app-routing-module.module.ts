@@ -10,6 +10,7 @@ import { UserProfileComponent } from '../user-profile/user-profile.component'
 import { HomeComponent } from '../home/home.component';
 import { EditProfileComponent } from '../edit-profile/edit-profile.component';
 import { PongComponent } from '../pong/pong.component';
+import { AdminPageComponent } from '../admin-page/admin-page.component';
 
 
 //routes are doubly protected:
@@ -82,6 +83,14 @@ const routes: Routes = [
 		canActivate: [AuthGuard],
 		data: {
 			logCheck: true
+		  },
+	},
+	{
+		path: 'admin',
+		component: AdminPageComponent,
+		canActivate: [AuthGuard],
+		data: {
+			adminCheck: true
 		  },
 	}
 ];
