@@ -58,6 +58,10 @@ export class AuthService {
 		//get user data from 42
 		const allUserData42 = await this.userService.whoAmI(data.access_token);
 		const payloadToCreateUser = { nick: allUserData42.login, email: allUserData42.email, firstName: allUserData42.first_name, lastName: allUserData42.last_name, login: allUserData42.login, image: allUserData42.image.versions.medium }; //all requests from the frontend will contain this info
+
+		const isBanned: boolean = (await this.userService.getUserByLogin(payloadToCreateUser.login)).isBanned
+		if (isBanned) return false;
+
 		const createdUser = await this.userService.createUser(payloadToCreateUser);
 		const payloadToSign = {login: createdUser.login, id: createdUser.id, role: createdUser.userRole}
 		const access_token = await this.jwtService.signAsync(payloadToSign);
