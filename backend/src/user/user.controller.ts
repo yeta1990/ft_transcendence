@@ -43,8 +43,11 @@ export class UserController {
 	public async grantAdmin(@Query('login') login: string, @UserId() id: number): Promise<User[]>{
 		const hasExecutorPrivileges: boolean = (await this.service.getUser(id)).userRole >= 5 ? true : false
 		if (!hasExecutorPrivileges) return [] as User[]
-		const isTargetOwner: boolean = (await this.service.getUserByLogin(login)).userRole >= 6 ? true : false
+		const target: User = await this.service.getUserByLogin(login)
+		const isTargetOwner: boolean = target.userRole >= 6 ? true : false
 		if (isTargetOwner) return [] as User[]
+		const isTargetBanned: boolean = target.isBanned ? true : false
+		if (isTargetBanned) return [] as User[]
 		return this.service.grantAdmin(login);
 	}
 

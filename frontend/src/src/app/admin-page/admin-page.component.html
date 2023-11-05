@@ -17,7 +17,7 @@
         </td>
         <td>
           <button
-            *ngIf="user.userRole < 6"
+            *ngIf="user.userRole < 6 && !user.isBanned" 
             (click)="user.userRole === 5 ? removeAdminModal(user.login, user.userRole) : grantAdminModal(user.login, user.userRole)"
             class="btn btn-outline-light"
           >
