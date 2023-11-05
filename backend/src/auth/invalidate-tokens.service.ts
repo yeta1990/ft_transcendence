@@ -30,7 +30,9 @@ export class InvalidateTokensService {
 		if (t !== null) return false;
 		const tokenPrivileges: string | undefined  = UserRole[this.authService.getUserRoleFromJwt(token)]
 		const tokenLogin = this.authService.getLoginFromJwt(token)
-		const realPrivileges: string | undefined = UserRole[(await this.userService.getUserByLogin(tokenLogin)).userRole]
+		const user = await this.userService.getUserByLogin(tokenLogin)
+		if (user == undefined) return true;
+		const realPrivileges: string | undefined = UserRole[user.userRole]
 
 //		console.log(UserRole[tokenPrivileges] + ","+ UserRole[realPrivileges])
 //		console.log(tokenPrivileges +  "," + realPrivileges)

@@ -18,6 +18,7 @@ import { generateSocketErrorResponse, generateSocketInformationResponse } from '
 import { events, values } from '@shared/const';
 import { ChatUser } from '@shared/types';
 import { map } from 'rxjs/operators';
+import {User} from '../user/user.entity'
 
 //this base class is used to log the initialization
 //and avoid code duplications in the gateways
@@ -350,10 +351,13 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   public async sendBlockedUsers(clientId: string, login: string): Promise<void>{
-		const blockedUsersByLogin: Array<string> = (await this.userService
-			.getBannedUsersByLogin(login))
+  	  	const bannedUsers: User[] = await this.userService
+  	  		.getBannedUsersByLogin(login)
+  	  	if (bannedUsers && bannedUsers.length > 0) {
+			const blockedUsersByLogin: Array<string> =  bannedUsers
 			.map(m => m.login)
- 		this.server.to(clientId).emit(events.BlockedUsers, blockedUsersByLogin) 
+ 			this.server.to(clientId).emit(events.BlockedUsers, blockedUsersByLogin) 
+ 		}
   }
 
   public async kickAndDisconnect(login: string): Promise<void> {
