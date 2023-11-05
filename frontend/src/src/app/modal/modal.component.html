@@ -189,6 +189,57 @@
         </div>
       </ng-template>
 
+      <ng-template [ngSwitchCase]="'template10'">
+        <div id="modal-content-template10">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Grant @{{getModalData()[0]}} Admin privileges?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>If you want to give {{getModalData()[0]}} Admin privileges, just press the "Yes" button.</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template11'">
+        <div id="modal-content-template11">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Remove @{{getModalData()[0]}} its Admin privileges?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>If you want to remove the {{getModalData()[0]}} Admin privileges, just press the "Yes" button.</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template12'">
+        <div id="modal-content-template12">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Ban @{{getModalData()[0]}} of the whole site?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>If you ban {{getModalData()[0]}}, the user won't be able to login or navigate in this site.</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
     </ng-container>
   </div>
 </div>

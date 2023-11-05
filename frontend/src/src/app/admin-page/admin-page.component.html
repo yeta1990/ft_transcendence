@@ -1,1 +1,38 @@
-<p>admin-page works!</p>
+<app-nav-bar/>
+
+<div class="container">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Login</th>
+        <th>Role</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of allUsers">
+        <td>{{ user.login }}</td>
+        <td>
+          	{{ user.userRole < 5 ? 'User' : user.userRole > 5 ? 'Owner' : 'Admin' }}
+        </td>
+        <td>
+          <button
+            *ngIf="user.userRole < 6"
+            (click)="changeUserRoleModal(user.login, user.userRole)"
+            class="btn btn-outline-light"
+          >
+            {{ user.userRole === 5 ? 'Remove Admin privileges' : 'Grant Admin privileges' }}
+          </button>
+          <button
+            *ngIf="user.userRole !== 6"
+            (click)="banUserModal(user.login)"
+            class="btn btn-outline-danger"
+          >
+            Banear
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+

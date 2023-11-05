@@ -10,7 +10,7 @@ export class User {
 	login: string;
 	tokenHash: string;
 	campus: Campuses;
-	role: UserRole;
+	userRole: UserRole;
 	mfa: boolean;
 	mfaSecret: string;
 	image: string;
@@ -30,7 +30,7 @@ export class User {
 		this.login = model && model.login;
 		this.tokenHash = model && model.tokenHash;
 		this.campus = model && model.campus;
-		this.role = model && model.role;
+		this.userRole = model && model.userRole;
 		this.mfa = model && model.mfa;
 		this.mfaSecret = model && model.mfaSecret;
 		this.image = model && model.image;

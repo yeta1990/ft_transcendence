@@ -6,6 +6,7 @@ import { CreateUserDto } from './user.dto';
 import { User } from './user.entity';
 import { catchError, lastValueFrom, map } from 'rxjs';
 import { Achievement } from './achievement/achievement.entity';
+import { UserRole } from '@shared/enum';
  
 @Injectable()
 export class UserService {
@@ -81,6 +82,21 @@ export class UserService {
 				ownedRooms: true
     		}
     	})
+	}
+
+	public async grantAdmin(login: string): Promise<User[]>{
+		console.log(login)
+		const user: User = await this.getUserByLogin(login)
+		user.userRole = UserRole.ADMIN
+		await this.saveUser(user)
+		return this.getAllUsers()
+	}
+
+	public async removeAdmin(login: string): Promise<User[]>{
+		const user: User = await this.getUserByLogin(login)
+		user.userRole = UserRole.REGISTRED
+		await this.saveUser(user)
+		return this.getAllUsers()
 	}
 
 	public async createUser(body: CreateUserDto): Promise<User>{
