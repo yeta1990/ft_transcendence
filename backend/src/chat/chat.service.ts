@@ -61,7 +61,7 @@ export class ChatService {
 				.map(n => parseInt(n));
 			const user1: User = await this.userService.getUser(userIds[0])
 			const user2: User = await this.userService.getUser(userIds[1])
-			if (user1.login === myLogin){
+			if (user1.login === myLogin && user2){
 				return "@" + user2.login
 			}
 			return "@" + user1.login

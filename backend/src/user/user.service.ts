@@ -187,4 +187,15 @@ export class UserService {
 			return [] as Achievement[];
 		}
 	}
+
+	public async hasAdminPrivileges(login: string){
+		const role: UserRole = (await this.getUserByLogin(login)).userRole
+		return  role == UserRole.ADMIN || role == UserRole.OWNER
+	}
+
+	public async isWebOwner(login: string){
+		const role: UserRole = (await this.getUserByLogin(login)).userRole
+		return role == UserRole.OWNER
+	}
+
 }

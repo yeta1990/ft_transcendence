@@ -81,12 +81,14 @@ export class AuthService {
 
 	getLoginFromJwt(token: string): string{
 		const decoded: JwtPayload = this.jwtService.decode(token) as JwtPayload;
+		if (!decoded) return null
 		return (decoded.login)
 	}
 
 	getUserRoleFromJwt(token: string): string {
 		const decoded: JwtPayload = this.jwtService.decode(token) as JwtPayload;
-		console.log(decoded)
+		if (!decoded)
+			return ("1")
 		return (decoded.role)
 	}
 
