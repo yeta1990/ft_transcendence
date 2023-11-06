@@ -53,7 +53,8 @@ export class User {
 	userRole: UserRole;
 
 	@Column({
-		default:false
+		default:false,
+		type: 'boolean'
 	})
 	mfa: boolean;
 

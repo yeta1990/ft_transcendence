@@ -4,6 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from 'jsonwebtoken';
 import { HttpService } from '@nestjs/axios';
 import { catchError, lastValueFrom, map } from 'rxjs';
+import { EntityManager } from 'typeorm';
+import { User } from '../user/user.entity';
 
 export interface authData42 {
 	access_token: string;
@@ -19,7 +21,8 @@ export class AuthService {
 	constructor(
 		private userService: UserService,
 		private jwtService: JwtService,
-		private httpService: HttpService
+		private httpService: HttpService,
+		private entityManager: EntityManager
 	) {}
 
 	async confirmAuthFrom42(code: string): Promise<any>{
@@ -79,25 +82,65 @@ export class AuthService {
 	}
 
 	async verifyJwt(token: string): Promise<boolean> {
-    	if (!token) {
-    	  throw new UnauthorizedException();
-    	}
-    	try {
-    	  const payload = await this.jwtService.verifyAsync(
-    	    token,
-    	    {
-    	      secret: 'santanabanana'
-    	    }
-    	  );
-    	  // 💡 We're assigning the payload to the request object here
-    	  // so that we can access it in our route handlers
-//    	  request['user'] = payload;
+		if (!token) {
+		throw new UnauthorizedException();
+		}
+		try {
+		const payload = await this.jwtService.verifyAsync(
+			token,
+			{
+			secret: 'santanabanana'
+			}
+		);
+		// 💡 We're assigning the payload to the request object here
+		// so that we can access it in our route handlers
+		// request['user'] = payload;
 			
-    	} catch {
-    		return false;
-//    	  throw new UnauthorizedException();
-    	}
-    	return true;
-    }
+		} catch {
+			return false;
+			// throw new UnauthorizedException();
+		}
+		return true;
+	}
+
+	async enable2FA(userId: number, mfaSecret: string): Promise<void> {
+		const user = await this.userService.getUser(userId);
+
+		if (!user) {
+			throw new Error('User not found');
+		}
+		// Guarda el secreto 2FA en el usuario y marca 2FA como habilitado
+		user.mfaSecret = mfaSecret;
+		user.mfa = true;
+		await this.userService.saveUser(user);
+	}
+	
+	async disable2FA(userId: number): Promise<void> {
+		const user = await this.userService.getUser(userId);
+		
+		if (!user) {
+			throw new Error('User not found');
+		}
+		console.log('Desactivando MFA... Por favor espere');
+		// Deshabilita la autenticación de dos factores para el usuario
+		user.mfa = false;
+		user.mfaSecret = null;
+
+		await this.userService.saveUser(user);
+	}
+	
+
+	async saveRecoveryCodes(userId: number, recoveryCodes: string[]): Promise<void> {
+		const user = await this.userService.getUser(userId);
+
+		if (!user) {
+			throw new Error('User not found'); 
+		}
+
+		// Guarda los códigos de recuperación en el usuario
+		user.recoveryCodes = recoveryCodes;
+		await this.userService.saveUser(user);
+	}
+
 
 }

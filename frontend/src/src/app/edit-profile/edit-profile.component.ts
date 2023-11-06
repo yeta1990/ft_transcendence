@@ -1,5 +1,5 @@
 import { Component, OnInit, } from '@angular/core'; 
-import { FormBuilder } from '@angular/forms';
+import { FormBuilder, FormControl } from '@angular/forms';
 import { EditProfileService } from './edit-profile.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
@@ -10,7 +10,14 @@ import { environment } from '../../environments/environment';
 import { UserRole } from '@shared/enum';
 import { Location } from '@angular/common'
 import { forkJoin, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, takeUntil } from 'rxjs/operators';
+import { QRCode } from 'qrcode';
+
+
+interface Enable2FAResponse {
+  message: string;
+  recoveryCodes?: string[];
+}
 
 @Component({
   selector: 'app-edit-profile',
@@ -21,7 +28,6 @@ export class EditProfileComponent implements  OnInit {
 
   user: User | undefined;
   newUser: User | undefined;
-
   editingField: string | null = null;
   editedFields: { [key: string]: any } = {};
 
@@ -29,7 +35,8 @@ export class EditProfileComponent implements  OnInit {
 		firstName: '',
     lastName: '',
 		nick: '',
-		email: ''
+		email: '',
+    mfa: false,
 	});
 
   constructor(
@@ -48,19 +55,41 @@ export class EditProfileComponent implements  OnInit {
       //   });
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     this.newUser = this.user;
+  
     if (this.newUser) {
       this.newUser.firstName = this.editForm.get('firstName')?.value!;
       this.newUser.lastName = this.editForm.get('lastName')?.value!;
       this.newUser.nick = this.editForm.get('nick')?.value!;
       this.newUser.email = this.editForm.get('email')?.value!;
+      
+      const newMFA = this.editForm.get('mfa')?.value!;
+  
+      // Verificar si el estado del MFA ha cambiado
+      if (newMFA !== this.user?.mfa) {
+        console.log("El estado del MFA ha cambiado");
+        // Si el nuevo estado del MFA es verdadero, activa MFA; de lo contrario, desactívalo
+        if (newMFA) {
+          console.log("Voy a activar MFA");
+          await this.enable2FA();
+          this.newUser.mfa = true;
+        } else {
+          console.log("Voy a desactivar MFA");
+          await this.disable2FA();
+          this.newUser.mfa = false;
+        }
+      }
+  
+      // Realiza el envío del formulario después de verificar el MFA
+      this.httpClient.post<User>(environment.apiUrl + '/edit-profile/user/edit', this.newUser)
+        .subscribe((response: User) => {
+          console.log(response);
+          this.router.navigateByUrl('/user-profile/' + this.newUser?.login);
+        });
     }
-    this.httpClient.post<User>(environment.apiUrl + '/edit-profile/user/edit', this.newUser)
-    .subscribe((response: User) =>console.log(response))
-    console.log(this.newUser);
-    this.router.navigateByUrl('/my-profile');
   }
+  
 
   ngOnInit(): void {
     this.activatedRoute.paramMap.pipe(
@@ -92,6 +121,7 @@ export class EditProfileComponent implements  OnInit {
             this.editForm.controls['lastName'].setValue(this.user!.lastName);
             this.editForm.controls['nick'].setValue(this.user!.nick);
             this.editForm.controls['email'].setValue(this.user!.email);
+            this.editForm.controls['mfa'].setValue(this.user!.mfa);
             // El usuario tiene permiso para editar el perfil
             // Agrega aquí cualquier lógica adicional que necesites para gestionar la edición.
           } else {
@@ -121,4 +151,22 @@ export class EditProfileComponent implements  OnInit {
 		this.editingField = null;
 		this.editedFields = {};
 	  }
+
+    disable2FA() {
+      this.httpClient.post<{ message: string }>(environment.apiUrl + '/auth/2fa/disable', this.newUser)
+        .subscribe((response) => {
+          console.log(response.message);
+        });
+    }
+
+    enable2FA() {
+      this.httpClient.post<Enable2FAResponse>(environment.apiUrl + '/auth/2fa/enable', this.newUser)
+        .subscribe((response) => {
+          console.log(response.message);
+          if (response.recoveryCodes) {
+            // Si se generaron códigos de recuperación, puedes mostrarlos al usuario
+            console.log('Recovery codes:', response.recoveryCodes);
+          }
+        });
+    }
 }

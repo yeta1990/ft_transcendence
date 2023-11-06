@@ -20,11 +20,6 @@ export class EditProfileService {
             .set(newUser)
             .where("id = :id", { id: id})
             .execute()
-        let user =  await this.repository.findOne({
-                where: {
-                    id: id,
-                },
-            })
         return this.repository.save(newUser);
     }  
 }

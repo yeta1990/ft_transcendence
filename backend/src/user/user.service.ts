@@ -18,7 +18,7 @@ export class UserService {
 	constructor(private httpService: HttpService, @InjectConnection() private readonly connection: Connection) {}
 
 	public async getUser(id: number): Promise<User | undefined>{
-		return this.repository.findOne({
+		return await this.repository.findOne({
     		where: {
         		id: id,
     		},
@@ -64,7 +64,7 @@ export class UserService {
 	}
 
 	public async getUserByLogin(login: string): Promise<User | undefined>{
-		return this.repository.findOne({
+		return await this.repository.findOne({
 			relations: ['ownedRooms', 'bannedUsers'],
     		where: {
         		login: login,
@@ -73,7 +73,7 @@ export class UserService {
 	}
 
 	public async getUserByLoginWithRooms(login: string): Promise<User | undefined>{
-		return this.repository.findOne({
+		return await this.repository.findOne({
     		where: {
         		login: login,
     		},
@@ -94,12 +94,40 @@ export class UserService {
 //		user.nick = body.nick;
 //		user.email = body.email;
 //		user.firstName = body.first
-		return this.repository.save(body);
+		return await this.repository.save(body);
 	};
 
-	async saveUser(user: User): Promise<User> {
-		return await this.repository.save(user);
-	}
+	async saveUser(newUser: User): Promise<User> {
+		console.log("SAVING: MFA of user is: " + newUser.mfa.valueOf());
+	  
+		const id = newUser.id;
+	  
+		console.log(newUser)
+		try {
+		  // Intenta ejecutar la actualización
+		  let updateResult = await this.repository
+			.createQueryBuilder()
+			.update(User)
+			.set(newUser)
+			.where("id = :id", { id: id })
+			.execute();
+	  
+			console.log(await this.getUser(id));
+		  // Verifica el resultado de la actualización
+		  if (updateResult.affected && updateResult.affected > 0) {
+			console.log(`User with ID ${id} updated successfully.`);
+		  } else {
+			console.log(`No user was updated for ID ${id}.`);
+		  }
+		} catch (error) {
+		  console.error("Error updating user:", error);
+		  throw error; // Puedes lanzar el error nuevamente o manejarlo según tus necesidades
+		}
+	  
+		// Finalmente, guarda y devuelve el objeto actualizado
+		return await this.repository.save(newUser);
+	  }
+	  
 
 	public async whoAmI(token: string): Promise<any>
 	{
@@ -120,7 +148,7 @@ export class UserService {
 	public async getAllUsers(): Promise<User[]> {
 		return await this.repository.find({
 			order: {
-			  id: 'ASC', // Ordena por ID de manera ascendente (también puedes usar 'DESC' para descendente)
+			  id: 'ASC', // (también puedes usar 'DESC' para descendente)
 			}});
 	}
 
