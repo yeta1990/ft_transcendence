@@ -179,7 +179,7 @@ export class ChatService {
 
 	public async removeOwnerFromRoom(room: string): Promise<boolean>{
 		const foundRoom: Room = await this.getRoom(room);
-		if (!foundRoom) return false;
+		if (!foundRoom || !foundRoom.owner) return false;
 		const login: string = foundRoom.owner.login;
 		foundRoom.owner = undefined;
 		await this.roomRepository.save(foundRoom);
@@ -305,7 +305,7 @@ export class ChatService {
 		const isTargetBanned: boolean = await this.isBannedOfRoom(login, room)
 		if (!isTargetBanned) return false;
 
-		const oldBannedSize: number = foundRoom.users.length;
+		const oldBannedSize: number = foundRoom.banned.length;
 		foundRoom.banned = foundRoom.banned.filter(user => {
 			return user.login != login;
 		})

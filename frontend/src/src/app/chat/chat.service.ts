@@ -117,4 +117,50 @@ export class ChatService {
 		this.socketService.adminJoin()
 	}
 
+	adminBanUserOfRoom(room: string, login: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
+		this.socketService.sendMessageToServer(events.AdminBanChatUser, payloadToSend);
+	}
+
+	adminRemoveBanOfRoom(room: string, login: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
+		this.socketService.sendMessageToServer(events.AdminRemoveBanChatUser, payloadToSend);
+	}
+
+	adminSilenceUserOfRoom(room: string, login: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
+		this.socketService.sendMessageToServer(events.AdminSilenceChatUser, payloadToSend);
+	}
+
+	adminRemoveSilenceUserOfRoom(room: string, login: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
+		this.socketService.sendMessageToServer(events.AdminRemoveSilenceChatUser, payloadToSend);
+	}
+
+	adminDestroyRoom(room: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , login: "", date: new Date() }
+		this.socketService.sendMessageToServer(events.AdminDestroyChannel, payloadToSend);
+	}
+
+	adminMakeRoomAdmin(room: string, login: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
+		this.socketService.sendMessageToServer(events.AdminGiveAdminChatPrivileges, payloadToSend);
+	}
+
+	adminRevokeRoomAdmin(room: string, login: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
+		this.socketService.sendMessageToServer(events.AdminRevokeAdminChatPrivileges, payloadToSend);
+	}
+
+
+	adminMakeRoomOwner(room: string, login: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
+		this.socketService.sendMessageToServer(events.AdminGiveChatOwnership, payloadToSend);
+	}
+
+	adminRevokeRoomOwner(room: string, login: string){
+		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
+		this.socketService.sendMessageToServer(events.AdminRevokeChatOwnership, room);
+	}
+
 }

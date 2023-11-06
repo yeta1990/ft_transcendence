@@ -29,6 +29,15 @@ export class ChatAdminService {
 		if (!executorIsWebAdmin) return false;
 
 		//remove user, owner and admin of the room, if proceed
+		const userToBan: User | undefined = await this.userService.getUserByLogin(login);
+		if (!userToBan) return false;
+		const foundRoom: Room = await this.roomService.getRoom(room);
+		if (!foundRoom) return false;
+		const isBannedOfRoom: boolean = await this.chatService.isBannedOfRoom(login, room)
+		if (isBannedOfRoom) return false;
+		foundRoom.banned.push(userToBan)
+		await this.roomRepository.save(foundRoom)
+		
 		return await this.chatService.removeUserFromRoom(room, login)
 	}
 
@@ -41,7 +50,8 @@ export class ChatAdminService {
 		const isTargetBanned: boolean = await this.chatService.isBannedOfRoom(login, room)
 		if (!isTargetBanned) return false;
 
-		const oldBannedSize: number = foundRoom.users.length;
+
+		const oldBannedSize: number = foundRoom.banned.length;
 		foundRoom.banned = foundRoom.banned.filter(user => {
 			return user.login != login;
 		})
@@ -134,8 +144,8 @@ export class ChatAdminService {
 	public async removeOwnerFromRoom(executorLogin: string, room: string): Promise<boolean>{
 	  const foundRoom: Room = await this.chatService.getRoom(room)
 	  if (!foundRoom || !foundRoom.owner) return false;
-
 	  const targetIsWebOwner: boolean = await this.userService.isWebOwner(foundRoom.owner.login)
+	  console.log(targetIsWebOwner)
 	  if (targetIsWebOwner && foundRoom.owner.login != executorLogin) return ;
 	  const executorIsWebAdmin: boolean = await this.userService.hasAdminPrivileges(executorLogin)
 	  if (!executorIsWebAdmin) return ;

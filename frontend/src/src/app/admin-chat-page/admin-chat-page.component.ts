@@ -80,7 +80,70 @@ export class AdminChatPageComponent implements OnInit {
 	}
 
 	destroyRoom(room: string) {
-
+		this.chatService.adminDestroyRoom(room)
 	}
+	
+	banUser(room:string, login:string) {
+		this.chatService.adminBanUserOfRoom(room, login)
+	}
+
+	removeBan(room:string, login:string) {
+		this.chatService.adminRemoveBanOfRoom(room, login)
+	}
+
+	silenceUser(room:string, login:string) {
+		this.chatService.adminSilenceUserOfRoom(room, login)
+	}
+
+	unSilenceUser(room:string, login:string) {
+		this.chatService.adminRemoveSilenceUserOfRoom(room, login)
+	}
+
+	makeAdmin(room:string, login:string) {
+		this.chatService.adminMakeRoomAdmin(room, login)
+	}
+
+	revokeAdmin(room:string, login:string) {
+		this.chatService.adminRevokeRoomAdmin(room, login)
+	}
+
+	makeOwner(room:string, login:string) {
+		this.chatService.adminMakeRoomOwner(room, login)
+	}
+
+	revokeOwner(room:string, login:string) {
+		this.chatService.adminRevokeRoomOwner(room, login)
+	}
+
+	isSilenced(room:string, login:string): boolean {
+		const foundRoom  =   this.roomsMetaData.get(room)
+		if (!foundRoom) return false;
+		return foundRoom.silenced.includes(login)
+	}
+
+	isOwner(room: string, login: string): boolean {
+		const foundRoom = this.roomsMetaData.get(room)
+		if (!foundRoom) return false;
+		return foundRoom.owner === login
+	}
+
+	isAdmin(room: string, login: string): boolean {
+		const foundRoom  =   this.roomsMetaData.get(room)
+		if (!foundRoom) return false;
+		return foundRoom.admins.includes(login)
+	}
+
+	isUser(room: string, login: string):boolean {
+		const foundRoom  =   this.roomsMetaData.get(room)
+		if (!foundRoom) return false;
+		return foundRoom.users.includes(login)
+	}
+
+	isBanned(room: string, login:string): boolean {
+		const foundRoom  =   this.roomsMetaData.get(room)
+		if (!foundRoom) return false;
+		return foundRoom.banned.includes(login)
+	}
+
 
 }

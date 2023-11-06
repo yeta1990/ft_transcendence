@@ -22,22 +22,22 @@
           </div>
         </td>
         <td>
-        	{{roomsMetaData.get(room.key)?.owner}}
+        	{{roomsMetaData.get(room.key)?.owner}} - <span (click)="revokeOwner(room.key, roomsMetaData.get(room.key)!.owner)">Revoke ownership</span>
         </td>
         <td>
         	<div *ngFor="let admin of roomsMetaData.get(room.key)?.admins">
-        		{{admin}}
+        		{{admin}} - <span (click)="revokeAdmin(room.key, admin)">Revoke admin privileges</span>
         	</div>
 
         </td>
         <td>
         	<div *ngFor="let user of roomsMetaData.get(room.key)?.users">
-        		{{user}}
+        		{{user}} - <span (click)="makeAdmin(room.key, user)">Make channel admin</span> - <span (click)="makeOwner(room.key, user)">Make channel owner</span> - <span *ngIf="!isSilenced(room.key, user)" (click)="silenceUser(room.key, user)"> Silence User - </span> <span *ngIf="isSilenced(room.key,user)" (click)="unSilenceUser(room.key, user)"> Unsilence User</span> - <span (click)="banUser(room.key, user)">Ban user</span>
         	</div>
         </td>
         <td>
         	<div *ngFor="let ban of roomsMetaData.get(room.key)?.banned">
-        		{{ban}}
+        		{{ban}} - <span (click)="removeBan(room.key, ban)">Remove ban</span>
         	</div>
 
         </td>
