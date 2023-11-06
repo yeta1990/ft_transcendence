@@ -13,10 +13,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Room } from '../chat/room.entity';
 import { HashService } from '../hash/hash.service';
 import { UserModule } from '../user/user.module';
+import { ChatAdminService } from '../chat/chat-admin/chat-admin.service'
 
 @Module({
 	imports: [TypeOrmModule.forFeature([Room, User, ChatMessage]), AuthModule, HttpModule, UserModule],
-  	providers: [ChatService, RoomService, ChatMessageService, ChatGateway, GameGateway, BaseGateway, HashService]
+  	providers: [ChatService, ChatAdminService, RoomService, ChatMessageService, ChatGateway, GameGateway, BaseGateway, HashService]
 })
 
 export class EventsModule {}

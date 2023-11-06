@@ -15,7 +15,16 @@ export const events = {
 	KickUser: "kickUser",
 	Kicked: "kicked",
 	AllHistoricalMessages: "allHistoricalMessages",
-	AdminJoin: "adminJoin"
+	AdminJoin: "adminJoin",
+	AdminBanChatUser: "adminBanUser",
+	AdminRemoveBanChatUser: "adminRemoveBanUser",
+	AdminSilenceChatUser: "adminSilenceUser",
+	AdminRemoveSilenceChatUser: "adminRemoveSilenceUser",
+	AdminGiveAdminChatPrivileges: "adminGiveAdminChatPrivileges",
+	AdminRevokeAdminChatPrivileges: "adminRevokeAdminChatPrivileges",
+	AdminGiveChatOwnership: "adminGiveChatOwnership",
+	AdminRevokeChatOwnership: "adminRevokeChatOwnership",
+	AdminDestroyChannel: "adminDestroyChannel"
 }
 
 export const values = {

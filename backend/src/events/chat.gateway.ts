@@ -7,6 +7,7 @@ import { events, values } from '@shared/const';
 import { generateSocketErrorResponse, generateSocketInformationResponse } from '@shared/functions';
 import { generateJoinResponse } from '@shared/functions';
 import { ChatMessageService } from '../chat/chat-message/chat-message.service';
+import { ChatAdminService } from '../chat/chat-admin/chat-admin.service';
 import { User } from '../user/user.entity';
 import { RoomMessages, ChatUser } from '@shared/types';
 
@@ -15,7 +16,8 @@ import { RoomMessages, ChatUser } from '@shared/types';
 //extending BaseGateway to log the gateway creation in the terminal
 export class ChatGateway extends BaseGateway {
 
-  constructor(private chatMessageService: ChatMessageService) {
+  constructor(private chatMessageService: ChatMessageService, 
+  			 private chatAdminService: ChatAdminService) {
 	super(ChatGateway.name);
   }
 
@@ -342,37 +344,49 @@ export class ChatGateway extends BaseGateway {
 	  }
   }
 
-
-  @SubscribeMessage('ban')
-  async banUserOfRoom(client: Socket, payload: ChatMessage){
-	  const login: string = client.handshake.query.login as string;
-	  const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(payload.room);
-	  const banOk: boolean = await this
-	  	.chatService
-	  	.banUserOfRoom(login, payload.login, payload.room);
-	  if (banOk){
-	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(payload.login);
+  async afterBanInform(executorLogin: string, executorSocketId: string, targetLogin: string, room: string){
+	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(targetLogin);
 	  	if (targetSocketIds.length){
 
-			const err: SocketPayload = generateSocketInformationResponse(payload.room, 
-				`Information: you have been banned from ${payload.room}`)
+			const err: SocketPayload = generateSocketInformationResponse(room, 
+				`Information: you have been banned from ${room}`)
 
 			for (let i = 0; i < targetSocketIds.length; i++){
 				this.server.to(targetSocketIds[i]).emit("system", err.data)
 				this.server.to(targetSocketIds[i])
-					.emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(payload.login));
+					.emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(targetLogin));
 			}
 		}
-		this.server.to(client.id)
-			.emit("system", generateSocketInformationResponse(payload.room, 
-				`You've banned ${payload.login} in ${payload.room} successfully`).data)
-	    const banInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.login} has been banned of ${payload.room}`)
+		this.server.to(executorSocketId)
+			.emit("system", generateSocketInformationResponse(room, 
+				`You've banned ${targetLogin} in ${room} successfully`).data)
+	    const banInfo: SocketPayload = generateSocketInformationResponse(room, `user ${targetLogin} has been banned of ${room}`)
 		let roomMetaData: RoomMetaData = await this.roomService
-			.getRoomMetaData(payload.room)
+			.getRoomMetaData(room)
 	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
-	  	this.broadCastToRoomExceptForSomeUsers(banInfo.event, banInfo.data, [payload.login, login])
+	  	this.broadCastToRoomExceptForSomeUsers(banInfo.event, banInfo.data, [executorLogin, targetLogin])
 
+  }
+
+  @SubscribeMessage('ban')
+  async banUserOfRoom(client: Socket, payload: ChatMessage){
+	  const login: string = client.handshake.query.login as string;
+	  const banOk: boolean = await this
+	  	.chatService
+	  	.banUserOfRoom(login, payload.login, payload.room);
+	  if (banOk){
+		await this.afterBanInform(login, client.id, payload.login, payload.room)
   	  }
+  }
+
+  async afterNoBanInform(executorSocketId: string, targetLogin: string, room: string ){
+		this.server.to(executorSocketId)
+			.emit("system", generateSocketInformationResponse(room, 
+				`You've removed the ban of ${targetLogin} in ${room} successfully`).data)
+		let roomMetaData: RoomMetaData = await this.roomService
+			.getRoomMetaData(room)
+	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
+	  
   }
 
   @SubscribeMessage('noban')
@@ -380,13 +394,31 @@ export class ChatGateway extends BaseGateway {
 	  const login: string = client.handshake.query.login as string;
 	  const banRemoved: boolean = await this.chatService.removeBanOfRoom(login, payload.login, payload.room);
 	  if (banRemoved){
-		this.server.to(client.id)
-			.emit("system", generateSocketInformationResponse(payload.room, 
-				`You've removed the ban of ${payload.login} in ${payload.room} successfully`).data)
-		let roomMetaData: RoomMetaData = await this.roomService
-			.getRoomMetaData(payload.room)
-	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
+	  	  await this.afterNoBanInform(client.id, payload.login, payload.room)
 	  }
+  }
+
+  async afterSilenceInform(executorLogin: string, executorSocketId: string, targetLogin: string, room: string){
+	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(targetLogin);
+	  	if (targetSocketIds.length){
+
+			const err: SocketPayload = generateSocketInformationResponse(room, 
+				`Information: you have been silenced from ${room}`)
+
+			for (let i = 0; i < targetSocketIds.length; i++){
+				this.server.to(targetSocketIds[i]).emit("system", err.data)
+			}
+		}
+		this.server.to(executorSocketId)
+			.emit("system", generateSocketInformationResponse(room, 
+				`You've silenced ${targetLogin} in ${room} successfully`).data)
+	    const silenceInfo: SocketPayload = generateSocketInformationResponse(room, `user ${targetLogin} has been silenced of ${room}`)
+		let roomMetaData: RoomMetaData = await this.roomService
+			.getRoomMetaData(room)
+	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
+	  	this.broadCastToRoomExceptForSomeUsers(silenceInfo.event, silenceInfo.data, [targetLogin, executorLogin])
+  	  
+
   }
 
   @SubscribeMessage(events.SilenceUser)
@@ -397,25 +429,8 @@ export class ChatGateway extends BaseGateway {
 	  	.chatService
 	  	.silenceUserOfRoom(login, payload.login, payload.room);
 	  if (silenceOk){
-	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(payload.login);
-	  	if (targetSocketIds.length){
-
-			const err: SocketPayload = generateSocketInformationResponse(payload.room, 
-				`Information: you have been silenced from ${payload.room}`)
-
-			for (let i = 0; i < targetSocketIds.length; i++){
-				this.server.to(targetSocketIds[i]).emit("system", err.data)
-			}
-		}
-		this.server.to(client.id)
-			.emit("system", generateSocketInformationResponse(payload.room, 
-				`You've silenced ${payload.login} in ${payload.room} successfully`).data)
-	    const silenceInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.login} has been silenced of ${payload.room}`)
-		let roomMetaData: RoomMetaData = await this.roomService
-			.getRoomMetaData(payload.room)
-	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
-	  	this.broadCastToRoomExceptForSomeUsers(silenceInfo.event, silenceInfo.data, [payload.login, login])
-  	  }
+		this.afterSilenceInform(login, client.id, payload.login, payload.room)
+	  }
   }
 
   @SubscribeMessage(events.UnSilenceUser)
@@ -533,4 +548,74 @@ export class ChatGateway extends BaseGateway {
 		return { event: events.AllHistoricalMessages, data: allHistoricalMessages};
 
   }
+
+  @SubscribeMessage(events.AdminBanChatUser)
+  async adminBanUser(client: Socket, payload: ChatMessage){
+	  const login: string = client.handshake.query.login as string;
+	  const banOk: boolean = await this
+	  	.chatAdminService
+	  	.banUserOfRoom(login, payload.login, payload.room);
+	  if (banOk){
+		await this.afterBanInform(login, client.id, payload.login, payload.room)
+		this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
+  	  }
+  }
+
+  @SubscribeMessage(events.AdminRemoveBanChatUser)
+  async adminRemoveBanUser(client: Socket, payload: ChatMessage){
+	  const login: string = client.handshake.query.login as string;
+	  const banRemoved: boolean = await this.chatAdminService.removeBanOfRoom(login, payload.login, payload.room);
+	  if (banRemoved){
+	  	  await this.afterNoBanInform(client.id, payload.login, payload.room)
+		  this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
+	  }
+  }
+
+  @SubscribeMessage(events.AdminSilenceChatUser)
+  async adminSilenceUserOfRoom(client: Socket, payload: ChatMessage){
+	  const login: string = client.handshake.query.login as string;
+	  const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(payload.room);
+	  const silenceOk: boolean = await this
+	  	.chatAdminService
+	  	.silenceUserOfRoom(login, payload.login, payload.room);
+	  if (silenceOk){
+		this.afterSilenceInform(login, client.id, payload.login, payload.room)
+		  this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
+	  }
+  }
+
+  @SubscribeMessage(events.AdminRemoveSilenceChatUser)
+  async adminRemoveSilenceOfRoom(client: Socket, payload: ChatMessage){
+	  const login: string = client.handshake.query.login as string;
+	  const silenceRemoved: boolean = await this
+	  	.chatAdminService
+	  	.removeSilenceOfRoom(login, payload.login, payload.room);
+	  if (silenceRemoved){
+		this.server.to(client.id)
+			.emit("system", generateSocketInformationResponse(payload.room, 
+				`You've removed the silence of ${payload.login} in ${payload.room} successfully`).data)
+		let roomMetaData: RoomMetaData = await this.roomService
+			.getRoomMetaData(payload.room)
+	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
+		  this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
+	  }
+  }
+
+  @SubscribeMessage(events.AdminRemoveSilenceChatUser)
+  async adminDestroyRoom(client: Socket, room: string){
+	  const login: string = client.handshake.query.login as string;
+		await this.chatAdminService.destroyRoom(login, room)
+		this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
+
+  }
+
+
+//	AdminSilenceChatUser: "adminSilenceUser",
+//	AdminRemoveSilenceChatUser: "adminRemoveSilenceUser",
+//	AdminGiveAdminChatPrivileges: "adminGiveAdminChatPrivileges",
+//	AdminRevokeAdminChatPrivileges: "adminRevokeAdminChatPrivileges",
+//	AdminGiveChatOwnership: "adminGiveChatOwnership",
+//	AdminRevokeChatOwnership: "adminRevokeChatOwnership",
+//	AdminDestroyChannel: "adminDestroyChannel"
+
 }

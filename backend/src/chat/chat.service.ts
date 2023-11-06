@@ -137,9 +137,6 @@ export class ChatService {
 			return user.login != login;
 		})
 		await this.roomRepository.save(foundRoom);
-		if (oldUserSize === foundRoom.users.length){ 
-			return false;
-		}
 		const isOwnerOfRoom: boolean = await this.isOwnerOfRoom(login, room)
 		if (isOwnerOfRoom) {
 			await this.removeOwnerFromRoom(room)
@@ -147,6 +144,9 @@ export class ChatService {
 		const isAdminOfRoom: boolean = await this.isAdminOfRoom(login, room)
 		if (isAdminOfRoom) {
 			await this.forceRemoveRoomAdmin(login, room)
+		}
+		if (!isOwnerOfRoom && !isAdminOfRoom && oldUserSize === foundRoom.users.length){ 
+			return false;
 		}
 		return true;
 	}
@@ -326,7 +326,6 @@ export class ChatService {
 
 	public async silenceUserOfRoom(executorLogin: string, login: string, room: string): Promise<boolean>{
 		//check privileges
-		console.log(executorLogin, login, room)
 		if (executorLogin === login) return false;
 		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorLogin, room);
 		const executorIsAdminOfRoom: boolean = await this.isAdminOfRoom(executorLogin, room);
@@ -454,12 +453,12 @@ export class ChatService {
 	}
 
 	public async deleteRoom(room: string): Promise<any>{
-		return this.roomRepository.delete(room);
+		return await this.roomRepository.delete(room);
 	}
 
 	//only for testing purposes
 	public async emptyTableRoom(): Promise<any>{
-		return this.roomRepository.clear();
+		return await this.roomRepository.clear();
 	}
 
 	public async getHashPassFromRoom(room: string): Promise<string>{
