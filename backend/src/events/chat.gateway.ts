@@ -288,17 +288,29 @@ export class ChatGateway extends BaseGateway {
 	  return { event: events.ListMyJoinedRooms, data: await this.chatService.getAllJoinedRoomsByOneUser(login)}
   }
 
+  async makeRoomAdminInform(targetLogin: string, room: string){
+	    const roomInfo: SocketPayload = generateSocketInformationResponse(room, `user ${targetLogin} is now admin of room ${room}`)
+	  	this.broadCastToRoom(roomInfo.event, roomInfo.data)
+		let roomMetaData: RoomMetaData = await this.roomService
+			.getRoomMetaData(room)
+	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
+  }
+
   @SubscribeMessage('admin')
   async makeRoomAdmin(client: Socket, payload: ChatMessage){
 	  const login: string = client.handshake.query.login as string;
 	  const adminOk: boolean = await this.chatService.makeRoomAdmin(login, payload.login, payload.room);
 	  if (adminOk){
-	    const roomInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.login} is now admin of room ${payload.room}`)
+	  	  await this.makeRoomAdminInform(payload.login, payload.room);
+	  }
+  }
+
+  async  removeAdminInform(targetLogin: string, room: string){
+	    const roomInfo: SocketPayload = generateSocketInformationResponse(room, `user ${targetLogin} isn't admin of room ${room} anymore`)
 	  	this.broadCastToRoom(roomInfo.event, roomInfo.data)
 		let roomMetaData: RoomMetaData = await this.roomService
-			.getRoomMetaData(payload.room)
+			.getRoomMetaData(room)
 	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
-	  }
   }
 
   @SubscribeMessage('noadmin')
@@ -306,11 +318,7 @@ export class ChatGateway extends BaseGateway {
 	  const login: string = client.handshake.query.login as string;
 	  const adminRemoved: boolean = await this.chatService.removeRoomAdmin(login, payload.login, payload.room);
 	  if (adminRemoved){
-	    const roomInfo: SocketPayload = generateSocketInformationResponse(payload.room, `user ${payload.login} isn't admin of room ${payload.room} anymore`)
-	  	this.broadCastToRoom(roomInfo.event, roomInfo.data)
-		let roomMetaData: RoomMetaData = await this.roomService
-			.getRoomMetaData(payload.room)
-	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
+			await this.removeAdminInform(payload.login, payload.room)
 	  }
   } 
 
@@ -601,7 +609,7 @@ export class ChatGateway extends BaseGateway {
 	  }
   }
 
-  @SubscribeMessage(events.AdminRemoveSilenceChatUser)
+  @SubscribeMessage(events.AdminDestroyChannel)
   async adminDestroyRoom(client: Socket, room: string){
 	  const login: string = client.handshake.query.login as string;
 		await this.chatAdminService.destroyRoom(login, room)
@@ -609,13 +617,49 @@ export class ChatGateway extends BaseGateway {
 
   }
 
+  @SubscribeMessage(events.AdminGiveAdminChatPrivileges)
+  async adminMakeRoomAdmin(client: Socket, payload: ChatMessage){
+	  const login: string = client.handshake.query.login as string;
+	  const adminOk: boolean = await this.chatAdminService.makeRoomAdmin(login, payload.login, payload.room);
+	  if (adminOk){
+	  	  await this.makeRoomAdminInform(payload.login, payload.room);
+		  this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
+	  }
+  }
 
-//	AdminSilenceChatUser: "adminSilenceUser",
-//	AdminRemoveSilenceChatUser: "adminRemoveSilenceUser",
-//	AdminGiveAdminChatPrivileges: "adminGiveAdminChatPrivileges",
-//	AdminRevokeAdminChatPrivileges: "adminRevokeAdminChatPrivileges",
-//	AdminGiveChatOwnership: "adminGiveChatOwnership",
-//	AdminRevokeChatOwnership: "adminRevokeChatOwnership",
-//	AdminDestroyChannel: "adminDestroyChannel"
+
+  @SubscribeMessage(events.AdminRevokeAdminChatPrivileges)
+  async adminRemoveRoomAdmin(client: Socket, payload: ChatMessage){
+	  const login: string = client.handshake.query.login as string;
+	  const targetIsWebOwner: boolean = await this.userService.isWebOwner(payload.login)
+	  if (targetIsWebOwner && login != payload.login) return ;
+	  const executorIsWebAdmin: boolean = await this.userService.hasAdminPrivileges(login)
+	  if (!executorIsWebAdmin) return ;
+	  const adminRemoved: boolean = await this.chatService.forceRemoveRoomAdmin(payload.login, payload.room);
+	  if (adminRemoved){
+			await this.removeAdminInform(payload.login, payload.room)
+		    this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
+	  }
+  } 
+
+  @SubscribeMessage(events.AdminGiveChatOwnership)
+  async adminGiveChatOwnership(client: Socket, payload: ChatMessage){
+	  const login: string = client.handshake.query.login as string;
+	  const ownershipGranted: boolean = await this.chatAdminService.giveChatOwnerPrivileges(login, payload.login, payload.room)
+	  if (ownershipGranted){
+		    this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
+	  }
+  }
+
+  @SubscribeMessage(events.AdminRevokeChatOwnership)
+  async adminRevokeChatOwnership(client: Socket, room: string){
+	  const login: string = client.handshake.query.login as string;
+
+	  const ownerRemoved: boolean = await this.chatAdminService.removeOwnerFromRoom(login, room)
+	  if (ownerRemoved){
+		    this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
+	  }
+  }
+
 
 }

@@ -109,14 +109,6 @@ export class ChatService {
 
 	public async getRoom(room: string): Promise<Room>{
 		return await this.roomService.getRoom(room)
-		/*
-		const foundRoom = await this.roomRepository
-			.findOne({
-				relations: ['owner', 'users', 'admins', 'banned'],
-				where: { name: room}
-			});
-		return foundRoom;
-		*/
 	}
 
 	public async addUserToRoom(room: string, login: string): Promise<boolean>{

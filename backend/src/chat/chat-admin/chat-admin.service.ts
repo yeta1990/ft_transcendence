@@ -97,10 +97,52 @@ export class ChatAdminService {
 		return this.roomRepository.delete(room);
 	}
 
+	public async makeRoomAdmin(executorLogin: string, login: string, room: string): Promise<boolean>{
+		const executorIsWebAdmin: boolean = await this.userService.hasAdminPrivileges(executorLogin)
+		if (!executorIsWebAdmin) return false;
+
+		const isBannedOfRoom: boolean = await this.chatService.isBannedOfRoom(login, room)
+		if (isBannedOfRoom) return false;
+
+		const foundRoom: Room = await this.chatService.getRoom(room)
+		if (!foundRoom) return false;
+		const roomAdmins: User[] = foundRoom.admins;
+		for (let admin of roomAdmins){
+			if (admin.login === login) return false;
+		}
+		const userToMakeAdmin: User | undefined = await this.userService.getUserByLogin(login);
+		if (!userToMakeAdmin) return false;
+		foundRoom.admins.push(userToMakeAdmin);
+		await this.roomRepository.save(foundRoom)
+		return true;
+	}
+
+	public async giveChatOwnerPrivileges(executorLogin: string, login: string, room: string): Promise<boolean>{
+  	  const executorIsWebAdmin: boolean = await this.userService.hasAdminPrivileges(executorLogin)
+	  if (!executorIsWebAdmin) return false;
+	  const foundRoom: Room = await this.chatService.getRoom(room)
+	  if (!foundRoom) return false;
+	  await this.chatService.removeOwnerFromRoom(room)
+	  const newOwner: User = await this.userService.getUserByLogin(login)
+	  if (!newOwner) return false;
+	  foundRoom.owner = newOwner;
+	  await this.roomRepository.save(foundRoom)
+	  return true;
+	}
+
+
+	public async removeOwnerFromRoom(executorLogin: string, room: string): Promise<boolean>{
+	  const foundRoom: Room = await this.chatService.getRoom(room)
+	  if (!foundRoom || !foundRoom.owner) return false;
+
+	  const targetIsWebOwner: boolean = await this.userService.isWebOwner(foundRoom.owner.login)
+	  if (targetIsWebOwner && foundRoom.owner.login != executorLogin) return ;
+	  const executorIsWebAdmin: boolean = await this.userService.hasAdminPrivileges(executorLogin)
+	  if (!executorIsWebAdmin) return ;
+	  return await this.chatService.removeOwnerFromRoom(room)
+	}
 	//GiveChatOwnerPrivileges
 	//RevokeChatOwnerPrivileges
-	//GiveChatAdminPrivileges
-	//RevokeChatAdminPrivileges
 
 
 }
