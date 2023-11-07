@@ -100,7 +100,7 @@ export class PongService {
                 const targetUsers: Array<ChatUser> = gameGateway
 	            .getActiveUsersInRoom(game.room);
 	            for (let i = 0; i < targetUsers.length; i++){
-                    console.log("\t-> " + targetUsers[i].login + " in " + game.room);
+                    //console.log("\t-> " + targetUsers[i].login + " in " + game.room);
 		            gameGateway.server.to(targetUsers[i].client_id).emit('getStatus', game);
 	            }            
             },1000/64)
@@ -213,7 +213,7 @@ export class PongService {
     }
 
     keyStatus(room: string, key: number, nick:string){
-    	console.log("key status " + room)
+    	console.log("key status " + key + " - " + nick);
         var g = this.games.get(room);
         console.log(g.playerOne)
         if ((nick == g.playerOne) || (nick == g.playerTwo)){
