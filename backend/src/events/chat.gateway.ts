@@ -121,16 +121,19 @@ export class ChatGateway extends BaseGateway {
 	}
 	return { event: 'system', data: response};
   }
-
+ 
   async joinRoutine(clientSocketId: string, login: string, room: string, pass: string, typeOfJoin: string){
   	  const originalRoom = room;
   	  if (room.length > 0 && room[0] == '@'){
+  	  	  
 	  	  if (await this.userService
 	  			  .isUserBannedFromUser(room.substr(1, room.length - 1), login)){
 	  			  return this.messageToClient(clientSocketId, "system-error", 
 	  					generateSocketErrorResponse("", `You can't open a private conversation with ${room.substr(1, room.length - 1)} because you are banned`).data);
 	      }
-		  room = await this.chatService.generatePrivateRoomName(login, room.substr(1, room.length - 1))
+	      const targetLogin: string = room.substr(1, room.length - 1)
+	      if (login === targetLogin) return false;
+		  room = await this.chatService.generatePrivateRoomName(login, targetLogin)
 		  if (!room){
 			  return this.messageToClient(clientSocketId, "system-error",
 	  		  	  generateSocketErrorResponse("", `Bad channel name`).data);
@@ -236,6 +239,7 @@ export class ChatGateway extends BaseGateway {
   async mp(client: Socket, payload: ChatMessage): Promise<void> {
 	  const login: string = client.handshake.query.login as string;
 	  let destinationLogin: string = payload.room;
+	  if (login === destinationLogin) return ;
 	  const destinationUser = await this.userService.getUserByLogin(destinationLogin);
 	  if (!destinationUser)
 	  	  return generateSocketErrorResponse("", `User not found: ${destinationLogin}`);
