@@ -58,16 +58,17 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			);
    }
 
-   joinUserToRoom(roomAndPass: string): void {
+//   joinUserToRoom(roomAndPass: string): void {
+   joinUserToRoom(room: string, pass: string): void {
 	    //adding a # to those rooms who haven't it
-	  	if (roomAndPass.length > 0 && roomAndPass[0] != '#' && roomAndPass[0] != '@') roomAndPass = '#' + roomAndPass;
+	  	if (room.length > 0 && room[0] != '#' && room[0] != '@') room = '#' + room;
    	      //in case the user was already in that channel
    	      //we want to preserve the historial of the room
-		if (!this.messageList.get(roomAndPass)){
-			this.messageList.set(roomAndPass, new Array<ChatMessage>);
+		if (!this.messageList.get(room)){
+			this.messageList.set(room, new Array<ChatMessage>);
 		}
 		//sending only one signal to the server with the raw rooms string
-		this.chatService.joinUserToRoom(roomAndPass.trim());
+		this.chatService.joinUserToRoom([room, pass]);
    }
 
 	makeRoomAdmin(login:string, room: string){
@@ -139,7 +140,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					}
 					else if (!this.myJointRoomList.includes(this.currentRoom)){
 						this.currentRoom = this.myJointRoomList[0];
-						this.joinUserToRoom(this.currentRoom)
+						this.joinUserToRoom(this.currentRoom, "")
 					}
 				}
 				else if (payload.event === 'system'){
@@ -232,11 +233,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		}
 		else if (splittedCommand[0] === '/join' && splittedCommand.length > 2){
 			//channel list comma-separated and password
-			this.joinUserToRoom(splittedCommand[1] + " " + splittedCommand[2]);
+			this.joinUserToRoom(splittedCommand[1], splittedCommand[2]);
 		}
 		else if (splittedCommand[0] === '/join'){
 			//channel list comma-separated and password
-			this.joinUserToRoom(splittedCommand[1]);
+			this.joinUserToRoom(splittedCommand[1], '');
 		}
 		else if (splittedCommand[0] === '/part'){
 			//channel list comma-separated and password
@@ -327,7 +328,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const introducedPass = this.modalService.getModalData()[0];
 			console.log(room + " " + introducedPass)
-			this.joinUserToRoom(room + " " + introducedPass);
+			this.joinUserToRoom(room, introducedPass);
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template1', room);
@@ -350,7 +351,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			const receivedData = this.modalService.getModalData();
 			const room = receivedData[0]
       		const pass = receivedData[1]
-			this.joinUserToRoom(room + " " + pass);
+			this.joinUserToRoom(room, pass);
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template2');

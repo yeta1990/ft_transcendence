@@ -37,8 +37,8 @@ export class ChatService {
 		this.socketService.sendMessageToChat("mp", payloadToSend);
 	}
 
-	joinUserToRoom(room: string){
-		this.socketService.sendMessageToServer("join", room);
+	joinUserToRoom(roomAndPass: string[]){
+		this.socketService.sendMessageToServer("join", roomAndPass);
 	}
 
 	getRoomList(){

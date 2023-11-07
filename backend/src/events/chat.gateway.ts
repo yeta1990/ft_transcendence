@@ -198,9 +198,13 @@ export class ChatGateway extends BaseGateway {
   // the rooms param is splitted
   //the command allows this structure: /join [#]channel [pass with spaces allowed]
   @SubscribeMessage('join')
-  async handleJoinRoom(client: Socket, roomAndPassword: string): Promise<void>{
-	  let room: string = roomAndPassword.split(" ", 2)[0];
-	  const pass: string | undefined = roomAndPassword.split(" ", 2)[1];
+  async handleJoinRoom(client: Socket, roomAndPassword: string[]): Promise<void>{
+  	  if (roomAndPassword.length != 2) return ;
+
+	  let room: string = roomAndPassword[0]
+	  let pass: string = roomAndPassword[1]
+  	  console.log(room + "," + pass)
+	  if (pass.length == 0) pass = undefined
 	  const login: string = client.handshake.query.login as string;
 
   	  if (room.length > 0 && room[0] != '#' && room[0] != '@'){

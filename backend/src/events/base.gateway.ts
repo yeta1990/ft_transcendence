@@ -156,7 +156,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	const roomsRaw: any = adapter.rooms;
 
 	if (roomsRaw){
-		console.log(roomsRaw)
+//		console.log(roomsRaw)
 		return (Array.from(roomsRaw.keys()).filter(x => x[0] == '#') as Array<string>);
 	}
 	return ([]);

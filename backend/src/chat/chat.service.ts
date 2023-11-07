@@ -377,6 +377,8 @@ export class ChatService {
 	}
 
 	public async addPassToRoom(login: string, room: string, pass: string){
+		console.log("pass " + pass)
+		if (pass.trim().length === 0) return
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) return false;
 		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(login, room); 
