@@ -124,16 +124,32 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					this.messageList.get(payload.data.room)!.push(payload.data);
 				}
 				else if (payload.event === events.ListAllRooms){
+					
+					const listRoomsReceived: Array<string> = Array.from(payload.data.map((r: any) => r.room));
+
+					//force update room list  in case of differences or lack of information
+					const roomListDifferences: Array<string> = this.availableRoomsList.filter(r => !listRoomsReceived.includes(r))
 					this.availableRoomsList = Array.from(payload.data.map((r: any) => r.room));
+					this.availableRoomsList = this.availableRoomsList.filter(r => !roomListDifferences.includes(r))
+					this.myJointRoomList = this.myJointRoomList.filter(r => !roomListDifferences.includes(r))
+
 					payload.data.map((r: RoomMetaData) => {
 						if (r.room) this.roomsMetaData.set(r.room, r)
 					}
 					)
+
+
+					if (!(this.availableRoomsList).includes(this.currentRoom)){ 
+						this.currentRoom = ""
+//						this.myJointRoomList.filter(r => r != )
+					}
 				}
 				else if (payload.event === events.ListMyPrivateRooms){
 					this.myPrivateMessageRooms = Array.from(payload.data);
 				}
 				else if (payload.event === events.ListMyJoinedRooms){
+//					console.log("My joined rooms")
+//					console.log(payload.data)
 					this.myJointRoomList = Array.from(payload.data)	
 					if (this.myJointRoomList.length == 0){
 						this.currentRoom = "";

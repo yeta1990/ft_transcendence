@@ -159,11 +159,13 @@ export class ChatService {
 
 	public async isUserInRoom(room: string, login: string): Promise<boolean>{
 		const usersInRoom: string[] = await this.getAllUsersInRoom(room);
+		if (!usersInRoom) return false;
 		return usersInRoom.includes(login);
 	}
 
 	public async isRoomEmpty(room: string): Promise<boolean>{
 		const foundRoom: Room = await this.getRoom(room);
+		if (!foundRoom) return false;
 		if (foundRoom.users.length === 0){
 			return (true)
 		}
