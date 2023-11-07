@@ -122,8 +122,10 @@ export class AdminChatPageComponent implements OnInit {
 	}
 
 	isOwner(room: string, login: string): boolean {
+		if (login == null) return false;
 		const foundRoom = this.roomsMetaData.get(room)
 		if (!foundRoom) return false;
+		console.log(foundRoom.owner)
 		return foundRoom.owner === login
 	}
 

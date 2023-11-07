@@ -22,18 +22,27 @@
           </div>
         </td>
         <td>
-        	{{roomsMetaData.get(room.key)?.owner}} - <span (click)="revokeOwner(room.key, roomsMetaData.get(room.key)!.owner)">Revoke ownership</span>
+        	{{roomsMetaData.get(room.key)?.owner}}<span *ngIf="isOwner(room.key, roomsMetaData.get(room.key)!.owner)" (click)="revokeOwner(room.key, roomsMetaData.get(room.key)!.owner)"> - Revoke ownership</span>
         </td>
         <td>
         	<div *ngFor="let admin of roomsMetaData.get(room.key)?.admins">
-        		{{admin}} - <span (click)="revokeAdmin(room.key, admin)">Revoke admin privileges</span>
+        		{{admin}} - <span *ngIf="isAdmin(room.key, admin) && !isOwner(room.key, admin)" (click)="revokeAdmin(room.key, admin)">Revoke admin privileges</span>
         	</div>
 
         </td>
         <td>
-        	<div *ngFor="let user of roomsMetaData.get(room.key)?.users">
-        		{{user}} - <span (click)="makeAdmin(room.key, user)">Make channel admin</span> - <span (click)="makeOwner(room.key, user)">Make channel owner</span> - <span *ngIf="!isSilenced(room.key, user)" (click)="silenceUser(room.key, user)"> Silence User - </span> <span *ngIf="isSilenced(room.key,user)" (click)="unSilenceUser(room.key, user)"> Unsilence User</span> - <span (click)="banUser(room.key, user)">Ban user</span>
-        	</div>
+        	<table class="table-striped">
+        	<tr *ngFor="let user of roomsMetaData.get(room.key)?.users" style="border-bottom: 1px solid #ccc;">
+        		<td>{{user}}</td>
+        		<td>
+        			<div *ngIf="!isAdmin(room.key, user) && !isOwner(room.key, user)" (click)="makeAdmin(room.key, user)"> - Make channel admin</div>
+        			<div *ngIf="!isAdmin(room.key, user) && !isOwner(room.key, user)" (click)="makeOwner(room.key, user)"> - Make channel owner</div>
+        			<div *ngIf="!isSilenced(room.key, user)" (click)="silenceUser(room.key, user)"> - Silence User</div>
+        			<div *ngIf="isSilenced(room.key,user)" (click)="unSilenceUser(room.key, user)"> - Remove silence</div>
+        			<div (click)="banUser(room.key, user)">- Ban user</div>
+        		</td>
+        	</tr>
+        	</table>
         </td>
         <td>
         	<div *ngFor="let ban of roomsMetaData.get(room.key)?.banned">
