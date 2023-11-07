@@ -16,9 +16,9 @@ export class AdminChatPageComponent implements OnInit {
 	@ViewChildren('messages') messages!: QueryList<any>;
 	@ViewChild('chatBox') content!: ElementRef;
 
-	rooms: any 
 	private subscriptions = new Subscription();
 	roomsMetaData: Map<string, RoomMetaData> = new Map<string, RoomMetaData>();
+	rooms: Array<string> = []
 	messageList: Map<string, ChatMessage[]> = new Map<string, ChatMessage[]>();
 	destroy: Subject<any> = new Subject();
 
@@ -42,22 +42,24 @@ export class AdminChatPageComponent implements OnInit {
 					}
 					else if (payload.event === events.AllRoomsMetaData){
 //						const data: RoomMetaData[] = payload.data
+						const roomSet: Set<string> = new Set()
 						for (const room of payload.data){
 							this.roomsMetaData.set(room.room, room)
+							roomSet.add(room.room)
 						}
-
+						this.rooms = Array.from(roomSet)
+						console.log(this.rooms)
+						
         				this.scrollToBottom();
 					}
 					else if (payload.event === events.MessageForWebAdmins){
-						console.log("message for admins received: " + JSON.stringify(payload.data));
-						const messagesChannel: Array<ChatMessage> | undefined = this.messageList.get(payload.data.room)
-//						if (messagesChannel){
-//							messagesChannel!.push(payload.data)
-//						}	
-//						this.messageList.set(payload.data.room, payload.data)
-						console.log(this.messageList.get(payload.data.room))
-
-//						console.log("yeee")
+						const messagesChannel: Array<ChatMessage> = this.messageList.get(payload.data.room)!
+						if (!messagesChannel) return 
+						if (messagesChannel){
+							messagesChannel!.push(payload.data)
+						}	
+						this.messageList.set(payload.data.room, messagesChannel)
+        				this.scrollToBottom();
 					}
         			this.scrollToBottom();
 				}
@@ -156,5 +158,8 @@ export class AdminChatPageComponent implements OnInit {
 		return foundRoom.banned.includes(login)
 	}
 
+	getRoomsMessages(room: string) {
+		return this.messageList.get(room)
+	}
 
 }
