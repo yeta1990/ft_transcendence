@@ -395,6 +395,7 @@ export class ChatGateway extends BaseGateway {
 	  	.banUserOfRoom(login, payload.login, payload.room);
 	  if (banOk){
 		await this.afterBanInform(login, client.id, payload.login, payload.room)
+  	  	await this.destroyEmptyRooms(payload.room);
   	  }
   }
 
@@ -576,6 +577,7 @@ export class ChatGateway extends BaseGateway {
 	  	.banUserOfRoom(login, payload.login, payload.room);
 	  if (banOk){
 		await this.afterBanInform(login, client.id, payload.login, payload.room)
+  	  	await this.destroyEmptyRooms(payload.room);
 		this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
   	  }
   }

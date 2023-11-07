@@ -122,6 +122,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		await this.chatService.deleteRoom(room);
 	}
     this.emit(events.ListAllRooms, await this.roomService.getAllRoomsMetaData());
+    this.emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData());
   }
 
   async handleDisconnect(socket: Socket): Promise<void> {
@@ -248,7 +249,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		await this.server.in(clientId).socketsJoin(room);
 		const successfulJoin: boolean = await this.chatService.addUserToRoom(room, creatorLogin);
 		if (!successfulJoin) return false;
-		this.emit(events.ListAllRooms, await this.roomService.getAllRoomsMetaData());
+		const allRoomsMetadata = await this.roomService.getAllRoomsMetaData()
+		this.emit(events.AllRoomsMetaData, allRoomsMetadata);
+		this.emit(events.ListAllRooms, allRoomsMetadata);
 		this.logger.log("User " + clientId + "joined room " + room);
 		return true
   }

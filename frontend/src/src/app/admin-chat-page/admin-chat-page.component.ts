@@ -41,21 +41,21 @@ export class AdminChatPageComponent implements OnInit {
         				this.scrollToBottom();
 					}
 					else if (payload.event === events.AllRoomsMetaData){
-//						const data: RoomMetaData[] = payload.data
 						const roomSet: Set<string> = new Set()
 						for (const room of payload.data){
 							this.roomsMetaData.set(room.room, room)
 							roomSet.add(room.room)
 						}
 						this.rooms = Array.from(roomSet)
-						console.log(this.rooms)
-						
         				this.scrollToBottom();
 					}
 					else if (payload.event === events.MessageForWebAdmins){
-						const messagesChannel: Array<ChatMessage> = this.messageList.get(payload.data.room)!
-						if (!messagesChannel) return 
-						if (messagesChannel){
+						let messagesChannel: Array<ChatMessage> = this.messageList.get(payload.data.room)!
+						//for receiving messages from new created channels
+						if (!messagesChannel){
+							messagesChannel = [payload.data]
+						} 
+						else{
 							messagesChannel!.push(payload.data)
 						}	
 						this.messageList.set(payload.data.room, messagesChannel)
