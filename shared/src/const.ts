@@ -24,7 +24,8 @@ export const events = {
 	AdminRevokeAdminChatPrivileges: "adminRevokeAdminChatPrivileges",
 	AdminGiveChatOwnership: "adminGiveChatOwnership",
 	AdminRevokeChatOwnership: "adminRevokeChatOwnership",
-	AdminDestroyChannel: "adminDestroyChannel"
+	AdminDestroyChannel: "adminDestroyChannel",
+	MessageForWebAdmins: "messageForWebAdmins"
 }
 
 export const values = {

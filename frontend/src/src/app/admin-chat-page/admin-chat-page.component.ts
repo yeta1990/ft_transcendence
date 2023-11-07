@@ -44,10 +44,20 @@ export class AdminChatPageComponent implements OnInit {
 //						const data: RoomMetaData[] = payload.data
 						for (const room of payload.data){
 							this.roomsMetaData.set(room.room, room)
-							console.log(room)
 						}
 
         				this.scrollToBottom();
+					}
+					else if (payload.event === events.MessageForWebAdmins){
+						console.log("message for admins received: " + JSON.stringify(payload.data));
+						const messagesChannel: Array<ChatMessage> | undefined = this.messageList.get(payload.data.room)
+//						if (messagesChannel){
+//							messagesChannel!.push(payload.data)
+//						}	
+//						this.messageList.set(payload.data.room, payload.data)
+						console.log(this.messageList.get(payload.data.room))
+
+//						console.log("yeee")
 					}
         			this.scrollToBottom();
 				}
@@ -125,7 +135,6 @@ export class AdminChatPageComponent implements OnInit {
 		if (login == null) return false;
 		const foundRoom = this.roomsMetaData.get(room)
 		if (!foundRoom) return false;
-		console.log(foundRoom.owner)
 		return foundRoom.owner === login
 	}
 

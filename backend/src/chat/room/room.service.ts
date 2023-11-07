@@ -57,7 +57,6 @@ export class RoomService {
 			const roomMetaData: RoomMetaData = await this.getRoomMetaData(room)
 			allRoomsMetadata.push(roomMetaData)
 		}
-		console.log(allRoomsMetadata)
 		return allRoomsMetadata
 	}
 }

@@ -100,12 +100,16 @@ export class ChatGateway extends BaseGateway {
 			.getActiveUsersInRoom(payload.room)
 			.filter(u => !(bannedUsersBySender.includes(u.login)))
 			.filter(u => !(receiversThatHaveBannedSender.includes(u.login)))
+
 		for (let i = 0; i < activeUsersInRoom.length; i++){
 			this.messageToClient(activeUsersInRoom[i].client_id, "message", payload)
 		}
-		//TBD
-		//send message to admins
-
+		const activeWebAdmins: Array<ChatUser> = await this.getActiveWebAdminsInServer()
+		for (let i = 0; i < activeWebAdmins.length; i++){
+			
+			this.messageToClient(activeWebAdmins[i].client_id, events.MessageForWebAdmins, payload)
+			console.log("enviando mensaje a webadmin")
+		}
 		await this.chatMessageService.saveMessage(payload)
 	} 
   }
@@ -203,7 +207,6 @@ export class ChatGateway extends BaseGateway {
 
 	  let room: string = roomAndPassword[0]
 	  let pass: string = roomAndPassword[1]
-  	  console.log(room + "," + pass)
 	  if (pass.length == 0) pass = undefined
 	  const login: string = client.handshake.query.login as string;
 
@@ -650,13 +653,30 @@ export class ChatGateway extends BaseGateway {
 	  }
   } 
 
+  async giveOwnershipInform(targetLogin: string, room: string){
+	    const roomInfo: SocketPayload = generateSocketInformationResponse(room, `user ${targetLogin} is now owner of room ${room}`)
+	  	this.broadCastToRoom(roomInfo.event, roomInfo.data)
+		let roomMetaData: RoomMetaData = await this.roomService
+			.getRoomMetaData(room)
+	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
+  }
+
   @SubscribeMessage(events.AdminGiveChatOwnership)
   async adminGiveChatOwnership(client: Socket, payload: ChatMessage){
 	  const login: string = client.handshake.query.login as string;
 	  const ownershipGranted: boolean = await this.chatAdminService.giveChatOwnerPrivileges(login, payload.login, payload.room)
 	  if (ownershipGranted){
+	  	  	await this.giveOwnershipInform(payload.login, payload.room)
 		    this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
 	  }
+  }
+
+  async removeOwnershipInform(room: string){
+	    const roomInfo: SocketPayload = generateSocketInformationResponse(room, `owner of ${room} removed`)
+	  	this.broadCastToRoom(roomInfo.event, roomInfo.data)
+		let roomMetaData: RoomMetaData = await this.roomService
+			.getRoomMetaData(room)
+	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
   }
 
   @SubscribeMessage(events.AdminRevokeChatOwnership)
@@ -665,6 +685,7 @@ export class ChatGateway extends BaseGateway {
 
 	  const ownerRemoved: boolean = await this.chatAdminService.removeOwnerFromRoom(login, room)
 	  if (ownerRemoved){
+	  	  	await this.removeOwnershipInform(room)
 		    this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
 	  }
   }

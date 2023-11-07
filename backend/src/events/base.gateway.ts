@@ -78,11 +78,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		);
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
 
-  	    if (isHardConnect){
-  	    	const activeLoginsInServer: Array<string> = this
-  	    		.getActiveLoginsInServer()
-			this.server.emit(events.ActiveUsers, activeLoginsInServer)	
-		}
+      	const activeLoginsInServer: Array<string> = this
+      		.getActiveLoginsInServer()
+		this.server.emit(events.ActiveUsers, activeLoginsInServer)	
 		this.sendBlockedUsers(socket.id, login)
 	}
 	else{
@@ -171,6 +169,25 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		connectedClient = clientsIterator.next()
 	}
 	return [...new Set(logins)];
+  }
+
+  async getActiveWebAdminsInServer(): Promise<Array<ChatUser>>{
+		const activeWebAdminsInServer: Array<string> = (await Promise.all(this
+			.getActiveLoginsInServer()
+			.map(async u => {
+				const isWebAdmin = await this.userService.hasAdminPrivileges(u)
+				if (isWebAdmin) return u;
+			})))
+			.filter(u => u !== undefined)
+			console.log(activeWebAdminsInServer)
+
+
+		const usersArray = Array.from(this.users);
+		const usersWithCompleteData: Array<ChatUser> = 
+			usersArray
+				.filter(([clientId, chatUser]) => activeWebAdminsInServer.includes(chatUser.login))
+  				.map(([_, chatUser]) => chatUser);
+	    return (usersWithCompleteData);
   }
 
   //getting the currently connected users

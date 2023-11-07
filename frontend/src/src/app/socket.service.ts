@@ -37,31 +37,31 @@ export class SocketService {
 		this.messageObservable = from(this.message);
 		this.socket
 			.on('message', (data: ChatMessage) => {
-				console.log("message received: " + JSON.stringify(data));
+//				console.log("message received: " + JSON.stringify(data));
 				this.message.next({event: 'message', data});
 			})
 			.on('join', (data: any) => {
-				console.log("join received: " + JSON.stringify(data));
+//				console.log("join received: " + JSON.stringify(data));
 				this.message.next({event: 'join', data});
 			})
 			.on('joinmp', (data: any) => {
-				console.log("join private message received: " + JSON.stringify(data));
+//				console.log("join private message received: " + JSON.stringify(data));
 				this.message.next({event: 'joinmp', data});
 			})
 			.on(events.ListAllRooms, (data: Array<RoomMetaData>) => {
-				console.log("listRooms received: " + data);
+//				console.log("listRooms received: " + data);
 				this.message.next({event: events.ListAllRooms, data});
 			})
 			.on(events.ListMyJoinedRooms, (data: any) => {
-				console.log("listMyJoinedRooms received: " + data);
+//				console.log("listMyJoinedRooms received: " + data);
 				this.message.next({event: events.ListMyJoinedRooms, data});
 			})
 			.on(events.ListMyPrivateRooms, (data: any) => {
-				console.log("listMyPrivateRooms: " + data);
+//				console.log("listMyPrivateRooms: " + data);
 				this.message.next({event: events.ListMyPrivateRooms, data});
 			})
 			.on('listRoomUsers', (data: any) => {
-				console.log("get users in this room: " + data);
+//				console.log("get users in this room: " + data);
 				this.message.next({event: 'listRooms', data});
 			})
 			.on(events.RoomMetaData, (data: RoomMetaData) => {
@@ -90,6 +90,10 @@ export class SocketService {
 			})
 			.on(events.AllHistoricalMessages, (data: any) => {
 				this.message.next({event: events.AllHistoricalMessages, data});
+			})
+			.on(events.MessageForWebAdmins, (data: ChatMessage) => {
+				console.log("message received: " + JSON.stringify(data));
+				this.message.next({event: events.MessageForWebAdmins, data});
 			})
 		}
 

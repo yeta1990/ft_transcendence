@@ -256,7 +256,6 @@ export class ChatService {
 	// - nobody can ban himself
 	public async banUserOfRoom(executorLogin: string, login: string, room: string): Promise<boolean>{
 		//check privileges
-		console.log(executorLogin, login, room)
 		if (executorLogin === login) return false;
 		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorLogin, room);
 		const executorIsAdminOfRoom: boolean = await this.isAdminOfRoom(executorLogin, room);
@@ -377,7 +376,6 @@ export class ChatService {
 	}
 
 	public async addPassToRoom(login: string, room: string, pass: string){
-		console.log("pass " + pass)
 		if (pass.trim().length === 0) return
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) return false;
