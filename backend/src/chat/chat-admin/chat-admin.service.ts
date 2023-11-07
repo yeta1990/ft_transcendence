@@ -103,8 +103,7 @@ export class ChatAdminService {
 	public async destroyRoom(executorLogin: string, room: string): Promise<any>{
 		const executorIsWebAdmin: boolean = await this.userService.hasAdminPrivileges(executorLogin)
 		if (!executorIsWebAdmin) return false;
-
-		return this.roomRepository.delete(room);
+		return this.chatService.deleteRoom(room);
 	}
 
 	public async makeRoomAdmin(executorLogin: string, login: string, room: string): Promise<boolean>{

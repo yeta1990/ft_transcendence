@@ -327,7 +327,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	askForChannelPasswordToJoin(room: string) {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const introducedPass = this.modalService.getModalData()[0];
-			console.log(room + " " + introducedPass)
 			this.joinUserToRoom(room, introducedPass);
 			this.modalClosedSubscription.unsubscribe();
     	});

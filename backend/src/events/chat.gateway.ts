@@ -623,9 +623,9 @@ export class ChatGateway extends BaseGateway {
   }
 
   @SubscribeMessage(events.AdminDestroyChannel)
-  async adminDestroyRoom(client: Socket, room: string){
+  async adminDestroyRoom(client: Socket, payload: ChatMessage){
 	  const login: string = client.handshake.query.login as string;
-		await this.chatAdminService.destroyRoom(login, room)
+		await this.chatAdminService.destroyRoom(login, payload.room)
 		this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
 
   }
