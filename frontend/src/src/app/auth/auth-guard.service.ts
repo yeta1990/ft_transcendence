@@ -53,7 +53,8 @@ export class AuthGuardService  {
 	private checkAdminPermissions(): Observable<boolean | UrlTree> {
 		// Comprueba si el usuario es administrador
 		const token = this.auth.getDecodedAccessToken(this.auth.getUserToken() ?? '');
-		if (token?.role === UserRole.ADMIN) {
+		console.log(token?.role)
+		if (token?.role === UserRole.ADMIN || token?.role === UserRole.OWNER) {
 			return of(true);
 		}
 

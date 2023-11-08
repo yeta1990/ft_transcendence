@@ -112,7 +112,7 @@ export class EditProfileComponent implements  OnInit {
           // Verificar si el usuario tiene un rol de administrador o si es el propio usuario conectado
           console.log("ID is: " + id);
           console.log("UserID is: " + this.user?.id);
-          if (id !== null && (id === this.user?.id || this.user?.role == UserRole.ADMIN)) {
+          if (id !== null && (id === this.user?.id || this.user?.userRole == UserRole.ADMIN)) {
             console.log("Este usuario puede editar");
             this.editForm.controls['firstName'].setValue(this.user!.firstName);
             this.editForm.controls['lastName'].setValue(this.user!.lastName);

@@ -128,6 +128,9 @@ export class User {
 	@ManyToMany(() => Room, (room) => room.banned)
 	bannedRooms: Room[];
 
+	@ManyToMany(() => Room, (room) => room.silenced)
+	silencedRooms: Room[];
+
 	@ManyToMany(type => User)
 	@JoinTable()
 	bannedUsers: User[];
@@ -153,6 +156,13 @@ export class User {
 		],
 	})
 	friends: Friend[];
+
+
+	//Baneo de usuario de la web
+	@Column({
+		default:false
+	})
+	isBanned: boolean
 
 }
 

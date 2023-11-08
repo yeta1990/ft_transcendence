@@ -6,6 +6,7 @@ import { HttpService } from '@nestjs/axios';
 import { catchError, lastValueFrom, map } from 'rxjs';
 import { EntityManager } from 'typeorm';
 import { User } from '../user/user.entity';
+import { UserRole } from '@shared/enum'
 
 export interface authData42 {
 	access_token: string;
@@ -60,9 +61,13 @@ export class AuthService {
 
 		//get user data from 42
 		const allUserData42 = await this.userService.whoAmI(data.access_token);
-		const payloadToCreateUser = { nick: allUserData42.login, email: allUserData42.email, firstName: allUserData42.first_name, lastName: allUserData42.last_name, login: allUserData42.login, image: allUserData42.image.versions.medium }; //all requests from the frontend will contain this info
+		const payloadToCreateUser = { nick: allUserData42.login, email: allUserData42.email, firstName: allUserData42.first_name, lastName: allUserData42.last_name, login: allUserData42.login, image: allUserData42.image.versions.medium, userRole: UserRole.REGISTRED }; //all requests from the frontend will contain this info
+
+		const user: User = await this.userService.getUserByLogin(payloadToCreateUser.login)
+		if (user && user.isBanned) return false;
+
 		const createdUser = await this.userService.createUser(payloadToCreateUser);
-		const payloadToSign = {login: createdUser.login, id: createdUser.id}
+		const payloadToSign = {login: createdUser.login, id: createdUser.id, role: createdUser.userRole}
 		const access_token = await this.jwtService.signAsync(payloadToSign);
 		const decoded: JwtPayload = this.jwtService.decode(access_token) as JwtPayload;
 		return {
@@ -78,7 +83,15 @@ export class AuthService {
 
 	getLoginFromJwt(token: string): string{
 		const decoded: JwtPayload = this.jwtService.decode(token) as JwtPayload;
+		if (!decoded) return null
 		return (decoded.login)
+	}
+
+	getUserRoleFromJwt(token: string): string {
+		const decoded: JwtPayload = this.jwtService.decode(token) as JwtPayload;
+		if (!decoded)
+			return ("1")
+		return (decoded.role)
 	}
 
 	async verifyJwt(token: string): Promise<boolean> {
