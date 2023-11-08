@@ -44,6 +44,14 @@ export class ChatGateway extends BaseGateway {
   	  if (destinationLogin.length > 0 && destinationLogin[0] != '@'){
   	  	destinationLoginWithAt = '@' + destinationLogin;
   	  }
+
+	  for (let i = 0; i < emisorSocketIds.length; i++){
+  	  	await this.joinRoutine(emisorSocketIds[i], emisorLogin, destinationLoginWithAt, undefined, "join")
+	  }
+	  for (let i = 0; i < destinationSocketIds.length; i++){
+  	  	await this.joinRoutine(destinationSocketIds[i], destinationLogin, emisorLoginWithAt, undefined, "joinmp")
+  	  }
+
 	  payload.room = destinationLoginWithAt;
 	  for (let i = 0; i < emisorSocketIds.length; i++){
 		this.messageToClient(emisorSocketIds[i], "message", payload)	
@@ -52,6 +60,8 @@ export class ChatGateway extends BaseGateway {
 	  for (let i = 0; i < destinationSocketIds.length; i++){
 		this.messageToClient(destinationSocketIds[i], "message", payload)	
 	  }
+
+
 	  payload.room = realRoomName;
 	  await this.chatMessageService.saveMessage(payload)
   }
@@ -143,7 +153,6 @@ export class ChatGateway extends BaseGateway {
 	  		  	  generateSocketErrorResponse("", `Bad channel name`).data);
 	  	  }
   	  }
-
 	  const wasUserAlreadyActiveInRoom: boolean = await this.isUserAlreadyActiveInRoom(clientSocketId, room);
 	  const successfulJoin = await 
 	  		this.joinUserToRoom(clientSocketId, login, room, pass);
@@ -269,8 +278,10 @@ export class ChatGateway extends BaseGateway {
 	  for (let i = 0; i < emisorSocketIds.length; i++){
   	  	await this.joinRoutine(emisorSocketIds[i], login, destinationLoginWithAt, undefined, "join")
 	  }
+
 	  for (let i = 0; i < destinationSocketIds.length; i++){
   	  	await this.joinRoutine(destinationSocketIds[i], destinationLogin, emisorLoginWithAt, undefined, "joinmp")
+//	  	 const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(payload.room);
 	  }
 
    	  const messagePayload: ChatMessage = {
@@ -405,7 +416,6 @@ export class ChatGateway extends BaseGateway {
 				`You've removed the ban of ${targetLogin} in ${room} successfully`).data)
 		let roomMetaData: RoomMetaData = await this.roomService
 			.getRoomMetaData(room)
-			console.log(roomMetaData)
 	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
 	  
   }

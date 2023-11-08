@@ -332,7 +332,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  	});
 
 	  	//announce the rest of the channel a new user has joined
-	  	if (hardJoin){
+	  	if (hardJoin && !room.includes(':') && !room.includes('@')){
 	  		const socketInfo: SocketPayload = generateSocketInformationResponse(room, `user ${login} has joined room ${room}`)
 			this.broadCastToRoomExceptForSomeUsers(socketInfo.event, socketInfo.data, [login])
 			const joinFeedback: SocketPayload = generateSocketInformationResponse(room, `You have joined ${room}`)
