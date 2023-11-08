@@ -5,6 +5,7 @@ import { ChatMessage } from './chat-message.entity';
 import { RoomMessages } from '@shared/types';
 import { ChatMessage as ChatMessageType } from '@shared/types';
 import { DataSource } from "typeorm"
+import { ChatService } from '../chat.service';
 
 @Injectable()
 export class ChatMessageService {
@@ -12,7 +13,7 @@ export class ChatMessageService {
 	@InjectRepository(ChatMessage)
 	private readonly chatMessageRepository: Repository<ChatMessage>;
 
-//	constructor(private readOnly chatMessageRepository: ChatMessage)
+	constructor(private chatService: ChatService) {}
 	public async saveMessage(message: ChatMessageType): Promise<void>{
 		await this.chatMessageRepository.save(message)
 	}
@@ -30,4 +31,15 @@ export class ChatMessageService {
 		const messagesFromRoom: RoomMessages = new RoomMessages(room, messages.reverse());
 		return messagesFromRoom;
 	}
+
+	public async getAllMessagesFromAllRooms(): Promise<Array<RoomMessages>>{
+		const allRooms: Array<string> = await this.chatService.getAllRooms();
+		let allRoomsMessages: Array<RoomMessages> = new Array();
+
+		for (const room of allRooms) {
+			const roomMessages = await this.getAllMessagesFromRoom(room)
+			allRoomsMessages.push(roomMessages)
+		}
+		return allRoomsMessages;
+	} 
 }

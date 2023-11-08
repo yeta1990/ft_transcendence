@@ -1,0 +1,38 @@
+<app-nav-bar/>
+
+<div class="container">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Login</th>
+        <th>Role</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of allUsers">
+        <td>{{ user.login }}</td>
+        <td>
+          	{{ user.userRole < 5 ? 'User' : user.userRole > 5 ? 'Owner' : 'Admin' }}
+        </td>
+        <td>
+          <button
+            *ngIf="user.userRole < 6 && !user.isBanned" 
+            (click)="user.userRole === 5 ? removeAdminModal(user.login, user.userRole) : grantAdminModal(user.login, user.userRole)"
+            class="btn btn-outline-light"
+          >
+            {{ user.userRole === 5 ? 'Remove Admin privileges' : 'Grant Admin privileges' }}
+          </button>
+          <button
+            *ngIf="user.userRole !== 6"
+            (click)="user.isBanned ? removeBanUserModal(user.login) : banUserModal(user.login)"
+            class="btn btn-outline-danger"
+          >
+          {{ user.isBanned ? 'Remove ban' : 'Ban' }}
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+

@@ -19,7 +19,10 @@ export class ErrorInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(catchError(err => {
       if ([401, 403].includes(err.status)) {
-      	  if (this.authservice.isLoggedIn())
+      	  if (err.error?.message.includes("token"))
+      		{
+      	    	this.authservice.logout();
+      		} else if (this.authservice.isLoggedIn())
       	  {
 			 this.authservice.redirectToHome();
       	  }

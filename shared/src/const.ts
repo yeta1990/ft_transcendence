@@ -6,9 +6,26 @@ export const events = {
 	Pass: "pass",
 	RemovePass: "nopass",
 	RoomMetaData: "roomMetaData",
+	AllRoomsMetaData: "allRoomsMetaData",
 	ActiveUsers: "activeUsers",
 	SoftDisconnect: "softDisconnect",
-	BlockedUsers: "blockedUsers"
+	BlockedUsers: "blockedUsers",
+	SilenceUser: "silence",
+	UnSilenceUser: "nosilence",
+	KickUser: "kickUser",
+	Kicked: "kicked",
+	AllHistoricalMessages: "allHistoricalMessages",
+	AdminJoin: "adminJoin",
+	AdminBanChatUser: "adminBanUser",
+	AdminRemoveBanChatUser: "adminRemoveBanUser",
+	AdminSilenceChatUser: "adminSilenceUser",
+	AdminRemoveSilenceChatUser: "adminRemoveSilenceUser",
+	AdminGiveAdminChatPrivileges: "adminGiveAdminChatPrivileges",
+	AdminRevokeAdminChatPrivileges: "adminRevokeAdminChatPrivileges",
+	AdminGiveChatOwnership: "adminGiveChatOwnership",
+	AdminRevokeChatOwnership: "adminRevokeChatOwnership",
+	AdminDestroyChannel: "adminDestroyChannel",
+	MessageForWebAdmins: "messageForWebAdmins"
 }
 
 export const values = {

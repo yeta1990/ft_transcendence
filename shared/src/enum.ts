@@ -6,7 +6,7 @@ export const enum UserStatus {
 	SPECTATING
 }
 
-export const enum UserRole {
+export enum UserRole {
 	VISITOR, // Visitante no registrado
 	REGISTRED, // Usuario registrado, sin confirmación de cuenta
 	USER, // Usuario registrado e identificado

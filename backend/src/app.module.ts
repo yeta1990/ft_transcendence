@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource, getConnection } from 'typeorm';
 
 import { AuthModule } from './auth/auth.module'
+import { AuthController } from './auth/auth.controller'
 
 import { User } from './user/user.entity'
 import { Friend } from './user/friend/friend.entity'
@@ -21,6 +22,8 @@ import { HttpModule } from '@nestjs/axios';
 import { EventsModule } from './events/events.module';
 import { ChatModule } from './chat/chat.module';
 import { HashService } from './hash/hash.service';
+import {InvalidTokens} from './auth/invalid-tokens-entity'
+import { TokenValidationMiddleware } from './token-validation/token-validation.middleware'
  
 @Module({
   imports: [
@@ -36,7 +39,7 @@ import { HashService } from './hash/hash.service';
 		username: process.env.POSTGRES_USER,
 		password: process.env.POSTGRES_PASSWORD,
 		database: process.env.POSTGRES_DATABASE,
-		entities: [User, Friend, Achievement, Room, ChatMessage],
+		entities: [User, Friend, Achievement, Room, ChatMessage, InvalidTokens],
 		synchronize: true, // creo que esto hay que cambiarlo para subirlo a producción
 		logging: false //useful for debugging errors in typeorm/postgres
 
@@ -49,4 +52,10 @@ import { HashService } from './hash/hash.service';
   controllers: [AppController, UserController],
   providers: [AppService, HashService, AchievementService]
 })
-export class AppModule {}
+export class AppModule implements NestModule{
+	configure(consumer: MiddlewareConsumer) {
+		consumer
+			.apply(TokenValidationMiddleware)
+			.forRoutes(UserController, AuthController)
+	}
+}
