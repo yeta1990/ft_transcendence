@@ -9,11 +9,12 @@ import {UserModule} from '../user/user.module';
 import { RoomService } from './room/room.service';
 import { ChatMessageService } from './chat-message/chat-message.service';
 import { ChatMessage } from './chat-message/chat-message.entity';
+import { ChatAdminService } from './chat-admin/chat-admin.service';
 
 @Module({
 	imports: [TypeOrmModule.forFeature([Room, User, ChatMessage]), HttpModule, UserModule],
 	exports: [RoomService, ChatService],
-	providers: [ChatService, HashService, RoomService, ChatMessageService]
+	providers: [ChatService, HashService, RoomService, ChatMessageService, ChatAdminService]
 })
 export class ChatModule {
 

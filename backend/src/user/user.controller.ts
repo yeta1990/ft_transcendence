@@ -6,7 +6,8 @@ import {
 	ParseIntPipe, 
 	Param, 
 	Post,
-	UseGuards
+	UseGuards,
+	Query
 } from '@nestjs/common';
 
 import { AuthGuard } from '../auth/auth.guard';
@@ -35,6 +36,49 @@ export class UserController {
 	@Get()
 	public whoAmI(@UserId() id: number): Promise<User>{
 		return this.getUser(id);
+	}
+
+	@UseGuards(AuthGuard)
+	@Post('grant-admin')
+	public async grantAdmin(@Query('login') login: string, @UserId() id: number): Promise<User[]>{
+		const hasExecutorPrivileges: boolean = (await this.service.getUser(id)).userRole >= 5 ? true : false
+		if (!hasExecutorPrivileges) return [] as User[]
+		const target: User = await this.service.getUserByLogin(login)
+		const isTargetOwner: boolean = target.userRole >= 6 ? true : false
+		if (isTargetOwner) return [] as User[]
+		const isTargetBanned: boolean = target.isBanned ? true : false
+		if (isTargetBanned) return [] as User[]
+		return this.service.grantAdmin(login);
+	}
+
+	@UseGuards(AuthGuard)
+	@Post('remove-admin')
+	public async removeAdmin(@UserId() id: number, @Query('login') login: string): Promise<User[]>{
+		const hasExecutorPrivileges: boolean = (await this.service.getUser(id)).userRole >= 5 ? true : false
+		if (!hasExecutorPrivileges) return [] as User[]
+		const isTargetOwner: boolean = (await this.service.getUserByLogin(login)).userRole >= 6 ? true : false
+		if (isTargetOwner) return [] as User[]
+		return this.service.removeAdmin(login);
+	}
+
+	@UseGuards(AuthGuard)
+	@Post('ban')
+	public async banUserFromWebsite(@UserId() id: number, @Query('login') login: string): Promise<User[]>{
+		const hasExecutorPrivileges: boolean = (await this.service.getUser(id)).userRole >= 5 ? true : false
+		if (!hasExecutorPrivileges) return [] as User[]
+		const isTargetOwner: boolean = (await this.service.getUserByLogin(login)).userRole >= 6 ? true : false
+		if (isTargetOwner) return [] as User[]
+		return this.service.banUserFromWebsite(login);
+	}
+
+	@UseGuards(AuthGuard)
+	@Post('unban')
+	public async removeBanUserFromWebsite(@UserId() id: number, @Query('login') login: string): Promise<User[]>{
+		const hasExecutorPrivileges: boolean = (await this.service.getUser(id)).userRole >= 5 ? true : false
+		if (!hasExecutorPrivileges) return [] as User[]
+		const isTargetOwner: boolean = (await this.service.getUserByLogin(login)).userRole >= 6 ? true : false
+		if (isTargetOwner) return [] as User[]
+		return this.service.removeBanUserFromWebsite(login);
 	}
  
 	@Get('all')
@@ -73,7 +117,7 @@ export class UserController {
 	@Get('/force/:login')
 	public async getTokenFromLogin(@Param('login') login: string): Promise<any>{
 		const user: User = await this.service.getUserByLogin(login);
-		const payloadToSign = {login: login, id: user.id}
+		const payloadToSign = {login: login, id: user.id, role: user.userRole}
 		const access_token = await this.jwtService.signAsync(payloadToSign);
 		const decoded: JwtPayload = this.jwtService.decode(access_token) as JwtPayload;
 		return {

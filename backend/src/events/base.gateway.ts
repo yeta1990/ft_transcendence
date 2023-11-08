@@ -18,6 +18,7 @@ import { generateSocketErrorResponse, generateSocketInformationResponse } from '
 import { events, values } from '@shared/const';
 import { ChatUser } from '@shared/types';
 import { map } from 'rxjs/operators';
+import {User} from '../user/user.entity'
 
 //this base class is used to log the initialization
 //and avoid code duplications in the gateways
@@ -65,7 +66,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   async handleConnection(socket: Socket): Promise<void>{
 
     const isUserVerified = await this.authService.verifyJwt(socket.handshake.auth.token);
- 
 	if (isUserVerified){
 		const login = this.authService.getLoginFromJwt(socket.handshake.auth.token)
   	    const isHardConnect: boolean = this.getClientSocketIdsFromLogin(login).length > 0 ? false : true
@@ -78,11 +78,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		);
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
 
-  	    if (isHardConnect){
-  	    	const activeLoginsInServer: Array<string> = this
-  	    		.getActiveLoginsInServer()
-			this.server.emit(events.ActiveUsers, activeLoginsInServer)	
-		}
+      	const activeLoginsInServer: Array<string> = this
+      		.getActiveLoginsInServer()
+		this.server.emit(events.ActiveUsers, activeLoginsInServer)	
 		this.sendBlockedUsers(socket.id, login)
 	}
 	else{
@@ -124,11 +122,12 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		await this.chatService.deleteRoom(room);
 	}
     this.emit(events.ListAllRooms, await this.roomService.getAllRoomsMetaData());
+    this.emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData());
   }
 
-
   async handleDisconnect(socket: Socket): Promise<void> {
-  	  const login: string = this.users.get(socket.id).login
+  	  const login: string = this.users.get(socket.id)?.login
+  	  if (!login) return;
 	  this.logger.log(`Socket client disconnected: ${socket.id}`)
 	  this.users.delete(socket.id);
 	  this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
@@ -156,7 +155,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	const roomsRaw: any = adapter.rooms;
 
 	if (roomsRaw){
-		console.log(roomsRaw)
+//		console.log(roomsRaw)
 		return (Array.from(roomsRaw.keys()).filter(x => x[0] == '#') as Array<string>);
 	}
 	return ([]);
@@ -171,6 +170,25 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		connectedClient = clientsIterator.next()
 	}
 	return [...new Set(logins)];
+  }
+
+  async getActiveWebAdminsInServer(): Promise<Array<ChatUser>>{
+		const activeWebAdminsInServer: Array<string> = (await Promise.all(this
+			.getActiveLoginsInServer()
+			.map(async u => {
+				const isWebAdmin = await this.userService.hasAdminPrivileges(u)
+				if (isWebAdmin) return u;
+			})))
+			.filter(u => u !== undefined)
+			console.log(activeWebAdminsInServer)
+
+
+		const usersArray = Array.from(this.users);
+		const usersWithCompleteData: Array<ChatUser> = 
+			usersArray
+				.filter(([clientId, chatUser]) => activeWebAdminsInServer.includes(chatUser.login))
+  				.map(([_, chatUser]) => chatUser);
+	    return (usersWithCompleteData);
   }
 
   //getting the currently connected users
@@ -214,7 +232,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   private disconnect(socket: Socket) {
-    socket.emit('Error', new UnauthorizedException());
     socket.disconnect();
   }
 
@@ -232,7 +249,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		await this.server.in(clientId).socketsJoin(room);
 		const successfulJoin: boolean = await this.chatService.addUserToRoom(room, creatorLogin);
 		if (!successfulJoin) return false;
-		this.emit(events.ListAllRooms, await this.roomService.getAllRoomsMetaData());
+		const allRoomsMetadata = await this.roomService.getAllRoomsMetaData()
+		this.emit(events.AllRoomsMetaData, allRoomsMetadata);
+		this.emit(events.ListAllRooms, allRoomsMetadata);
 		this.logger.log("User " + clientId + "joined room " + room);
 		return true
   }
@@ -313,7 +332,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  	});
 
 	  	//announce the rest of the channel a new user has joined
-	  	if (hardJoin){
+	  	if (hardJoin && !room.includes(':') && !room.includes('@')){
 	  		const socketInfo: SocketPayload = generateSocketInformationResponse(room, `user ${login} has joined room ${room}`)
 			this.broadCastToRoomExceptForSomeUsers(socketInfo.event, socketInfo.data, [login])
 			const joinFeedback: SocketPayload = generateSocketInformationResponse(room, `You have joined ${room}`)
@@ -349,10 +368,26 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   public async sendBlockedUsers(clientId: string, login: string): Promise<void>{
-		const blockedUsersByLogin: Array<string> = (await this.userService
-			.getBannedUsersByLogin(login))
+  	  	const bannedUsers: User[] = await this.userService
+  	  		.getBannedUsersByLogin(login)
+  	  	if (bannedUsers && bannedUsers.length > 0) {
+			const blockedUsersByLogin: Array<string> =  bannedUsers
 			.map(m => m.login)
- 		this.server.to(clientId).emit(events.BlockedUsers, blockedUsersByLogin) 
+ 			this.server.to(clientId).emit(events.BlockedUsers, blockedUsersByLogin) 
+ 		}
+ 		else if (bannedUsers && bannedUsers.length == 0){
+ 			this.server.to(clientId).emit(events.BlockedUsers, []) 
+			
+ 		}
   }
 
+  public async kickAndDisconnect(login: string): Promise<void> {
+  	    const socketIds: Array<string> = this.getClientSocketIdsFromLogin(login)
+		const sockets = await this.server.fetchSockets()
+		for (const socket of sockets) {
+			if (socketIds.includes(socket.id)){ 
+				socket.disconnect(true); 
+			}
+		}
+  }
 }

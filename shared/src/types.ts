@@ -15,6 +15,8 @@ export type RoomMetaData = {
 	owner: string,
 	admins: Array<string>,
 	users: Array<string>,
+	banned: Array<string>,
+	silenced: Array<string>,
 	hasPass: boolean
 }
 

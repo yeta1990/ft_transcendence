@@ -38,6 +38,10 @@ export class Room {
 	@JoinTable()
 	admins: User[];
 
+	@ManyToMany(() => User, (user) => user.silencedRooms)
+	@JoinTable()
+	silenced: User[];
+
 	@ManyToMany(() => User, (user) => user.bannedRooms)
 	@JoinTable()
 	banned: User[];
