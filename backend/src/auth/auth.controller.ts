@@ -86,7 +86,7 @@ export class AuthController {
 
 	@Post('2fa/validate')
 	async validate2FA(@Request() req, @Body() body) {
-		const user = req.user; // Obtén el usuario actual desde la solicitud
+		const user = req.user;
 		if (!user.mfa) {
 			return { message: '2FA is not enabled for this user' };
 		}
@@ -100,5 +100,4 @@ export class AuthController {
 			return { message: 'Invalid 2FA code' };
 		}
 	}
-
 }
