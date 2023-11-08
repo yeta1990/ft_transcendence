@@ -405,6 +405,7 @@ export class ChatGateway extends BaseGateway {
 				`You've removed the ban of ${targetLogin} in ${room} successfully`).data)
 		let roomMetaData: RoomMetaData = await this.roomService
 			.getRoomMetaData(room)
+			console.log(roomMetaData)
 	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
 	  
   }
@@ -413,6 +414,7 @@ export class ChatGateway extends BaseGateway {
   async removeBanOfRoom(client: Socket, payload: ChatMessage){
 	  const login: string = client.handshake.query.login as string;
 	  const banRemoved: boolean = await this.chatService.removeBanOfRoom(login, payload.login, payload.room);
+	  console.log(banRemoved)
 	  if (banRemoved){
 	  	  await this.afterNoBanInform(client.id, payload.login, payload.room)
 	  }

@@ -375,6 +375,10 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 			.map(m => m.login)
  			this.server.to(clientId).emit(events.BlockedUsers, blockedUsersByLogin) 
  		}
+ 		else if (bannedUsers && bannedUsers.length == 0){
+ 			this.server.to(clientId).emit(events.BlockedUsers, []) 
+			
+ 		}
   }
 
   public async kickAndDisconnect(login: string): Promise<void> {
