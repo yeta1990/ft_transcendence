@@ -22,6 +22,7 @@ export class ModalService {
   }
 
   openModal(templateId: string, data?: any): void {
+    this.confirmationInput = false;
     this.currentModal = templateId;
     this.modalData1 = data;
     this.modalStatus = true;

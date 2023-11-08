@@ -342,8 +342,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	askForChannelPasswordToJoin(room: string) {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-      		const introducedPass = this.modalService.getModalData()[0];
-			this.joinUserToRoom(room, introducedPass);
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm){
+      			const introducedPass = this.modalService.getModalData()[0];
+				this.joinUserToRoom(room, introducedPass);
+			}
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template1', room);
@@ -351,22 +354,29 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	challengeMatchModal(login: string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-      		const challengeConfirmation = this.modalService.getModalData()[0];
-      		//to be done!!!
-      		//a function to drive the user to a wait room or something ...
-			console.log("match challenge")
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm){
+      			const challengeConfirmation = this.modalService.getModalData()[0];
+      			//to be done!!!
+      			//a function to drive the user to a wait room or something ...
+      			//maybe sending a gameService event
+				console.log("match challenge")
+			}
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template9', login);
-
-	} 
+	}
 
 	createChannelModal() {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-			const receivedData = this.modalService.getModalData();
-			const room = receivedData[0]
-      		const pass = receivedData[1]
-			this.joinUserToRoom(room, pass);
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		console.log(confirm)
+      		if (confirm){
+				const receivedData = this.modalService.getModalData();
+				const room = receivedData[0]
+      			const pass = receivedData[1]
+				this.joinUserToRoom(room, pass);
+			}
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template2');
@@ -376,8 +386,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	banUserFromRoomModal(nick: string, room: string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-      		const banConfirmation = this.modalService.getModalData()[0];
-			this.banUserFromRoom(nick, room)
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm){
+      			const banConfirmation = this.modalService.getModalData()[0];
+				this.banUserFromRoom(nick, room)
+			}
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template3', [nick, room]);
@@ -385,8 +398,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	unBanUserFromRoomModal(nick: string, room: string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-      		const banConfirmation = this.modalService.getModalData()[0];
-			this.unBanUserFromRoom(nick, room)
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm){
+      			const banConfirmation = this.modalService.getModalData()[0];
+				this.unBanUserFromRoom(nick, room)
+			}
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template3b', [nick, room]);
@@ -394,8 +410,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	blockUserModal(targetUser: string) {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-      		const banConfirmation = this.modalService.getModalData()[0];
-			this.chatService.banUser2User(targetUser)
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm){
+      			const banConfirmation = this.modalService.getModalData()[0];
+				this.chatService.banUser2User(targetUser)
+			}
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template4', targetUser);
@@ -403,8 +422,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	unBlockUserModal(targetUser: string) {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-      		const banConfirmation = this.modalService.getModalData()[0];
-			this.chatService.noBanUser2User(targetUser)
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm){
+      			const banConfirmation = this.modalService.getModalData()[0];
+				this.chatService.noBanUser2User(targetUser)
+			}
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template5', targetUser);
@@ -412,8 +434,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	changePassToRoomModal(room:string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-      		const pass = this.modalService.getModalData()[0];
-			this.addPassToRoom(room, pass)
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm){
+      			const pass = this.modalService.getModalData()[0];
+				this.addPassToRoom(room, pass)
+			}
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template6', room);
@@ -421,8 +446,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	addPassToRoomModal(room:string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-      		const pass = this.modalService.getModalData()[0];
-			this.addPassToRoom(room, pass)
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm){
+      			const pass = this.modalService.getModalData()[0];
+				this.addPassToRoom(room, pass)
+			}
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template8', room);
@@ -430,12 +458,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	removePassOfRoomModal(room: string) {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-      		const removePassConfirmation = this.modalService.getModalData()[0];
-			this.removePassOfRoom(room)
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm){
+      			const removePassConfirmation = this.modalService.getModalData()[0];
+				this.removePassOfRoom(room)
+			}
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template7', room);
-
 	}
-
 }

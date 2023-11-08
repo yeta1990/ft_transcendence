@@ -27,6 +27,7 @@ export class ModalComponent {
   }
 
   saveAndCloseModal(): void {
+ 	this.confirmationInput = true; 
     this.modalService.setModalData(this.inputValue, this.inputValue2, this.confirmationInput);
     this.modalService.closeModalWithData();
 	this.inputValue = "";
