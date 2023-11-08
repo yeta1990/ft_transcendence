@@ -68,14 +68,11 @@ export class EditProfileComponent implements  OnInit {
   
       // Verificar si el estado del MFA ha cambiado
       if (newMFA !== this.user?.mfa) {
-        console.log("El estado del MFA ha cambiado");
         // Si el nuevo estado del MFA es verdadero, activa MFA; de lo contrario, desactívalo
         if (newMFA) {
-          console.log("Voy a activar MFA");
           await this.enable2FA();
           this.newUser.mfa = true;
         } else {
-          console.log("Voy a desactivar MFA");
           await this.disable2FA();
           this.newUser.mfa = false;
         }

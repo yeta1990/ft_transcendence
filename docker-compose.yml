@@ -49,7 +49,6 @@ services:
          tty: true
          volumes:
            - tx_postgres_volume:/var/lib/postgresql/data
-           - /etc/localtime:/etc/localtime:ro
          networks:
            - ft_transcendence
          restart: always

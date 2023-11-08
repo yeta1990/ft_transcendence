@@ -3,7 +3,6 @@ import * as QRCode from 'qrcode';
 import { HttpClient } from '@angular/common/http';
 import { TwoFAService } from './two-factor-auth.service'
 
-
 @Component({
   selector: 'app-two-factor-auth',
   templateUrl: './two-factor-auth.component.html',
