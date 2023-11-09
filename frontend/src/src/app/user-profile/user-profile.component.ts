@@ -9,6 +9,7 @@ import { Achievement, AchievementsData } from '@shared/achievement'
 import { forkJoin } from 'rxjs';
 import { Location } from '@angular/common';
 import { UserModule } from '../user/user.module';
+import {ChatService} from '../chat/chat.service'
 
 
 @Component({
@@ -31,14 +32,13 @@ export class UserProfileComponent implements OnInit {
   editingField: string | null = null;
   editedFields: { [key: string]: any } = {};
 
-
-
   constructor(
 		private profileService: UserProfileService,
 		private authService: AuthService,
 		private router: Router,
     	private activateroute: ActivatedRoute,
 		private location: Location,
+		private chatService: ChatService
 	) {}
 
 	allUsers(): void {
@@ -48,7 +48,7 @@ export class UserProfileComponent implements OnInit {
 
 	ngOnInit() {
 		const login = this.activateroute.snapshot.paramMap.get('login');
-		if ( login !== null )
+		if ( login !== null ){
 			this.profileService.getUserIDByLogin(login).subscribe((userId: number) => {
 				forkJoin([
 					this.profileService.getUserProfile(userId),
@@ -64,6 +64,8 @@ export class UserProfileComponent implements OnInit {
 				});
 				this.check_admin_level(userId);
 			});
+			this.profileService.getMyBlockedUsers().subscribe(users =>this.chatService.setMyBlockedUsers(users))
+		}
 	  }
 
 	  check_admin_level(userId: number) {
@@ -78,6 +80,28 @@ export class UserProfileComponent implements OnInit {
 		  this.editedFields[fieldName] = this.user[fieldName as keyof User];
 		  }
 		}
+		
+	
+	  isBlocked(): boolean {
+	  	  if (this.user){
+				return this.chatService.getMyBlockedUsers().includes(this.user!.login)
+		  }
+		  return false;
+	  }
+
+	  async blockUser(login:string) {
+		this.profileService.blockUser(login)
+			.subscribe(users => 
+				this.chatService.setMyBlockedUsers(users)
+			)
+	  }
+
+	  async unBlockUser(login:string) {
+		this.profileService.unBlockUser(login)
+			.subscribe(users => 
+				this.chatService.setMyBlockedUsers(users)
+			)
+	  }
 
 	  progressStyles: { [key: string]: string } = {};
 

@@ -83,6 +83,15 @@ export class UserController {
 		const isTargetOwner: boolean = (await this.service.getUserByLogin(login)).userRole >= 6 ? true : false
 		if (isTargetOwner) return [] as User[]
 		return this.service.removeBanUserFromWebsite(login);
+	}  
+
+	@UseGuards(AuthGuard)
+	@Get('my-blocked')
+	public async getMyBlockedUsers(@UserId() id: number): Promise<Array<string>>{
+		const user: User = await this.getUser(id)
+  		const bannedUsers: User[] = await this.service
+  	  		.getBannedUsersByLogin(user.login)
+		return bannedUsers.map(m => m.login)
 	}
 
 	@UseGuards(AuthGuard)
@@ -90,10 +99,15 @@ export class UserController {
 	public async blockUser(@UserId() id: number, @Query('login') login: string): Promise<Array<string>>{
 		const user: User = await this.getUser(id)
 		const blockUser: boolean = await this.chatService.banUser2User(user.login, login)
-		if (blockUser){
-			
-		}
-		return []
+		return await this.getMyBlockedUsers(id)
+	}
+
+	@UseGuards(AuthGuard)
+	@Post('unblock')
+	public async unBlockUser(@UserId() id: number, @Query('login') login: string): Promise<Array<string>>{
+		const user: User = await this.getUser(id)
+		const unBlockUser: boolean = await this.chatService.noBanUser2User(user.login, login)
+		return await this.getMyBlockedUsers(id)
 	}
  
 	@Get('all')
@@ -101,7 +115,7 @@ export class UserController {
 		return this.service.getAllUsers();
 	}
 	
-
+	@UseGuards(AuthGuard)
 	@Get(':id')
 	public getUser(@Param('id', ParseIntPipe) id: number): Promise<User>{
 		return this.service.getUser(id);

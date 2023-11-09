@@ -30,4 +30,17 @@ export class UserProfileService {
         })
       );
   }
+
+  getMyBlockedUsers(): Observable<Array<string>> {
+	return this.httpClient.get<Array<string>>(environment.apiUrl+'/user/my-blocked')
+  }
+
+	blockUser(login: string) {
+		return this.httpClient.post<Array<string>>(environment.apiUrl+'/user/block?login='+login, {})
+	}
+
+	unBlockUser(login: string) {
+		return this.httpClient.post<Array<string>>(environment.apiUrl+'/user/unblock?login='+login, {})
+	}
+
 }

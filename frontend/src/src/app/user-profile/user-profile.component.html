@@ -49,6 +49,8 @@
 
 	  <!-- Botón de edición -->
 	  <button class="edit-button" (click)="goEdit()" *ngIf="adminPower">EDIT PROFILE</button>
+	  <button class="edit-button" (click)="unBlockUser(user!.login)" *ngIf="isBlocked()">UNBLOCK</button>
+	  <button class="edit-button" (click)="blockUser(user!.login)" *ngIf="!isBlocked()">BLOCK</button>
 	  
 	  <!-- Botón de salida -->
 	  <div class="close-button">
