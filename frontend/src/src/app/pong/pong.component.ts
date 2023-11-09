@@ -8,6 +8,8 @@ import { PaddleComponent }  from './paddle/paddle.component'
 import { EntityComponent } from './entity/entity.component'
 import { MyProfileService } from '../my-profile/my-profile.service';
 import { User } from '../user';
+import { AppRoutingModule } from '../app-routing-module/app-routing-module.module';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-pong',
@@ -26,17 +28,21 @@ export class PongComponent implements OnInit, OnDestroy {
     destroy: Subject<any> = new Subject();
     public game: GameRoom = {} as GameRoom;
     public playerLogin:string = "";
+    public online: boolean = false;
+    public contected: boolean = false;
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
     constructor(
         private myProfileService: MyProfileService,
+        private route: ActivatedRoute
         //private pongService: PongService,
     ){
         //window.location.reload();
-        console.log("ROOM-->" +this.game.room);
+        this.online = this.route.snapshot.data['online'];
+        console.log("ONLINE-->" + this.online);
         //this.game.gameMode = 0;
         console.log("Try join Room: #pongRoom");
-        this.pongService.joinUserToRoom("#pongRoom");
+        //this.pongService.joinUserToRoom("#pongRoom");
         this.subscriptions.add(
         this.pongService
         .getMessage()
@@ -65,7 +71,15 @@ export class PongComponent implements OnInit, OnDestroy {
         if (payload.event === 'getStatus'){
             this.game = payload.data;
         }
-
+        if (!this.online && !this.contected) {      
+            this.pongService.joinUserToRoom("#pongRoom");            
+            this.contected = true;
+        }
+        else if (this.online && !this.contected) {
+            this.pongService.playOnLine(this.playerLogin);
+            this.contected = true;
+        }
+        
         }));
         window.addEventListener('keydown', (e) => {
             if(this.playerOne || this.playerTwo)

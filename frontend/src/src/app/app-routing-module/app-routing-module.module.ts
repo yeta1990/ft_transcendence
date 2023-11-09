@@ -81,7 +81,17 @@ const routes: Routes = [
 		component: PongComponent,
 		canActivate: [AuthGuard],
 		data: {
-			logCheck: true
+			logCheck: true,
+			online: false
+		  },
+	},
+	{
+		path: 'on-line',
+		component: PongComponent,
+		canActivate: [AuthGuard],
+		data: {
+			logCheck: true,
+			online: true
 		  },
 	}
 ];
