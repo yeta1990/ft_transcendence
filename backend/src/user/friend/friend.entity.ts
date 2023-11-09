@@ -7,7 +7,7 @@ export class Friend {
 	id: number;
 
 	@Column()
-	friendName: string;
+	friendLogin: string;
 
 	@ManyToMany(() => User, user => user.friends)
 	users: User[];

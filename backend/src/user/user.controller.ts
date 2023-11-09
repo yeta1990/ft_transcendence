@@ -109,7 +109,38 @@ export class UserController {
 		const unBlockUser: boolean = await this.chatService.noBanUser2User(user.login, login)
 		return await this.getMyBlockedUsers(id)
 	}
+
+	@UseGuards(AuthGuard)
+	@Post('friendship/request')
+	public async requestFriendship(@UserId() id: number, @Query('login') login: string): Promise<boolean>{
+		const user: User = await this.getUser(id)
+		const friendshipSent: boolean = await this.service.requestFriendship(user.login, login)
+		return friendshipSent
+	}
+
+	@UseGuards(AuthGuard)
+	@Post('friendship/accept')
+	public async acceptFriendship(@UserId() id: number, @Query('login') login: string): Promise<Array<string>>{
+		const user: User = await this.getUser(id)
+		return await this.service.acceptFriendship(user.login, login)
+	}
+
+	@UseGuards(AuthGuard)
+	@Post('friendship/request/reject')
+	public async rejectFriendshipRequest(@UserId() id: number, @Query('login') login: string): Promise<Array<string>>{
+		const user: User = await this.getUser(id)
+		return await this.service.rejectFriendshipRequest(user.login, login)
+	}
+
+	@UseGuards(AuthGuard)
+	@Post('friendship/remove')
+	public async removeFriendship(@UserId() id: number, @Query('login') login: string): Promise<Array<string>>{
+		const user: User = await this.getUser(id)
+		return await this.service.removeFriendship(user.login, login)
+	}
+
  
+
 	@Get('all')
 	public findAll(): Promise<User[]> {
 		return this.service.getAllUsers();

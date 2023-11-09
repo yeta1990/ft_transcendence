@@ -198,4 +198,52 @@ export class UserService {
 		return role == UserRole.OWNER
 	}
 
+	public async requestFriendship(senderLogin: string, targetLogin: string): Promise<boolean>{
+		if (senderLogin === targetLogin) return false;
+		const user: User = await this.getUserByLogin(targetLogin)
+		if (!user) return false;
+		const friendRequests: Set<string> = new Set(user.incomingFriendRequests)
+		friendRequests.add(senderLogin)	
+		user.incomingFriendRequests = Array.from(friendRequests)
+		await this.repository.save(user)
+		return true;
+	}
+
+	public async acceptFriendship(acceptorLogin: string, pendingFriendLogin: string): Promise<Array<string>>{
+		const user: User = await this.getUserByLogin(acceptorLogin)
+		const newFriend: User = await this.getUserByLogin(pendingFriendLogin)
+		if (!newFriend) return null;
+		const friendRequests: Set<string> = new Set(user.incomingFriendRequests)
+
+		if (friendRequests.has(pendingFriendLogin)){
+			user.friends ? user.friends.push(pendingFriendLogin) : user.friends = [pendingFriendLogin]
+			user.friends = Array.from(new Set(user.friends))
+			user.incomingFriendRequests = Array.from(friendRequests).filter(f => f != pendingFriendLogin)
+			newFriend.friends ? newFriend.friends.push(acceptorLogin) : newFriend.friends = [acceptorLogin]
+			newFriend.friends = Array.from(new Set(newFriend.friends))
+			await this.repository.save(user)
+			await this.repository.save(newFriend)
+		}
+		return user.friends
+	}
+
+	public async rejectFriendshipRequest(rejectorLogin: string, pendingFriendLogin: string): Promise<Array<string>>{
+		const user: User = await this.getUserByLogin(rejectorLogin)
+		const friendRequests: Set<string> = new Set(user.incomingFriendRequests)
+	    user.incomingFriendRequests = user.incomingFriendRequests.filter(f => f !== pendingFriendLogin)
+		await this.repository.save(user)
+		return user.incomingFriendRequests;
+	}
+
+	public async removeFriendship(friend1: string, friend2: string): Promise<Array<string>>{
+		if (friend1 === friend2) return null;
+		const user1: User = await this.getUserByLogin(friend1)
+		const user2: User = await this.getUserByLogin(friend2)
+
+		user1.friends = user1.friends.filter(f => f != friend2)
+		user2.friends = user2.friends.filter(f => f != friend1)
+		await this.repository.save(user1)
+		await this.repository.save(user2)
+		return user1.friends;
+	}
 }

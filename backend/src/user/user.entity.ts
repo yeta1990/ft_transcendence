@@ -134,10 +134,11 @@ export class User {
 	@JoinTable()
 	bannedUsers: User[];
 
-	// AMIGOS ------------------------------------------------
-	@ManyToMany(type => User)
-	@JoinTable()
-	friends: Friend[];
+	@Column("text", {array:true, default: []})
+	friends: string[];
+
+	@Column("text", {array:true, default: []})
+	incomingFriendRequests: string[];
 
 	//Baneo de usuario de la web
 	@Column({
