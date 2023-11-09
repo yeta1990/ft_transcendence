@@ -200,6 +200,12 @@ export class UserService {
 
 	public async requestFriendship(senderLogin: string, targetLogin: string): Promise<boolean>{
 		if (senderLogin === targetLogin) return false;
+		const sender: User = await this.getUserByLogin(senderLogin)
+		if (!sender) return false;
+		if (sender.incomingFriendRequests.includes(targetLogin)){
+			await this.acceptFriendship(senderLogin, targetLogin)
+			return true;
+		}
 		const user: User = await this.getUserByLogin(targetLogin)
 		if (!user) return false;
 		const friendRequests: Set<string> = new Set(user.incomingFriendRequests)
@@ -236,6 +242,7 @@ export class UserService {
 	}
 
 	public async removeFriendship(friend1: string, friend2: string): Promise<Array<string>>{
+		console.log(friend1+friend2)
 		if (friend1 === friend2) return null;
 		const user1: User = await this.getUserByLogin(friend1)
 		const user2: User = await this.getUserByLogin(friend2)
@@ -244,6 +251,8 @@ export class UserService {
 		user2.friends = user2.friends.filter(f => f != friend1)
 		await this.repository.save(user1)
 		await this.repository.save(user2)
+		console.log(user1.friends)
+		console.log(user2.friends)
 		return user1.friends;
 	}
 }

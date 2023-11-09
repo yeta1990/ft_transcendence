@@ -111,15 +111,16 @@ export class UserController {
 	}
 
 	@UseGuards(AuthGuard)
-	@Post('friendship/request')
-	public async requestFriendship(@UserId() id: number, @Query('login') login: string): Promise<boolean>{
+	@Get('friendshiprequest')
+	public async requestFriendship(@UserId() id: number, @Query('login') login: string): Promise<any>{
+		console.log("yee")
 		const user: User = await this.getUser(id)
 		const friendshipSent: boolean = await this.service.requestFriendship(user.login, login)
 		return friendshipSent
 	}
 
 	@UseGuards(AuthGuard)
-	@Post('friendship/accept')
+	@Post('/friendship/accept')
 	public async acceptFriendship(@UserId() id: number, @Query('login') login: string): Promise<Array<string>>{
 		const user: User = await this.getUser(id)
 		return await this.service.acceptFriendship(user.login, login)
@@ -133,8 +134,9 @@ export class UserController {
 	}
 
 	@UseGuards(AuthGuard)
-	@Post('friendship/remove')
+	@Post('friendship-remove')
 	public async removeFriendship(@UserId() id: number, @Query('login') login: string): Promise<Array<string>>{
+		console.log("yee")
 		const user: User = await this.getUser(id)
 		return await this.service.removeFriendship(user.login, login)
 	}

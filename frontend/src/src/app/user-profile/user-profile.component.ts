@@ -10,6 +10,8 @@ import { forkJoin } from 'rxjs';
 import { Location } from '@angular/common';
 import { UserModule } from '../user/user.module';
 import {ChatService} from '../chat/chat.service'
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 
 @Component({
@@ -32,6 +34,7 @@ export class UserProfileComponent implements OnInit {
   editingField: string | null = null;
   editedFields: { [key: string]: any } = {};
   myLogin: string;
+  myIncomingFriendRequests: Array<string> = [];
 
   constructor(
 		private profileService: UserProfileService,
@@ -39,10 +42,12 @@ export class UserProfileComponent implements OnInit {
 		private router: Router,
     	private activateroute: ActivatedRoute,
 		private location: Location,
-		private chatService: ChatService
+		private chatService: ChatService,
+		private httpClient: HttpClient
 	) {
-
 		this.myLogin = this.authService.getDecodedAccessToken(this.authService.getUserToken()!).login;
+		const currentID = this.authService.getDecodedAccessToken(this.authService.getUserToken()!).id;
+		this.profileService.getMyIncomingFriendRequests(currentID).subscribe((fr: User) => this.myIncomingFriendRequests = fr.incomingFriendRequests)
 	}
 
 	allUsers(): void {
@@ -117,7 +122,7 @@ export class UserProfileComponent implements OnInit {
 		if (totalMatches !== 0) {
 			loosePercentage = (user.losses / totalMatches) * 100;
 		}
-	  
+
 		this.gradientStart = Math.max(0, loosePercentage - 10); // Limitando entre 0 y 100
 		this.gradientEnd = Math.min(100, loosePercentage + 10); // Limitando entre 0 y 100;
 		
@@ -160,4 +165,38 @@ export class UserProfileComponent implements OnInit {
 		this.location.back(); // Navegar a la página anterior
 	}
 	
+	async sendFriendShipRequest(login:string){
+		return this.profileService.sendFriendShipRequest(login)
+			.subscribe(r => {if (r) this.user!.incomingFriendRequests.push(this.myLogin)})
+	}
+
+	acceptFriendShipRequest(login:string){
+		return this.profileService.acceptFriendShipRequest(login)
+			.subscribe(r => {
+				if (r) {
+					this.user!.incomingFriendRequests = this.user!.incomingFriendRequests.filter(l => l != this.myLogin)
+					this.myIncomingFriendRequests = this.myIncomingFriendRequests.filter(l => l != login)
+					this.user!.friends.push(this.myLogin)
+				}
+			})
+	}
+
+	rejectFriendshipRequest(login:string){
+		return this.profileService.rejectFriendshipRequest(login)
+			.subscribe(r => {
+				if (r) {
+					this.user!.incomingFriendRequests = this.user!.incomingFriendRequests.filter(l => l != this.myLogin)
+					this.myIncomingFriendRequests = this.myIncomingFriendRequests.filter(l => l != login)
+				}
+			})
+	}
+
+	removeFriendship(login:string) {
+		return this.profileService.removeFriendship(login)
+			.subscribe(r => {if (r){
+				this.user!.friends = this.user!.friends.filter(f => f != this.myLogin)
+				this.myIncomingFriendRequests = this.myIncomingFriendRequests.filter(l => l != login)
+	 			}
+			} )
+	}
 }
