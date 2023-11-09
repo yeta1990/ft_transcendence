@@ -6,7 +6,7 @@ import {
 } from '@nestjs/websockets';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from 'jsonwebtoken';
-import { Logger, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Logger, Inject, Injectable, UnauthorizedException, forwardRef } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from '../auth/auth.service';
 import { ChatService } from '../chat/chat.service';
@@ -38,7 +38,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   @Inject(JwtService)
   private jwtService: JwtService;
 
-  @Inject(ChatService)
+  @Inject(forwardRef(() => ChatService))
   protected chatService: ChatService;
 
   @Inject(HashService)

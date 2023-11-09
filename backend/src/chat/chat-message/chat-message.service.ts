@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ChatMessage } from './chat-message.entity';
@@ -13,7 +13,7 @@ export class ChatMessageService {
 	@InjectRepository(ChatMessage)
 	private readonly chatMessageRepository: Repository<ChatMessage>;
 
-	constructor(private chatService: ChatService) {}
+	constructor(@Inject(forwardRef(() => ChatService))private chatService: ChatService) {}
 	public async saveMessage(message: ChatMessageType): Promise<void>{
 		await this.chatMessageRepository.save(message)
 	}

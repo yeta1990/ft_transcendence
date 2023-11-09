@@ -23,6 +23,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { ValidationFunctions } from '@shared/user.functions'
 import { Achievement } from '@shared/achievement';
+import { ChatService } from '../chat/chat.service'
 
 @Controller('user')
 export class UserController {
@@ -31,6 +32,9 @@ export class UserController {
 
 	@Inject(JwtService)
 	private jwtService: JwtService;
+
+	@Inject(ChatService)
+	private chatService: ChatService;
 
 	@UseGuards(AuthGuard)
 	@Get()
@@ -81,12 +85,16 @@ export class UserController {
 		return this.service.removeBanUserFromWebsite(login);
 	}
 
-//	@UseGuards(AuthGuard)
-//	@Post('block')
-//	public async blockUser(@UserId() id: number, @Query('login') login: string): Promise<User[]>{
-//
-		
-//	}
+	@UseGuards(AuthGuard)
+	@Post('block')
+	public async blockUser(@UserId() id: number, @Query('login') login: string): Promise<Array<string>>{
+		const user: User = await this.getUser(id)
+		const blockUser: boolean = await this.chatService.banUser2User(user.login, login)
+		if (blockUser){
+			
+		}
+		return []
+	}
  
 	@Get('all')
 	public findAll(): Promise<User[]> {
