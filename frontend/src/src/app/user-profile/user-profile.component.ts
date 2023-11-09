@@ -31,6 +31,7 @@ export class UserProfileComponent implements OnInit {
   achievementsStatus: { name: string; achieved: boolean }[] = [];
   editingField: string | null = null;
   editedFields: { [key: string]: any } = {};
+  myLogin: string;
 
   constructor(
 		private profileService: UserProfileService,
@@ -39,7 +40,10 @@ export class UserProfileComponent implements OnInit {
     	private activateroute: ActivatedRoute,
 		private location: Location,
 		private chatService: ChatService
-	) {}
+	) {
+
+		this.myLogin = this.authService.getDecodedAccessToken(this.authService.getUserToken()!).login;
+	}
 
 	allUsers(): void {
 		console.log("All users login list:");
@@ -47,6 +51,7 @@ export class UserProfileComponent implements OnInit {
 	}
 
 	ngOnInit() {
+
 		const login = this.activateroute.snapshot.paramMap.get('login');
 		if ( login !== null ){
 			this.profileService.getUserIDByLogin(login).subscribe((userId: number) => {

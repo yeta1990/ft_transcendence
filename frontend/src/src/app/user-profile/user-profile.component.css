@@ -63,6 +63,22 @@
 	font-weight: bold; /* Aplicar negrita */
   }
 
+  .friend-button {
+	font-family: "Roboto", sans-serif;
+	position: absolute;
+	top: 130px; /* Ajusta la posición vertical del botón */
+	right: 30px; /* Ajusta la posición horizontal del botón */
+	width: calc(680px / 4); /* Tamaño del botón en un tercio del ancho del rectángulo */
+	height: 50px; /* Altura del botón */
+	background-color: #d4da5b; /* Color de fondo verde */
+	color: white; /* Color del texto blanco */
+	font-size: 16px; /* Tamaño de fuente */
+	border: none; /* Quitamos el borde del botón */
+	border-radius: 15px; /* Bordes redondeados */
+	cursor: pointer; /* Cambiamos el cursor al pasar por encima */
+	font-weight: bold; /* Aplicar negrita */
+  }
+
   .close-button {
 	position: absolute;
 	top: 0;
