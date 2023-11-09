@@ -6,7 +6,7 @@ import {
 } from '@nestjs/websockets';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from 'jsonwebtoken';
-import { Logger, Inject, UnauthorizedException } from '@nestjs/common';
+import { Logger, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from '../auth/auth.service';
 import { ChatService } from '../chat/chat.service';
@@ -22,11 +22,12 @@ import {User} from '../user/user.entity'
 
 //this base class is used to log the initialization
 //and avoid code duplications in the gateways
+@Injectable()
 export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   @WebSocketServer() server: Server = new Server<any>();
 
-  private readonly logger; 
+  logger; 
   gatewayName: string;
   users: Map<string, ChatUser>;
   rooms: Set<string>;
@@ -49,14 +50,14 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   @Inject(UserService)
   protected userService: UserService;
 
-  constructor(name: string){
-	this.gatewayName = name;
-	this.logger = new Logger(this.gatewayName);
+  constructor(){
+
 	this.users = new Map();
 	this.rooms = new Set<string>();
   }
 
   async afterInit(): Promise<void>{
+
 	const allRoomsInDb: string[] = await this.chatService.getAllRooms();
 	allRoomsInDb.map(x => this.rooms.add(x));
   }
@@ -81,7 +82,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
       	const activeLoginsInServer: Array<string> = this
       		.getActiveLoginsInServer()
 		this.server.emit(events.ActiveUsers, activeLoginsInServer)	
-		this.sendBlockedUsers(socket.id, login)
+		this.sendBlockedUsers(login)
 	}
 	else{
 		//disconnect
@@ -367,18 +368,22 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	return this.users.size;
   }
 
-  public async sendBlockedUsers(clientId: string, login: string): Promise<void>{
+  public async sendBlockedUsers(login: string): Promise<void>{
   	  	const bannedUsers: User[] = await this.userService
   	  		.getBannedUsersByLogin(login)
-  	  	if (bannedUsers && bannedUsers.length > 0) {
-			const blockedUsersByLogin: Array<string> =  bannedUsers
-			.map(m => m.login)
- 			this.server.to(clientId).emit(events.BlockedUsers, blockedUsersByLogin) 
- 		}
- 		else if (bannedUsers && bannedUsers.length == 0){
- 			this.server.to(clientId).emit(events.BlockedUsers, []) 
-			
- 		}
+	    const socketIdsByLogin: Array<string> = this.getClientSocketIdsFromLogin(login);
+  	  	//unsubscribe user from socket service
+  	  	for (const clientId of socketIdsByLogin){
+  	  		console.log(clientId)
+  		  	if (bannedUsers && bannedUsers.length > 0) {
+				const blockedUsersByLogin: Array<string> =  bannedUsers
+				.map(m => m.login)
+ 				this.server.to(clientId).emit(events.BlockedUsers, blockedUsersByLogin) 
+ 			}
+ 			else if (bannedUsers && bannedUsers.length == 0){
+ 				this.server.to(clientId).emit(events.BlockedUsers, []) 
+ 			}
+	    }
   }
 
   public async kickAndDisconnect(login: string): Promise<void> {

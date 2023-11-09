@@ -80,11 +80,19 @@ export class UserController {
 		if (isTargetOwner) return [] as User[]
 		return this.service.removeBanUserFromWebsite(login);
 	}
+
+//	@UseGuards(AuthGuard)
+//	@Post('block')
+//	public async blockUser(@UserId() id: number, @Query('login') login: string): Promise<User[]>{
+//
+		
+//	}
  
 	@Get('all')
 	public findAll(): Promise<User[]> {
 		return this.service.getAllUsers();
 	}
+	
 
 	@Get(':id')
 	public getUser(@Param('id', ParseIntPipe) id: number): Promise<User>{

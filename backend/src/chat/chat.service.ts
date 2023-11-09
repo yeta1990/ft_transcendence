@@ -8,6 +8,7 @@ import { RoomService } from './room/room.service';
 
 import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
+import { ChatGateway } from '../events/chat.gateway'
 
 @Injectable()
 export class ChatService {
@@ -20,7 +21,10 @@ export class ChatService {
 
 	constructor(private httpService: HttpService, private hashService: HashService, private userService: UserService, 
 				@Inject(forwardRef(() => RoomService))
-				private roomService: RoomService) {}
+				private roomService: RoomService,
+				@Inject(forwardRef(() => ChatGateway))
+				private chatGateway: ChatGateway
+			   ) {}
 
 	public async createRoom(login: string, room: string, hasPass: boolean, password: string | undefined): Promise<boolean>{
 		const roomAlreadyExists = await this.roomRepository.findOne({ where: {name: room}});
@@ -432,6 +436,7 @@ export class ChatService {
 			return false
 		foundEmisor.bannedUsers.push(foundTarget)
 		await this.userRepository.save(foundEmisor)
+		await this.chatGateway.sendBlockedUsers(emisorLogin)
 		return true
 	}
 
@@ -443,6 +448,7 @@ export class ChatService {
 		if (foundEmisor.bannedUsers.length === newBannedUsers.length) return false;
 		foundEmisor.bannedUsers = newBannedUsers;
 		await this.userRepository.save(foundEmisor)
+		await this.chatGateway.sendBlockedUsers(emisorLogin)
 		return true
 	}
 

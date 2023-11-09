@@ -134,28 +134,10 @@ export class User {
 	@JoinTable()
 	bannedUsers: User[];
 
-
-
 	// AMIGOS ------------------------------------------------
-
-	@ManyToMany(() => Friend)
-	@JoinTable({
-		name: 'user_friends',
-		joinColumns: [
-		{
-			name: 'user_id',
-			referencedColumnName: 'id',
-		}
-		],
-		inverseJoinColumns: [
-		{
-			name: 'friend_id',
-			referencedColumnName: 'id',
-		}
-		],
-	})
+	@ManyToMany(type => User)
+	@JoinTable()
 	friends: Friend[];
-
 
 	//Baneo de usuario de la web
 	@Column({
