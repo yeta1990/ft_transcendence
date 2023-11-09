@@ -1,4 +1,4 @@
-import { Injectable, NotAcceptableException, HttpStatus } from '@nestjs/common';
+import { Injectable, NotAcceptableException, HttpStatus, HttpException } from '@nestjs/common';
 import { InjectRepository, InjectConnection} from '@nestjs/typeorm';
 import { HttpService } from '@nestjs/axios';
 import { Repository, Connection } from 'typeorm';
@@ -18,13 +18,127 @@ export class UserService {
 
 	constructor(private httpService: HttpService, @InjectConnection() private readonly connection: Connection) {}
 
-	public async getUser(id: number): Promise<User | undefined>{
-		return await this.repository.findOne({
-    		where: {
-        		id: id,
-    		},
-    	})
+
+	public async whoAmI(token: string): Promise<any>
+	{
+		const data  = await lastValueFrom(
+			this.httpService.get(
+				'https://api.intra.42.fr/v2/me',
+				{headers: {
+			  	 	Authorization: `Bearer ${token}`,
+					}
+				})
+				.pipe(
+					map(res => res.data)
+				)
+		);
+		return data;
 	}
+
+	public async createUser(body: CreateUserDto): Promise<User>{
+		const alreadyRegisteredUser: User = await this.getUserByLogin(body.login);
+		if (alreadyRegisteredUser)
+			return (alreadyRegisteredUser)
+		if (body.login === "albgarci") body.userRole = UserRole.OWNER
+		return await this.repository.save(body);
+	};
+
+	async saveUser(newUser: User): Promise<User> {
+		const id = newUser.id;
+		try {
+			let updateResult = await this.repository
+				.createQueryBuilder()
+				.update(User)
+				.set(newUser)
+				.where("id = :id", { id: id })
+				.execute();
+			if (updateResult.affected && updateResult.affected > 0) {
+				console.log(`User with ID ${id} updated successfully.`);
+			} else {
+				console.log(`No user was updated for ID ${id}.`);}
+		} catch (error) {
+			console.error("Error updating user:", error);
+			throw error; 
+		}
+		return await this.repository.save(newUser);
+	}
+
+	//____________________________ GETTERS ________________________________
+
+	public async getUser(id: number) : Promise<User | undefined> {
+		const user = await this.repository.findOne({
+			where: {
+				id: id,
+			},
+		})
+		if (user) {
+			return user;
+		}
+		throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+	}
+
+	public async getUserByLogin(login: string): Promise<User | undefined>{
+		const user =  await this.repository.findOne({
+			relations: ['ownedRooms', 'bannedUsers'],
+			where: {
+				login: login,
+			},
+		})
+		if (user) {
+			return user;
+		}
+		throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+	}
+
+	async getUserByEmail( email: string ){
+		const user = await this.repository.findOne({ 
+			where: {
+				email: email,
+			},
+		});
+		if (user) {
+			return user;
+		}
+		throw new HttpException('User with this email does not exist', HttpStatus.NOT_FOUND);
+	}
+
+	public async getAllUsers(): Promise<User[]> {
+		return await this.repository.find({
+			order: {
+			  id: 'ASC', // (también puedes usar 'DESC' para descendente)
+			}});
+	}
+
+	public async getUserAchievements(id: number): Promise<Achievement[]> {
+		
+		const user = await this.repository
+			.createQueryBuilder("user")
+			.leftJoinAndSelect("user.achievements", "achievement")
+			.where("user.id = :id", { id: id })
+			.getOne();
+		if (user) {
+			console.log("User Achievements:", user.achievements);
+			return user.achievements;
+		} else {
+			console.log("User not found.");
+			return [] as Achievement[];
+		}
+	}
+
+	public async getUserIdByLogin(login: string): Promise<number | undefined> {
+		const user = await this.repository.findOne({
+			where: {
+			login: login,
+			},
+			select: ["id"],
+		})
+		if (user) {
+			return user.id;
+		}
+		throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+	}
+
+	//____________________________ WEB ADMIN ________________________________
 
 	public async isUserBannedFromWebsite(login: string): Promise<boolean> {
 		const user: User = await this.getUserByLogin(login)
@@ -32,68 +146,7 @@ export class UserService {
 		return user.isBanned
 	}
 
-	public async getUserIdByLogin(login: string): Promise<number | undefined> {
-		const user = await this.repository.findOne({
-		  where: {
-			login: login,
-		  },
-		  select: ["id"],
-		});
-		return user ? user.id : undefined;
-	  }
-
-	  //ban user2user
-	public async getBannedUsersByLogin(login: string): Promise<User[] | undefined> {
-		const user: User = await this.getUserByLogin(login);
-		if (!user) return null;
-	    return await this.connection.query(
-	    	`SELECT f."userId_2" as id, login
-	    	FROM user_banned_users_user f
-	    	LEFT JOIN public.user ON f."userId_2" = public.user.id 
-	    	WHERE (f."userId_1" = $1)`, [user.id]);
-	}
-
-	  //ban user2user
-	public async getUsersThatHaveBannedAnother(login: string): Promise<User[]> {
-		const user: User = await this.getUserByLogin(login);
-	    return await this.connection.query(
-	    	`SELECT f."userId_1" as id, login
-	    	FROM user_banned_users_user f
-	    	LEFT JOIN public.user ON f."userId_1" = public.user.id 
-	    	WHERE (f."userId_2" = $1)`, [user.id]);
-	}
-
-	  //ban user2user
-	public async isUserBannedFromUser(executor: string, banned: string): Promise<boolean>{
-		const bannedUsers = await this.getBannedUsersByLogin(executor);
-		if (!bannedUsers) return false;
-		for (let i = 0; i < bannedUsers.length; i++){
-			if (bannedUsers[i].login === banned) return true;
-		}
-		return false;
-	}
-
-	public async getUserByLogin(login: string): Promise<User | undefined>{
-		return await this.repository.findOne({
-			relations: ['ownedRooms', 'bannedUsers'],
-    		where: {
-        		login: login,
-    		},
-    	})
-	}
-
-	public async getUserByLoginWithRooms(login: string): Promise<User | undefined>{
-		return await this.repository.findOne({
-    		where: {
-        		login: login,
-    		},
-    		relations: {
-				ownedRooms: true
-    		}
-    	})
-	}
-
-	public async grantAdmin(login: string): Promise<User[]>{
+		public async grantAdmin(login: string): Promise<User[]>{
 		console.log(login)
 		const user: User = await this.getUserByLogin(login)
 		user.userRole = UserRole.ADMIN
@@ -128,94 +181,6 @@ export class UserService {
 		return this.getAllUsers()
 	}
 
-
-	public async createUser(body: CreateUserDto): Promise<User>{
-		const alreadyRegisteredUser: User = await this.getUserByLogin(body.login);
-		if (alreadyRegisteredUser)
-			return (alreadyRegisteredUser)
-		if (body.login === "albgarci") body.userRole = UserRole.OWNER
-
-//			throw new NotAcceptableException('User already registered', {cause: new Error(), description: 'User already registered'});
-
-//		const user: User = new User();
-//		user.nick = body.nick;
-//		user.email = body.email;
-//		user.firstName = body.first
-		return await this.repository.save(body);
-	};
-
-	async saveUser(newUser: User): Promise<User> {
-		console.log("SAVING: MFA of user is: " + newUser.mfa.valueOf());
-	  
-		const id = newUser.id;
-	  
-		console.log(newUser)
-		try {
-		  // Intenta ejecutar la actualización
-		  let updateResult = await this.repository
-			.createQueryBuilder()
-			.update(User)
-			.set(newUser)
-			.where("id = :id", { id: id })
-			.execute();
-	  
-			console.log(await this.getUser(id));
-		  // Verifica el resultado de la actualización
-		  if (updateResult.affected && updateResult.affected > 0) {
-			console.log(`User with ID ${id} updated successfully.`);
-		  } else {
-			console.log(`No user was updated for ID ${id}.`);
-		  }
-		} catch (error) {
-		  console.error("Error updating user:", error);
-		  throw error; // Puedes lanzar el error nuevamente o manejarlo según tus necesidades
-		}
-	  
-		// Finalmente, guarda y devuelve el objeto actualizado
-		return await this.repository.save(newUser);
-	  }
-	  
-
-	public async whoAmI(token: string): Promise<any>
-	{
-		const data  = await lastValueFrom(
-			this.httpService.get(
-				'https://api.intra.42.fr/v2/me',
-				{headers: {
-			  	 	Authorization: `Bearer ${token}`,
-					}
-				})
-				.pipe(
-					map(res => res.data)
-				)
-		);
-		return data;
-	}
-
-	public async getAllUsers(): Promise<User[]> {
-		return await this.repository.find({
-			order: {
-			  id: 'ASC', // (también puedes usar 'DESC' para descendente)
-			}});
-	}
-
-	public async getUserAchievements(id: number): Promise<Achievement[]> {
-		
-		const user = await this.repository
-			.createQueryBuilder("user")
-			.leftJoinAndSelect("user.achievements", "achievement")
-			.where("user.id = :id", { id: id })
-			.getOne();
-
-		if (user) {
-			console.log("User Achievements:", user.achievements);
-			return user.achievements;
-		} else {
-			console.log("User not found.");
-			return [] as Achievement[];
-		}
-	}
-
 	public async hasAdminPrivileges(login: string){
 		const role: UserRole = (await this.getUserByLogin(login)).userRole
 		return  role == UserRole.ADMIN || role == UserRole.OWNER
@@ -224,6 +189,67 @@ export class UserService {
 	public async isWebOwner(login: string){
 		const role: UserRole = (await this.getUserByLogin(login)).userRole
 		return role == UserRole.OWNER
+	}
+
+	//____________________________ CHAT USER SERVICE ____________________________
+
+	public async getUserByLoginWithRooms(login: string): Promise<User | undefined>{
+		const user =  await this.repository.findOne({
+			where: {
+				login: login,
+			},
+			relations: {
+				ownedRooms: true
+			}
+		})
+		if (user) {
+			return user;
+		}
+		throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+	}
+
+	//____________________________ BAN USER2USER ________________________________
+
+	public async getBannedUsersByLogin(login: string): Promise<User[] | undefined> {
+		const user: User = await this.getUserByLogin(login);
+		if (!user) return null;
+		return await this.connection.query(
+			`SELECT f."userId_2" as id, login
+			FROM user_banned_users_user f
+			LEFT JOIN public.user ON f."userId_2" = public.user.id 
+			WHERE (f."userId_1" = $1)`, [user.id]);
+	}
+
+	public async getUsersThatHaveBannedAnother(login: string): Promise<User[]> {
+		const user: User = await this.getUserByLogin(login);
+		return await this.connection.query(
+			`SELECT f."userId_1" as id, login
+			FROM user_banned_users_user f
+			LEFT JOIN public.user ON f."userId_1" = public.user.id 
+			WHERE (f."userId_2" = $1)`, [user.id]);
+	}
+
+	public async isUserBannedFromUser(executor: string, banned: string): Promise<boolean>{
+		const bannedUsers = await this.getBannedUsersByLogin(executor);
+		if (!bannedUsers) return false;
+		for (let i = 0; i < bannedUsers.length; i++){
+			if (bannedUsers[i].login === banned) return true;
+		}
+		return false;
+	}
+
+	//______________________________ MFA ___________________________________
+
+	async set2FASecret( secret: string, userId: number ) {
+		return this.repository.update(userId, {
+			mfaSecret: secret
+		});
+	}
+
+	async turnOn2fa ( userId: number ) {
+		return this.repository.update( userId, {
+			mfa: true
+		});
 	}
 
 }

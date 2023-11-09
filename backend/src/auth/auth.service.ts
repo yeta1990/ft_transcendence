@@ -7,6 +7,7 @@ import { catchError, lastValueFrom, map } from 'rxjs';
 import { EntityManager } from 'typeorm';
 import { User } from '../user/user.entity';
 import { UserRole } from '@shared/enum'
+import { stringify } from 'querystring';
 
 export interface authData42 {
 	access_token: string;
@@ -47,27 +48,64 @@ export class AuthService {
 		return data;
 	}
 
-	async signIn(code: string): Promise<any> {
-//		const allUserData42;
+	async signIn(code: string, is2FAuthenticated = false ): Promise<any> {
 		let data: authData42;
 		try{
 			data = await this.confirmAuthFrom42(code);
-//			console.log(data);
-
 		}
 		catch(error){
 			throw new UnauthorizedException();
 		}
 
-		//get user data from 42
 		const allUserData42 = await this.userService.whoAmI(data.access_token);
-		const payloadToCreateUser = { nick: allUserData42.login, email: allUserData42.email, firstName: allUserData42.first_name, lastName: allUserData42.last_name, login: allUserData42.login, image: allUserData42.image.versions.medium, userRole: UserRole.REGISTRED }; //all requests from the frontend will contain this info
+		const payloadToCreateUser = this.createPayloadForUser(allUserData42);
+		const isUserBanned = await this.checkIfUserExistsAndNotBanned(payloadToCreateUser.login);
+		if (!isUserBanned)
+			return false;
+		const createdUser = await this.createNewUser(payloadToCreateUser);
+		if (createdUser.mfa) {
+			return {
+				requiresMFA: true,
+				userId: createdUser.id
+			};
+		}
+		const tokenData = await this.generateTokenData(createdUser);
+		return {
+			access_token: tokenData.access_token,
+			expires_at: tokenData.expires_at,
+		};
+	}
 
-		const user: User = await this.userService.getUserByLogin(payloadToCreateUser.login)
-		if (user && user.isBanned) return false;
+	createPayloadForUser(userData: any): any {
+		return { 
+			nick: userData.login,
+			email: userData.email,
+			firstName: userData.first_name,
+			lastName: userData.last_name,
+			login: userData.login,
+			image: userData.image.versions.medium,
+			userRole: UserRole.REGISTRED
+		};
+	}
 
-		const createdUser = await this.userService.createUser(payloadToCreateUser);
-		const payloadToSign = {login: createdUser.login, id: createdUser.id, role: createdUser.userRole}
+	async checkIfUserExistsAndNotBanned(login: string): Promise<User | boolean> {
+		const user: User = await this.userService.getUserByLogin(login);
+		if (user && user.isBanned) {
+			return false;
+		}
+		return true;
+	}
+
+	async createNewUser(userData: any): Promise<User> {
+		return await this.userService.createUser(userData);
+	}
+
+	async generateTokenData(user: User): Promise<any> {
+		const payloadToSign = {
+			login: user.login,
+			id: user.id,
+			role: user.userRole
+		};
 		const access_token = await this.jwtService.signAsync(payloadToSign);
 		const decoded: JwtPayload = this.jwtService.decode(access_token) as JwtPayload;
 		return {
@@ -96,64 +134,18 @@ export class AuthService {
 
 	async verifyJwt(token: string): Promise<boolean> {
 		if (!token) {
-		throw new UnauthorizedException();
+			throw new UnauthorizedException();
 		}
 		try {
-		const payload = await this.jwtService.verifyAsync(
-			token,
-			{
-			secret: 'santanabanana'
-			}
-		);
-		// 💡 We're assigning the payload to the request object here
-		// so that we can access it in our route handlers
-		// request['user'] = payload;
-			
+			const payload = await this.jwtService.verifyAsync(
+				token, {
+					secret: 'santanabanana'
+				}
+			);
 		} catch {
 			return false;
-			// throw new UnauthorizedException();
 		}
 		return true;
 	}
-
-	async enable2FA(userId: number, mfaSecret: string): Promise<void> {
-		const user = await this.userService.getUser(userId);
-
-		if (!user) {
-			throw new Error('User not found');
-		}
-		// Guarda el secreto 2FA en el usuario y marca 2FA como habilitado
-		user.mfaSecret = mfaSecret;
-		user.mfa = true;
-		await this.userService.saveUser(user);
-	}
-	
-	async disable2FA(userId: number): Promise<void> {
-		const user = await this.userService.getUser(userId);
-		
-		if (!user) {
-			throw new Error('User not found');
-		}
-		console.log('Desactivando MFA... Por favor espere');
-		// Deshabilita la autenticación de dos factores para el usuario
-		user.mfa = false;
-		user.mfaSecret = null;
-
-		await this.userService.saveUser(user);
-	}
-	
-
-	async saveRecoveryCodes(userId: number, recoveryCodes: string[]): Promise<void> {
-		const user = await this.userService.getUser(userId);
-
-		if (!user) {
-			throw new Error('User not found'); 
-		}
-
-		// Guarda los códigos de recuperación en el usuario
-		user.recoveryCodes = recoveryCodes;
-		await this.userService.saveUser(user);
-	}
-
 
 }

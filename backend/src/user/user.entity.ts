@@ -62,7 +62,7 @@ export class User {
 		nullable: true,
 		default: undefined,
 	})
-	mfaSecret: string;
+	mfaSecret?: string;
 
 	@Column('text',{ 
 		array: true,

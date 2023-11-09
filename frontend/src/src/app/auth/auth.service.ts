@@ -33,10 +33,17 @@ export class AuthService {
 	*/
 
 	login(code: string){
-		return this.http.post<User>(environment.apiUrl + '/auth/login', {code})
-			.pipe(tap((res: any) => this.setSession(res)))
-			.pipe(shareReplay())
-			//We are calling shareReplay to prevent the receiver of this Observable from accidentally triggering multiple POST requests due to multiple subscriptions.
+		return this.http.post<any>(environment.apiUrl + '/auth/login', {code})
+			.pipe(
+				tap((res: any) => {
+					if (res.requiresMFA) {
+						this.handle2fa(res.userId);
+					} else {
+						this.setSession(res);
+					}
+				}),
+			shareReplay()
+		);
 	}
 
 	logout() {
@@ -45,6 +52,10 @@ export class AuthService {
 		this.chatService.forceDisconnect();
         this.router.navigateByUrl('/login');
     }
+
+	handle2fa( userId: number ) {
+
+	}
 
 	redirectToHome() {
         this.router.navigateByUrl('/home');
