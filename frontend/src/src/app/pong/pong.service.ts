@@ -8,9 +8,12 @@ import { ChatMessage, GameRoom, SocketPayload } from '@shared/types';
 })
 export class PongService {
 
-  private socketService: SocketService = new SocketService("/game")
-  constructor() { }
+  constructor(private socketService: SocketService) {
+	}
 
+	forceInit() {
+		if (!this.socketService.isConnected()) this.socketService.initializeSocket("/chat")
+	}
   getMessage(): Observable<SocketPayload>{
 		return this.socketService.getMessage();
 	}

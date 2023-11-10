@@ -6,7 +6,7 @@ export class InvalidTokens {
 	@PrimaryGeneratedColumn()
 	id: number;
 
-	@Column({unique: true})
+	@Column({unique: false})
 	token: string;
 
 }

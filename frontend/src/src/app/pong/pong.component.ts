@@ -21,7 +21,7 @@ export class PongComponent implements OnInit, OnDestroy {
 
     private gameContext: any;
     private canvas: any;
-    pongService:PongService = new PongService();
+
     public playerOne: boolean = false;
     public playerTwo: boolean = false;
     private subscriptions = new Subscription();
@@ -33,6 +33,7 @@ export class PongComponent implements OnInit, OnDestroy {
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
     constructor(
+        private pongService:PongService,
         private myProfileService: MyProfileService,
         private route: ActivatedRoute
         //private pongService: PongService,
@@ -94,7 +95,7 @@ export class PongComponent implements OnInit, OnDestroy {
     }
 
     async ngOnInit() {
-        
+        this.pongService.forceInit();
         await this.myProfileService.getUserDetails()
         .subscribe((response: User) => {
           this.playerLogin = response.login;

@@ -48,7 +48,7 @@ import { RoomComponent } from './pong/room/room.component'
     ModalComponent,
     PaddleComponent,
     EntityComponent,
-    RoomComponent
+    RoomComponent,
     AdminPageComponent,
     AdminChatPageComponent,
     FriendsComponent
