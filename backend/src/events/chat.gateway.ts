@@ -1,5 +1,5 @@
 import { SubscribeMessage, WebSocketGateway, WsResponse } from '@nestjs/websockets';
-import { Inject } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { BaseGateway } from './base.gateway';
 import { Socket } from 'socket.io';
 import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
@@ -12,13 +12,17 @@ import { User } from '../user/user.entity';
 import { RoomMessages, ChatUser } from '@shared/types';
 
 //https://stackoverflow.com/questions/69435506/how-to-pass-a-dynamic-port-to-the-websockets-gateway-in-nestjs
+@Injectable()
 @WebSocketGateway({ namespace: '/chat', cors: true } )
 //extending BaseGateway to log the gateway creation in the terminal
 export class ChatGateway extends BaseGateway {
 
   constructor(private chatMessageService: ChatMessageService, 
   			 private chatAdminService: ChatAdminService) {
-	super(ChatGateway.name);
+  			 	 super();
+  			 	 this.gatewayName = "ChatGateway"
+				 this.logger = new Logger(this.gatewayName);
+//	super(ChatGateway.name);
   }
 
   //separate afterInit from the base class
@@ -487,7 +491,7 @@ export class ChatGateway extends BaseGateway {
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
 				`You've banned ${payload.room} successfully`).data)
-		this.sendBlockedUsers(client.id, login)
+//		this.sendBlockedUsers(login)
 	  }
   }
 
@@ -499,7 +503,7 @@ export class ChatGateway extends BaseGateway {
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
 				`You've removed the ban of ${payload.room} successfully`).data)
-		this.sendBlockedUsers(client.id, login)
+//		this.sendBlockedUsers(login)
 	  }
   }
 

@@ -32,7 +32,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	roomsMetaData: Map<string, RoomMetaData> = new Map<string, RoomMetaData>();
 	myUser: User | undefined;
 	private subscriptions = new Subscription();
-	myBlockedUsers: Array<string> = []
 
 	destroy: Subject<any> = new Subject();
 	private modalClosedSubscription: Subscription = {} as Subscription;
@@ -69,6 +68,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		}
 		//sending only one signal to the server with the raw rooms string
 		this.chatService.joinUserToRoom([room, pass]);
+   }
+   getMyBlockedUsers(): Array<string> {
+		return this.chatService.getMyBlockedUsers()
    }
 
 	makeRoomAdmin(login:string, room: string){
@@ -201,7 +203,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					console.log("-----end of rooms metadata-----")
 				}
 				else if (payload.event === events.BlockedUsers){
-					this.myBlockedUsers = payload.data;
+					this.chatService.setMyBlockedUsers(payload.data)
 				}
 				else if (payload.event === events.Kicked){
 					this.authService.logout()	

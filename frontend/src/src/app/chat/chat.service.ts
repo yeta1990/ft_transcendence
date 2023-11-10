@@ -13,12 +13,20 @@ import { ChatMessage, SocketPayload } from '@shared/types';
 export class ChatService {
 //https://auth0.com/blog/real-time-charts-using-angular-d3-and-socket-io/
 
-//	private socketService: SocketService = new SocketService("/chat");
+	private myBlockedUsers: Array<string> = []
+
 	constructor(private socketService: SocketService) {
 	}
 
 	forceInit() {
 		if (!this.socketService.isConnected()) this.socketService.initializeSocket("/chat")
+	}
+
+	getMyBlockedUsers(): Array<string> {
+		return this.myBlockedUsers
+	}
+	setMyBlockedUsers(blockedUsers: Array<string>) {
+		this.myBlockedUsers = blockedUsers;
 	}
 
 	getMessage(): Observable<SocketPayload>{

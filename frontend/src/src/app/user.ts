@@ -21,6 +21,8 @@ export class User {
 	losses: number;
 	elo: number;
 	isBanned: boolean;
+	friends: Array<string>;
+	incomingFriendRequests: Array<string>;
 
 	constructor(model: User) {
 		this.id = model && model.id;
@@ -42,5 +44,7 @@ export class User {
 		this.losses = model && model.losses;
 		this.elo = model && model.elo;
 		this.isBanned = model && model.isBanned;
+		this.friends = model && model.friends;
+		this.incomingFriendRequests = model && model.incomingFriendRequests;
 	}
 }

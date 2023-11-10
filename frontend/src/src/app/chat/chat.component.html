@@ -108,8 +108,8 @@
 					
 				</div>
 				<div class="p-2" *ngIf="myUser?.login !== roomsMetaData.get(currentRoom)?.owner">
-						<i *ngIf="!myBlockedUsers.includes(roomsMetaData.get(currentRoom)!.owner)" class="bi bi-person-fill-slash" (click)="blockUserModal(roomsMetaData.get(currentRoom)!.owner)">&nbsp;</i>
-								<i *ngIf="myBlockedUsers.includes(roomsMetaData.get(currentRoom)!.owner)" class="bi bi-person-check-fill" (click)="unBlockUserModal(roomsMetaData.get(currentRoom)!.owner)">&nbsp;</i>
+						<i *ngIf="!getMyBlockedUsers().includes(roomsMetaData.get(currentRoom)!.owner)" class="bi bi-person-fill-slash" (click)="blockUserModal(roomsMetaData.get(currentRoom)!.owner)">&nbsp;</i>
+								<i *ngIf="getMyBlockedUsers().includes(roomsMetaData.get(currentRoom)!.owner)" class="bi bi-person-check-fill" (click)="unBlockUserModal(roomsMetaData.get(currentRoom)!.owner)">&nbsp;</i>
 				</div>
 			</li>
 			<li *ngIf="!roomsMetaData.get(currentRoom)?.owner">
@@ -135,8 +135,8 @@
 							<div class="p-2" *ngIf="myUser?.login !== login">
 								<i class="bi bi-controller">&nbsp;</i>
 								<i class="bi bi-chat-left-text" (click)="joinUserToRoom('@'+login, '')">&nbsp;</i>
-								<i *ngIf="!myBlockedUsers.includes(login)" class="bi bi-person-fill-slash" (click)="blockUserModal(login)">&nbsp;</i>
-								<i *ngIf="myBlockedUsers.includes(login)" class="bi bi-person-check-fill" (click)="unBlockUserModal(login)">&nbsp;</i>
+								<i *ngIf="!getMyBlockedUsers().includes(login)" class="bi bi-person-fill-slash" (click)="blockUserModal(login)">&nbsp;</i>
+								<i *ngIf="getMyBlockedUsers().includes(login)" class="bi bi-person-check-fill" (click)="unBlockUserModal(login)">&nbsp;</i>
 							    <i *ngIf="roomsMetaData.get(currentRoom)?.owner === myUser?.login && roomMetaData.value.admins.includes(login)" class="bi bi-shield-minus" (click)="removeRoomAdmin(login, currentRoom)">&nbsp;</i>	
 								<i *ngIf="(roomsMetaData.get(currentRoom)?.owner === myUser?.login || roomMetaData.value.admins.includes(myUser?.login!)) && !roomMetaData.value.silenced.includes(login)" class="bi bi-volume-mute" (click)="silenceUserFromRoom(login, currentRoom)">&nbsp;</i>
 								<i *ngIf="(roomsMetaData.get(currentRoom)?.owner === myUser?.login || roomMetaData.value.admins.includes(myUser?.login!)) && roomMetaData.value.silenced.includes(login)" class="bi bi-volume-up" (click)="unSilenceUserFromRoom(login, currentRoom)">&nbsp;</i>
@@ -165,8 +165,8 @@
 							<div class="p-2" *ngIf="myUser?.login !== login">
 								<i *ngIf="activeUsers.includes(login)" class="bi bi-controller" (click)="challengeMatchModal(login)">&nbsp;</i>
 								<i class="bi bi-chat-left-text" (click)="joinUserToRoom('@'+login, '')">&nbsp;</i>
-								<i *ngIf="!myBlockedUsers.includes(login)" class="bi bi-person-fill-slash" (click)="blockUserModal(login)">&nbsp;</i>
-								<i *ngIf="myBlockedUsers.includes(login)" class="bi bi-person-check-fill" (click)="unBlockUserModal(login)">&nbsp;</i>
+								<i *ngIf="!getMyBlockedUsers().includes(login)" class="bi bi-person-fill-slash" (click)="blockUserModal(login)">&nbsp;</i>
+								<i *ngIf="getMyBlockedUsers().includes(login)" class="bi bi-person-check-fill" (click)="unBlockUserModal(login)">&nbsp;</i>
 							    <i *ngIf="roomsMetaData.get(currentRoom)?.owner === myUser?.login && !roomMetaData.value.admins.includes(login)" class="bi bi-shield-plus" (click)="makeRoomAdmin(login, currentRoom)">&nbsp;</i>	
 								<i *ngIf="(roomsMetaData.get(currentRoom)?.owner === myUser?.login || roomMetaData.value.admins.includes(myUser?.login!)) && !roomMetaData.value.silenced.includes(login)" class="bi bi-volume-mute" (click)="silenceUserFromRoom(login, currentRoom)">&nbsp;</i>
 								<i *ngIf="(roomsMetaData.get(currentRoom)?.owner === myUser?.login || roomMetaData.value.admins.includes(myUser?.login!)) && roomMetaData.value.silenced.includes(login)" class="bi bi-volume-up" (click)="unSilenceUserFromRoom(login, currentRoom)">&nbsp;</i>
@@ -194,8 +194,8 @@
 							<div class="p-2" *ngIf="myUser?.login !== login">
 								<i *ngIf="activeUsers.includes(login)" class="bi bi-controller" (click)="challengeMatchModal(login)">&nbsp;</i>
 								<i class="bi bi-chat-left-text" (click)="joinUserToRoom('@'+login, '')">&nbsp;</i>
-								<i *ngIf="!myBlockedUsers.includes(login)" class="bi bi-person-fill-slash" (click)="blockUserModal(login)">&nbsp;</i>
-								<i *ngIf="myBlockedUsers.includes(login)" class="bi bi-person-check-fill" (click)="unBlockUserModal(login)">&nbsp;</i>
+								<i *ngIf="!getMyBlockedUsers().includes(login)" class="bi bi-person-fill-slash" (click)="blockUserModal(login)">&nbsp;</i>
+								<i *ngIf="getMyBlockedUsers().includes(login)" class="bi bi-person-check-fill" (click)="unBlockUserModal(login)">&nbsp;</i>
 								<i *ngIf="roomsMetaData.get(currentRoom)?.owner === myUser?.login || roomMetaData.value.admins.includes(myUser?.login!)" class="bi bi-check-circle" (click)="unBanUserFromRoomModal(login, currentRoom)"></i>
 							</div>
 						</li>
