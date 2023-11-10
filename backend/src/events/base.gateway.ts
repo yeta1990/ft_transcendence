@@ -128,7 +128,10 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
 
   async handleDisconnect(socket: Socket): Promise<void> {
-  	  const login: string = this.users.get(socket.id).login
+		if (!socket) return;
+		const user = this.users.get(socket.id)
+		if (!user) return;
+  	  const login: string = user.login
 	  this.logger.log(`Socket client disconnected: ${socket.id}`)
 	  this.users.delete(socket.id);
 	  this.logger.log(this.getNumberOfConnectedUsers() + " users connected")

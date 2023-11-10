@@ -306,6 +306,7 @@ export class PongService {
             }
             //Remove both 
             this.matchMaking.shift();
+            
             this.matchMaking.shift();
         }
     }

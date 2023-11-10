@@ -69,6 +69,7 @@ export class PongComponent implements OnInit, OnDestroy {
             }
         }
         if (payload.event === 'getStatus'){
+            
             this.game = payload.data;
         }
         if (!this.online && !this.contected) {      
