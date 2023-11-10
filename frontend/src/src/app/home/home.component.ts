@@ -14,9 +14,15 @@ export class HomeComponent {
 		private profileService: MyProfileService,
 		private authService: AuthService,
 		private router: Router
-	){}
+	){
+		if (this.authService.isLoggedIn())
+		{
+			this.router.navigateByUrl('/home');
+		}else{
+			this.router.navigateByUrl('/login');
+		}
+
+	}
   allUsers(): void {
-		console.log("All users login list:");
-		this.router.navigateByUrl('/all-users');
 	}
 }

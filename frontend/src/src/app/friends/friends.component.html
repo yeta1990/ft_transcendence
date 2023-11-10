@@ -1,0 +1,55 @@
+<app-nav-bar/>
+<p>friends works!</p>
+
+<h2>My friends</h2>
+
+<table class="table">
+	<thead>
+        <tr>
+          <th>Login</th>
+          <th>Foto</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Aquí irá el *ngFor con los datos de los amigos -->
+        <tr *ngFor="let friend of friends">
+          <td>{{ friend.login }}</td>
+          <td><img [src]="friend.image" alt="Picture of {{ friend.login }}" class="img-thumbnail"style="max-width: 100px;" ></td>
+          <td>status</td>
+          <td>
+            <!-- Aquí irá el botón y cualquier otra acción que desees -->
+            <button class="btn btn-primary">Action</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+
+	<h2>Incoming friend requests</h2>
+
+
+<table class="table">
+	<thead>
+        <tr>
+          <th>Login</th>
+          <th>Foto</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+    	<tr *ngFor="let request of incomingFriendRequests">
+          <td>{{ request.login }}</td>
+          <td><img [src]="request.image" alt="Picture of {{ request.login }}" class="img-thumbnail"style="max-width: 100px;" ></td>
+          <td>status</td>
+          <td>
+            <!-- Aquí irá el botón y cualquier otra acción que desees -->
+            <button class="btn btn-primary">Action</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+<router-outlet>
