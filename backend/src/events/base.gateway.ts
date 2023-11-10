@@ -6,7 +6,7 @@ import {
 } from '@nestjs/websockets';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from 'jsonwebtoken';
-import { Logger, Inject, UnauthorizedException } from '@nestjs/common';
+import { Logger, Inject, Injectable, UnauthorizedException, forwardRef } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from '../auth/auth.service';
 import { ChatService } from '../chat/chat.service';
@@ -18,14 +18,16 @@ import { generateSocketErrorResponse, generateSocketInformationResponse } from '
 import { events, values } from '@shared/const';
 import { ChatUser } from '@shared/types';
 import { map } from 'rxjs/operators';
+import {User} from '../user/user.entity'
 
 //this base class is used to log the initialization
 //and avoid code duplications in the gateways
+@Injectable()
 export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   @WebSocketServer() server: Server = new Server<any>();
 
-  private readonly logger; 
+  logger; 
   gatewayName: string;
   users: Map<string, ChatUser>;
   rooms: Set<string>;
@@ -36,7 +38,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   @Inject(JwtService)
   private jwtService: JwtService;
 
-  @Inject(ChatService)
+  @Inject(forwardRef(() => ChatService))
   protected chatService: ChatService;
 
   @Inject(HashService)
@@ -48,14 +50,14 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   @Inject(UserService)
   protected userService: UserService;
 
-  constructor(name: string){
-	this.gatewayName = name;
-	this.logger = new Logger(this.gatewayName);
+  constructor(){
+
 	this.users = new Map();
 	this.rooms = new Set<string>();
   }
 
   async afterInit(): Promise<void>{
+
 	const allRoomsInDb: string[] = await this.chatService.getAllRooms();
 	allRoomsInDb.map(x => this.rooms.add(x));
   }
@@ -65,7 +67,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   async handleConnection(socket: Socket): Promise<void>{
 
     const isUserVerified = await this.authService.verifyJwt(socket.handshake.auth.token);
- 
 	if (isUserVerified){
 		const login = this.authService.getLoginFromJwt(socket.handshake.auth.token)
   	    const isHardConnect: boolean = this.getClientSocketIdsFromLogin(login).length > 0 ? false : true
@@ -78,12 +79,10 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		);
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
 
-  	    if (isHardConnect){
-  	    	const activeLoginsInServer: Array<string> = this
-  	    		.getActiveLoginsInServer()
-			this.server.emit(events.ActiveUsers, activeLoginsInServer)	
-		}
-		this.sendBlockedUsers(socket.id, login)
+      	const activeLoginsInServer: Array<string> = this
+      		.getActiveLoginsInServer()
+		this.server.emit(events.ActiveUsers, activeLoginsInServer)	
+		this.sendBlockedUsers(login)
 	}
 	else{
 		//disconnect
@@ -124,8 +123,8 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		await this.chatService.deleteRoom(room);
 	}
     this.emit(events.ListAllRooms, await this.roomService.getAllRoomsMetaData());
+    this.emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData());
   }
-
 
   async handleDisconnect(socket: Socket): Promise<void> {
 		if (!socket) return;
@@ -159,7 +158,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	const roomsRaw: any = adapter.rooms;
 
 	if (roomsRaw){
-		console.log(roomsRaw)
+//		console.log(roomsRaw)
 		return (Array.from(roomsRaw.keys()).filter(x => x[0] == '#') as Array<string>);
 	}
 	return ([]);
@@ -174,6 +173,25 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		connectedClient = clientsIterator.next()
 	}
 	return [...new Set(logins)];
+  }
+
+  async getActiveWebAdminsInServer(): Promise<Array<ChatUser>>{
+		const activeWebAdminsInServer: Array<string> = (await Promise.all(this
+			.getActiveLoginsInServer()
+			.map(async u => {
+				const isWebAdmin = await this.userService.hasAdminPrivileges(u)
+				if (isWebAdmin) return u;
+			})))
+			.filter(u => u !== undefined)
+			console.log(activeWebAdminsInServer)
+
+
+		const usersArray = Array.from(this.users);
+		const usersWithCompleteData: Array<ChatUser> = 
+			usersArray
+				.filter(([clientId, chatUser]) => activeWebAdminsInServer.includes(chatUser.login))
+  				.map(([_, chatUser]) => chatUser);
+	    return (usersWithCompleteData);
   }
 
   //getting the currently connected users
@@ -218,7 +236,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   private disconnect(socket: Socket) {
-    socket.emit('Error', new UnauthorizedException());
     socket.disconnect();
   }
 
@@ -236,7 +253,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		await this.server.in(clientId).socketsJoin(room);
 		const successfulJoin: boolean = await this.chatService.addUserToRoom(room, creatorLogin);
 		if (!successfulJoin) return false;
-		this.emit(events.ListAllRooms, await this.roomService.getAllRoomsMetaData());
+		const allRoomsMetadata = await this.roomService.getAllRoomsMetaData()
+		this.emit(events.AllRoomsMetaData, allRoomsMetadata);
+		this.emit(events.ListAllRooms, allRoomsMetadata);
 		this.logger.log("User " + clientId + "joined room " + room);
 		return true
   }
@@ -317,7 +336,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  	});
 
 	  	//announce the rest of the channel a new user has joined
-	  	if (hardJoin){
+	  	if (hardJoin && !room.includes(':') && !room.includes('@')){
 	  		const socketInfo: SocketPayload = generateSocketInformationResponse(room, `user ${login} has joined room ${room}`)
 			this.broadCastToRoomExceptForSomeUsers(socketInfo.event, socketInfo.data, [login])
 			const joinFeedback: SocketPayload = generateSocketInformationResponse(room, `You have joined ${room}`)
@@ -352,11 +371,31 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	return this.users.size;
   }
 
-  public async sendBlockedUsers(clientId: string, login: string): Promise<void>{
-		const blockedUsersByLogin: Array<string> = (await this.userService
-			.getBannedUsersByLogin(login))
-			.map(m => m.login)
- 		this.server.to(clientId).emit(events.BlockedUsers, blockedUsersByLogin) 
+  public async sendBlockedUsers(login: string): Promise<void>{
+  	  	const bannedUsers: User[] = await this.userService
+  	  		.getBannedUsersByLogin(login)
+	    const socketIdsByLogin: Array<string> = this.getClientSocketIdsFromLogin(login);
+  	  	//unsubscribe user from socket service
+  	  	for (const clientId of socketIdsByLogin){
+  	  		console.log(clientId)
+  		  	if (bannedUsers && bannedUsers.length > 0) {
+				const blockedUsersByLogin: Array<string> =  bannedUsers
+				.map(m => m.login)
+ 				this.server.to(clientId).emit(events.BlockedUsers, blockedUsersByLogin) 
+ 			}
+ 			else if (bannedUsers && bannedUsers.length == 0){
+ 				this.server.to(clientId).emit(events.BlockedUsers, []) 
+ 			}
+	    }
   }
 
+  public async kickAndDisconnect(login: string): Promise<void> {
+  	    const socketIds: Array<string> = this.getClientSocketIdsFromLogin(login)
+		const sockets = await this.server.fetchSockets()
+		for (const socket of sockets) {
+			if (socketIds.includes(socket.id)){ 
+				socket.disconnect(true); 
+			}
+		}
+  }
 }

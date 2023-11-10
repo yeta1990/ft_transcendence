@@ -23,7 +23,10 @@ import { ToasterComponent } from './toaster/toaster.component'
 import { ToasterService } from './toaster/toaster.service';
 import { ModalComponent } from './modal/modal.component'
 import { ModalService } from './modal/modal.service'
-import { ValidationFunctions } from '@shared/user.functions'
+import { ValidationFunctions } from '@shared/user.functions';
+import { AdminPageComponent } from './admin-page/admin-page.component';
+import { AdminChatPageComponent } from './admin-chat-page/admin-chat-page.component';
+import { FriendsComponent } from './friends/friends.component'
 import { PaddleComponent } from './pong/paddle/paddle.component';
 import { EntityComponent } from './pong/entity/entity.component';
 import { RoomComponent } from './pong/room/room.component'
@@ -46,6 +49,9 @@ import { RoomComponent } from './pong/room/room.component'
     PaddleComponent,
     EntityComponent,
     RoomComponent
+    AdminPageComponent,
+    AdminChatPageComponent,
+    FriendsComponent
 
   ],
   imports: [

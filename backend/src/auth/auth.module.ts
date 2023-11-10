@@ -4,10 +4,13 @@ import { AuthService } from './auth.service';
 import { UserModule } from '../user/user.module'
 import { JwtModule} from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
-
+import { InvalidateTokensService } from './invalidate-tokens.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import {InvalidTokens} from './invalid-tokens-entity'
 
 @Module({
 	imports: [
+		TypeOrmModule.forFeature([InvalidTokens]),
 		UserModule, 
 		JwtModule.register({
     		global: true,
@@ -16,8 +19,9 @@ import { HttpModule } from '@nestjs/axios';
     	}),
 		HttpModule,
     ],
+
 	controllers: [AuthController],
-	providers: [AuthService],
-	exports: [AuthService]
+	providers: [AuthService, InvalidateTokensService],
+	exports: [AuthService, InvalidateTokensService]
 })
 export class AuthModule {}

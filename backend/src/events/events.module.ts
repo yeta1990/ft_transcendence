@@ -5,7 +5,6 @@ import { User } from '../user/user.entity';
 import { ChatMessage } from '../chat/chat-message/chat-message.entity';
 import { ChatMessageService } from '../chat/chat-message/chat-message.service';
 import { GameGateway } from './game.gateway';
-import { BaseGateway } from './base.gateway';
 import { ChatService } from '../chat/chat.service';
 import { RoomService } from '../chat/room/room.service';
 import { HttpModule } from '@nestjs/axios';
@@ -14,10 +13,13 @@ import { Room } from '../chat/room.entity';
 import { HashService } from '../hash/hash.service';
 import { UserModule } from '../user/user.module';
 import { PongService } from 'src/pong/pong.service';
+import { ChatAdminService } from '../chat/chat-admin/chat-admin.service'
 
 @Module({
 	imports: [TypeOrmModule.forFeature([Room, User, ChatMessage]), AuthModule, HttpModule, UserModule],
-  providers: [ChatService, ChatMessageService, ChatGateway, GameGateway, BaseGateway, HashService, RoomService, PongService]
+  	providers: [ChatGateway, ChatService, ChatAdminService, RoomService, ChatMessageService, GameGateway, HashService, PongService],
+  	exports: [ChatGateway]
+
 })
 
 export class EventsModule {}

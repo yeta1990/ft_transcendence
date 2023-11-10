@@ -19,14 +19,20 @@ export class ModalComponent {
   }
 
   closeModal(): void {
+	this.inputValue = "";
+	this.inputValue2 = "";
+	this.checkboxInput = false;
+	this.confirmationInput = false;
     this.modalService.closeModal();
   }
 
   saveAndCloseModal(): void {
+ 	this.confirmationInput = true; 
     this.modalService.setModalData(this.inputValue, this.inputValue2, this.confirmationInput);
     this.modalService.closeModalWithData();
 	this.inputValue = "";
 	this.inputValue2 = "";
+	this.checkboxInput = false;
 	this.confirmationInput = false;
   }
 
@@ -45,6 +51,10 @@ export class ModalComponent {
 
   getModalData(): Array<string> {
  	return this.modalService.getModalData(); 
+  }
+
+  getConfirmationInput(): boolean {
+  	  return this.modalService.getConfirmationInput();
   }
 
   @HostListener('document:keydown.escape', ['$event']) 

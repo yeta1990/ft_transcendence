@@ -22,12 +22,17 @@ export class ModalService {
   }
 
   openModal(templateId: string, data?: any): void {
+    this.confirmationInput = false;
     this.currentModal = templateId;
     this.modalData1 = data;
     this.modalStatus = true;
   }
   closeModal(): void {
     this.modalStatus = false;
+    this.confirmationInput = false;
+    this.modalData1 = "";
+    this.modalData2 = "";
+	this.modalCloseSubject.next();
   }
 
   closeModalWithData(): void {
@@ -43,6 +48,10 @@ export class ModalService {
 
   getModalData(): Array<string>{
     return [this.modalData1, this.modalData2];
+  }
+
+  getConfirmationInput(): boolean {
+  	  return this.confirmationInput;
   }
 
   getCurrentModal(): string {

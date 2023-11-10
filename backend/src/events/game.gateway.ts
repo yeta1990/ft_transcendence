@@ -1,3 +1,4 @@
+import {Logger} from '@nestjs/common'
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { BaseGateway } from './base.gateway';
 import { Socket } from 'socket.io';
@@ -15,7 +16,10 @@ import { PongService } from 'src/pong/pong.service';
 export class GameGateway extends BaseGateway {
 
   constructor(private chatMessageService: ChatMessageService, private pongservice:PongService) {
-	super(GameGateway.name);
+  	super();
+  	this.gatewayName = "ChatGateway"
+	this.logger = new Logger(this.gatewayName);
+  
   }
 
 

@@ -127,31 +127,24 @@ export class User {
 	@ManyToMany(() => Room, (room) => room.banned)
 	bannedRooms: Room[];
 
+	@ManyToMany(() => Room, (room) => room.silenced)
+	silencedRooms: Room[];
+
 	@ManyToMany(type => User)
 	@JoinTable()
 	bannedUsers: User[];
 
+	@Column("text", {array:true, default: []})
+	friends: string[];
 
+	@Column("text", {array:true, default: []})
+	incomingFriendRequests: string[];
 
-	// AMIGOS ------------------------------------------------
-
-	@ManyToMany(() => Friend)
-	@JoinTable({
-		name: 'user_friends',
-		joinColumns: [
-		{
-			name: 'user_id',
-			referencedColumnName: 'id',
-		}
-		],
-		inverseJoinColumns: [
-		{
-			name: 'friend_id',
-			referencedColumnName: 'id',
-		}
-		],
+	//Baneo de usuario de la web
+	@Column({
+		default:false
 	})
-	friends: Friend[];
+	isBanned: boolean
 
 }
 

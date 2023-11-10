@@ -6,6 +6,7 @@ import { CreateUserDto } from './user.dto';
 import { User } from './user.entity';
 import { catchError, lastValueFrom, map } from 'rxjs';
 import { Achievement } from './achievement/achievement.entity';
+import { UserRole } from '@shared/enum';
  
 @Injectable()
 export class UserService {
@@ -25,6 +26,12 @@ export class UserService {
     	})
 	}
 
+	public async isUserBannedFromWebsite(login: string): Promise<boolean> {
+		const user: User = await this.getUserByLogin(login)
+		if (user === null || user === undefined) return false;
+		return user.isBanned
+	}
+
 	public async getUserIdByLogin(login: string): Promise<number | undefined> {
 		const user = await this.repository.findOne({
 		  where: {
@@ -35,6 +42,7 @@ export class UserService {
 		return user ? user.id : undefined;
 	  }
 
+	  //ban user2user
 	public async getBannedUsersByLogin(login: string): Promise<User[] | undefined> {
 		const user: User = await this.getUserByLogin(login);
 		if (!user) return null;
@@ -45,6 +53,7 @@ export class UserService {
 	    	WHERE (f."userId_1" = $1)`, [user.id]);
 	}
 
+	  //ban user2user
 	public async getUsersThatHaveBannedAnother(login: string): Promise<User[]> {
 		const user: User = await this.getUserByLogin(login);
 	    return await this.connection.query(
@@ -54,6 +63,7 @@ export class UserService {
 	    	WHERE (f."userId_2" = $1)`, [user.id]);
 	}
 
+	  //ban user2user
 	public async isUserBannedFromUser(executor: string, banned: string): Promise<boolean>{
 		const bannedUsers = await this.getBannedUsersByLogin(executor);
 		if (!bannedUsers) return false;
@@ -83,10 +93,47 @@ export class UserService {
     	})
 	}
 
+	public async grantAdmin(login: string): Promise<User[]>{
+		console.log(login)
+		const user: User = await this.getUserByLogin(login)
+		user.userRole = UserRole.ADMIN
+		await this.saveUser(user)
+		return this.getAllUsers()
+	}
+
+	public async removeAdmin(login: string): Promise<User[]>{
+		const user: User = await this.getUserByLogin(login)
+		user.userRole = UserRole.REGISTRED
+		await this.saveUser(user)
+		return this.getAllUsers()
+	}
+
+	public async banUserFromWebsite(login: string): Promise<User[]>{
+		const user: User = await this.getUserByLogin(login)
+		//by changing the role, we force to logout that user
+		user.userRole = UserRole.VISITOR
+		user.isBanned = true;
+
+		await this.saveUser(user)
+		return this.getAllUsers()
+	}
+
+	public async removeBanUserFromWebsite(login: string): Promise<User[]>{
+		const user: User = await this.getUserByLogin(login)
+		//by changing the role, we force to logout that user
+		user.userRole = UserRole.REGISTRED
+		user.isBanned = false;
+
+		await this.saveUser(user)
+		return this.getAllUsers()
+	}
+
+
 	public async createUser(body: CreateUserDto): Promise<User>{
 		const alreadyRegisteredUser: User = await this.getUserByLogin(body.login);
 		if (alreadyRegisteredUser)
 			return (alreadyRegisteredUser)
+		if (body.login === "albgarci") body.userRole = UserRole.OWNER
 
 //			throw new NotAcceptableException('User already registered', {cause: new Error(), description: 'User already registered'});
 
@@ -139,5 +186,73 @@ export class UserService {
 			console.log("User not found.");
 			return [] as Achievement[];
 		}
+	}
+
+	public async hasAdminPrivileges(login: string){
+		const role: UserRole = (await this.getUserByLogin(login)).userRole
+		return  role == UserRole.ADMIN || role == UserRole.OWNER
+	}
+
+	public async isWebOwner(login: string){
+		const role: UserRole = (await this.getUserByLogin(login)).userRole
+		return role == UserRole.OWNER
+	}
+
+	public async requestFriendship(senderLogin: string, targetLogin: string): Promise<boolean>{
+		if (senderLogin === targetLogin) return false;
+		const sender: User = await this.getUserByLogin(senderLogin)
+		if (!sender) return false;
+		if (sender.incomingFriendRequests.includes(targetLogin)){
+			await this.acceptFriendship(senderLogin, targetLogin)
+			return true;
+		}
+		const user: User = await this.getUserByLogin(targetLogin)
+		if (!user) return false;
+		const friendRequests: Set<string> = new Set(user.incomingFriendRequests)
+		friendRequests.add(senderLogin)	
+		user.incomingFriendRequests = Array.from(friendRequests)
+		await this.repository.save(user)
+		return true;
+	}
+
+	public async acceptFriendship(acceptorLogin: string, pendingFriendLogin: string): Promise<Array<string>>{
+		const user: User = await this.getUserByLogin(acceptorLogin)
+		const newFriend: User = await this.getUserByLogin(pendingFriendLogin)
+		if (!newFriend) return null;
+		const friendRequests: Set<string> = new Set(user.incomingFriendRequests)
+
+		if (friendRequests.has(pendingFriendLogin)){
+			user.friends ? user.friends.push(pendingFriendLogin) : user.friends = [pendingFriendLogin]
+			user.friends = Array.from(new Set(user.friends))
+			user.incomingFriendRequests = Array.from(friendRequests).filter(f => f != pendingFriendLogin)
+			newFriend.friends ? newFriend.friends.push(acceptorLogin) : newFriend.friends = [acceptorLogin]
+			newFriend.friends = Array.from(new Set(newFriend.friends))
+			await this.repository.save(user)
+			await this.repository.save(newFriend)
+		}
+		return user.friends
+	}
+
+	public async rejectFriendshipRequest(rejectorLogin: string, pendingFriendLogin: string): Promise<Array<string>>{
+		const user: User = await this.getUserByLogin(rejectorLogin)
+		const friendRequests: Set<string> = new Set(user.incomingFriendRequests)
+	    user.incomingFriendRequests = user.incomingFriendRequests.filter(f => f !== pendingFriendLogin)
+		await this.repository.save(user)
+		return user.incomingFriendRequests;
+	}
+
+	public async removeFriendship(friend1: string, friend2: string): Promise<Array<string>>{
+		console.log(friend1+friend2)
+		if (friend1 === friend2) return null;
+		const user1: User = await this.getUserByLogin(friend1)
+		const user2: User = await this.getUserByLogin(friend2)
+
+		user1.friends = user1.friends.filter(f => f != friend2)
+		user2.friends = user2.friends.filter(f => f != friend1)
+		await this.repository.save(user1)
+		await this.repository.save(user2)
+		console.log(user1.friends)
+		console.log(user2.friends)
+		return user1.friends;
 	}
 }

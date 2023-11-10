@@ -8,6 +8,7 @@ import { RoomService } from './room/room.service';
 
 import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
+import { ChatGateway } from '../events/chat.gateway'
 
 @Injectable()
 export class ChatService {
@@ -20,7 +21,10 @@ export class ChatService {
 
 	constructor(private httpService: HttpService, private hashService: HashService, private userService: UserService, 
 				@Inject(forwardRef(() => RoomService))
-				private roomService: RoomService) {}
+				private roomService: RoomService,
+				@Inject(forwardRef(() => ChatGateway))
+				private chatGateway: ChatGateway
+			   ) {}
 
 	public async createRoom(login: string, room: string, hasPass: boolean, password: string | undefined): Promise<boolean>{
 		const roomAlreadyExists = await this.roomRepository.findOne({ where: {name: room}});
@@ -61,7 +65,7 @@ export class ChatService {
 				.map(n => parseInt(n));
 			const user1: User = await this.userService.getUser(userIds[0])
 			const user2: User = await this.userService.getUser(userIds[1])
-			if (user1.login === myLogin){
+			if (user1.login === myLogin && user2){
 				return "@" + user2.login
 			}
 			return "@" + user1.login
@@ -109,14 +113,6 @@ export class ChatService {
 
 	public async getRoom(room: string): Promise<Room>{
 		return await this.roomService.getRoom(room)
-		/*
-		const foundRoom = await this.roomRepository
-			.findOne({
-				relations: ['owner', 'users', 'admins', 'banned'],
-				where: { name: room}
-			});
-		return foundRoom;
-		*/
 	}
 
 	public async addUserToRoom(room: string, login: string): Promise<boolean>{
@@ -137,12 +133,16 @@ export class ChatService {
 			return user.login != login;
 		})
 		await this.roomRepository.save(foundRoom);
-		if (oldUserSize === foundRoom.users.length){ 
-			return false;
-		}
 		const isOwnerOfRoom: boolean = await this.isOwnerOfRoom(login, room)
 		if (isOwnerOfRoom) {
 			await this.removeOwnerFromRoom(room)
+		}
+		const isAdminOfRoom: boolean = await this.isAdminOfRoom(login, room)
+		if (isAdminOfRoom) {
+			await this.forceRemoveRoomAdmin(login, room)
+		}
+		if (!isOwnerOfRoom && !isAdminOfRoom && oldUserSize === foundRoom.users.length){ 
+			return false;
 		}
 		return true;
 	}
@@ -163,11 +163,13 @@ export class ChatService {
 
 	public async isUserInRoom(room: string, login: string): Promise<boolean>{
 		const usersInRoom: string[] = await this.getAllUsersInRoom(room);
+		if (!usersInRoom) return false;
 		return usersInRoom.includes(login);
 	}
 
 	public async isRoomEmpty(room: string): Promise<boolean>{
 		const foundRoom: Room = await this.getRoom(room);
+		if (!foundRoom) return false;
 		if (foundRoom.users.length === 0){
 			return (true)
 		}
@@ -183,7 +185,7 @@ export class ChatService {
 
 	public async removeOwnerFromRoom(room: string): Promise<boolean>{
 		const foundRoom: Room = await this.getRoom(room);
-		if (!foundRoom) return false;
+		if (!foundRoom || !foundRoom.owner) return false;
 		const login: string = foundRoom.owner.login;
 		foundRoom.owner = undefined;
 		await this.roomRepository.save(foundRoom);
@@ -239,13 +241,27 @@ export class ChatService {
 		return true;
 	}
 
+	public async forceRemoveRoomAdmin(login: string, room:string) {
+		const foundRoom: Room = await this.getRoom(room);
+		if (!foundRoom) return false;
+
+		const oldAdminSize: number = foundRoom.admins.length;
+		foundRoom.admins = foundRoom.admins.filter(user => {
+			return user.login != login;
+		})
+		await this.roomRepository.save(foundRoom);
+		if (oldAdminSize === foundRoom.admins.length){ 
+			return false;
+		}
+		return true;
+	}
+
 	// 3 user privileges: owner, admin, user
 	// - owner can ban and remove ban of admins and users
 	// - admins can ban and remove ban of users
 	// - nobody can ban himself
 	public async banUserOfRoom(executorLogin: string, login: string, room: string): Promise<boolean>{
 		//check privileges
-		console.log(executorLogin, login, room)
 		if (executorLogin === login) return false;
 		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorLogin, room);
 		const executorIsAdminOfRoom: boolean = await this.isAdminOfRoom(executorLogin, room);
@@ -253,7 +269,6 @@ export class ChatService {
 		const targetIsAlreadyBanned: boolean = await this.isBannedOfRoom(login, room)
 		if (targetIsAlreadyBanned) return false;
 		const targetIsAdminOfRoom: boolean = await this.isAdminOfRoom(login, room)
-		if (!executorIsOwnerOfRoom && executorIsAdminOfRoom && targetIsAdminOfRoom) return false;
 		const targetIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(login, room)
 		if (executorIsAdminOfRoom && targetIsOwnerOfRoom) return false;
 		if (executorIsOwnerOfRoom && targetIsOwnerOfRoom) return false;
@@ -272,8 +287,7 @@ export class ChatService {
 		await this.roomRepository.save(foundRoom)
 
 		//remove user from room where has been banned
-		await this.removeUserFromRoom(room, login)
-		return true;
+		return await this.removeUserFromRoom(room, login)
 	}
 
 	public async isBannedOfRoom(login: string, room: string): Promise<boolean>{
@@ -296,7 +310,7 @@ export class ChatService {
 		const isTargetBanned: boolean = await this.isBannedOfRoom(login, room)
 		if (!isTargetBanned) return false;
 
-		const oldBannedSize: number = foundRoom.users.length;
+		const oldBannedSize: number = foundRoom.banned.length;
 		foundRoom.banned = foundRoom.banned.filter(user => {
 			return user.login != login;
 		})
@@ -307,8 +321,68 @@ export class ChatService {
 		return true;
 	}
 
+	public async silenceUserOfRoom(executorLogin: string, login: string, room: string): Promise<boolean>{
+		//check privileges
+		if (executorLogin === login) return false;
+		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorLogin, room);
+		const executorIsAdminOfRoom: boolean = await this.isAdminOfRoom(executorLogin, room);
+		if (!executorIsOwnerOfRoom && !executorIsAdminOfRoom) return false;
+		const targetIsAlreadySilenced: boolean = await this.isSilencedOfRoom(login, room)
+		if (targetIsAlreadySilenced) return false;
+		const targetIsAdminOfRoom: boolean = await this.isAdminOfRoom(login, room)
+		const targetIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(login, room)
+		if (executorIsAdminOfRoom && targetIsOwnerOfRoom) return false;
+		if (executorIsOwnerOfRoom && targetIsOwnerOfRoom) return false;
+
+		//remove privileges and ban
+		const foundRoom: Room = await this.getRoom(room)
+		if (!foundRoom) return false;
+		const roomSilenced: User[] = foundRoom.silenced;
+		for (let silenced of roomSilenced){
+			if (silenced.login === login) return true;
+		}
+		const userToSilence: User | undefined = await this.userService.getUserByLogin(login);
+		if (!userToSilence) return false;
+		foundRoom.silenced.push(userToSilence);
+		await this.roomRepository.save(foundRoom)
+
+		return true;
+	}
+
+	public async removeSilenceOfRoom(executorLogin: string, login: string, room: string): Promise<boolean>{
+		if (executorLogin === login) return false;
+		const foundRoom: Room = await this.getRoom(room);
+		if (!foundRoom) return false;
+		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorLogin, room); 
+		const executorIsAdminOfRoom: boolean = await this.isAdminOfRoom(executorLogin, room);
+		if (!executorIsOwnerOfRoom && !executorIsAdminOfRoom) return false;
+		const isTargetSilenced: boolean = await this.isSilencedOfRoom(login, room)
+		if (!isTargetSilenced) return false;
+
+		const oldSilencedSize: number = foundRoom.users.length;
+		foundRoom.silenced = foundRoom.silenced.filter(user => {
+			return user.login != login;
+		})
+		await this.roomRepository.save(foundRoom);
+		if (oldSilencedSize === foundRoom.silenced.length){ 
+			return false;
+		}
+		return true;
+	}
+
+
+	public async isSilencedOfRoom(login: string, room: string): Promise<boolean>{
+		const foundRoom: Room = await this.getRoom(room);
+		if (!foundRoom) return false;
+		const silencedOfRoom: User[] = foundRoom.silenced;
+		for (let i = 0; i < silencedOfRoom.length; i++){
+			if (silencedOfRoom[i].login === login) return true;
+		}
+		return false;
+	}
 
 	public async addPassToRoom(login: string, room: string, pass: string){
+		if (pass.trim().length === 0) return
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) return false;
 		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(login, room); 
@@ -362,6 +436,7 @@ export class ChatService {
 			return false
 		foundEmisor.bannedUsers.push(foundTarget)
 		await this.userRepository.save(foundEmisor)
+		await this.chatGateway.sendBlockedUsers(emisorLogin)
 		return true
 	}
 
@@ -373,16 +448,17 @@ export class ChatService {
 		if (foundEmisor.bannedUsers.length === newBannedUsers.length) return false;
 		foundEmisor.bannedUsers = newBannedUsers;
 		await this.userRepository.save(foundEmisor)
+		await this.chatGateway.sendBlockedUsers(emisorLogin)
 		return true
 	}
 
 	public async deleteRoom(room: string): Promise<any>{
-		return this.roomRepository.delete(room);
+		return await this.roomRepository.delete(room);
 	}
 
 	//only for testing purposes
 	public async emptyTableRoom(): Promise<any>{
-		return this.roomRepository.clear();
+		return await this.roomRepository.clear();
 	}
 
 	public async getHashPassFromRoom(room: string): Promise<string>{

@@ -10,6 +10,9 @@ import { UserProfileComponent } from '../user-profile/user-profile.component'
 import { HomeComponent } from '../home/home.component';
 import { EditProfileComponent } from '../edit-profile/edit-profile.component';
 import { PongComponent } from '../pong/pong.component';
+import { AdminPageComponent } from '../admin-page/admin-page.component';
+import {AdminChatPageComponent } from '../admin-chat-page/admin-chat-page.component';
+import {FriendsComponent} from '../friends/friends.component'
 
 
 //routes are doubly protected:
@@ -32,6 +35,13 @@ const routes: Routes = [
 	},
 	{	path: 'home',
 		component: HomeComponent,
+		canActivate: [AuthGuard],
+		data: {
+			logCheck: true
+		},
+	},
+	{	path: 'friends',
+		component: FriendsComponent,
 		canActivate: [AuthGuard],
 		data: {
 			logCheck: true
@@ -93,7 +103,24 @@ const routes: Routes = [
 			logCheck: true,
 			online: true
 		  },
-	}
+	},
+	{
+		path: 'admin',
+		component: AdminPageComponent,
+		canActivate: [AuthGuard],
+		data: {
+			adminCheck: true
+		  },
+	},
+	{
+		path: 'admin-chat',
+		component: AdminChatPageComponent,
+		canActivate: [AuthGuard],
+		data: {
+			adminCheck: true
+		  },
+	},
+
 ];
 
 @NgModule({
