@@ -96,7 +96,6 @@ export class SocketService {
 				this.message.next({event: events.MessageForWebAdmins, data});
 			})
 		}
-
 	}
 
 	isConnected(): boolean {

@@ -187,6 +187,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				}
 				else if (payload.event === events.ActiveUsers){
 					this.activeUsers = payload.data;
+					this.chatService.setActiveUsers(payload.data)
 				}
 				else if (payload.event === events.RoomMetaData){
 					console.log("-------rooms metadata--------")

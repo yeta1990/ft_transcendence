@@ -14,12 +14,21 @@ export class ChatService {
 //https://auth0.com/blog/real-time-charts-using-angular-d3-and-socket-io/
 
 	private myBlockedUsers: Array<string> = []
+	activeUsers: Array<string> = [];
 
 	constructor(private socketService: SocketService) {
 	}
 
 	forceInit() {
 		if (!this.socketService.isConnected()) this.socketService.initializeSocket("/chat")
+	}
+
+	setActiveUsers(activeUsers: Array<string>){
+		this.activeUsers = activeUsers;
+	} 
+	
+	getActiveUsers(){
+		return this.activeUsers;
 	}
 
 	getMyBlockedUsers(): Array<string> {

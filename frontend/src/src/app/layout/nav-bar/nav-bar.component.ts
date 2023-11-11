@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { AuthService } from 'src/app/auth/auth.service';
 import { Router } from '@angular/router';
 import { AuthGuardService } from '../../auth/auth-guard.service';
+import { ChatService } from '../../chat/chat.service'
 
 @Component({
   selector: 'app-nav-bar',
@@ -15,9 +16,12 @@ export class NavBarComponent {
    constructor(
        private authService: AuthService,
        private authGuardService: AuthGuardService,
-       private router: Router
+       private router: Router,
+       private chatService: ChatService
+
     ) {
       this.isUserLogged = authService.isLoggedIn();
+	  this.chatService.forceInit()    
     }
 
 
