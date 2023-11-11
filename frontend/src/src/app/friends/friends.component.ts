@@ -15,7 +15,7 @@ export class FriendsComponent {
 	allUsers: User[] = []
 	incomingFriendRequests: User[] = []
 	myLogin: string;
-	constructor(private usersService: AllUsersService, private authService: AuthService, private userProfileService: UserProfileService) {
+	constructor(private usersService: AllUsersService, private authService: AuthService, private profileService: UserProfileService) {
 		this.myLogin = this.authService.getUserNameFromToken() as string
 		this.usersService.getUsers()
 			.subscribe(r=> {
@@ -25,11 +25,37 @@ export class FriendsComponent {
 				this.allUsers.map(u => {if (u.login === this.myLogin) friendRequestsLogins = u.incomingFriendRequests})
 				this.incomingFriendRequests = this.allUsers.filter(u => friendRequestsLogins.includes(u.login))
 			})
-//		this.userProfileService.getMyIncomingFriendRequests
-//			.subscribe(r => this.incomingFriendRequests = r)
 
 	}
 
-	
+	acceptFriendShipRequest(login:string){
+		return this.profileService.acceptFriendShipRequest(login)
+			.subscribe(r => {
+				if (r) {
+
+					this.incomingFriendRequests = this.incomingFriendRequests.filter(l => l.login != login)
+					this.friends.push(this.allUsers.filter(u => u.login === login)[0])
+					
+				}
+			})
+	}
+
+	rejectFriendshipRequest(login:string){
+		return this.profileService.rejectFriendshipRequest(login)
+			.subscribe(r => {
+				if (r) {
+					this.incomingFriendRequests = this.incomingFriendRequests.filter(l => l.login != login)
+				}
+			})
+	}
+
+	removeFriendship(login:string) {
+		return this.profileService.removeFriendship(login)
+			.subscribe(r => {if (r){
+				this.friends = this.friends.filter(f => f.login != login)
+				this.incomingFriendRequests = this.incomingFriendRequests.filter(l => l.login != login)
+	 			}
+			} )
+	}
 
 }
