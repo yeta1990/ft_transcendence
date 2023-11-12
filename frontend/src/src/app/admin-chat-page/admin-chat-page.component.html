@@ -18,11 +18,11 @@
         <td>{{ room }}</td>
         <td>
           <div class="scrollable-textbox p-2">
-          	  <div *ngFor="let message of getRoomsMessages(room)">{{message.login}} ({{message.date}}): {{ message.message}}</div>
+          	  <div *ngFor="let message of getRoomsMessages(room)">{{getNickEquivalence(message.login)}} ({{message.date}}): {{ message.message}}</div>
           </div>
         </td>
         <td>
-        	{{roomsMetaData.get(room)?.owner}}<span *ngIf="isOwner(room, roomsMetaData.get(room)!.owner)" (click)="revokeOwner(room, roomsMetaData.get(room)!.owner)"> - Revoke ownership</span>
+        	{{getNickEquivalence(roomsMetaData.get(room)!.owner)}}<span *ngIf="isOwner(room, roomsMetaData.get(room)!.owner)" (click)="revokeOwner(room, roomsMetaData.get(room)!.owner)"> - Revoke ownership</span>
         </td>
         <td>
         	<div *ngFor="let admin of roomsMetaData.get(room)?.admins">

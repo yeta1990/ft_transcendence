@@ -202,16 +202,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 						console.log(JSON.stringify(el))
 					}
 
-					console.log(payload.data.loginNickEquivalence)
-//					payload.data.loginNickEquivalence.forEach((roomMetaData: RoomMetaData, key:string) => {
-//						console.log(key)
-//						console.log(roomMetaData)
-//						if(roomMetaData.loginNickEquivalence instanceof Map) {
-//							console.log("yes")
-//						}
-//						roomMetaData.loginNickEquivalence.forEach((value: string, innerKey: string) => { console.log(value)} )
-//					})
-//					console.log("-----end of rooms metadata-----")
+//					console.log(payload.data.loginNickEquivalence)
 				}
 				else if (payload.event === events.BlockedUsers){
 					this.chatService.setMyBlockedUsers(payload.data)
@@ -447,52 +438,52 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
 
-	banUserFromRoomModal(nick: string, room: string){
+	banUserFromRoomModal(login: string, room: string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const confirm: boolean = this.modalService.getConfirmationInput();
       		if (confirm){
       			const banConfirmation = this.modalService.getModalData()[0];
-				this.banUserFromRoom(nick, room)
+				this.banUserFromRoom(login, room)
 			}
 			this.modalClosedSubscription.unsubscribe();
     	});
-		this.modalService.openModal('template3', [nick, room]);
+		this.modalService.openModal('template3', [this.getNickEquivalence(login), room]);
 	}
 
-	unBanUserFromRoomModal(nick: string, room: string){
+	unBanUserFromRoomModal(login: string, room: string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const confirm: boolean = this.modalService.getConfirmationInput();
       		if (confirm){
       			const banConfirmation = this.modalService.getModalData()[0];
-				this.unBanUserFromRoom(nick, room)
+				this.unBanUserFromRoom(login, room)
 			}
 			this.modalClosedSubscription.unsubscribe();
     	});
-		this.modalService.openModal('template3b', [nick, room]);
+		this.modalService.openModal('template3b', [this.getNickEquivalence(login), room]);
 	}
 
-	blockUserModal(targetUser: string) {
+	blockUserModal(login: string) {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const confirm: boolean = this.modalService.getConfirmationInput();
       		if (confirm){
       			const banConfirmation = this.modalService.getModalData()[0];
-				this.chatService.banUser2User(targetUser)
+				this.chatService.banUser2User(login)
 			}
 			this.modalClosedSubscription.unsubscribe();
     	});
-		this.modalService.openModal('template4', targetUser);
+		this.modalService.openModal('template4', this.getNickEquivalence(login));
 	}
 
-	unBlockUserModal(targetUser: string) {
+	unBlockUserModal(login: string) {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const confirm: boolean = this.modalService.getConfirmationInput();
       		if (confirm){
       			const banConfirmation = this.modalService.getModalData()[0];
-				this.chatService.noBanUser2User(targetUser)
+				this.chatService.noBanUser2User(login)
 			}
 			this.modalClosedSubscription.unsubscribe();
     	});
-		this.modalService.openModal('template5', targetUser);
+		this.modalService.openModal('template5', this.getNickEquivalence(login));
 	}
 
 	changePassToRoomModal(room:string){

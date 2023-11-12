@@ -393,9 +393,10 @@ export class ChatGateway extends BaseGateway {
 					.emit("listMyJoinedRooms", await this.chatService.getAllJoinedRoomsByOneUser(targetLogin));
 			}
 		}
+   	    const user: User = await this.userService.getUserByLogin(targetLogin)
 		this.server.to(executorSocketId)
-			.emit("system", generateSocketInformationResponse(room, 
-				`You've banned ${targetLogin} in ${room} successfully`).data)
+			.emit("system", generateSocketInformationResponse(room,
+				`You've banned ${user.nick} in ${room} successfully`).data)
 	    const banInfo: SocketPayload = generateSocketInformationResponse(room, `user ${targetLogin} has been banned of ${room}`)
 		let roomMetaData: RoomMetaData = await this.roomService
 			.getRoomMetaData(room)
@@ -417,9 +418,10 @@ export class ChatGateway extends BaseGateway {
   }
 
   async afterNoBanInform(executorSocketId: string, targetLogin: string, room: string ){
+   	    const user: User = await this.userService.getUserByLogin(targetLogin)
 		this.server.to(executorSocketId)
 			.emit("system", generateSocketInformationResponse(room, 
-				`You've removed the ban of ${targetLogin} in ${room} successfully`).data)
+				`You've removed the ban of ${user.nick} in ${room} successfully`).data)
 		let roomMetaData: RoomMetaData = await this.roomService
 			.getRoomMetaData(room)
 	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
@@ -447,10 +449,11 @@ export class ChatGateway extends BaseGateway {
 				this.server.to(targetSocketIds[i]).emit("system", err.data)
 			}
 		}
+   	    const user: User = await this.userService.getUserByLogin(targetLogin)
 		this.server.to(executorSocketId)
 			.emit("system", generateSocketInformationResponse(room, 
-				`You've silenced ${targetLogin} in ${room} successfully`).data)
-	    const silenceInfo: SocketPayload = generateSocketInformationResponse(room, `user ${targetLogin} has been silenced of ${room}`)
+				`You've silenced ${user.nick} in ${room} successfully`).data)
+	    const silenceInfo: SocketPayload = generateSocketInformationResponse(room, `user ${user.nick} has been silenced of ${room}`)
 		let roomMetaData: RoomMetaData = await this.roomService
 			.getRoomMetaData(room)
 	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
@@ -474,11 +477,12 @@ export class ChatGateway extends BaseGateway {
   @SubscribeMessage(events.UnSilenceUser)
   async removeSilenceOfRoom(client: Socket, payload: ChatMessage){
 	  const login: string = client.handshake.query.login as string;
+   	    const user: User = await this.userService.getUserByLogin(payload.login)
 	  const silenceRemoved: boolean = await this.chatService.removeSilenceOfRoom(login, payload.login, payload.room);
 	  if (silenceRemoved){
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
-				`You've removed the silence of ${payload.login} in ${payload.room} successfully`).data)
+				`You've removed the silence of ${user.nick} in ${payload.room} successfully`).data)
 		let roomMetaData: RoomMetaData = await this.roomService
 			.getRoomMetaData(payload.room)
 	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
@@ -488,11 +492,12 @@ export class ChatGateway extends BaseGateway {
   @SubscribeMessage('banuser')
   async banUser2User(client: Socket, payload: ChatMessage){
 	  const login: string = client.handshake.query.login as string;
+   	  const user: User = await this.userService.getUserByLogin(payload.room)
 	  const banOk: boolean = await this.chatService.banUser2User(login, payload.room)
 	  if (banOk){
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
-				`You've banned ${payload.room} successfully`).data)
+				`You've banned ${user.nick} successfully`).data)
 //		this.sendBlockedUsers(login)
 	  }
   }
@@ -501,10 +506,11 @@ export class ChatGateway extends BaseGateway {
   async nobanUser2User(client: Socket, payload: ChatMessage){
 	  const login: string = client.handshake.query.login as string;
 	  const noBanOk: boolean = await this.chatService.noBanUser2User(login, payload.room)
+   	  const user: User = await this.userService.getUserByLogin(payload.room)
 	  if (noBanOk){
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
-				`You've removed the ban of ${payload.room} successfully`).data)
+				`You've removed the ban of ${user.nick} successfully`).data)
 //		this.sendBlockedUsers(login)
 	  }
   }
@@ -526,7 +532,8 @@ export class ChatGateway extends BaseGateway {
 		  this.server.to(socketId).emit("system", generateSocketInformationResponse(room, `you've left ${room}`).data);
 	  	});
 
-	 	const roomInfo: SocketPayload = generateSocketInformationResponse(room, `user ${login} has left room ${room}`)
+   	    const user: User = await this.userService.getUserByLogin(login)
+	 	const roomInfo: SocketPayload = generateSocketInformationResponse(room, `user ${user.nick} has left room ${room}`)
 	  	this.broadCastToRoom(roomInfo.event, roomInfo.data)
 	}
 	else{
@@ -572,6 +579,8 @@ export class ChatGateway extends BaseGateway {
 		}
 		await this.kickAndDisconnect(login)
   }
+
+
 
   @SubscribeMessage(events.AdminJoin)
   async adminJoin(client: Socket): Promise<WsResponse<unknown>> {
@@ -629,10 +638,11 @@ export class ChatGateway extends BaseGateway {
 	  const silenceRemoved: boolean = await this
 	  	.chatAdminService
 	  	.removeSilenceOfRoom(login, payload.login, payload.room);
+   	  const user: User = await this.userService.getUserByLogin(payload.login)
 	  if (silenceRemoved){
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
-				`You've removed the silence of ${payload.login} in ${payload.room} successfully`).data)
+				`You've removed the silence of ${user.nick} in ${payload.room} successfully`).data)
 		let roomMetaData: RoomMetaData = await this.roomService
 			.getRoomMetaData(payload.room)
 	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);

@@ -61,6 +61,9 @@ export class AdminChatPageComponent implements OnInit {
 						this.messageList.set(payload.data.room, messagesChannel)
         				this.scrollToBottom();
 					}
+					else if (payload.event === events.LoginNickEquivalence){
+						this.chatService.setLoginNickEquivalence(payload.data)
+					}
         			this.scrollToBottom();
 				}
 		)
@@ -132,6 +135,10 @@ export class AdminChatPageComponent implements OnInit {
 		if (!foundRoom) return false;
 		const silenced: Array<string> = foundRoom.silenced.map(f => f.login)
 		return silenced.includes(login)
+	}
+
+	getNickEquivalence(login: string): string {
+		return this.chatService.getLoginNickEquivalence().find(u => u.login === login)?.nick
 	}
 
 	isOwner(room: string, login: string): boolean {
