@@ -5,6 +5,7 @@ import { UserService } from '../../user/user.service';
 import { ConfigService } from '@nestjs/config';
 import { toFileStream } from 'qrcode';
 import { Response } from 'express';
+import { Validator } from '@shared/validation'
 
 @Injectable()
 export class Auth2faService {
@@ -38,10 +39,16 @@ export class Auth2faService {
 	}
 
 	public async is2fACodeValid( code2fa: string, userId: number ) {
-		const user = await this.userService.getUser(userId);
-		return authenticator.verify({
-			token: code2fa,
-			secret: user.mfaSecret
-		})
+		const regex = /^\d{6}$/;
+			if (regex.test(code2fa)) {
+				{
+					const user = await this.userService.getUser(userId);
+					if (user) {
+						return authenticator.verify({
+							token: code2fa,
+							secret: user.mfaSecret
+						})
+					}
+				}
 	}
 }
