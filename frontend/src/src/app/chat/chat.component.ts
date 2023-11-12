@@ -10,6 +10,7 @@ import { MyProfileService } from '../my-profile/my-profile.service';
 import { ToasterService } from '../toaster/toaster.service'
 import { ModalService } from '../modal/modal.service'
 import { AuthService } from '../auth/auth.service'
+import { UserStatus } from '@shared/enum';
  
 @Component({
   selector: 'app-chat',
@@ -351,7 +352,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		return this.chatService.getActiveUsers()
 	}
 
-	isUserActive(login: string): boolean {
+	isUserActive(login: string): UserStatus {
 		return this.chatService.isUserActive(login)
 	}
 

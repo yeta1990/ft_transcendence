@@ -5,13 +5,18 @@ import { HashService } from '../hash/hash.service';
 import { Repository } from 'typeorm';
 import { Room } from './room.entity';
 import { RoomService } from './room/room.service';
-
+import {ChatUser} from '@shared/types'
+import {UserStatus} from '@shared/enum'
 import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
 import { ChatGateway } from '../events/chat.gateway'
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable()
 export class ChatService {
+
+	users: Map<string, ChatUser> = new Map();
+	usersSubject: BehaviorSubject<Map<string, ChatUser>> = new BehaviorSubject(new Map())
 
 	@InjectRepository(Room)
 	private readonly roomRepository: Repository<Room>;
@@ -25,6 +30,51 @@ export class ChatService {
 				@Inject(forwardRef(() => ChatGateway))
 				private chatGateway: ChatGateway
 			   ) {}
+
+	getUsersObservable(): Observable<Map<string, ChatUser>>{
+		return this.usersSubject.asObservable()
+	}
+
+	addChatUser(socket_id: string, user: ChatUser){
+		this.users.set(socket_id, user)
+		this.usersSubject.next(this.users)
+	}
+
+	setAllChatUsers(allChatUsers: Map<string, ChatUser>) {
+		this.users = allChatUsers;
+		this.usersSubject.next(this.users)
+	}
+
+	getAllChatUsers(): Map<string, ChatUser> {
+		return this.users;
+	}
+
+	getChatUserBySocketId(socket_id: string): ChatUser {
+		return this.users.get(socket_id)
+	}
+
+	deleteChatUserBySocketId(socket_id: string): void {
+		this.users.delete(socket_id)
+		this.usersSubject.next(this.users)
+	}
+
+	setUserStatusIsPlaying(login: string):void {
+		this.users.forEach((chatUser: ChatUser, key: string) => {
+  			if (chatUser.login === login) {
+    			chatUser.status = UserStatus.PLAYING;
+  			}
+		});	
+		this.usersSubject.next(this.users)
+	}
+
+	setUserStatusIsActive(login: string):void {
+		this.users.forEach((chatUser: ChatUser, key: string) => {
+  			if (chatUser.login === login) {
+    			chatUser.status = UserStatus.ONLINE;
+  			}
+		});
+		this.usersSubject.next(this.users)
+	}
 
 	public async createRoom(login: string, room: string, hasPass: boolean, password: string | undefined): Promise<boolean>{
 		const roomAlreadyExists = await this.roomRepository.findOne({ where: {name: room}});

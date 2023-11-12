@@ -19,12 +19,19 @@ export class ChatService {
 	activeUsers: Array<ChatUser> = [];
 	loginNickEquivalence: Array<any> = []
 
+
 	constructor(private socketService: SocketService) {
 	}
 
 	forceInit() {
 		if (!this.socketService.isConnected()) this.socketService.initializeSocket("/chat")
 	}
+
+
+//	removeChatUser(socket_id:string) {}
+//	getChatUserBySocketId()
+
+//	getChatUsersByLogin()
 
 	setActiveUsers(activeUsers: Array<ChatUser>){
 		this.activeUsers = activeUsers;
@@ -41,10 +48,10 @@ export class ChatService {
 		return user.status
 	}
 
-	isUserActive(login: string){
+	isUserActive(login: string): UserStatus{
 		const user:ChatUser | undefined = this.activeUsers.find(u=> u.login === login)
-		if (user) return true;
-		return false;
+		if (user) return user.status;
+		return 0;
 	}
 
 	getMyBlockedUsers(): Array<string> {
