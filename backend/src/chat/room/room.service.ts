@@ -41,11 +41,11 @@ export class RoomService {
 		if (!roomData)
 			return data;
 		data.room = room;
-		data.owner = roomData.owner ? roomData.owner.nick : null;
-		data.admins = [...new Set(roomData.admins.map(a => a.nick))];
-		data.users = [...new Set(roomData.users.map(u => u.nick))];
-		data.banned = [...new Set(roomData.banned.map(u => u.nick))];
-		data.silenced = [...new Set(roomData.silenced.map(u => u.nick))];
+		data.owner = roomData.owner ? roomData.owner.login : null;
+		data.admins = [...new Set(roomData.admins.map(a => a.login))];
+		data.users = [...new Set(roomData.users.map(u => u.login))];
+		data.banned = [...new Set(roomData.banned.map(u => u.login))];
+		data.silenced = [...new Set(roomData.silenced.map(u => u.login))];
 		data.hasPass = roomData.hasPass;
 		return data;
 	}

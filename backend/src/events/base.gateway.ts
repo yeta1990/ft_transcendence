@@ -182,12 +182,10 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	let activeUsersUnique: Array<ChatUser> = []
 	for (let user of activeUsers){
 		if (activeLogins.has(user.login)){
-			user.client_id = null
 			activeUsersUnique.push(user)
 			activeLogins.delete(user.login)
 		}
 	}
-	console.log(activeUsersUnique)
 	return activeUsersUnique
   }
 
@@ -226,12 +224,16 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
    	const adapter: any = this.server.adapter;
 	const roomsRaw: any = adapter.rooms;
 	const roomIds = roomsRaw.get(room)
+
 	if (!roomIds) return [];
 	const usersRaw: Array<string> = Array.from(roomIds);
+	console.log("users raw")
+	console.log(usersRaw)
 	let usersWithCompleteData: Array<ChatUser> = new Array();
 	usersRaw.forEach(x => {
 		usersWithCompleteData.push(this.users.get(x));
 	});
+	console.log(usersWithCompleteData)
     return (usersWithCompleteData);
   }
 

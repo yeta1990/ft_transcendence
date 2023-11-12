@@ -115,6 +115,8 @@ export class ChatGateway extends BaseGateway {
 			.filter(u => !(bannedUsersBySender.includes(u.login)))
 			.filter(u => !(receiversThatHaveBannedSender.includes(u.login)))
 
+			console.log(activeUsersInRoom)
+
 		for (let i = 0; i < activeUsersInRoom.length; i++){
 			this.messageToClient(activeUsersInRoom[i].client_id, "message", payload)
 		}
