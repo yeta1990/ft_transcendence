@@ -19,7 +19,7 @@ import { events, values } from '@shared/const';
 import { ChatUser } from '@shared/types';
 import { map } from 'rxjs/operators';
 import {User} from '../user/user.entity'
-
+import {UserStatus} from '@shared/enum'
 //this base class is used to log the initialization
 //and avoid code duplications in the gateways
 @Injectable()
@@ -69,19 +69,25 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
     const isUserVerified = await this.authService.verifyJwt(socket.handshake.auth.token);
 	if (isUserVerified){
 		const login = this.authService.getLoginFromJwt(socket.handshake.auth.token)
+		const user: User = await this.userService.getUserByLogin(login)
   	    const isHardConnect: boolean = this.getClientSocketIdsFromLogin(login).length > 0 ? false : true
 		this.setLogin(socket);
 		this.logger.log(`Socket client connected: ${socket.id}`)
 		this.users.set(socket.id, new ChatUser(
 			 socket.id,
 			 this.authService.getIdFromJwt(socket.handshake.auth.token),
-			 login)
+			 login,
+			 user.nick,
+			 UserStatus.ONLINE
+		)
 		);
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
 
-      	const activeLoginsInServer: Array<string> = this
-      		.getActiveLoginsInServer()
-		this.server.emit(events.ActiveUsers, activeLoginsInServer)	
+//      	const activeLoginsInServer: Array<string> = this
+//      		.getActiveLoginsInServer()
+      	const activeUsersInServer: Array<ChatUser> = this
+      		.getActiveUsersInServer()
+		this.server.emit(events.ActiveUsers, activeUsersInServer)
 		this.sendBlockedUsers(login)
 	}
 	else{
@@ -138,9 +144,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   	  if (isHardDisconnect){
 		  const allJoinedRoomsByUser: Array<string> = await this.chatService
 		  	  .getAllJoinedRoomsByOneUser(login);
-  	   	  const activeLoginsInServer: Array<string> = this
-  	    	  .getActiveLoginsInServer()
-		  this.server.emit(events.ActiveUsers, activeLoginsInServer)	
+      	  const activeUsersInServer: Array<ChatUser> = this
+      		.getActiveUsersInServer()
+		  this.server.emit(events.ActiveUsers, activeUsersInServer)	
 		  for (let room of allJoinedRoomsByUser){
 	  		  let roomMetaData: RoomMetaData = await this.roomService
 	  		    .getRoomMetaData(room)
@@ -160,6 +166,29 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		return (Array.from(roomsRaw.keys()).filter(x => x[0] == '#') as Array<string>);
 	}
 	return ([]);
+  }
+
+  getActiveUsersInServer(): Array<ChatUser>{
+	const clientsIterator = this.users.entries();
+	let activeUsers: Array<ChatUser> = []	
+	let connectedClient = clientsIterator.next()
+	let activeLogins = new Set()
+	while (!connectedClient.done){
+		const activeUser = connectedClient.value[1]
+		activeLogins.add(activeUser.login)
+		activeUsers.push(activeUser)
+		connectedClient = clientsIterator.next()
+	}
+	let activeUsersUnique: Array<ChatUser> = []
+	for (let user of activeUsers){
+		if (activeLogins.has(user.login)){
+			user.client_id = null
+			activeUsersUnique.push(user)
+			activeLogins.delete(user.login)
+		}
+	}
+	console.log(activeUsersUnique)
+	return activeUsersUnique
   }
 
   getActiveLoginsInServer(): Array<string>{

@@ -28,7 +28,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	availableRoomsList: string[] = [];
 	myJointRoomList: string[] = [];
 	myPrivateMessageRooms: string[] = [];
-	activeUsers: Array<string> = [];
+//	activeUsers: Array<string> = [];
 	roomsMetaData: Map<string, RoomMetaData> = new Map<string, RoomMetaData>();
 	myUser: User | undefined;
 	private subscriptions = new Subscription();
@@ -186,7 +186,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					}
 				}
 				else if (payload.event === events.ActiveUsers){
-					this.activeUsers = payload.data;
 					this.chatService.setActiveUsers(payload.data)
 				}
 				else if (payload.event === events.RoomMetaData){
@@ -337,6 +336,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			return b;
 		}
 		return false
+	}
+
+	getActiveUsers() {
+		return this.chatService.getActiveUsers()
+	}
+
+	isUserActive(login: string): boolean {
+		return this.chatService.isUserActive(login)
 	}
 
 	launchToast() {

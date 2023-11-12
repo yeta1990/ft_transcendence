@@ -1,8 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { AuthService } from 'src/app/auth/auth.service';
 import { Router } from '@angular/router';
+import { SocketPayload } from '@shared/types'
+import { events } from '@shared/const';
 import { AuthGuardService } from '../../auth/auth-guard.service';
 import { ChatService } from '../../chat/chat.service'
+import { Subscription } from "rxjs"
 
 @Component({
   selector: 'app-nav-bar',
@@ -13,6 +16,7 @@ export class NavBarComponent {
 
   @Input() public isUserLogged: boolean;
 
+	private subscriptions = new Subscription();
    constructor(
        private authService: AuthService,
        private authGuardService: AuthGuardService,
@@ -22,6 +26,15 @@ export class NavBarComponent {
     ) {
       this.isUserLogged = authService.isLoggedIn();
 	  this.chatService.forceInit()    
+	  this.subscriptions.add(
+		this.chatService
+			.getMessage()
+			.subscribe((payload: SocketPayload) => {
+				if (payload.event === events.ActiveUsers){
+					this.chatService.setActiveUsers(payload.data)
+				}
+		})
+	  )
     }
 
 

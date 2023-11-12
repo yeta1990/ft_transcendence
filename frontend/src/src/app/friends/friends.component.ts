@@ -1,8 +1,11 @@
 import { Component } from '@angular/core';
 import { AllUsersService } from '../all-users/all-users.service'
 import { AuthService } from '../auth/auth.service'
+import { ChatService } from '../chat/chat.service'
 import {UserProfileService} from '../user-profile/user-profile.service'
 import {User} from '../user'
+import {ChatUser} from '@shared/types'
+import {UserStatus} from '@shared/enum'
 
 @Component({
   selector: 'app-friends',
@@ -15,7 +18,7 @@ export class FriendsComponent {
 	allUsers: User[] = []
 	incomingFriendRequests: User[] = []
 	myLogin: string;
-	constructor(private usersService: AllUsersService, private authService: AuthService, private profileService: UserProfileService) {
+	constructor(private usersService: AllUsersService, private authService: AuthService, private profileService: UserProfileService, private chatService: ChatService) {
 		this.myLogin = this.authService.getUserNameFromToken() as string
 		this.usersService.getUsers()
 			.subscribe(r=> {
@@ -26,6 +29,14 @@ export class FriendsComponent {
 				this.incomingFriendRequests = this.allUsers.filter(u => friendRequestsLogins.includes(u.login))
 			})
 
+	}
+
+	getActiveUsers(): Array<ChatUser> {
+		return this.chatService.getActiveUsers()
+	}
+
+	getUserStatus(login: string): UserStatus {
+		return this.chatService.getUserStatus(login)
 	}
 
 	acceptFriendShipRequest(login:string){

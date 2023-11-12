@@ -5,7 +5,7 @@ import { events } from '@shared/const';
 import { environment } from '../environments/environment'
 import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
 import { Location } from '@angular/common';
-import {RoomMessages } from '@shared/types'
+import {RoomMessages, ChatUser } from '@shared/types'
 
 @Injectable({
   providedIn: 'root',
@@ -70,7 +70,9 @@ export class SocketService {
 			.on(events.AllRoomsMetaData, (data: Array<RoomMetaData>) => {
 				this.message.next({event: events.AllRoomsMetaData, data})
 			})
-			.on(events.ActiveUsers, (data: Array<string>) => {
+			.on(events.ActiveUsers, (data: Array<ChatUser>) => {
+				console.log("active users")
+				console.log(data)
 				this.message.next({event: events.ActiveUsers, data})
 //				console.log("active users: " + JSON.stringify(data));
 			})

@@ -1,3 +1,5 @@
+import { UserStatus } from './enum'
+
 export type ChatMessage = {
 	room: string;
 	message: string;
@@ -26,7 +28,9 @@ export class ChatUser {
 	constructor (
 		public client_id: string, 
 		public user_id: number, 
-		public login: string
+		public login: string,
+		public nick: string,
+		public status: UserStatus
 	){ }
 };
 

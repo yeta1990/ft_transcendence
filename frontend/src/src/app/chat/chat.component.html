@@ -20,7 +20,7 @@
 	  	  <div *ngFor="let room of myPrivateMessageRooms">
 	  	<li [class.active]="currentRoom === room" class="d-flex">
 	  		<div class="p-2 flex-grow-1 link-channel" (click)="joinUserToRoom(room, '')">{{room}}
-								<i *ngIf="activeUsers.includes(room.substr(1))" class="bi bi-circle-fill" style="color: green"></i>
+								<i *ngIf="isUserActive(room.substr(1))" class="bi bi-circle-fill" style="color: green"></i>
 	  		</div>
 	  	</li>
 	  	  </div>
@@ -104,7 +104,7 @@
 			<li *ngIf="roomsMetaData.get(currentRoom)?.owner" class="d-flex">
 				<div class="p-2 flex-grow-1 link-channel">
 					@{{roomsMetaData.get(currentRoom)?.owner}}
-					<i *ngIf="activeUsers.includes(roomsMetaData.get(currentRoom)?.owner! )" class="bi bi-circle-fill" style="color: green"></i>
+					<i *ngIf="isUserActive(roomsMetaData.get(currentRoom)?.owner! )" class="bi bi-circle-fill" style="color: green"></i>
 					
 				</div>
 				<div class="p-2" *ngIf="myUser?.login !== roomsMetaData.get(currentRoom)?.owner">
@@ -128,7 +128,7 @@
 							<div class="p-2 flex-grow-1 link-channel">
 							<a style="text-decoration:none; color: inherit;" routerLink="/user-profile/{{login}}" target="_blank">
 								@{{login}}</a>
-								<i *ngIf="activeUsers.includes(login)" class="bi bi-circle-fill" style="color: green">&nbsp;</i>
+								<i *ngIf="isUserActive(login)" class="bi bi-circle-fill" style="color: green">&nbsp;</i>
 								<i *ngIf="roomMetaData.value.silenced.includes(login)" class="bi bi-mic-mute" style="color: red"></i>
 								
 							</div>
@@ -159,11 +159,11 @@
 							<a style="text-decoration:none; color: inherit;" routerLink="/user-profile/{{login}}" target="_blank">
 								@{{login}}
 							</a>
-								<i *ngIf="activeUsers.includes(login)" class="bi bi-circle-fill" style="color: green"></i>
+								<i *ngIf="isUserActive(login)" class="bi bi-circle-fill" style="color: green"></i>
 								<i *ngIf="roomMetaData.value.silenced.includes(login)" class="bi bi-mic-mute" style="color: red"></i>
 							</div>
 							<div class="p-2" *ngIf="myUser?.login !== login">
-								<i *ngIf="activeUsers.includes(login)" class="bi bi-controller" (click)="challengeMatchModal(login)">&nbsp;</i>
+								<i *ngIf="isUserActive(login)" class="bi bi-controller" (click)="challengeMatchModal(login)">&nbsp;</i>
 								<i class="bi bi-chat-left-text" (click)="joinUserToRoom('@'+login, '')">&nbsp;</i>
 								<i *ngIf="!getMyBlockedUsers().includes(login)" class="bi bi-person-fill-slash" (click)="blockUserModal(login)">&nbsp;</i>
 								<i *ngIf="getMyBlockedUsers().includes(login)" class="bi bi-person-check-fill" (click)="unBlockUserModal(login)">&nbsp;</i>
@@ -189,10 +189,10 @@
 							<a style="text-decoration:none; color: inherit;" routerLink="/user-profile/{{login}}" target="_blank">
 								@{{login}}
 							</a>
-								<i *ngIf="activeUsers.includes(login)" class="bi bi-circle-fill" style="color: green"></i>
+								<i *ngIf="isUserActive(login)" class="bi bi-circle-fill" style="color: green"></i>
 							</div>
 							<div class="p-2" *ngIf="myUser?.login !== login">
-								<i *ngIf="activeUsers.includes(login)" class="bi bi-controller" (click)="challengeMatchModal(login)">&nbsp;</i>
+								<i *ngIf="isUserActive(login)" class="bi bi-controller" (click)="challengeMatchModal(login)">&nbsp;</i>
 								<i class="bi bi-chat-left-text" (click)="joinUserToRoom('@'+login, '')">&nbsp;</i>
 								<i *ngIf="!getMyBlockedUsers().includes(login)" class="bi bi-person-fill-slash" (click)="blockUserModal(login)">&nbsp;</i>
 								<i *ngIf="getMyBlockedUsers().includes(login)" class="bi bi-person-check-fill" (click)="unBlockUserModal(login)">&nbsp;</i>
