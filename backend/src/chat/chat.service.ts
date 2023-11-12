@@ -16,6 +16,9 @@ import { BehaviorSubject, Observable } from 'rxjs';
 export class ChatService {
 
 	users: Map<string, ChatUser> = new Map();
+	trigger: Date = new Date();
+    private triggerSubject: BehaviorSubject<Date> = new BehaviorSubject(this.trigger);
+
 	usersSubject: BehaviorSubject<Map<string, ChatUser>> = new BehaviorSubject(new Map())
 
 	@InjectRepository(Room)
@@ -31,8 +34,8 @@ export class ChatService {
 				private chatGateway: ChatGateway
 			   ) {}
 
-	getUsersObservable(): Observable<Map<string, ChatUser>>{
-		return this.usersSubject.asObservable()
+	getUsersObservable(): Observable<Date>{
+			return this.triggerSubject
 	}
 
 	addChatUser(socket_id: string, user: ChatUser){
@@ -42,7 +45,8 @@ export class ChatService {
 
 	setAllChatUsers(allChatUsers: Map<string, ChatUser>) {
 		this.users = allChatUsers;
-		this.usersSubject.next(this.users)
+		this.trigger = new Date();
+		this.triggerSubject.next(this.trigger)
 	}
 
 	getAllChatUsers(): Map<string, ChatUser> {
@@ -55,7 +59,8 @@ export class ChatService {
 
 	deleteChatUserBySocketId(socket_id: string): void {
 		this.users.delete(socket_id)
-		this.usersSubject.next(this.users)
+		this.trigger = new Date();
+		this.triggerSubject.next(this.trigger)
 	}
 
 	setUserStatusIsPlaying(login: string):void {
@@ -64,7 +69,8 @@ export class ChatService {
     			chatUser.status = UserStatus.PLAYING;
   			}
 		});	
-		this.usersSubject.next(this.users)
+		this.trigger = new Date();
+		this.triggerSubject.next(this.trigger)
 	}
 
 	setUserStatusIsActive(login: string):void {
@@ -73,7 +79,8 @@ export class ChatService {
     			chatUser.status = UserStatus.ONLINE;
   			}
 		});
-		this.usersSubject.next(this.users)
+		this.trigger = new Date();
+		this.triggerSubject.next(this.trigger)
 	}
 
 	public async createRoom(login: string, room: string, hasPass: boolean, password: string | undefined): Promise<boolean>{

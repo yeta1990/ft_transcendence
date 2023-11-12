@@ -55,12 +55,8 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   async afterInit(): Promise<void>{
-	this.chatService.getUsersObservable().pipe().subscribe((users: Map<string, ChatUser>) => {
-      	const activeUsersInServer: Array<ChatUser> = this
-      		.getActiveUsersInServer()
-//      		console.log("emitiendo active users")
-//      		console.log(activeUsersInServer)
-		this.server.emit(events.ActiveUsers, activeUsersInServer)
+	this.chatService.getUsersObservable().subscribe(trigger=> {
+		this.emitUpdateUsersAndRoomsMetadata()
 	}
 	)
 
@@ -68,6 +64,18 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	allRoomsInDb.map(x => this.rooms.add(x));
   }
  
+  emitUpdateUsersAndRoomsMetadata() {
+      	const activeUsersInServer: Array<ChatUser> = this
+      		.getActiveUsersInServer()
+
+		this.server.emit(events.ActiveUsers, activeUsersInServer)
+		this.roomService.getAllRoomsMetaData()
+			.then(r =>  this.server.emit(events.ListAllRooms, r))
+
+		this.getAllChatUsersWithNickEquivalence()
+			.then(c => this.server.emit(events.LoginNickEquivalence, c))
+  }
+
   // about auth during client connection
   // https://github.com/ThomasOliver545/realtime-todo-task-management-app-nestjs-and-angular/blob/main/todo-api/src/todo/gateway/todo.gateway.ts
   async handleConnection(socket: Socket): Promise<void>{

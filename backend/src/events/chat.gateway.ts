@@ -26,7 +26,12 @@ export class ChatGateway extends BaseGateway {
   }
 
   //separate afterInit from the base class
-  async afterInit(): Promise<void> {}
+  async afterInit(): Promise<void> {
+	this.chatService.getUsersObservable().subscribe(trigger=> {
+		this.emitUpdateUsersAndRoomsMetadata()
+	}
+	)
+  }
 
   async handlePrivateMessage(client:Socket, payload: ChatMessage){
 	  const emisorLogin: string = client.handshake.query.login as string;
