@@ -222,6 +222,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				else if (payload.event === events.AllHistoricalMessages){
 					
 				}
+				else if (payload.event === events.LoginNickEquivalence){
+					this.chatService.setLoginNickEquivalence(payload.data)
+				}
         		this.scrollToBottom();
 			})
 		);
@@ -339,6 +342,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	goToChatRoom(room: string): void{
 		console.log("go to chat room " + room);
+	}
+
+	getNickEquivalence(login: string): string {
+		return this.chatService.getLoginNickEquivalence().find(u => u.login === login).nick
 	}
 
 	isPrivateRoom(room: string): boolean {

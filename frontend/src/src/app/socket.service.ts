@@ -95,8 +95,10 @@ export class SocketService {
 				this.message.next({event: events.AllHistoricalMessages, data});
 			})
 			.on(events.MessageForWebAdmins, (data: ChatMessage) => {
-				console.log("message received: " + JSON.stringify(data));
 				this.message.next({event: events.MessageForWebAdmins, data});
+			})
+			.on(events.LoginNickEquivalence, (data: Array<any>) => {
+				this.message.next({event: events.LoginNickEquivalence, data});
 			})
 		}
 	}

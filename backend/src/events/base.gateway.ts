@@ -83,8 +83,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		);
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
 
-//      	const activeLoginsInServer: Array<string> = this
-//      		.getActiveLoginsInServer()
+		const loginNickEquivalence: Array<any> = await this.
+			getAllChatUsersWithNickEquivalence()
+		this.server.emit(events.LoginNickEquivalence, loginNickEquivalence)
       	const activeUsersInServer: Array<ChatUser> = this
       		.getActiveUsersInServer()
 		this.server.emit(events.ActiveUsers, activeUsersInServer)
@@ -187,6 +188,15 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		}
 	}
 	return activeUsersUnique
+  }
+
+  async getAllChatUsersWithNickEquivalence(): Promise<Array<any>>{
+  	  const user: User[] = await this.userService.getAllUsers()
+  	  const allUsers: Array<any> = user.map(u=> {
+		 const eq = {login: u.login, nick: u.nick}
+		 return eq
+  	  })
+	  return allUsers
   }
 
   getActiveLoginsInServer(): Array<string>{

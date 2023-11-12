@@ -79,7 +79,7 @@
 	<div #messages *ngFor="let message of messageList.get(this.currentRoom)">
 		<div [ngSwitch]="message.login">
 			<span *ngSwitchCase="'system'" style="font-weight: bold">System message: {{message.message}}</span>
-			<span *ngSwitchDefault><a style="text-decoration:none" routerLink="/user-profile/{{message.login}}" target="_blank">{{message.login}}</a> ({{message.date}}): {{message.message}}</span>
+			<span *ngSwitchDefault><a style="text-decoration:none" routerLink="/user-profile/{{message.login}}" target="_blank">{{getNickEquivalence(message.login)}}</a> ({{message.date}}): {{message.message}}</span>
 		</div>
 	</div>
 	</div>

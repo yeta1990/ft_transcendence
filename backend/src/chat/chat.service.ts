@@ -380,7 +380,6 @@ export class ChatService {
 		return true;
 	}
 
-
 	public async isSilencedOfRoom(login: string, room: string): Promise<boolean>{
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) return false;

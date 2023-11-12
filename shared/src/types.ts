@@ -7,6 +7,13 @@ export type ChatMessage = {
 	date: Date;
 }
 
+export type ChatMessageComplete = {
+	room: string;
+	message: string;
+	user: ChatUser;
+	date: Date;
+}
+
 export type SocketPayload = {
 	event: string;
 	data: any 

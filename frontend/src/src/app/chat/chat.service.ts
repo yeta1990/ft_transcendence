@@ -17,6 +17,7 @@ export class ChatService {
 
 	private myBlockedUsers: Array<string> = []
 	activeUsers: Array<ChatUser> = [];
+	loginNickEquivalence: Array<any> = []
 
 	constructor(private socketService: SocketService) {
 	}
@@ -53,6 +54,13 @@ export class ChatService {
 		this.myBlockedUsers = blockedUsers;
 	}
 
+	getLoginNickEquivalence(): Array<any> {
+		return this.loginNickEquivalence
+	}
+	
+	setLoginNickEquivalence(data: Array<any>) {
+		this.loginNickEquivalence = data;
+	}
 	getMessage(): Observable<SocketPayload>{
 		return this.socketService.getMessage();
 	}
