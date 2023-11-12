@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { User } from '../user';
-import { Observable } from "rxjs";
-import { tap, shareReplay } from "rxjs/operators";
+import { BehaviorSubject, Observable, of } from "rxjs";
+import { tap, shareReplay, catchError, map } from "rxjs/operators";
 import * as moment from "moment";
 import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
@@ -20,7 +20,9 @@ export class AuthService {
         private router: Router,
 		private chatService: ChatService
     ) { }
+  private authToken: any;
 
+  
 /*
  *  old login function
  *
@@ -35,12 +37,15 @@ export class AuthService {
 	login(code: string){
 		return this.http.post<any>(environment.apiUrl + '/auth/login', {code})
 			.pipe(
-				tap((res: any) => {
+				map((res: any) => {
 					if (res.requiresMFA) {
-						this.handle2fa(res.userId);
-					} else {
-						this.setSession(res);
+						this.authToken = res.authResult;
 					}
+					else {
+						this.setSession(res.authResult);
+						this.redirectToHome();
+					}
+					return { requiresMFA: res.requiresMFA, userId: res.userId };
 				}),
 			shareReplay()
 		);
@@ -53,9 +58,22 @@ export class AuthService {
         this.router.navigateByUrl('/login');
     }
 
-	handle2fa( userId: number ) {
-
-	}
+	validateMfa(userId: number, loginCode: string) : Observable<boolean> {
+		const message: string = "Token para validar mfa"
+		return this.http.post<any>(environment.apiUrl + '/2fa/auth/', { userId, loginCode, message })
+		.pipe(
+			tap((response) =>{
+				if (response) {
+					console.log("El codigo está bien");
+					this.setSession(this.authToken);
+					this.redirectToHome();
+				}
+				console.log("He recibido respuesta");
+			}),
+			map((response) => false),
+			catchError((error) => of(true))
+		);
+	  }
 
 	redirectToHome() {
         this.router.navigateByUrl('/home');
@@ -63,6 +81,7 @@ export class AuthService {
 
 	private setSession(authResult: any) {
 		console.log("Consigo entrar en setSession");
+		console.log(authResult);
         localStorage.setItem("access_token", authResult.access_token);
         localStorage.setItem("expires_at", authResult.expires_at);
     }

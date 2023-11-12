@@ -48,7 +48,7 @@ export class AuthService {
 		return data;
 	}
 
-	async signIn(code: string, is2FAuthenticated = false ): Promise<any> {
+	async signIn(code: string ): Promise<any> {
 		let data: authData42;
 		try{
 			data = await this.confirmAuthFrom42(code);
@@ -63,17 +63,15 @@ export class AuthService {
 		if (!isUserBanned)
 			return false;
 		const createdUser = await this.createNewUser(payloadToCreateUser);
-		if (createdUser.mfa) {
-			return {
-				requiresMFA: true,
-				userId: createdUser.id
-			};
-		}
 		const tokenData = await this.generateTokenData(createdUser);
 		return {
-			access_token: tokenData.access_token,
-			expires_at: tokenData.expires_at,
-		};
+			requiresMFA: createdUser.mfa,
+			userId: createdUser.id,
+			authResult: {
+			  access_token: tokenData.access_token,
+			  expires_at: tokenData.expires_at,
+			},
+		  };
 	}
 
 	createPayloadForUser(userData: any): any {

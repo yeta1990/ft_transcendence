@@ -14,16 +14,21 @@ export class Auth2faService {
 	) {}
 
 	public async generate2FASecret( userId: number ) {
-		const secret = authenticator.generateSecret();
 		const user = await this.userService.getUser(userId);
 		if (user) {
-			const otpauthURL = authenticator.keyuri( user.email, this.configService.get('FT_TRASCENDENCE'), secret);
-	
-			await this.userService.set2FASecret( secret, user.id );
-	
-			return {
-				secret,
-				otpauthURL
+			if (user.mfa == false) {
+				const secret = authenticator.generateSecret();
+				const otpauthURL = authenticator.keyuri( user.email, 'ft_trascendence', secret);
+				await this.userService.set2FASecret( secret, user.id );
+		
+				return {
+					secret,
+					otpauthURL
+				}
+			} else {
+				return {
+					message: 'QR already generated'
+				}
 			}
 		}
 	}
@@ -40,6 +45,3 @@ export class Auth2faService {
 		})
 	}
 }
-
-//https://wanago.io/2021/03/08/api-nestjs-two-factor-authentication/
-//https://medium.com/@hemi_1337/authentication-and-authorization-in-angular-and-nestjs-with-oauth2-and-openid-connect-df1109042c07

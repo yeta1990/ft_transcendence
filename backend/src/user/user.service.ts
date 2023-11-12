@@ -241,15 +241,33 @@ export class UserService {
 	//______________________________ MFA ___________________________________
 
 	async set2FASecret( secret: string, userId: number ) {
-		return this.repository.update(userId, {
+		const existingUser = await this.getUser(userId);
+		if (!existingUser) {
+			throw new Error('User with ID ${userId} not found');
+		}
+		return await this.repository.update(userId, {
 			mfaSecret: secret
 		});
 	}
 
 	async turnOn2fa ( userId: number ) {
-		return this.repository.update( userId, {
+		const existingUser = await this.getUser(userId);
+		if (!existingUser) {
+			throw new Error('User with ID ${userId} not found');
+		}
+		return await this.repository.update( userId, {
 			mfa: true
 		});
 	}
+
+	async turnOff2FA(userId: number): Promise<void> {
+		const existingUser = await this.getUser(userId);
+		if (!existingUser) {
+			throw new Error('User with ID ${userId} not found');
+		}
+		await this.repository.update( userId, {
+			mfa: false
+		});
+	  }
 
 }

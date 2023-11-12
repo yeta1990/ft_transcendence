@@ -29,45 +29,59 @@ export class Auth2faController {
 		private readonly authService: AuthService,
 	) {}
 
+		
+
 	@Post('generate')
 	@UseGuards(AuthGuard)
-	async register(@Res() response: Response, @Req() request: RequestWithUser ) {
+	async register(@Res() response: Response, @Body() request: RequestWithUser ) {
 		const { otpauthURL } = await this.auth2faService.generate2FASecret( request.userId );
-
+		response.setHeader('content-type', 'image/png');
 		return this.auth2faService.createQRCode( response, otpauthURL );
 	}
 
 	@Post('turn-on')
 	@HttpCode(HttpStatus.OK)
 	@UseGuards(AuthGuard)
-	async turnOn2fA(
-		@Req() request: RequestWithUser,
-		@Body() { code2fa } : CodeDto2fa
-	) {
+	async turnOn2fA( @Body() request: RequestWithUser ) {
 		const isCodeValid = this.auth2faService.is2fACodeValid(
-			code2fa, request.userId
+			request.loginCode, request.userId
 		);
 		if (!isCodeValid) {
 			throw new UnauthorizedException('Wrong authentication code');
 		}
 		await this.userService.turnOn2fa(request.userId);
+		return ("Has habilitado la autenticación en dos pasos. Este cambio será efectivo la siguiente vez que te autentiques en la página.")
+	}
+
+	@Post('turn-off')
+	@HttpCode(HttpStatus.OK)
+	@UseGuards(AuthGuard)
+	async turnOff2fA(
+		@Body() request: RequestWithUser
+	) {
+		const isCodeValid = this.auth2faService.is2fACodeValid(
+			request.loginCode, request.userId
+		);
+		if (!isCodeValid) {
+			throw new UnauthorizedException('Wrong authentication code');
+		}
+		await this.userService.turnOff2FA(request.userId);
+		return("Has deshabilitado la autenticación en dos pasos.")
 	}
 
 	@Post('auth')
 	@HttpCode(HttpStatus.OK)
-	@UseGuards(AuthGuard)
+	//@UseGuards(AuthGuard)
 	async authenticate(
-		@Req() request: RequestWithUser,
-		@Body() { code2fa } : CodeDto2fa
+		@Body() request: RequestWithUser
 	) {
 		const isCodeValid = this.auth2faService.is2fACodeValid(
-			code2fa, request.userId
+			request.loginCode, request.userId
 		);
 		if (!isCodeValid){
 			throw new UnauthorizedException('Wrong authentication code');
+		} else {
+			return true;
 		}
-
-		return this.authService.signIn(request.loginCode, true );
-
 	}
 }

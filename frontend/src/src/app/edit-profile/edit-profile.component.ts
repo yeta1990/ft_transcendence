@@ -8,16 +8,14 @@ import { UserProfileService } from '../user-profile/user-profile.service';
 import { HttpHeaders, HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { UserRole } from '@shared/enum';
+import { ToastValues } from '@shared/const';
 import { Location } from '@angular/common'
-import { forkJoin, of } from 'rxjs';
-import { switchMap, takeUntil } from 'rxjs/operators';
-import { QRCode } from 'qrcode';
+import { forkJoin, of, Observable } from 'rxjs';
+import { switchMap, takeUntil, tap } from 'rxjs/operators';
+import { ModalService } from '../modal/modal.service';
+import { Subscription } from "rxjs"
+import { ToasterService } from '../toaster/toaster.service';
 
-
-interface Enable2FAResponse {
-  message: string;
-  recoveryCodes?: string[];
-}
 
 @Component({
   selector: 'app-edit-profile',
@@ -30,6 +28,10 @@ export class EditProfileComponent implements  OnInit {
   newUser: User | undefined;
   editingField: string | null = null;
   editedFields: { [key: string]: any } = {};
+  showMfaModal = false;
+  mfaActivated : boolean = false;
+
+  private modalClosedSubscription: Subscription = {} as Subscription;
 
   editForm = this.editBuilder.group({
 		firstName: '',
@@ -47,7 +49,9 @@ export class EditProfileComponent implements  OnInit {
     private profileService: UserProfileService,
     private httpClient: HttpClient,
     private location: Location,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private modalService: ModalService,
+    private toasterService: ToasterService
 	){
       // this.profileService.getUserDetails()
       //   .subscribe((response: User) => {
@@ -63,20 +67,6 @@ export class EditProfileComponent implements  OnInit {
       this.newUser.lastName = this.editForm.get('lastName')?.value!;
       this.newUser.nick = this.editForm.get('nick')?.value!;
       this.newUser.email = this.editForm.get('email')?.value!;
-      
-      const newMFA = this.editForm.get('mfa')?.value!;
-  
-      // Verificar si el estado del MFA ha cambiado
-      if (newMFA !== this.user?.mfa) {
-        // Si el nuevo estado del MFA es verdadero, activa MFA; de lo contrario, desactívalo
-        if (newMFA) {
-          await this.enable2FA();
-          this.newUser.mfa = true;
-        } else {
-          await this.disable2FA();
-          this.newUser.mfa = false;
-        }
-      }
   
       // Realiza el envío del formulario después de verificar el MFA
       this.httpClient.post<User>(environment.apiUrl + '/edit-profile/user/edit', this.newUser)
@@ -110,20 +100,16 @@ export class EditProfileComponent implements  OnInit {
           const id = token?.id;
   
           // Verificar si el usuario tiene un rol de administrador o si es el propio usuario conectado
-          console.log("ID is: " + id);
-          console.log("UserID is: " + this.user?.id);
           if (id !== null && (id === this.user?.id || this.user?.userRole == UserRole.ADMIN)) {
-            console.log("Este usuario puede editar");
             this.editForm.controls['firstName'].setValue(this.user!.firstName);
             this.editForm.controls['lastName'].setValue(this.user!.lastName);
             this.editForm.controls['nick'].setValue(this.user!.nick);
             this.editForm.controls['email'].setValue(this.user!.email);
-            this.editForm.controls['mfa'].setValue(this.user!.mfa);
-            // El usuario tiene permiso para editar el perfil
-            // Agrega aquí cualquier lógica adicional que necesites para gestionar la edición.
+            this.mfaActivated = this.user?.mfa || false;
           } else {
             // El usuario no tiene permiso para editar el perfil, redirige a la página anterior.
-            console.log("Este usuario no puede editar");
+            const message : string = "Este usuario no puede editar";
+            this.toasterService.launchToaster(ToastValues.ERROR, message);
             this.location.back();
           }
         });
@@ -138,32 +124,118 @@ export class EditProfileComponent implements  OnInit {
   }
 
   	
-  saveField(fieldName: string): void {
-		// Aquí debes implementar la lógica para guardar los cambios en el backend
-		console.log(`Guardando campo ${fieldName}: ${this.editedFields[fieldName]}`);
-		this.cancelEdit();
+    saveField(fieldName: string): void {
+      // Aquí debes implementar la lógica para guardar los cambios en el backend
+      console.log(`Guardando campo ${fieldName}: ${this.editedFields[fieldName]}`);
+      this.cancelEdit();
 	  }
 	
 	  cancelEdit() {
-		this.editingField = null;
-		this.editedFields = {};
+      this.editingField = null;
+      this.editedFields = {};
 	  }
 
-    disable2FA() {
-      this.httpClient.post<{ message: string }>(environment.apiUrl + '/auth/2fa/disable', this.newUser)
-        .subscribe((response) => {
-          console.log(response.message);
-        });
+    connectMfa(): void {
+      this.generateQRCode(this.user?.id!).subscribe(
+        (qrCodeBlob: Blob) => {
+          const qrURL = URL.createObjectURL(qrCodeBlob);
+          this.SubscribeTo2faInput(this.user?.id!, true);
+          this.modalService.openModal('enableMfaTemplate', { qrURL });
+        },
+        (error) => {
+          console.error('ERROR: Error al generar el código QR:', error);
+        }
+      )
     }
 
-    enable2FA() {
-      this.httpClient.post<Enable2FAResponse>(environment.apiUrl + '/auth/2fa/enable', this.newUser)
-        .subscribe((response) => {
-          console.log(response.message);
-          if (response.recoveryCodes) {
-            // Si se generaron códigos de recuperación, puedes mostrarlos al usuario
-            console.log('Recovery codes:', response.recoveryCodes);
+    disconnectMfa(): void {
+      this.SubscribeTo2faInput(this.user?.id!, false);
+      this.modalService.openModal('disableMfaTemplate');
+    }
+
+    disable2FA(Id: number, code2fa: string) {
+      const userId = Id;
+      const loginCode = code2fa;
+      const message = 'Token to validate code';
+
+      const body = { userId, loginCode, message };
+
+      console.log(body);
+      return this.httpClient.post(environment.apiUrl + '/2fa/turn-off', body, { responseType: 'text' })
+        .pipe(
+          tap(() => {
+            this.mfaActivated = false;
+        })
+      );
+    }
+
+    enable2FA(Id: number, code2fa: string) {
+      const userId = Id;
+      const loginCode = code2fa;
+      const message = 'Token to validate code';
+
+      const body = { userId, loginCode, message };
+
+      console.log(body);
+      return this.httpClient.post(environment.apiUrl + '/2fa/turn-on', body, { responseType: 'text' })
+        .pipe(
+          tap(() => {
+            this.mfaActivated = true;
+        })
+      );
+    }
+
+    generateQRCode(Id: number): Observable<Blob> {
+      const userId = Id;
+      const loginCode = 'None';
+      const message = 'This is the request token';
+
+      const body = { userId, loginCode, message };
+
+      console.log(body);
+      return this.httpClient.post(environment.apiUrl + '/2fa/generate', body, { responseType: 'blob' });
+    }
+
+    SubscribeTo2faInput(userId: number, enable: boolean) {
+      let code = '';
+      this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+        const confirm: boolean = this.modalService.getConfirmationInput();
+        if (confirm){
+          const receivedData = this.modalService.getModalData();
+          code = receivedData[0];
+          const regex = /^\d{6}$/;
+          if (regex.test(code)) {
+            if (enable) {
+              this.modalClosedSubscription.unsubscribe();
+              this.enable2FA(userId, code).subscribe(
+                response => {
+                  this.toasterService.launchToaster(ToastValues.INFO, response);
+                },
+                error => {
+                  this.toasterService.launchToaster(ToastValues.ERROR, error);
+                }
+              );
+            } else {
+              this.modalClosedSubscription.unsubscribe();
+              this.disable2FA(userId, code).subscribe(
+                response => {
+                  this.toasterService.launchToaster(ToastValues.INFO, response);
+                },
+                error => {
+                  this.toasterService.launchToaster(ToastValues.ERROR, error);
+                }
+              );
+            }
+            
+          } else {
+            this.modalClosedSubscription.unsubscribe();
+            const message : string = "Error en la introducción del código. El código debe tener 6 dígitos."
+            this.toasterService.launchToaster(ToastValues.ERROR, message);
           }
-        });
+        } else {
+          console.log("El cierre del modal no está confirmado");
+        }
+    
+    });
     }
 }

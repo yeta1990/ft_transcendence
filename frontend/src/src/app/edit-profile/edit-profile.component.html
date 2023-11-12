@@ -23,14 +23,18 @@
 			<input id="email" type="text" class="form-control" formControlName="email" placeholder="{{ user?.email }}">
 		</div>
 
-		<!-- Campo para activar o desactivar MFA -->
-		<div class="form-check">
-			<input class="form-check-input" type="checkbox" formControlName="mfa" id="mfaEnabled">
-			<label class="form-check-label" for="mfaEnabled">
-				Enable Two-Factor Authentication (MFA)
-			</label>
+		<br>
+
+		<!-- Botón para activar/desactivar MFA -->
+		<div *ngIf="!mfaActivated">
+			<button class="btn btn-success" type="button" (click)="connectMfa()">Enable Two-Factor Authentication (MFA)</button>
+		</div>
+		<!-- Botón para desconectar MFA -->
+		<div *ngIf="mfaActivated">
+			<button class="btn btn-danger" type="button" (click)="disconnectMfa()">Disconnect Two-Factor Authentication (MFA)</button>
 		</div>
 
 		<button class="btn btn-primary mt-3" type="submit">Submit</button>
+		<app-modal></app-modal>
 	</form>
 </div>
