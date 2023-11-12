@@ -26,8 +26,9 @@ export class ChatGateway extends BaseGateway {
   }
 
   //separate afterInit from the base class
-  async afterInit(): Promise<void> {
+  afterInit(): void {
 	this.chatService.getUsersObservable().subscribe(trigger=> {
+		console.log("yeeeessssssss")
 		this.emitUpdateUsersAndRoomsMetadata()
 	}
 	)

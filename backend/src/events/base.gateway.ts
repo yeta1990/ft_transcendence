@@ -54,14 +54,15 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	this.rooms = new Set<string>();
   }
 
-  async afterInit(): Promise<void>{
+  afterInit(): void{
 	this.chatService.getUsersObservable().subscribe(trigger=> {
+		console.log("holi")
 		this.emitUpdateUsersAndRoomsMetadata()
 	}
 	)
 
-	const allRoomsInDb: string[] = await this.chatService.getAllRooms();
-	allRoomsInDb.map(x => this.rooms.add(x));
+//	const allRoomsInDb: string[] = await this.chatService.getAllRooms();
+//	allRoomsInDb.map(x => this.rooms.add(x));
   }
  
   emitUpdateUsersAndRoomsMetadata() {

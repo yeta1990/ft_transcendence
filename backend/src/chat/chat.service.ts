@@ -19,7 +19,6 @@ export class ChatService {
 	trigger: Date = new Date();
     private triggerSubject: BehaviorSubject<Date> = new BehaviorSubject(this.trigger);
 
-	usersSubject: BehaviorSubject<Map<string, ChatUser>> = new BehaviorSubject(new Map())
 
 	@InjectRepository(Room)
 	private readonly roomRepository: Repository<Room>;
@@ -40,13 +39,12 @@ export class ChatService {
 
 	addChatUser(socket_id: string, user: ChatUser){
 		this.users.set(socket_id, user)
-		this.usersSubject.next(this.users)
+		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
 	}
 
 	setAllChatUsers(allChatUsers: Map<string, ChatUser>) {
 		this.users = allChatUsers;
-		this.trigger = new Date();
-		this.triggerSubject.next(this.trigger)
+		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
 	}
 
 	getAllChatUsers(): Map<string, ChatUser> {
@@ -59,8 +57,7 @@ export class ChatService {
 
 	deleteChatUserBySocketId(socket_id: string): void {
 		this.users.delete(socket_id)
-		this.trigger = new Date();
-		this.triggerSubject.next(this.trigger)
+		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
 	}
 
 	setUserStatusIsPlaying(login: string):void {
@@ -69,8 +66,7 @@ export class ChatService {
     			chatUser.status = UserStatus.PLAYING;
   			}
 		});	
-		this.trigger = new Date();
-		this.triggerSubject.next(this.trigger)
+		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
 	}
 
 	setUserStatusIsActive(login: string):void {
@@ -79,8 +75,16 @@ export class ChatService {
     			chatUser.status = UserStatus.ONLINE;
   			}
 		});
-		this.trigger = new Date();
-		this.triggerSubject.next(this.trigger)
+		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
+	}
+
+	editActiveUser(newUser: User): void {
+		this.users.forEach((chatUser: ChatUser, key: string) => {
+  			if (chatUser.login === newUser.login) {
+    			chatUser.nick = newUser.nick;
+  			}
+		});
+		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
 	}
 
 	public async createRoom(login: string, room: string, hasPass: boolean, password: string | undefined): Promise<boolean>{
