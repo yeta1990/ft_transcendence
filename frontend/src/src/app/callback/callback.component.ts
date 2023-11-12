@@ -62,10 +62,15 @@ export class CallbackComponent implements OnInit {
 			if (regex.test(code)) {
 				this.modalClosedSubscription.unsubscribe();
 				this.authService.validateMfa(Id, code).subscribe(
-					undefined,
-					(error) => {
+					success => {
+						if (!success) {
 						const message : string = "El código facilitado no es válido."
 						this.toasterService.launchToaster(ToastValues.ERROR, message);
+						}
+					},
+					(error) => {
+						console.error('HTTP Error:', error);
+						this.toasterService.launchToaster(ToastValues.ERROR, error);
 					});
 			} else {
 			  this.modalClosedSubscription.unsubscribe();

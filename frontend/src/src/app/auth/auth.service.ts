@@ -62,16 +62,20 @@ export class AuthService {
 		const message: string = "Token para validar mfa"
 		return this.http.post<any>(environment.apiUrl + '/2fa/auth/', { userId, loginCode, message })
 		.pipe(
-			tap((response) =>{
+			map(response =>{
 				if (response) {
 					console.log("El codigo está bien");
 					this.setSession(this.authToken);
 					this.redirectToHome();
+					return true;
 				}
 				console.log("He recibido respuesta");
+				return false;
 			}),
-			map((response) => false),
-			catchError((error) => of(true))
+			catchError((error) => {
+				console.error('Error en la validación MFA:', error);
+				return of(false);
+			})
 		);
 	  }
 

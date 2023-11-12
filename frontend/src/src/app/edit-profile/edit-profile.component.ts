@@ -212,7 +212,7 @@ export class EditProfileComponent implements  OnInit {
                   this.toasterService.launchToaster(ToastValues.INFO, response);
                 },
                 error => {
-                  this.toasterService.launchToaster(ToastValues.ERROR, error);
+					this.toasterService.launchToaster(ToastValues.ERROR, 'El código proporcionado no es correcto');
                 }
               );
             } else {
@@ -222,7 +222,7 @@ export class EditProfileComponent implements  OnInit {
                   this.toasterService.launchToaster(ToastValues.INFO, response);
                 },
                 error => {
-                  this.toasterService.launchToaster(ToastValues.ERROR, error);
+					this.toasterService.launchToaster(ToastValues.ERROR, 'El código proporcionado no es correcto');
                 }
               );
             }
