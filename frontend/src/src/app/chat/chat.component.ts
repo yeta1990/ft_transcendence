@@ -27,7 +27,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	roomList: string[] = [""];
 	availableRoomsList: string[] = [];
 	myJointRoomList: string[] = [];
-	myPrivateMessageRooms: string[] = [];
+	myPrivateMessageRooms: any[] = [];
 //	activeUsers: Array<string> = [];
 	roomsMetaData: Map<string, RoomMetaData> = new Map<string, RoomMetaData>();
 	loginNickEquivalence: Map<string, string> =new Map();

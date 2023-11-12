@@ -84,9 +84,19 @@ export class ChatService {
 		return (allRooms);
 	}
 
-	public async getMyPrivateRooms(login: string): Promise<string []>{
+	public async getMyPrivateRooms(login: string): Promise<any []>{
 		const allMyJoinedRooms: Array<string> = await this.getAllJoinedRoomsByOneUser(login)
-		return allMyJoinedRooms.filter(r => r.includes("@"))
+		const myPrivateRoomsList = allMyJoinedRooms.filter(r => r.includes("@"))
+		const myPrivateRooms: Array<any> = []
+		const allUsers: User[] = await this.userService.getAllUsers()
+			myPrivateRoomsList.map(r => { 
+				const privateRoom = {
+					room: r, 
+					nick: allUsers.find(u => r.substr(1) === u.login).nick
+				}
+				myPrivateRooms.push(privateRoom)
+			})
+		return myPrivateRooms
 	}
 
 	public async getAllJoinedRoomsByOneUser(login: string): Promise<string[]>{

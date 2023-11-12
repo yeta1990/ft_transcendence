@@ -18,9 +18,9 @@
       <h2 class="column-heading">My private conversations</h2>
 	  <ul class="channel-list"> 
 	  	  <div *ngFor="let room of myPrivateMessageRooms">
-	  	<li [class.active]="currentRoom === room" class="d-flex">
-	  		<div class="p-2 flex-grow-1 link-channel" (click)="joinUserToRoom(room, '')">{{room}}
-								<i *ngIf="isUserActive(room.substr(1))" class="bi bi-circle-fill" style="color: green"></i>
+	  	<li [class.active]="currentRoom === room.room" class="d-flex">
+	  		<div class="p-2 flex-grow-1 link-channel" (click)="joinUserToRoom(room.room, '')">@{{room.nick}}
+								<i *ngIf="isUserActive(room.room.substr(1))" class="bi bi-circle-fill" style="color: green"></i>
 	  		</div>
 	  	</li>
 	  	  </div>
