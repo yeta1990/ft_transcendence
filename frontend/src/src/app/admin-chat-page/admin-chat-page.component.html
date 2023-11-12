@@ -26,27 +26,27 @@
         </td>
         <td>
         	<div *ngFor="let admin of roomsMetaData.get(room)?.admins">
-        		{{admin}} - <span *ngIf="isAdmin(room, admin) && !isOwner(room, admin)" (click)="revokeAdmin(room, admin)">Revoke admin privileges</span>
+        		{{admin.nick}} - <span *ngIf="isAdmin(room, admin.login) && !isOwner(room, admin.login)" (click)="revokeAdmin(room, admin.login)">Revoke admin privileges</span>
         	</div>
 
         </td>
         <td>
         	<table class="table-striped">
         	<tr *ngFor="let user of roomsMetaData.get(room)?.users" style="border-bottom: 1px solid #ccc;">
-        		<td>{{user}}</td>
+        		<td>{{user.nick}}</td>
         		<td>
-        			<div *ngIf="!isAdmin(room, user) && !isOwner(room, user)" (click)="makeAdmin(room, user)"> - Make channel admin</div>
-        			<div *ngIf="!isAdmin(room, user) && !isOwner(room, user)" (click)="makeOwner(room, user)"> - Make channel owner</div>
-        			<div *ngIf="!isSilenced(room, user)" (click)="silenceUser(room, user)"> - Silence User</div>
-        			<div *ngIf="isSilenced(room,user)" (click)="unSilenceUser(room, user)"> - Remove silence</div>
-        			<div (click)="banUser(room, user)">- Ban user</div>
+        			<div *ngIf="!isAdmin(room, user.login) && !isOwner(room, user.login)" (click)="makeAdmin(room, user.login)"> - Make channel admin</div>
+        			<div *ngIf="!isAdmin(room, user.login) && !isOwner(room, user.login)" (click)="makeOwner(room, user.login)"> - Make channel owner</div>
+        			<div *ngIf="!isSilenced(room, user.login)" (click)="silenceUser(room, user.login)"> - Silence User</div>
+        			<div *ngIf="isSilenced(room,user.login)" (click)="unSilenceUser(room, user.login)"> - Remove silence</div>
+        			<div (click)="banUser(room, user.login)">- Ban user</div>
         		</td>
         	</tr>
         	</table>
         </td>
         <td>
         	<div *ngFor="let ban of roomsMetaData.get(room)?.banned">
-        		{{ban}} - <span (click)="removeBan(room, ban)">Remove ban</span>
+        		{{ban.nick}} - <span (click)="removeBan(room, ban.login)">Remove ban</span>
         	</div>
 
         </td>

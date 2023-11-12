@@ -65,6 +65,7 @@ export class SocketService {
 				this.message.next({event: 'listRooms', data});
 			})
 			.on(events.RoomMetaData, (data: RoomMetaData) => {
+//				console.log(data.loginNickEquivalence)
 				this.message.next({event: events.RoomMetaData, data})
 			})
 			.on(events.AllRoomsMetaData, (data: Array<RoomMetaData>) => {

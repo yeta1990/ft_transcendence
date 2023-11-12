@@ -700,7 +700,7 @@ export class ChatGateway extends BaseGateway {
 			.getRoomMetaData(room)
 	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
   }
-
+ 
   @SubscribeMessage(events.AdminRevokeChatOwnership)
   async adminRevokeChatOwnership(client: Socket, room: string){
 	  const login: string = client.handshake.query.login as string;

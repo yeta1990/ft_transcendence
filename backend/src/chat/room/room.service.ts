@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Room } from '../room.entity';
 import { HttpService } from '@nestjs/axios';
 import { Repository } from 'typeorm';
-import { RoomMetaData } from '@shared/types';
+import { RoomMetaData, ChatUser } from '@shared/types';
 import { ChatService } from '../chat.service';
 
 @Injectable()
@@ -42,10 +42,10 @@ export class RoomService {
 			return data;
 		data.room = room;
 		data.owner = roomData.owner ? roomData.owner.login : null;
-		data.admins = [...new Set(roomData.admins.map(a => a.login))];
-		data.users = [...new Set(roomData.users.map(u => u.login))];
-		data.banned = [...new Set(roomData.banned.map(u => u.login))];
-		data.silenced = [...new Set(roomData.silenced.map(u => u.login))];
+		data.admins = [...new Set(roomData.admins.map(a => new ChatUser(null, a.id, a.login, a.nick, null)))];
+		data.users = [...new Set(roomData.users.map(u => new ChatUser(null, u.id, u.login, u.nick, null)))];
+		data.banned = [...new Set(roomData.banned.map(u => new ChatUser(null, u.id, u.login, u.nick, null)))];
+		data.silenced = [...new Set(roomData.silenced.map(u => new ChatUser(null, u.id, u.login, u.nick, null)))];
 		data.hasPass = roomData.hasPass;
 		return data;
 	}

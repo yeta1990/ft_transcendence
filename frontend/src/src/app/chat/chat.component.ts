@@ -30,6 +30,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	myPrivateMessageRooms: string[] = [];
 //	activeUsers: Array<string> = [];
 	roomsMetaData: Map<string, RoomMetaData> = new Map<string, RoomMetaData>();
+	loginNickEquivalence: Map<string, string> =new Map();
 	myUser: User | undefined;
 	private subscriptions = new Subscription();
 
@@ -200,7 +201,17 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					for (const el of it){
 						console.log(JSON.stringify(el))
 					}
-					console.log("-----end of rooms metadata-----")
+
+					console.log(payload.data.loginNickEquivalence)
+//					payload.data.loginNickEquivalence.forEach((roomMetaData: RoomMetaData, key:string) => {
+//						console.log(key)
+//						console.log(roomMetaData)
+//						if(roomMetaData.loginNickEquivalence instanceof Map) {
+//							console.log("yes")
+//						}
+//						roomMetaData.loginNickEquivalence.forEach((value: string, innerKey: string) => { console.log(value)} )
+//					})
+//					console.log("-----end of rooms metadata-----")
 				}
 				else if (payload.event === events.BlockedUsers){
 					this.chatService.setMyBlockedUsers(payload.data)
@@ -344,6 +355,41 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	isUserActive(login: string): boolean {
 		return this.chatService.isUserActive(login)
+	}
+
+	isSilenced(room:string, login:string): boolean {
+		const foundRoom  =   this.roomsMetaData.get(room)
+		if (!foundRoom) return false;
+		const silenced: Array<string> = foundRoom.silenced.map(f => f.login)
+		return silenced.includes(login)
+	}
+
+	isOwner(room: string, login: string): boolean {
+		if (login == null) return false;
+		const foundRoom = this.roomsMetaData.get(room)
+		if (!foundRoom) return false;
+		return foundRoom.owner === login
+	}
+
+	isAdmin(room: string, login: string): boolean {
+		const foundRoom  =   this.roomsMetaData.get(room)
+		if (!foundRoom) return false;
+		const admins: Array<string> = foundRoom.admins.map(f => f.login)
+		return admins.includes(login)
+	}
+
+	isUser(room: string, login: string):boolean {
+		const foundRoom  =   this.roomsMetaData.get(room)
+		if (!foundRoom) return false;
+		const users: Array<string> = foundRoom.users.map(f => f.login)
+		return users.includes(login)
+	}
+
+	isBanned(room: string, login:string): boolean {
+		const foundRoom  =   this.roomsMetaData.get(room)
+		if (!foundRoom) return false;
+		const banned: Array<string> = foundRoom.banned.map(f => f.login)
+		return banned.includes(login)
 	}
 
 	launchToast() {

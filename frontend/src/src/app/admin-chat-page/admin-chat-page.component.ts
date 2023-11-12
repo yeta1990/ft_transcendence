@@ -130,7 +130,8 @@ export class AdminChatPageComponent implements OnInit {
 	isSilenced(room:string, login:string): boolean {
 		const foundRoom  =   this.roomsMetaData.get(room)
 		if (!foundRoom) return false;
-		return foundRoom.silenced.includes(login)
+		const silenced: Array<string> = foundRoom.silenced.map(f => f.login)
+		return silenced.includes(login)
 	}
 
 	isOwner(room: string, login: string): boolean {
@@ -143,19 +144,22 @@ export class AdminChatPageComponent implements OnInit {
 	isAdmin(room: string, login: string): boolean {
 		const foundRoom  =   this.roomsMetaData.get(room)
 		if (!foundRoom) return false;
-		return foundRoom.admins.includes(login)
+		const admins: Array<string> = foundRoom.admins.map(f => f.login)
+		return admins.includes(login)
 	}
 
 	isUser(room: string, login: string):boolean {
 		const foundRoom  =   this.roomsMetaData.get(room)
 		if (!foundRoom) return false;
-		return foundRoom.users.includes(login)
+		const users: Array<string> = foundRoom.users.map(f => f.login)
+		return users.includes(login)
 	}
 
 	isBanned(room: string, login:string): boolean {
 		const foundRoom  =   this.roomsMetaData.get(room)
 		if (!foundRoom) return false;
-		return foundRoom.banned.includes(login)
+		const banned: Array<string> = foundRoom.banned.map(f => f.login)
+		return banned.includes(login)
 	}
 
 	getRoomsMessages(room: string) {
