@@ -59,10 +59,12 @@ export class AuthService {
 
 		const allUserData42 = await this.userService.whoAmI(data.access_token);
 		const payloadToCreateUser = this.createPayloadForUser(allUserData42);
-		const isUserBanned = await this.checkIfUserExistsAndNotBanned(payloadToCreateUser.login);
-		if (!isUserBanned)
+		const user: User = await this.userService.getUserByLogin(payloadToCreateUser.login);
+		if (user && user.isBanned) {
 			return false;
+		}
 		const createdUser = await this.createNewUser(payloadToCreateUser);
+
 		const tokenData = await this.generateTokenData(createdUser);
 		return {
 			requiresMFA: createdUser.mfa,
@@ -81,18 +83,10 @@ export class AuthService {
 			firstName: userData.first_name,
 			lastName: userData.last_name,
 			login: userData.login,
-			image: userData.image.versions.medium,
 			userRole: UserRole.REGISTRED
 		};
 	}
 
-	async checkIfUserExistsAndNotBanned(login: string): Promise<User | boolean> {
-		const user: User = await this.userService.getUserByLogin(login);
-		if (user && user.isBanned) {
-			return false;
-		}
-		return true;
-	}
 
 	async createNewUser(userData: any): Promise<User> {
 		return await this.userService.createUser(userData);

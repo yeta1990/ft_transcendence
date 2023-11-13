@@ -73,7 +73,7 @@ export class User {
 	// PERSONALIZACION -------------------------------------
 
 	@Column({
-		default: '' //Poner ruta de imagen por defecto
+		default: 'avatar.png' //Poner ruta de imagen por defecto
 	})
 	image: string;
 
@@ -146,6 +146,9 @@ export class User {
 		default:false
 	})
 	isBanned: boolean
+
+	@Column({default: true})
+	firstLogin: boolean;
 
 }
 

@@ -38,7 +38,7 @@ export class CallbackComponent implements OnInit {
 			.subscribe(
 				(response) => {
 					if (response.requiresMFA) {
-						this.SubscribeTo2faInput(response.userId);
+						this.SubscribeTo2faInput(response.userId); 
 						this.modalService.openModal('verifyMfaTemplate');
 					} else {
 						console.log("User is logged in");

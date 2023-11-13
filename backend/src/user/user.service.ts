@@ -34,7 +34,7 @@ export class UserService {
 		);
 		return data;
 	}
-
+ 
 	public async createUser(body: CreateUserDto): Promise<User>{
 		const alreadyRegisteredUser: User = await this.getUserByLogin(body.login);
 		if (alreadyRegisteredUser)
@@ -87,7 +87,7 @@ export class UserService {
 		if (user) {
 			return user;
 		}
-		throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+		return null
 	}
 
 	async getUserByEmail( email: string ){
