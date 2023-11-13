@@ -7,11 +7,16 @@ import {
 	Param, 
 	Post,
 	UseGuards,
-	Query
+	Query,
+	UploadedFile,
+	UseInterceptors,
+	ParseFilePipeBuilder,
+	HttpStatus
+
 } from '@nestjs/common';
 
 import { AuthGuard } from '../auth/auth.guard';
-
+import {FileInterceptor} from '@nestjs/platform-express'
 import { UserService } from './user.service';
 import { CreateUserDto } from './user.dto';
 import { User } from './user.entity';
@@ -203,7 +208,24 @@ export class UserController {
 
 		return { isValid: isValidDB };
 	}
-
+	
+	@Post('upload')
+	@UseInterceptors(FileInterceptor('file'))
+	uploadFile(@UploadedFile(
+		  new ParseFilePipeBuilder()
+		    .addFileTypeValidator({
+		    	fileType: '.(png|jpeg|jpg)'
+		    })
+		    .addMaxSizeValidator({
+		      maxSize: 1048576//bytes
+		    })
+		    .build({
+		      errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+		    }),
+		)
+		file: Express.Multer.File) {
+		console.log(file);
+	}
 	
 
 }
