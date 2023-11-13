@@ -6,6 +6,7 @@ import { AuthService } from '../auth/auth.service';
 import { ChatService } from '../chat/chat.service'
 import {ChatUser} from '@shared/types'
 import {UserStatus} from '@shared/enum'
+import { environment } from '../../environments/environment';
 
 
 @Component({
@@ -16,6 +17,7 @@ import {UserStatus} from '@shared/enum'
 export class AllUsersComponent {
 
 	users: User[] | undefined;
+    imagesBaseUrl: string = environment.apiUrl + '/uploads/'
 
 	constructor(
 		private profileService: AllUsersService,

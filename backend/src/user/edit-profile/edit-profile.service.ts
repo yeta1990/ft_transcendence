@@ -27,6 +27,7 @@ export class EditProfileService {
                 },
             })
         this.chatService.editActiveUser(newUser)
+        console.log(newUser)
         return this.repository.save(newUser);
     }  
 }

@@ -29,6 +29,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ValidationFunctions } from '@shared/user.functions'
 import { Achievement } from '@shared/achievement';
 import { ChatService } from '../chat/chat.service'
+import { diskStorage } from 'multer'
 
 @Controller('user')
 export class UserController {
@@ -209,22 +210,26 @@ export class UserController {
 		return { isValid: isValidDB };
 	}
 	
+	@UseGuards(AuthGuard)
 	@Post('upload')
-	@UseInterceptors(FileInterceptor('file'))
-	uploadFile(@UploadedFile(
-		  new ParseFilePipeBuilder()
-		    .addFileTypeValidator({
-		    	fileType: '.(png|jpeg|jpg)'
-		    })
-		    .addMaxSizeValidator({
-		      maxSize: 1048576//bytes
-		    })
-		    .build({
-		      errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
-		    }),
-		)
-		file: Express.Multer.File) {
-		console.log(file);
+	@UseInterceptors(FileInterceptor('image', {
+		limits:{ fileSize: 1048576},
+		fileFilter: (req:any , file:any, cb:any) => {
+			cb(null, true)
+		},
+		storage: diskStorage({
+			destination: './uploads',
+			filename: (req, file, cb) => {
+				cb(null, file.originalname)
+			}
+		})
+	}))
+	uploadFile(@Body() body: any, @UploadedFile() file: Express.Multer.File) {
+		if (!file) {
+			console.log("no file")
+		}
+		console.log(body)
+		return {image: file.filename}
 	}
 	
 

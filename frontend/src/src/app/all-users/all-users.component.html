@@ -20,7 +20,7 @@
    <ul>
       <ul *ngFor="let u of users"><div (click)="getUserLogin(u.login)">
          <div class="avatar_column">
-            <img class="rect avatar" src={{u?.image}} alt=''/>
+            <img class="rect avatar" [src]="imagesBaseUrl + u.image" alt=''/>
          </div>
          <div class ="nick_column">
             <button class="user" (click)="getUserLogin(u.login)">{{u.nick}}

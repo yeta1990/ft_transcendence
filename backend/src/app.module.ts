@@ -24,11 +24,17 @@ import { ChatModule } from './chat/chat.module';
 import { HashService } from './hash/hash.service';
 import {InvalidTokens} from './auth/invalid-tokens-entity'
 import { TokenValidationMiddleware } from './token-validation/token-validation.middleware'
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
  
 @Module({
   imports: [
   	ConfigModule.forRoot({
 		envFilePath: '.env',
+	}),
+	ServeStaticModule.forRoot({
+		rootPath: join(__dirname, '../..', 'uploads'),
+		serveRoot: '/uploads',
 	}),
 	AuthModule,
 	UserModule,

@@ -6,6 +6,7 @@ import {UserProfileService} from '../user-profile/user-profile.service'
 import {User} from '../user'
 import {ChatUser} from '@shared/types'
 import {UserStatus} from '@shared/enum'
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-friends',
@@ -18,6 +19,7 @@ export class FriendsComponent {
 	allUsers: User[] = []
 	incomingFriendRequests: User[] = []
 	myLogin: string;
+    imagesBaseUrl: string = environment.apiUrl + '/uploads/'
 	constructor(private usersService: AllUsersService, private authService: AuthService, private profileService: UserProfileService, private chatService: ChatService) {
 		this.myLogin = this.authService.getUserNameFromToken() as string
 		this.usersService.getUsers()

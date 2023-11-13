@@ -24,12 +24,16 @@ export class EditProfileComponent implements  OnInit {
 
   editingField: string | null = null;
   editedFields: { [key: string]: any } = {};
+  selectedFile: File | null = null;
+  formData = new FormData();
+
 
   editForm = this.editBuilder.group({
 		firstName: '',
     lastName: '',
 		nick: '',
-		email: ''
+		email: '',
+		file: ''
 	});
 
   constructor(
@@ -48,18 +52,65 @@ export class EditProfileComponent implements  OnInit {
       //   });
   }
 
+  sendEditedUser():void {
+  	  console.log("sending")
+    this.httpClient.post<any>(environment.apiUrl + '/edit-profile/user/edit', this.newUser)
+    .subscribe(
+    	(response: User) => {console.log(response)},
+
+    	error => console.log(error))
+		console.log(this.newUser);
+    this.router.navigateByUrl(`/user-profile/${this.user?.login}`);
+
+  }
+  
   onSubmit(): void {
     this.newUser = this.user;
-    if (this.newUser) {
-      this.newUser.firstName = this.editForm.get('firstName')?.value!;
-      this.newUser.lastName = this.editForm.get('lastName')?.value!;
-      this.newUser.nick = this.editForm.get('nick')?.value!;
-      this.newUser.email = this.editForm.get('email')?.value!;
+	if (!this.newUser) return;
+
+    this.newUser.firstName = this.editForm.get('firstName')?.value!;
+    this.newUser.lastName = this.editForm.get('lastName')?.value!;
+    this.newUser.nick = this.editForm.get('nick')?.value!;
+    this.newUser.email = this.editForm.get('email')?.value!;
+
+	//in case of new image: first save image, get image name and then change the
+	//value in newUser.image
+	if (this.formData.has('image')){
+    	this.httpClient.post<any>(environment.apiUrl + '/user/upload', this.formData)
+    		.subscribe(response => {
+    			
+    			this.newUser!.image = response.image
+
+    			console.log(this.newUser)
+    			console.log("save user")
+    			this.sendEditedUser()
+    		},
+    		error => console.log(error))
     }
-    this.httpClient.post<User>(environment.apiUrl + '/edit-profile/user/edit', this.newUser)
-    .subscribe((response: User) =>console.log(response))
-    console.log(this.newUser);
-    this.router.navigateByUrl('/my-profile');
+    //otherwise, send the payload as it's
+    else {
+    	this.sendEditedUser()
+    }
+	
+
+  }
+
+  onFileChange(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      this.editForm.patchValue({ file });
+      this.formData.append('image', file)
+    }
+  }
+
+  clearFile(): void{
+  	  this.editForm.get('file')?.setValue(null)
+  	  const fileInput = document.getElementById('file') as HTMLInputElement
+  	  if (fileInput){
+  	  	  fileInput.value = ''
+  	  }
+	 this.formData.delete('image')
   }
 
   ngOnInit(): void {
