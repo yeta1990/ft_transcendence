@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { User } from '../user';
-import { Observable } from "rxjs";
-import { tap, shareReplay } from "rxjs/operators";
+import { BehaviorSubject, Observable, of } from "rxjs";
+import { tap, shareReplay, catchError, map } from "rxjs/operators";
 import * as moment from "moment";
 import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
@@ -20,7 +20,9 @@ export class AuthService {
         private router: Router,
 		private chatService: ChatService
     ) { }
+  private authToken: any;
 
+  
 /*
  *  old login function
  *
@@ -33,10 +35,20 @@ export class AuthService {
 	*/
 
 	login(code: string){
-		return this.http.post<User>(environment.apiUrl + '/auth/login', {code})
-			.pipe(tap((res: any) => this.setSession(res)))
-			.pipe(shareReplay())
-			//We are calling shareReplay to prevent the receiver of this Observable from accidentally triggering multiple POST requests due to multiple subscriptions.
+		return this.http.post<any>(environment.apiUrl + '/auth/login', {code})
+			.pipe(
+				map((res: any) => {
+					if (res.requiresMFA) {
+						this.authToken = res.authResult;
+					}
+					else {
+						this.setSession(res.authResult);
+						this.redirectToHome();
+					}
+					return { requiresMFA: res.requiresMFA, userId: res.userId };
+				}),
+			shareReplay()
+		);
 	}
 
 	logout() {
@@ -46,12 +58,34 @@ export class AuthService {
         this.router.navigateByUrl('/login');
     }
 
+	validateMfa(userId: number, loginCode: string) : Observable<boolean> {
+		const message: string = "Token para validar mfa"
+		return this.http.post<any>(environment.apiUrl + '/2fa/auth/', { userId, loginCode, message })
+		.pipe(
+			map(response =>{
+				if (response) {
+					console.log("El codigo está bien");
+					this.setSession(this.authToken);
+					this.redirectToHome();
+					return true;
+				}
+				console.log("He recibido respuesta");
+				return false;
+			}),
+			catchError((error) => {
+				console.error('Error en la validación MFA:', error);
+				return of(false);
+			})
+		);
+	  }
+
 	redirectToHome() {
         this.router.navigateByUrl('/home');
     }
 
 	private setSession(authResult: any) {
 		console.log("Consigo entrar en setSession");
+		console.log(authResult);
         localStorage.setItem("access_token", authResult.access_token);
         localStorage.setItem("expires_at", authResult.expires_at);
     }

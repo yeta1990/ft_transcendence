@@ -53,3 +53,8 @@ export function getEloRank(elo: number): string {
 	  return 'Maestro';
 	}
   }
+
+
+export function generateRandomString(size: number){
+return Array(size).fill(0).map((elt: number) => Math.ceil(Math.random() * 35).toString(36)).join("");
+}

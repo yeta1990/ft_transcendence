@@ -1,15 +1,17 @@
 import { Body, Controller, Get, Post, HttpCode, HttpStatus, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
+import { UserId } from '../user/user.decorator';
 import { User } from '../user/user.entity';
-
-interface LoginBody{
-	code: string;
-}
+import { JwtService } from '@nestjs/jwt';
+import { LoginBody } from './auth.interface'
 
 @Controller('auth')
 export class AuthController {
-	constructor(private authService: AuthService) {}
+	constructor(
+		private authService: AuthService,
+		private jwtService: JwtService
+	) {}
 
 	@HttpCode(HttpStatus.OK)
 	@Post('login')
@@ -34,4 +36,6 @@ export class AuthController {
 	getProfile(@Request() req) {
 		return req.user;
 	}
+
+
 }
