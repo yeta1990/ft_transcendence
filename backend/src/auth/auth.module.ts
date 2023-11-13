@@ -7,6 +7,7 @@ import { HttpModule } from '@nestjs/axios';
 import { InvalidateTokensService } from './invalidate-tokens.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {InvalidTokens} from './invalid-tokens-entity'
+import { Auth2faModule } from './auth2fa/auth2fa.module';
 
 @Module({
 	imports: [
@@ -18,6 +19,7 @@ import {InvalidTokens} from './invalid-tokens-entity'
     		signOptions: { expiresIn: '86400s' },
     	}),
 		HttpModule,
+		Auth2faModule,
     ],
 
 	controllers: [AuthController],

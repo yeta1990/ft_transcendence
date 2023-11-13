@@ -46,7 +46,7 @@ export class ModalService {
 	this.confirmationInput = data3;
   }
 
-  getModalData(): Array<string>{
+  getModalData(): Array<any>{
     return [this.modalData1, this.modalData2];
   }
 
