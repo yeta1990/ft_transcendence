@@ -24,6 +24,9 @@ export class UserProfileService {
   getUserProfile(id: number): Observable<User> {
 		return this.httpClient.get<User>(environment.apiUrl + '/user/' + id)
 	}
+  isMyFirstLogin(login: boolean){
+		return this.httpClient.get<User>(environment.apiUrl + '/user/first-login/'+login)
+  }
 
   getUserAchievements(id: number): Observable<Achievement[]> {
     return this.httpClient.get<Achievement[]>(environment.apiUrl + '/user/' + id + '/achievements')

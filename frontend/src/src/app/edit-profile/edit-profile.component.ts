@@ -56,14 +56,9 @@ export class EditProfileComponent implements  OnInit {
     private modalService: ModalService,
     private toasterService: ToasterService
 	){
-      // this.profileService.getUserDetails()
-      //   .subscribe((response: User) => {
-      //     this.user = response;
-      //   });
   }
 
   sendEditedUser():void {
-  	  console.log("sending")
     this.httpClient.post<any>(environment.apiUrl + '/edit-profile/user/edit', this.newUser)
     .subscribe(
     	(response: User) => {console.log(response)},

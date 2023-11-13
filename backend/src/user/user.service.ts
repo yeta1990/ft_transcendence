@@ -44,22 +44,6 @@ export class UserService {
 	};
 
 	async saveUser(newUser: User): Promise<User> {
-		const id = newUser.id;
-		try {
-			let updateResult = await this.repository
-				.createQueryBuilder()
-				.update(User)
-				.set(newUser)
-				.where("id = :id", { id: id })
-				.execute();
-			if (updateResult.affected && updateResult.affected > 0) {
-				console.log(`User with ID ${id} updated successfully.`);
-			} else {
-				console.log(`No user was updated for ID ${id}.`);}
-		} catch (error) {
-			console.error("Error updating user:", error);
-			throw error; 
-		}
 		return await this.repository.save(newUser);
 	}
 

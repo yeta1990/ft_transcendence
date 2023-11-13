@@ -161,14 +161,26 @@ export class UserController {
 	public getUser(@Param('id', ParseIntPipe) id: number): Promise<User>{
 		return this.service.getUser(id);
 	}
+
+	@UseGuards(AuthGuard)
+	@Get('first-login/:login')
+	public async isMyFirst(@Param('login') login: string): Promise<boolean> {
+		const user: User = await this.service.getUserByLogin(login);
+		if (user.firstLogin){
+			user.firstLogin = false;
+			await this.service.saveUser(user)
+			return true;
+		}
+		return false
+	}
 	
-	//@UseGuards(AuthGuard)
+	@UseGuards(AuthGuard)
 	@Get('id/:login')
 	public getUserIdByLogin(@Param('login') login: string): Promise<number> {
 	  return this.service.getUserIdByLogin(login);
 	}
 
-	//@UseGuards(AuthGuard)
+	@UseGuards(AuthGuard)
 	@Get(':id/achievements')
 	public getUserAchievements(@Param('id', ParseIntPipe) id: number): Promise<Achievement[]> {
 	  return this.service.getUserAchievements(id);

@@ -31,7 +31,7 @@ export class EditProfileService {
             })
 
         const oldImage = user.image
-		if (oldImage !== newUser.image) this.deleteImage(oldImage)
+		if (oldImage !== "avatar.png" && oldImage !== newUser.image) this.deleteImage(oldImage)
 
         let userUpdate = await this.repository
             .createQueryBuilder()
