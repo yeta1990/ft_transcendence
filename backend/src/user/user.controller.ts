@@ -30,6 +30,8 @@ import { ValidationFunctions } from '@shared/user.functions'
 import { Achievement } from '@shared/achievement';
 import { ChatService } from '../chat/chat.service'
 import { diskStorage } from 'multer'
+import { generateRandomString } from '@shared/functions'
+import { extname } from 'path'
 
 @Controller('user')
 export class UserController {
@@ -220,15 +222,12 @@ export class UserController {
 		storage: diskStorage({
 			destination: './uploads',
 			filename: (req, file, cb) => {
-				cb(null, file.originalname)
+				console.log(file)
+				cb(null, generateRandomString(16) + extname(file.originalname))
 			}
 		})
 	}))
 	uploadFile(@Body() body: any, @UploadedFile() file: Express.Multer.File) {
-		if (!file) {
-			console.log("no file")
-		}
-		console.log(body)
 		return {image: file.filename}
 	}
 	

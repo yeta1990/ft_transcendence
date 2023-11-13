@@ -59,12 +59,14 @@ export class UserProfileComponent implements OnInit {
 	ngOnInit() {
 
 		const login = this.activateroute.snapshot.paramMap.get('login');
+		console.log("yes")
 		if ( login !== null ){
 			this.profileService.getUserIDByLogin(login).subscribe((userId: number) => {
 				forkJoin([
 					this.profileService.getUserProfile(userId),
 					this.profileService.getUserAchievements(userId)
 				]).subscribe(([userProfile, userAchievements]: [User, Achievement[]]) => {
+					console.log("pepe")
 					this.user = userProfile;
 					this.userAchievements = userAchievements;
 					console.log('User:', this.user);
