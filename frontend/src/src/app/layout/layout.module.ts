@@ -6,6 +6,7 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import {AuthInterceptor } from '../auth/auth.interceptor';
 import { AppComponent } from '../app.component';
 import { AuthService } from '../auth/auth.service';
+import {ChatService} from '../chat/chat.service'
 
 
 @NgModule({
@@ -26,7 +27,8 @@ import { AuthService } from '../auth/auth.service';
     useClass: AuthInterceptor,
     multi: true,
     },
-    AuthService
+    AuthService,
+    ChatService
     ],
     bootstrap: [AppComponent]
 

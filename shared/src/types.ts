@@ -1,7 +1,16 @@
+import { UserStatus } from './enum'
+
 export type ChatMessage = {
 	room: string;
 	message: string;
 	login: string;
+	date: Date;
+}
+
+export type ChatMessageComplete = {
+	room: string;
+	message: string;
+	user: ChatUser;
 	date: Date;
 }
 
@@ -13,11 +22,11 @@ export type SocketPayload = {
 export type RoomMetaData = {
 	room: string;
 	owner: string,
-	admins: Array<string>,
-	users: Array<string>,
-	banned: Array<string>,
-	silenced: Array<string>,
-	hasPass: boolean
+	admins: Array<ChatUser>,
+	users: Array<ChatUser>,
+	banned: Array<ChatUser>,
+	silenced: Array<ChatUser>,
+	hasPass: boolean,
 }
 
 // type to handle relationships between
@@ -26,7 +35,9 @@ export class ChatUser {
 	constructor (
 		public client_id: string, 
 		public user_id: number, 
-		public login: string
+		public login: string,
+		public nick: string,
+		public status: UserStatus
 	){ }
 };
 

@@ -19,7 +19,7 @@ import { events, values } from '@shared/const';
 import { ChatUser } from '@shared/types';
 import { map } from 'rxjs/operators';
 import {User} from '../user/user.entity'
-
+import {UserStatus} from '@shared/enum'
 //this base class is used to log the initialization
 //and avoid code duplications in the gateways
 @Injectable()
@@ -29,7 +29,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   logger; 
   gatewayName: string;
-  users: Map<string, ChatUser>;
+//  users: Map<string, ChatUser>;
   rooms: Set<string>;
 
   @Inject(AuthService)
@@ -51,17 +51,32 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   protected userService: UserService;
 
   constructor(){
-
-	this.users = new Map();
 	this.rooms = new Set<string>();
   }
 
-  async afterInit(): Promise<void>{
+  afterInit(): void{
+	this.chatService.getUsersObservable().subscribe(trigger=> {
+		console.log("holi")
+		this.emitUpdateUsersAndRoomsMetadata()
+	}
+	)
 
-	const allRoomsInDb: string[] = await this.chatService.getAllRooms();
-	allRoomsInDb.map(x => this.rooms.add(x));
+//	const allRoomsInDb: string[] = await this.chatService.getAllRooms();
+//	allRoomsInDb.map(x => this.rooms.add(x));
   }
  
+  emitUpdateUsersAndRoomsMetadata() {
+      	const activeUsersInServer: Array<ChatUser> = this
+      		.getActiveUsersInServer()
+
+		this.server.emit(events.ActiveUsers, activeUsersInServer)
+		this.roomService.getAllRoomsMetaData()
+			.then(r =>  this.server.emit(events.ListAllRooms, r))
+
+		this.getAllChatUsersWithNickEquivalence()
+			.then(c => this.server.emit(events.LoginNickEquivalence, c))
+  }
+
   // about auth during client connection
   // https://github.com/ThomasOliver545/realtime-todo-task-management-app-nestjs-and-angular/blob/main/todo-api/src/todo/gateway/todo.gateway.ts
   async handleConnection(socket: Socket): Promise<void>{
@@ -69,19 +84,26 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
     const isUserVerified = await this.authService.verifyJwt(socket.handshake.auth.token);
 	if (isUserVerified){
 		const login = this.authService.getLoginFromJwt(socket.handshake.auth.token)
+		const user: User = await this.userService.getUserByLogin(login)
   	    const isHardConnect: boolean = this.getClientSocketIdsFromLogin(login).length > 0 ? false : true
 		this.setLogin(socket);
 		this.logger.log(`Socket client connected: ${socket.id}`)
-		this.users.set(socket.id, new ChatUser(
+		this.chatService.addChatUser(socket.id, new ChatUser(
 			 socket.id,
 			 this.authService.getIdFromJwt(socket.handshake.auth.token),
-			 login)
+			 login,
+			 user.nick,
+			 UserStatus.ONLINE
+		)
 		);
 		this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
 
-      	const activeLoginsInServer: Array<string> = this
-      		.getActiveLoginsInServer()
-		this.server.emit(events.ActiveUsers, activeLoginsInServer)	
+		const loginNickEquivalence: Array<any> = await this.
+			getAllChatUsersWithNickEquivalence()
+		this.server.emit(events.LoginNickEquivalence, loginNickEquivalence)
+      	const activeUsersInServer: Array<ChatUser> = this
+      		.getActiveUsersInServer()
+		this.server.emit(events.ActiveUsers, activeUsersInServer)
 		this.sendBlockedUsers(login)
 	}
 	else{
@@ -127,10 +149,10 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   async handleDisconnect(socket: Socket): Promise<void> {
-  	  const login: string = this.users.get(socket.id)?.login
+  	  const login: string = this.chatService.getChatUserBySocketId(socket.id)?.login
   	  if (!login) return;
 	  this.logger.log(`Socket client disconnected: ${socket.id}`)
-	  this.users.delete(socket.id);
+	  this.chatService.deleteChatUserBySocketId(socket.id)
 	  this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
 
   	  //check if all clients of same login has been disconnected or not
@@ -138,9 +160,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   	  if (isHardDisconnect){
 		  const allJoinedRoomsByUser: Array<string> = await this.chatService
 		  	  .getAllJoinedRoomsByOneUser(login);
-  	   	  const activeLoginsInServer: Array<string> = this
-  	    	  .getActiveLoginsInServer()
-		  this.server.emit(events.ActiveUsers, activeLoginsInServer)	
+      	  const activeUsersInServer: Array<ChatUser> = this
+      		.getActiveUsersInServer()
+		  this.server.emit(events.ActiveUsers, activeUsersInServer)	
 		  for (let room of allJoinedRoomsByUser){
 	  		  let roomMetaData: RoomMetaData = await this.roomService
 	  		    .getRoomMetaData(room)
@@ -162,8 +184,38 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	return ([]);
   }
 
+  getActiveUsersInServer(): Array<ChatUser>{
+	const clientsIterator = this.chatService.getAllChatUsers().entries();
+	let activeUsers: Array<ChatUser> = []	
+	let connectedClient = clientsIterator.next()
+	let activeLogins = new Set()
+	while (!connectedClient.done){
+		const activeUser = connectedClient.value[1]
+		activeLogins.add(activeUser.login)
+		activeUsers.push(activeUser)
+		connectedClient = clientsIterator.next()
+	}
+	let activeUsersUnique: Array<ChatUser> = []
+	for (let user of activeUsers){
+		if (activeLogins.has(user.login)){
+			activeUsersUnique.push(user)
+			activeLogins.delete(user.login)
+		}
+	}
+	return activeUsersUnique
+  }
+
+  async getAllChatUsersWithNickEquivalence(): Promise<Array<any>>{
+  	  const user: User[] = await this.userService.getAllUsers()
+  	  const allUsers: Array<any> = user.map(u=> {
+		 const eq = {login: u.login, nick: u.nick}
+		 return eq
+  	  })
+	  return allUsers
+  }
+
   getActiveLoginsInServer(): Array<string>{
-	const clientsIterator = this.users.entries();
+	const clientsIterator = this.chatService.getAllChatUsers().entries();
 	let logins: Array<string> = []	
 	let connectedClient = clientsIterator.next()
 	while (!connectedClient.done){
@@ -184,7 +236,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 			console.log(activeWebAdminsInServer)
 
 
-		const usersArray = Array.from(this.users);
+		const usersArray = Array.from(this.chatService.getAllChatUsers());
 		const usersWithCompleteData: Array<ChatUser> = 
 			usersArray
 				.filter(([clientId, chatUser]) => activeWebAdminsInServer.includes(chatUser.login))
@@ -197,17 +249,21 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
    	const adapter: any = this.server.adapter;
 	const roomsRaw: any = adapter.rooms;
 	const roomIds = roomsRaw.get(room)
+
 	if (!roomIds) return [];
 	const usersRaw: Array<string> = Array.from(roomIds);
+	console.log("users raw")
+	console.log(usersRaw)
 	let usersWithCompleteData: Array<ChatUser> = new Array();
 	usersRaw.forEach(x => {
-		usersWithCompleteData.push(this.users.get(x));
+		usersWithCompleteData.push(this.chatService.getAllChatUsers().get(x));
 	});
+	console.log(usersWithCompleteData)
     return (usersWithCompleteData);
   }
 
   getClientSocketIdsFromLogin(login: string): Array<string>{
-	const clientsIterator = this.users.entries();
+	const clientsIterator = this.chatService.getAllChatUsers().entries();
 	const clientSocketIds = []
 
 	let connectedClient = clientsIterator.next()
@@ -334,7 +390,8 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
 	  	//announce the rest of the channel a new user has joined
 	  	if (hardJoin && !room.includes(':') && !room.includes('@')){
-	  		const socketInfo: SocketPayload = generateSocketInformationResponse(room, `user ${login} has joined room ${room}`)
+	  		const user: User = await this.userService.getUserByLogin(login)
+	  		const socketInfo: SocketPayload = generateSocketInformationResponse(room, `user ${user.nick} has joined room ${room}`)
 			this.broadCastToRoomExceptForSomeUsers(socketInfo.event, socketInfo.data, [login])
 			const joinFeedback: SocketPayload = generateSocketInformationResponse(room, `You have joined ${room}`)
 			this.server.to(clientId).emit("system", joinFeedback.data)
@@ -365,7 +422,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   public getNumberOfConnectedUsers(): number{
-	return this.users.size;
+	return this.chatService.getAllChatUsers().size;
   }
 
   public async sendBlockedUsers(login: string): Promise<void>{
