@@ -12,9 +12,10 @@ export class PongService {
 	}
 
 	forceInit() {
-		if (!this.socketService.isConnected()) this.socketService.initializeSocket("/chat")
+		if (!this.socketService.isConnected()) this.socketService.initializeSocket("/game")
 	}
   getMessage(): Observable<SocketPayload>{
+    console.log("1HOLA");
 		return this.socketService.getMessage();
 	}
 
@@ -26,9 +27,9 @@ export class PongService {
 	}
 
   joinUserToRoom(room: string){
-    room += " alone"; //alone para saber que juega solo
-		console.log(room)
-		this.socketService.sendMessageToServer("join", room);
+    room += " alone"; //alone for know play alone
+		//console.log(room)
+		this.socketService.sendMessageToServer("joinGame", room);
 		console.log("enviando join")
 	}
 

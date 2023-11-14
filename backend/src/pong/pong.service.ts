@@ -2,19 +2,21 @@ import { Injectable } from '@nestjs/common';
 import { ChatMessage, SocketPayload, GameRoom, ChatUser } from '@shared/types';
 import { GameGateway } from 'src/events/game.gateway';
 import { BaseGateway } from 'src/events/base.gateway';
+import { ChatGateway } from 'src/events/chat.gateway';
 @Injectable()
 export class PongService {
 
     public game: GameRoom;
-    public gameGateaway: GameGateway;
+    //public gameGateaway: GameGateway;
     //public baseGateway: BaseGateway;
+    public gameGateaway: ChatGateway;
     games: Map<string, GameRoom> = new Map<string, GameRoom>;
     public numberOfGames: number = 0;
     public interval: any = 0;
 
     private matchMaking: Array<string> = new Array<string>;
 
-    initGame (name: string, gameGateaway: GameGateway, viwer: number, nick:string): GameRoom {
+    initGame (name: string, gameGateaway: ChatGateway, viwer: number, nick:string): GameRoom {
         
         if (this.games.get(name))
             return(this.games.get(name));
@@ -85,7 +87,7 @@ export class PongService {
         return (this.games.get(name));
     }
 
-    updateGame(gameGateway :GameGateway, game: GameRoom){
+    updateGame(gameGateway :ChatGateway, game: GameRoom){
         //this.games.forEach(element => {
             //element.gameMode = 1;
             console.log("Update -> " + game.room);
@@ -291,18 +293,18 @@ export class PongService {
         this.matchMaking.push(login);
         console.log("Waiting list: " + this.matchMaking);
         if (this.matchMaking.length >= 2){
-            this.disconectPlayer("#pongRoom_" + this.matchMaking[0], this.matchMaking[0]);
-            this.disconectPlayer("#pongRoom_" + this.matchMaking[1], this.matchMaking[1]);
+            //this.disconectPlayer("#pongRoom_" + this.matchMaking[0], this.matchMaking[0]);
+            //this.disconectPlayer("#pongRoom_" + this.matchMaking[1], this.matchMaking[1]);
             const room: string = "#pongRoom_" + this.matchMaking[0] + "+" + this.matchMaking[1];
             const idsPlayerOne: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMaking[0]);
             const idsPlayerTwo: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMaking[1]);
             
             for (let element of idsPlayerOne) {
-                await this.gameGateaway.joinRoutine(element, this.matchMaking[0], room, "", "join")
+                await this.gameGateaway.joinRoutineGame(element, this.matchMaking[0], room, "", "join")
             }
             
             for (let element of idsPlayerTwo) {
-                await this.gameGateaway.joinRoutine(element, this.matchMaking[1], room, "", "join")
+                await this.gameGateaway.joinRoutineGame(element, this.matchMaking[1], room, "", "join")
             }
             //Remove both 
             this.matchMaking.shift();

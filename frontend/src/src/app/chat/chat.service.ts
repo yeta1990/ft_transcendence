@@ -21,7 +21,7 @@ export class ChatService {
 	forceInit() {
 		if (!this.socketService.isConnected()) this.socketService.initializeSocket("/chat")
 	}
-
+	
 	getMyBlockedUsers(): Array<string> {
 		return this.myBlockedUsers
 	}

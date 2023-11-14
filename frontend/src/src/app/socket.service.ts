@@ -124,6 +124,7 @@ export class SocketService {
   }
 
   sendMessageToServer(type: string, payload: any) {
+	console.log("1,5HOLA " + type + " - " + payload + " - " + this.socket.id);
 	this.socket.emit(type, payload);
   }
 

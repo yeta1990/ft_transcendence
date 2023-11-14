@@ -209,6 +209,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   getClientSocketIdsFromLogin(login: string): Array<string>{
+	if (!login) return;
 	console.log("get client ids " + login);
 	const clientsIterator = this.users.entries();
 	const clientSocketIds = []
