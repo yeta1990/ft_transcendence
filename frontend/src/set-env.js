@@ -7,6 +7,7 @@ const targetPath = './src/environments/environment.ts';
 require('dotenv').config();
 // `environment.ts` file structure
 const envConfigFile = `export const environment = {
+	production: true,
    apiBaseUrl: '${process.env.BACKEND_IP}',
    apiUrl: '${process.env.BACKEND_IP}',
    frontendUrl: '${process.env.FRONTEND_URL}',

@@ -5,7 +5,7 @@
     "ng": "ng",
     "config": "node set-env.js",
     "start": "npm run config && ng serve --host 0.0.0.0 --port 4200",
-    "build": "npm run config && ng build",
+    "build": "npm run config && ng build --configuration=production",
     "watch": "npm run config && ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -50,3 +50,4 @@
     "typescript": "latest"
   }
 }
+
