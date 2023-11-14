@@ -6,7 +6,7 @@ import { tap, shareReplay, catchError, map } from "rxjs/operators";
 import * as moment from "moment";
 import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
-import jwt_decode from 'jwt-decode';
+import * as jwt_decode from 'jwt-decode';
 import { ChatService } from '../chat/chat.service'
 
 @Injectable({
@@ -102,7 +102,7 @@ export class AuthService {
 
 	getDecodedAccessToken(token: string): any {
 		try {
-	   		return jwt_decode(token);
+	   		return jwt_decode.jwtDecode(token);
 		} catch(Error) {
 			return null;
 		}

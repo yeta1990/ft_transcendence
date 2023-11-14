@@ -4,7 +4,7 @@
 //using fs throws an error
 const fs = require('fs-extra');
 const targetPath = './src/environments/environment.ts';
-require('dotenv').load();
+require('dotenv').config();
 // `environment.ts` file structure
 const envConfigFile = `export const environment = {
    apiBaseUrl: '${process.env.BACKEND_IP}',
