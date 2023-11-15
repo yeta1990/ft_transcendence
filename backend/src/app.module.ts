@@ -26,6 +26,8 @@ import {InvalidTokens} from './auth/invalid-tokens-entity'
 import { TokenValidationMiddleware } from './token-validation/token-validation.middleware'
 import * as Joi from '@hapi/joi';
 import { config } from 'process';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
  
 @Module({
   imports: [
@@ -39,6 +41,10 @@ import { config } from 'process';
 			PORT: Joi.number(),
 		}),
 		envFilePath: '.env',
+	}),
+	ServeStaticModule.forRoot({
+		rootPath: join(__dirname, '../..', 'uploads'),
+		serveRoot: '/uploads',
 	}),
 	AuthModule,
 	UserModule,

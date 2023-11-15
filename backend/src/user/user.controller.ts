@@ -7,11 +7,16 @@ import {
 	Param, 
 	Post,
 	UseGuards,
-	Query
+	Query,
+	UploadedFile,
+	UseInterceptors,
+	ParseFilePipeBuilder,
+	HttpStatus
+
 } from '@nestjs/common';
 
 import { AuthGuard } from '../auth/auth.guard';
-
+import {FileInterceptor} from '@nestjs/platform-express'
 import { UserService } from './user.service';
 import { CreateUserDto } from './user.dto';
 import { User } from './user.entity';
@@ -23,6 +28,10 @@ import { JwtService } from '@nestjs/jwt';
 
 import { ValidationFunctions } from '@shared/user.functions'
 import { Achievement } from '@shared/achievement';
+import { ChatService } from '../chat/chat.service'
+import { diskStorage } from 'multer'
+import { generateRandomString } from '@shared/functions'
+import { extname } from 'path'
 
 @Controller('user')
 export class UserController {
@@ -31,6 +40,9 @@ export class UserController {
 
 	@Inject(JwtService)
 	private jwtService: JwtService;
+
+	@Inject(ChatService)
+	private chatService: ChatService;
 
 	@UseGuards(AuthGuard)
 	@Get()
@@ -79,25 +91,96 @@ export class UserController {
 		const isTargetOwner: boolean = (await this.service.getUserByLogin(login)).userRole >= 6 ? true : false
 		if (isTargetOwner) return [] as User[]
 		return this.service.removeBanUserFromWebsite(login);
+	}  
+
+	@UseGuards(AuthGuard)
+	@Get('my-blocked')
+	public async getMyBlockedUsers(@UserId() id: number): Promise<Array<string>>{
+		const user: User = await this.getUser(id)
+  		const bannedUsers: User[] = await this.service
+  	  		.getBannedUsersByLogin(user.login)
+		return bannedUsers.map(m => m.login)
 	}
+
+	@UseGuards(AuthGuard)
+	@Post('block')
+	public async blockUser(@UserId() id: number, @Query('login') login: string): Promise<Array<string>>{
+		const user: User = await this.getUser(id)
+		const blockUser: boolean = await this.chatService.banUser2User(user.login, login)
+		return await this.getMyBlockedUsers(id)
+	}
+
+	@UseGuards(AuthGuard)
+	@Post('unblock')
+	public async unBlockUser(@UserId() id: number, @Query('login') login: string): Promise<Array<string>>{
+		const user: User = await this.getUser(id)
+		const unBlockUser: boolean = await this.chatService.noBanUser2User(user.login, login)
+		return await this.getMyBlockedUsers(id)
+	}
+
+	@UseGuards(AuthGuard)
+	@Get('friendshiprequest')
+	public async requestFriendship(@UserId() id: number, @Query('login') login: string): Promise<any>{
+		console.log("yee")
+		const user: User = await this.getUser(id)
+		const friendshipSent: boolean = await this.service.requestFriendship(user.login, login)
+		return friendshipSent
+	}
+
+	@UseGuards(AuthGuard)
+	@Post('/friendship/accept')
+	public async acceptFriendship(@UserId() id: number, @Query('login') login: string): Promise<Array<string>>{
+		const user: User = await this.getUser(id)
+		return await this.service.acceptFriendship(user.login, login)
+	}
+
+	@UseGuards(AuthGuard)
+	@Post('friendship/request/reject')
+	public async rejectFriendshipRequest(@UserId() id: number, @Query('login') login: string): Promise<Array<string>>{
+		const user: User = await this.getUser(id)
+		return await this.service.rejectFriendshipRequest(user.login, login)
+	}
+
+	@UseGuards(AuthGuard)
+	@Post('friendship-remove')
+	public async removeFriendship(@UserId() id: number, @Query('login') login: string): Promise<Array<string>>{
+		console.log("yee")
+		const user: User = await this.getUser(id)
+		return await this.service.removeFriendship(user.login, login)
+	}
+
  
+
 	@Get('all')
 	public findAll(): Promise<User[]> {
 		return this.service.getAllUsers();
 	}
-
+	
+	@UseGuards(AuthGuard)
 	@Get(':id')
 	public getUser(@Param('id', ParseIntPipe) id: number): Promise<User>{
 		return this.service.getUser(id);
 	}
+
+	@UseGuards(AuthGuard)
+	@Get('first-login/:login')
+	public async isMyFirst(@Param('login') login: string): Promise<boolean> {
+		const user: User = await this.service.getUserByLogin(login);
+		if (user.firstLogin){
+			user.firstLogin = false;
+			await this.service.saveUser(user)
+			return true;
+		}
+		return false
+	}
 	
-	//@UseGuards(AuthGuard)
+	@UseGuards(AuthGuard)
 	@Get('id/:login')
 	public getUserIdByLogin(@Param('login') login: string): Promise<number> {
 	  return this.service.getUserIdByLogin(login);
 	}
 
-	//@UseGuards(AuthGuard)
+	@UseGuards(AuthGuard)
 	@Get(':id/achievements')
 	public getUserAchievements(@Param('id', ParseIntPipe) id: number): Promise<Achievement[]> {
 	  return this.service.getUserAchievements(id);
@@ -140,7 +223,25 @@ export class UserController {
 
 		return { isValid: isValidDB };
 	}
-
+	
+	@UseGuards(AuthGuard)
+	@Post('upload')
+	@UseInterceptors(FileInterceptor('image', {
+		limits:{ fileSize: 1048576},
+		fileFilter: (req:any , file:any, cb:any) => {
+			cb(null, true)
+		},
+		storage: diskStorage({
+			destination: './uploads',
+			filename: (req, file, cb) => {
+				console.log(file)
+				cb(null, generateRandomString(16) + extname(file.originalname))
+			}
+		})
+	}))
+	uploadFile(@Body() body: any, @UploadedFile() file: Express.Multer.File) {
+		return {image: file.filename}
+	}
 	
 
 }

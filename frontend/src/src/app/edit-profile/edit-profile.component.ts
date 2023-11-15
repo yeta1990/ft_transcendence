@@ -30,6 +30,8 @@ export class EditProfileComponent implements  OnInit {
   editedFields: { [key: string]: any } = {};
   showMfaModal = false;
   mfaActivated : boolean = false;
+  selectedFile: File | null = null;
+  formData = new FormData();
 
   private modalClosedSubscription: Subscription = {} as Subscription;
 
@@ -39,6 +41,7 @@ export class EditProfileComponent implements  OnInit {
 		nick: '',
 		email: '',
     mfa: false,
+		file: ''
 	});
 
   constructor(
@@ -53,30 +56,68 @@ export class EditProfileComponent implements  OnInit {
     private modalService: ModalService,
     private toasterService: ToasterService
 	){
-      // this.profileService.getUserDetails()
-      //   .subscribe((response: User) => {
-      //     this.user = response;
-      //   });
   }
 
-  async onSubmit(): Promise<void> {
-    this.newUser = this.user;
-  
-    if (this.newUser) {
-      this.newUser.firstName = this.editForm.get('firstName')?.value!;
-      this.newUser.lastName = this.editForm.get('lastName')?.value!;
-      this.newUser.nick = this.editForm.get('nick')?.value!;
-      this.newUser.email = this.editForm.get('email')?.value!;
-  
-      // Realiza el envío del formulario después de verificar el MFA
-      this.httpClient.post<User>(environment.apiUrl + '/edit-profile/user/edit', this.newUser)
-        .subscribe((response: User) => {
-          console.log(response);
-          this.router.navigateByUrl('/user-profile/' + this.newUser?.login);
-        });
-    }
+  sendEditedUser():void {
+    this.httpClient.post<any>(environment.apiUrl + '/edit-profile/user/edit', this.newUser)
+    .subscribe(
+    	(response: User) => {console.log(response)},
+
+    	error => console.log(error))
+		console.log(this.newUser);
+    this.router.navigateByUrl(`/user-profile/${this.user?.login}`);
+
   }
   
+  async onSubmit(): Promise<void> {
+    this.newUser = this.user;
+	if (!this.newUser) return;
+
+    this.newUser.firstName = this.editForm.get('firstName')?.value!;
+    this.newUser.lastName = this.editForm.get('lastName')?.value!;
+    this.newUser.nick = this.editForm.get('nick')?.value!;
+    this.newUser.email = this.editForm.get('email')?.value!;
+
+	//in case of new image: first save image, get image name and then change the
+	//value in newUser.image
+	if (this.formData.has('image')){
+    	this.httpClient.post<any>(environment.apiUrl + '/user/upload', this.formData)
+    		.subscribe(response => {
+    			
+    			this.newUser!.image = response.image
+
+    			console.log(this.newUser)
+    			console.log("save user")
+    			this.sendEditedUser()
+    		},
+    		error => console.log(error))
+    }
+    //otherwise, send the payload as it's
+    else {
+    	this.sendEditedUser()
+    }
+	
+
+  }
+  
+
+  onFileChange(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      this.editForm.patchValue({ file });
+      this.formData.append('image', file)
+    }
+  }
+
+  clearFile(): void{
+  	  this.editForm.get('file')?.setValue(null)
+  	  const fileInput = document.getElementById('file') as HTMLInputElement
+  	  if (fileInput){
+  	  	  fileInput.value = ''
+  	  }
+	 this.formData.delete('image')
+  }
 
   ngOnInit(): void {
     this.activatedRoute.paramMap.pipe(

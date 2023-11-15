@@ -5,6 +5,7 @@ import { ModalService } from '../modal/modal.service';
 import { Subscription } from 'rxjs';
 import { ToasterService } from '../toaster/toaster.service';
 import { ToastValues } from '@shared/const';
+import { UserProfileService} from '../user-profile/user-profile.service'
 
 @Component({
   selector: 'app-callback',
@@ -18,7 +19,8 @@ export class CallbackComponent implements OnInit {
 		private route: ActivatedRoute,
 		private authService: AuthService,
 		private modalService: ModalService,
-		private toasterService: ToasterService
+		private toasterService: ToasterService,
+		private userProfileService: UserProfileService
 	) {}
 
 	code: string = '';
@@ -38,11 +40,24 @@ export class CallbackComponent implements OnInit {
 			.subscribe(
 				(response) => {
 					if (response.requiresMFA) {
-						this.SubscribeTo2faInput(response.userId);
+						this.SubscribeTo2faInput(response.userId); 
 						this.modalService.openModal('verifyMfaTemplate');
 					} else {
 						console.log("User is logged in");
-						this.router.navigateByUrl('/home');
+						const login: any = this.authService.getUserNameFromToken()
+						this.userProfileService
+							.isMyFirstLogin(login)
+							.subscribe(firstLogin => {
+								if (firstLogin)
+									{this.router.navigateByUrl('/user-profile/'+ login +'/edit');
+									}else{
+								this.router.navigateByUrl('/home');
+									}
+
+							},
+							(error) => {this.router.navigateByUrl('/login')}
+							)
+
 					}
 				}
 			);

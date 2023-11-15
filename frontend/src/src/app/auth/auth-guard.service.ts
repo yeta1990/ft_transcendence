@@ -50,11 +50,18 @@ export class AuthGuardService  {
 		return of(true);
 	}
 
+	isAdminOrOwner(): boolean {
+		const token = this.auth.getDecodedAccessToken(this.auth.getUserToken() ?? '');
+		if (token?.role === UserRole.ADMIN || token?.role === UserRole.OWNER) {
+			return true
+		}
+		return false;
+	}
+
 	private checkAdminPermissions(): Observable<boolean | UrlTree> {
 		// Comprueba si el usuario es administrador
-		const token = this.auth.getDecodedAccessToken(this.auth.getUserToken() ?? '');
-		console.log(token?.role)
-		if (token?.role === UserRole.ADMIN || token?.role === UserRole.OWNER) {
+
+		if (this.isAdminOrOwner()){
 			return of(true);
 		}
 

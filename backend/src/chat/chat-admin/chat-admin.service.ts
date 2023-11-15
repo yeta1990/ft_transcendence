@@ -17,7 +17,9 @@ export class ChatAdminService {
 	@InjectRepository(User)
 	private readonly userRepository: Repository<User>;
 
-	constructor(private chatService: ChatService, private httpService: HttpService, private userService: UserService, 
+	constructor(
+		@Inject(forwardRef(() => ChatService))
+		private chatService: ChatService, private httpService: HttpService, private userService: UserService, 
 				@Inject(forwardRef(() => RoomService))
 				private roomService: RoomService) {}
 

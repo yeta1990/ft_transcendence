@@ -33,8 +33,15 @@
 		<div *ngIf="mfaActivated">
 			<button class="btn btn-danger" type="button" (click)="disconnectMfa()">Disconnect Two-Factor Authentication (MFA)</button>
 		</div>
-
+        <br />
+	    <br />
+	    <label class="tab" for="file">Change profile picture&emsp;</label>
+	    <input id="file" type="file" (change)="onFileChange($event)" >
+        <button *ngIf="formData.has('image')" type="button" class="btn btn-danger" (click)="clearFile()">Unselect</button>
+        <br />
+        <br />
 		<button class="btn btn-primary mt-3" type="submit">Submit</button>
 		<app-modal></app-modal>
 	</form>
 </div>
+	

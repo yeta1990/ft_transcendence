@@ -34,7 +34,7 @@ export class UserService {
 		);
 		return data;
 	}
-
+ 
 	public async createUser(body: CreateUserDto): Promise<User>{
 		const alreadyRegisteredUser: User = await this.getUserByLogin(body.login);
 		if (alreadyRegisteredUser)
@@ -44,22 +44,6 @@ export class UserService {
 	};
 
 	async saveUser(newUser: User): Promise<User> {
-		const id = newUser.id;
-		try {
-			let updateResult = await this.repository
-				.createQueryBuilder()
-				.update(User)
-				.set(newUser)
-				.where("id = :id", { id: id })
-				.execute();
-			if (updateResult.affected && updateResult.affected > 0) {
-				console.log(`User with ID ${id} updated successfully.`);
-			} else {
-				console.log(`No user was updated for ID ${id}.`);}
-		} catch (error) {
-			console.error("Error updating user:", error);
-			throw error; 
-		}
 		return await this.repository.save(newUser);
 	}
 
@@ -87,7 +71,7 @@ export class UserService {
 		if (user) {
 			return user;
 		}
-		throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+		return null
 	}
 
 	async getUserByEmail( email: string ){
@@ -270,4 +254,61 @@ export class UserService {
 		});
 	  }
 
+	public async requestFriendship(senderLogin: string, targetLogin: string): Promise<boolean>{
+		if (senderLogin === targetLogin) return false;
+		const sender: User = await this.getUserByLogin(senderLogin)
+		if (!sender) return false;
+		if (sender.incomingFriendRequests.includes(targetLogin)){
+			await this.acceptFriendship(senderLogin, targetLogin)
+			return true;
+		}
+		const user: User = await this.getUserByLogin(targetLogin)
+		if (!user) return false;
+		const friendRequests: Set<string> = new Set(user.incomingFriendRequests)
+		friendRequests.add(senderLogin)	
+		user.incomingFriendRequests = Array.from(friendRequests)
+		await this.repository.save(user)
+		return true;
+	}
+
+	public async acceptFriendship(acceptorLogin: string, pendingFriendLogin: string): Promise<Array<string>>{
+		const user: User = await this.getUserByLogin(acceptorLogin)
+		const newFriend: User = await this.getUserByLogin(pendingFriendLogin)
+		if (!newFriend) return null;
+		const friendRequests: Set<string> = new Set(user.incomingFriendRequests)
+
+		if (friendRequests.has(pendingFriendLogin)){
+			user.friends ? user.friends.push(pendingFriendLogin) : user.friends = [pendingFriendLogin]
+			user.friends = Array.from(new Set(user.friends))
+			user.incomingFriendRequests = Array.from(friendRequests).filter(f => f != pendingFriendLogin)
+			newFriend.friends ? newFriend.friends.push(acceptorLogin) : newFriend.friends = [acceptorLogin]
+			newFriend.friends = Array.from(new Set(newFriend.friends))
+			await this.repository.save(user)
+			await this.repository.save(newFriend)
+		}
+		return user.friends
+	}
+
+	public async rejectFriendshipRequest(rejectorLogin: string, pendingFriendLogin: string): Promise<Array<string>>{
+		const user: User = await this.getUserByLogin(rejectorLogin)
+		const friendRequests: Set<string> = new Set(user.incomingFriendRequests)
+	    user.incomingFriendRequests = user.incomingFriendRequests.filter(f => f !== pendingFriendLogin)
+		await this.repository.save(user)
+		return user.incomingFriendRequests;
+	}
+
+	public async removeFriendship(friend1: string, friend2: string): Promise<Array<string>>{
+		console.log(friend1+friend2)
+		if (friend1 === friend2) return null;
+		const user1: User = await this.getUserByLogin(friend1)
+		const user2: User = await this.getUserByLogin(friend2)
+
+		user1.friends = user1.friends.filter(f => f != friend2)
+		user2.friends = user2.friends.filter(f => f != friend1)
+		await this.repository.save(user1)
+		await this.repository.save(user2)
+		console.log(user1.friends)
+		console.log(user2.friends)
+		return user1.friends;
+	}
 }
