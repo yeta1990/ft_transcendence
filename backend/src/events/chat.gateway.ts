@@ -597,6 +597,9 @@ export class ChatGateway extends BaseGateway {
 		const hasExecutorPrivileges: boolean = (await this.userService.getUserByLogin(emisorLogin)).userRole >= 5 ? true : false
 		if (!hasExecutorPrivileges) return ;
 
+		const loginNickEquivalence: Array<any> = await this.
+			getAllChatUsersWithNickEquivalence()
+		this.server.to(client.id).emit(events.LoginNickEquivalence, loginNickEquivalence)
 		
 		this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
 		const allHistoricalMessages: Array<RoomMessages> = await this.chatMessageService.getAllMessagesFromAllRooms()
