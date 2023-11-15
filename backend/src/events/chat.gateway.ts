@@ -197,6 +197,9 @@ export class ChatGateway extends BaseGateway {
 				oldMessagesInRoom.name = originalRoom
 				oldMessagesInRoom.messages.map(m => m.room = originalRoom)
 			}
+			const loginNickEquivalence: Array<any> = await this.
+				getAllChatUsersWithNickEquivalence()
+			this.server.to(clientSocketId).emit(events.LoginNickEquivalence, loginNickEquivalence)
 			for (let message of oldMessagesInRoom.messages){
 				if (!usersThatHaveBanned.includes(message.login)){
 					this.messageToClient(clientSocketId, "message", message)
