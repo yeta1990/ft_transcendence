@@ -24,7 +24,7 @@ import { ChatModule } from './chat/chat.module';
 import { HashService } from './hash/hash.service';
 import {InvalidTokens} from './auth/invalid-tokens-entity'
 import { TokenValidationMiddleware } from './token-validation/token-validation.middleware'
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { config } from 'process';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
