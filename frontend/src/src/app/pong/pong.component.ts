@@ -196,28 +196,47 @@ export class PongComponent implements OnInit, OnDestroy {
         this.drawBoardDetails();
         //player1
         this.gameContext.fillStyle = "#fff";
-        this.gameContext.fillRect(
+        this.drawRoundedRect(
+            this.gameContext,
             this.game.playerOneX,
             this.game.playerOneY,
             this.game.playerOneW,
-            this.game.playerOneH);
+            this.game.playerOneH,
+            5
+        );
+        this.gameContext.fill();
         //player2
         this.gameContext.fillStyle = "#fff";
-        this.gameContext.fillRect(
+        this.drawRoundedRect(
+            this.gameContext,
             this.game.playerTwoX,
             this.game.playerTwoY,
             this.game.playerTwoW,
-            this.game.playerOneH);
+            this.game.playerTwoH,
+            5
+        );
+        this.gameContext.fill();
         //ball
         this.gameContext.fillStyle = "#fff";
-        this.gameContext.fillRect(
+        this.drawRoundedRect(
+            this.gameContext,
             this.game.ballX,
             this.game.ballY,
             this.game.ballWidth,
-            this.game.ballHeight);
-        // this.player1!.draw(this.gameContext);
-        // this.computerPlayer!.draw(this.gameContext);
-        // this.ball!.draw(this.gameContext);
+            this.game.ballHeight,
+            5
+        );
+        this.gameContext.fill();
+    }
+
+    drawRoundedRect(context: any, x: any, y :any, width :any, height :any, cornerRadius :any) {
+        context.beginPath();
+        context.moveTo(x + cornerRadius, y);
+        context.arcTo(x + width, y, x + width, y + height, cornerRadius);
+        context.arcTo(x + width, y + height, x, y + height, cornerRadius);
+        context.arcTo(x, y + height, x, y, cornerRadius);
+        context.arcTo(x, y, x + width, y, cornerRadius);
+        context.closePath();
     }
 
     gameLoop = () => {
