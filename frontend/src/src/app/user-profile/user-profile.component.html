@@ -1,6 +1,5 @@
-
 <app-nav-bar/>
-<div class="background">
+<div class="background" *ngIf="loaded === true">
 	<div class="profile-container">
 	  <div class="avatar-container">
 	  <img class="avatar" [src]="imagesBaseUrl + user?.image" alt="User Avatar" />
