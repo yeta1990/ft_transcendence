@@ -127,8 +127,18 @@ export class PongComponent implements OnInit, OnDestroy {
         }
         //draw scores and check end game
         this.gameContext!.font = '36px Arial';
-        this.gameContext!.fillText(this.game.playerOneScore, 175, 50);
-        this.gameContext!.fillText(this.game.playerTwoScore, 525, 50);
+        var pOne = this.game.playerOne + " " + this.game.playerOneScore;
+        var ptwo: string;
+        if (this.game.playerTwo)
+            ptwo = this.game.playerTwoScore + " "+ this.game.playerTwo;
+        else
+            ptwo = this.game.playerTwoScore + " computer";
+        var posOne = ((this.canvas.width / 2) - pOne.length) / 2;
+        var posTwo = (this.canvas.width / 2) + 20;
+        this.gameContext!.fillStyle = "#808080";
+        this.gameContext!.fillText(pOne, posOne, 50);
+        this.gameContext!.fillText(ptwo, posTwo, 50);
+        this.gameContext!.fillStyle = "#FF0000";
         if (this.game.playerOneScore >= 3) { //POINTS
             //this.restartScores();
             this.gameContext!.fillStyle = "#00FF00";
@@ -144,11 +154,27 @@ export class PongComponent implements OnInit, OnDestroy {
                 winner =  "Computer WON!"
             }
             this.gameContext!.fillText(winner, 250, 200);
+            var again = "Press ESC for play again";
+            var textWidth = this.gameContext!.measureText(again).width;
+            this.gameContext!.fillStyle = "#808080";
+            this.gameContext!.fillText(again, (this.canvas.width - textWidth) / 2, 250);
         }
         //draw pause if not finish game
         if (this.game.pause && !this.game.finish) {
             this.gameContext!.fillStyle = "#00FF00";
             this.gameContext!.fillText("PAUSE", 290, 200);
+            this.gameContext!.fillStyle = "#808080";
+            var again = "Press ESC play";
+            var textWidth = this.gameContext!.measureText(again).width;
+            this.gameContext!.fillText(again, (this.canvas.width - textWidth) / 2, 250);
+            var up = "UP: W / ↑"
+            var textWidth = this.gameContext!.measureText(up).width;
+            const xOne = (this.canvas.width / 2 - textWidth) / 2;
+            var down = "DOWN: S / ↓"
+            textWidth = this.gameContext!.measureText(down).width;
+            const xTwo = (this.canvas.width / 2 - textWidth) / 2 + (this.canvas.width / 2) ;
+            this.gameContext!.fillText(up, xOne, this.canvas.height - 50);
+            this.gameContext!.fillText(down, xTwo, this.canvas.height - 50);
         }
     }
 

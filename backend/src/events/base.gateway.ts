@@ -150,10 +150,11 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   async handleDisconnect(socket: Socket): Promise<void> {
 		if (!socket) return;
-		const user = this.users.get(socket.id)
-		if (!user) return;
-  	  const login: string = user.login
-	  this.logger.log(`Socket client disconnected: ${socket.id}`)
+		//const user = this.user.get(socket.id)
+		const login: string = this.chatService.getChatUserBySocketId(socket.id)?.login
+		//if (!user) return;
+  	  //const login: string = user.login
+		this.logger.log(`Socket client disconnected: ${socket.id}`)
 	  this.chatService.deleteChatUserBySocketId(socket.id)
 	  this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
 
@@ -171,7 +172,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  		  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
 		  }
   	  }
-  }
+	}
 
   //socket rooms, not db rooms
   //all rooms are created in db, but not necessarily in the socket server

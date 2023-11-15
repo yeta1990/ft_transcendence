@@ -234,9 +234,10 @@ export class PongService {
         }
         if (g.pause) { return;}
         if (nick == g.playerOne) {
-            if (key === 87 && (g.playerOneY > 20)){ //w
+            if ((key === 87 && (g.playerOneY > 20)) || (key === 38 && (g.playerOneY > 20))){ //w
                 g.playerOneVel = -1;
-            } else if ( key === 83 && (g.playerOneY + g.playerOneH < g.canvasheight - 20)) {//s
+            } else if ((key === 83 && (g.playerOneY + g.playerOneH < g.canvasheight - 20))
+                || (key === 40 && (g.playerOneY + g.playerOneH < g.canvasheight - 20))) {//s
                 g.playerOneVel = 1;
             } else {
                 g.playerOneVel = 0;
