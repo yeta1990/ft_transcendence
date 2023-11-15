@@ -5,7 +5,7 @@ import { events } from '@shared/const';
 import { environment } from '../environments/environment'
 import { ChatMessage, SocketPayload, RoomMetaData, GameRoom } from '@shared/types';
 import { Location } from '@angular/common';
-import {RoomMessages } from '@shared/types'
+import {RoomMessages, ChatUser } from '@shared/types'
 
 @Injectable({
   providedIn: 'root',
@@ -65,12 +65,15 @@ export class SocketService {
 				this.message.next({event: 'listRooms', data});
 			})
 			.on(events.RoomMetaData, (data: RoomMetaData) => {
+//				console.log(data.loginNickEquivalence)
 				this.message.next({event: events.RoomMetaData, data})
 			})
 			.on(events.AllRoomsMetaData, (data: Array<RoomMetaData>) => {
 				this.message.next({event: events.AllRoomsMetaData, data})
 			})
-			.on(events.ActiveUsers, (data: Array<string>) => {
+			.on(events.ActiveUsers, (data: Array<ChatUser>) => {
+				console.log("active users")
+				console.log(data)
 				this.message.next({event: events.ActiveUsers, data})
 //				console.log("active users: " + JSON.stringify(data));
 			})
@@ -103,11 +106,12 @@ export class SocketService {
 				this.message.next({event: events.AllHistoricalMessages, data});
 			})
 			.on(events.MessageForWebAdmins, (data: ChatMessage) => {
-				console.log("message received: " + JSON.stringify(data));
 				this.message.next({event: events.MessageForWebAdmins, data});
 			})
+			.on(events.LoginNickEquivalence, (data: Array<any>) => {
+				this.message.next({event: events.LoginNickEquivalence, data});
+			})
 		}
-
 	}
 
 	isConnected(): boolean {

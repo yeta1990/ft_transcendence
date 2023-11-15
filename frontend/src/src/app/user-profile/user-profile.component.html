@@ -1,4 +1,5 @@
 
+<app-nav-bar/>
 <div class="background">
 	<div class="profile-container">
 	  <div class="avatar-container">
@@ -50,13 +51,15 @@
 
 	  <!-- Botón de edición -->
 	  <button class="edit-button" (click)="goEdit()" *ngIf="adminPower">EDIT PROFILE</button>
-	  <button class="edit-button" (click)="unBlockUser(user!.login)" *ngIf="myLogin !== user!.login && isBlocked()">UNBLOCK</button>
-	  <button class="edit-button" (click)="blockUser(user!.login)" *ngIf="myLogin !== user!.login && !isBlocked()">BLOCK</button>
+	  <span *ngIf="myLogin !== user!.login">
+	  <button class="edit-button" (click)="unBlockUser(user!.login)" *ngIf="isBlocked()">UNBLOCK</button>
+	  <button class="edit-button" (click)="blockUser(user!.login)" *ngIf="!isBlocked()">BLOCK</button>
 	  <button class="friend-button" (click)="sendFriendShipRequest(user!.login)" *ngIf="!user!.friends.includes(myLogin) && !user!.incomingFriendRequests.includes(myLogin) && !myIncomingFriendRequests.includes(user!.login)">ADD FRIEND</button>
 	 <button class="friend-button" (click)="acceptFriendShipRequest(user!.login)" *ngIf="!user!.friends.includes(myLogin) && myIncomingFriendRequests.includes(user!.login)">ACCEPT FRIENDSHIP REQUEST</button>
 	 <button class="friend2-button" (click)="rejectFriendshipRequest(user!.login)" *ngIf="!user!.friends.includes(myLogin) && myIncomingFriendRequests.includes(user!.login)">REJECT FRIENDSHIP REQUEST</button>
 	 <button class="friend-button" *ngIf="!user!.friends.includes(myLogin) && user!.incomingFriendRequests.includes(myLogin)">FRIENDSHIP REQUEST SENT</button>
 	  <button class="friend-button" (click)="removeFriendship(user!.login)" *ngIf="user!.friends.includes(myLogin)">REMOVE FRIEND</button>
+	  </span>
 	  
 	  <!-- Botón de salida -->
 	  <div class="close-button">
@@ -66,4 +69,4 @@
 	  <!-- Aquí irá el resto del contenido del perfil -->
 	</div>
   </div>
-  
+<router-outlet>

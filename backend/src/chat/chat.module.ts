@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { Room } from './room.entity';
 import { User } from '../user/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -15,7 +15,7 @@ import {EventsModule} from '../events/events.module'
 import {AuthService} from '../auth/auth.service'
 
 @Module({
-	imports: [TypeOrmModule.forFeature([Room, User, ChatMessage]), HttpModule, UserModule, EventsModule],
+	imports: [TypeOrmModule.forFeature([Room, User, ChatMessage]), HttpModule, forwardRef(() => UserModule), EventsModule],
 	exports: [RoomService, ChatService],
 	providers: [BaseGateway, ChatService, HashService, RoomService, ChatMessageService, ChatAdminService, AuthService]
 })

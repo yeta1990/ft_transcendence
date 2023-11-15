@@ -1,12 +1,11 @@
 <app-nav-bar/>
-<p>friends works!</p>
 
 <h2>My friends</h2>
 
 <table class="table">
 	<thead>
         <tr>
-          <th>Login</th>
+          <th>Nick</th>
           <th>Foto</th>
           <th>Status</th>
           <th>Actions</th>
@@ -15,25 +14,27 @@
       <tbody>
         <!-- Aquí irá el *ngFor con los datos de los amigos -->
         <tr *ngFor="let friend of friends">
-          <td>{{ friend.login }}</td>
+          <td>{{ friend.nick}}</td>
           <td><img [src]="friend.image" alt="Picture of {{ friend.login }}" class="img-thumbnail"style="max-width: 100px;" ></td>
-          <td>status</td>
+          <td>
+          	  <span *ngIf="getUserStatus(friend.login) === 0" class="bi bi-circle-fill" style="color: red"> Offline</span>
+          	  <span *ngIf="getUserStatus(friend.login) === 1" class="bi bi-circle-fill" style="color: green"> Online</span>
+          	  <span *ngIf="getUserStatus(friend.login) === 3" class="bi bi-circle-fill" style="color: yellow"> Playing</span>
+          </td>
           <td>
             <!-- Aquí irá el botón y cualquier otra acción que desees -->
-            <button class="btn btn-primary">Action</button>
+	  		<button class="btn btn-primary" (click)="removeFriendship(friend.login)">Remove friend</button>
           </td>
         </tr>
       </tbody>
     </table>
 
-
 	<h2>Incoming friend requests</h2>
-
 
 <table class="table">
 	<thead>
         <tr>
-          <th>Login</th>
+          <th>Nick</th>
           <th>Foto</th>
           <th>Status</th>
           <th>Actions</th>
@@ -41,12 +42,15 @@
       </thead>
       <tbody>
     	<tr *ngFor="let request of incomingFriendRequests">
-          <td>{{ request.login }}</td>
+          <td>{{ request.nick}}</td>
           <td><img [src]="request.image" alt="Picture of {{ request.login }}" class="img-thumbnail"style="max-width: 100px;" ></td>
           <td>status</td>
           <td>
             <!-- Aquí irá el botón y cualquier otra acción que desees -->
-            <button class="btn btn-primary">Action</button>
+	 		<button class="btn btn-primary" (click)="acceptFriendShipRequest(request.login)">ACCEPT FRIENDSHIP REQUEST</button>
+	 		<br/>
+	 		<br/>
+	 		<button class="btn btn-primary" (click)="rejectFriendshipRequest(request.login)">REJECT FRIENDSHIP REQUEST</button>
           </td>
         </tr>
       </tbody>

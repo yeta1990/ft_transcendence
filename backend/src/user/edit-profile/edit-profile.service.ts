@@ -4,6 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../user.dto';
 import { User } from '../user.entity';
+import { ChatService } from '../../chat/chat.service'
 
 
 @Injectable()
@@ -11,7 +12,7 @@ export class EditProfileService {
     @InjectRepository(User)
 	private readonly repository: Repository<User>;
 
-    constructor(private httpService: HttpService) {}
+    constructor(private httpService: HttpService, private chatService: ChatService) {}
 
     public async editProfile(newUser: User, id: number) : Promise<User> {
         let userUpdate = await this.repository
@@ -25,6 +26,7 @@ export class EditProfileService {
                     id: id,
                 },
             })
+        this.chatService.editActiveUser(newUser)
         return this.repository.save(newUser);
     }  
 }

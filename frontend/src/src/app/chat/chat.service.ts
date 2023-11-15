@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { Subject, from, Observable } from  'rxjs';
 import { io } from "socket.io-client";
 import { events } from '@shared/const';
+import { UserStatus } from '@shared/enum';
+import { ChatUser } from '@shared/types';
 import { environment } from '../../environments/environment'
 import { SocketService } from '../socket.service';
 
@@ -14,6 +16,9 @@ export class ChatService {
 //https://auth0.com/blog/real-time-charts-using-angular-d3-and-socket-io/
 
 	private myBlockedUsers: Array<string> = []
+	activeUsers: Array<ChatUser> = [];
+	loginNickEquivalence: Array<any> = []
+
 
 	constructor(private socketService: SocketService) {
 	}
@@ -21,7 +26,34 @@ export class ChatService {
 	forceInit() {
 		if (!this.socketService.isConnected()) this.socketService.initializeSocket("/chat")
 	}
-	
+
+
+//	removeChatUser(socket_id:string) {}
+//	getChatUserBySocketId()
+
+//	getChatUsersByLogin()
+
+	setActiveUsers(activeUsers: Array<ChatUser>){
+		this.activeUsers = activeUsers;
+	} 
+
+	getActiveUsers(){
+		console.log(this.activeUsers)
+		return this.activeUsers;
+	}
+
+	getUserStatus(login: string): UserStatus{
+		const user: ChatUser | undefined = this.activeUsers.find(u => u.login ===login)
+		if (!user) return UserStatus.OFFLINE
+		return user.status
+	}
+
+	isUserActive(login: string): UserStatus{
+		const user:ChatUser | undefined = this.activeUsers.find(u=> u.login === login)
+		if (user) return user.status;
+		return 0;
+	}
+
 	getMyBlockedUsers(): Array<string> {
 		return this.myBlockedUsers
 	}
@@ -29,6 +61,13 @@ export class ChatService {
 		this.myBlockedUsers = blockedUsers;
 	}
 
+	getLoginNickEquivalence(): Array<any> {
+		return this.loginNickEquivalence
+	}
+	
+	setLoginNickEquivalence(data: Array<any>) {
+		this.loginNickEquivalence = data;
+	}
 	getMessage(): Observable<SocketPayload>{
 		return this.socketService.getMessage();
 	}

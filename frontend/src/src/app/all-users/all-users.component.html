@@ -23,7 +23,11 @@
             <img class="rect avatar" src={{u?.image}} alt=''/>
          </div>
          <div class ="nick_column">
-            <button class="user" (click)="getUserLogin(u.login)">{{u.nick}}</button>
+            <button class="user" (click)="getUserLogin(u.login)">{{u.nick}}
+          	  <span *ngIf="getUserStatus(u.login) === 0" class="bi bi-circle-fill" style="color: red"> Offline</span>
+          	  <span *ngIf="getUserStatus(u.login) === 1" class="bi bi-circle-fill" style="color: green"> Online</span>
+          	  <span *ngIf="getUserStatus(u.login) === 3" class="bi bi-circle-fill" style="color: yellow"> Playing</span>
+          	</button>
          </div>
       </div></ul>
    </ul>

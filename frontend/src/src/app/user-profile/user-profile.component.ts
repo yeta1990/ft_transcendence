@@ -165,7 +165,7 @@ export class UserProfileComponent implements OnInit {
 		this.location.back(); // Navegar a la página anterior
 	}
 	
-	async sendFriendShipRequest(login:string){
+	sendFriendShipRequest(login:string){
 		return this.profileService.sendFriendShipRequest(login)
 			.subscribe(r => {if (r) this.user!.incomingFriendRequests.push(this.myLogin)})
 	}

@@ -5,13 +5,20 @@ import { HashService } from '../hash/hash.service';
 import { Repository } from 'typeorm';
 import { Room } from './room.entity';
 import { RoomService } from './room/room.service';
-
+import {ChatUser} from '@shared/types'
+import {UserStatus} from '@shared/enum'
 import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
 import { ChatGateway } from '../events/chat.gateway'
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable()
 export class ChatService {
+
+	users: Map<string, ChatUser> = new Map();
+	trigger: Date = new Date();
+    private triggerSubject: BehaviorSubject<Date> = new BehaviorSubject(this.trigger);
+
 
 	@InjectRepository(Room)
 	private readonly roomRepository: Repository<Room>;
@@ -25,6 +32,60 @@ export class ChatService {
 				@Inject(forwardRef(() => ChatGateway))
 				private chatGateway: ChatGateway
 			   ) {}
+
+	getUsersObservable(): Observable<Date>{
+			return this.triggerSubject
+	}
+
+	addChatUser(socket_id: string, user: ChatUser){
+		this.users.set(socket_id, user)
+		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
+	}
+
+	setAllChatUsers(allChatUsers: Map<string, ChatUser>) {
+		this.users = allChatUsers;
+		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
+	}
+
+	getAllChatUsers(): Map<string, ChatUser> {
+		return this.users;
+	}
+
+	getChatUserBySocketId(socket_id: string): ChatUser {
+		return this.users.get(socket_id)
+	}
+
+	deleteChatUserBySocketId(socket_id: string): void {
+		this.users.delete(socket_id)
+		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
+	}
+
+	setUserStatusIsPlaying(login: string):void {
+		this.users.forEach((chatUser: ChatUser, key: string) => {
+  			if (chatUser.login === login) {
+    			chatUser.status = UserStatus.PLAYING;
+  			}
+		});	
+		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
+	}
+
+	setUserStatusIsActive(login: string):void {
+		this.users.forEach((chatUser: ChatUser, key: string) => {
+  			if (chatUser.login === login) {
+    			chatUser.status = UserStatus.ONLINE;
+  			}
+		});
+		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
+	}
+
+	editActiveUser(newUser: User): void {
+		this.users.forEach((chatUser: ChatUser, key: string) => {
+  			if (chatUser.login === newUser.login) {
+    			chatUser.nick = newUser.nick;
+  			}
+		});
+		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
+	}
 
 	public async createRoom(login: string, room: string, hasPass: boolean, password: string | undefined): Promise<boolean>{
 		const roomAlreadyExists = await this.roomRepository.findOne({ where: {name: room}});
@@ -84,9 +145,19 @@ export class ChatService {
 		return (allRooms);
 	}
 
-	public async getMyPrivateRooms(login: string): Promise<string []>{
+	public async getMyPrivateRooms(login: string): Promise<any []>{
 		const allMyJoinedRooms: Array<string> = await this.getAllJoinedRoomsByOneUser(login)
-		return allMyJoinedRooms.filter(r => r.includes("@"))
+		const myPrivateRoomsList = allMyJoinedRooms.filter(r => r.includes("@"))
+		const myPrivateRooms: Array<any> = []
+		const allUsers: User[] = await this.userService.getAllUsers()
+			myPrivateRoomsList.map(r => { 
+				const privateRoom = {
+					room: r, 
+					nick: allUsers.find(u => r.substr(1) === u.login).nick
+				}
+				myPrivateRooms.push(privateRoom)
+			})
+		return myPrivateRooms
 	}
 
 	public async getAllJoinedRoomsByOneUser(login: string): Promise<string[]>{
@@ -369,7 +440,6 @@ export class ChatService {
 		}
 		return true;
 	}
-
 
 	public async isSilencedOfRoom(login: string, room: string): Promise<boolean>{
 		const foundRoom: Room = await this.getRoom(room);

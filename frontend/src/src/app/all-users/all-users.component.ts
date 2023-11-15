@@ -3,6 +3,9 @@ import { Router } from '@angular/router';
 import { User } from '../user';
 import { AllUsersService } from './all-users.service';
 import { AuthService } from '../auth/auth.service';
+import { ChatService } from '../chat/chat.service'
+import {ChatUser} from '@shared/types'
+import {UserStatus} from '@shared/enum'
 
 
 @Component({
@@ -17,7 +20,8 @@ export class AllUsersComponent {
 	constructor(
 		private profileService: AllUsersService,
 		private authService: AuthService,
-		private router: Router
+		private router: Router,
+		private chatService: ChatService
 	){
 		this.profileService.getUsers() 
 			.subscribe((response: User[]) => { 
@@ -28,6 +32,14 @@ export class AllUsersComponent {
 		console.log("Login: " + login);
 		this.router.navigateByUrl('/user-profile/' + login);
 		return login;
+	}
+
+	getActiveUsers(): Array<ChatUser> {
+		return this.chatService.getActiveUsers()
+	}
+
+	getUserStatus(login: string): UserStatus {
+		return this.chatService.getUserStatus(login)
 	}
 }
 
