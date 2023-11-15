@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { User } from '../user';
 import { BehaviorSubject, Observable, of } from "rxjs";
 import { tap, shareReplay, catchError, map } from "rxjs/operators";
-import * as moment from "moment";
 import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
 import * as jwt_decode from 'jwt-decode';
@@ -21,18 +20,6 @@ export class AuthService {
 		private chatService: ChatService
     ) { }
   private authToken: any;
-
-  
-/*
- *  old login function
- *
-	login(nick: string, email: string){
-		return this.http.post<User>('http://localhost:3000/auth/login', {nick, email})
-			.pipe(tap((res: any) => this.setSession(res)))
-			.pipe(shareReplay())
-			//We are calling shareReplay to prevent the receiver of this Observable from accidentally triggering multiple POST requests due to multiple subscriptions.
-	}
-	*/
 
 	login(code: string){
 		return this.http.post<any>(environment.apiUrl + '/auth/login', {code})
@@ -91,9 +78,8 @@ export class AuthService {
     }
 
     public isLoggedIn() {
-    	let a:boolean = moment().isBefore(this.getExpiration());
-		
-    	return a;
+    	const current: Date = new Date()
+    	return (this.getExpiration() > current)
     }
 
     isLoggedOut() {
@@ -119,7 +105,7 @@ export class AuthService {
 			expiration = parseInt(decodedAccessToken.exp) * 1000;
 		} catch(Error) {
 		}
-        return moment(expiration);
+        return new Date(expiration);
     }
 
 	getUserToken() {
