@@ -49,13 +49,23 @@ export class ModalComponent {
     return this.modalService.getCurrentModal();
   }
 
-  getModalData(): Array<string> {
+  getModalData(): Array<any> {
  	return this.modalService.getModalData(); 
   }
 
   getConfirmationInput(): boolean {
   	  return this.modalService.getConfirmationInput();
   }
+
+  getQrCodeUrl(): string {
+    const data = this.modalService.getModalData();
+    if (data.length > 0) {
+      const imgUrl = data[0];
+      return imgUrl.qrURL;
+    }
+    return ''; // o alguna URL predeterminada o manejo de errores
+  }
+
 
   @HostListener('document:keydown.escape', ['$event']) 
   onKeydownHandler(event: KeyboardEvent): void {

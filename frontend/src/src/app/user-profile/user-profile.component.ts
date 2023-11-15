@@ -35,6 +35,7 @@ export class UserProfileComponent implements OnInit {
   editedFields: { [key: string]: any } = {};
   myLogin: string;
   myIncomingFriendRequests: Array<string> = [];
+  imagesBaseUrl: string = environment.apiUrl + '/uploads/'
 
   constructor(
 		private profileService: UserProfileService,
