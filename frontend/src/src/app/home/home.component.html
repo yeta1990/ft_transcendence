@@ -1,6 +1,8 @@
 <app-nav-bar/>
-<app-button dir="/play" value='Play'></app-button>
-<app-button dir="/on-line" value='On-line'></app-button>
+<!--app-button dir="/play" value='Play'></app-button-->
+<app-button value = 'Play' (click)="newRoom()"></app-button>
+<!--app-button dir="/on-line" value='On-line'></app-button-->
+<app-button value = 'On-line' (click)="onLine()"></app-button>
 <br>
 <app-pong/>
 <br>

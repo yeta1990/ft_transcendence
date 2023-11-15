@@ -8,9 +8,17 @@ import { ChatMessage, GameRoom, SocketPayload } from '@shared/types';
 })
 export class PongService {
 
+  public _onlineBoolean: boolean = false;
   constructor(private socketService: SocketService) {
 	}
 
+  get onlineBoolean(): boolean {
+    return this._onlineBoolean;
+  }
+
+  set onlineBoolean(value: boolean) {
+    this._onlineBoolean = value;
+  }
 	forceInit() {
 		if (!this.socketService.isConnected()) this.socketService.initializeSocket("/game")
 	}

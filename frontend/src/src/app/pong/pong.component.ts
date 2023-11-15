@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, OnDestroy, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { PongService } from './pong.service';
 import { Subject, Subscription, pipe } from "rxjs"
@@ -35,11 +35,12 @@ export class PongComponent implements OnInit, OnDestroy {
     constructor(
         private pongService:PongService,
         private myProfileService: MyProfileService,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
         //private pongService: PongService,
     ){
         //window.location.reload();
-        this.online = this.route.snapshot.data['online'];
+        //this.online = this.route.snapshot.data['online'];
+        this.online = this.pongService.onlineBoolean;
         console.log("ONLINE-->" + this.online);
         //this.game.gameMode = 0;
         console.log("Try subscribe");

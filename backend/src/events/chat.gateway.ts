@@ -773,6 +773,12 @@ export class ChatGateway extends BaseGateway {
 		const originalRoom = room;
 		console.log("Try join..");
   		const wasUserAlreadyActiveInRoom: boolean = await this.isUserAlreadyActiveInRoomGame(clientSocketId, room);
+		  const rooms :Array<string> = this.getActiveRooms();
+		  rooms.forEach(element => {
+			  if (element.includes("#pongRoom")){
+				  this.removeUserFromRoom(element, login);
+			  }
+		  });
   		const successfulJoin = await 
 		  this.joinUserToRoom(clientSocketId, login, room, "");
 
@@ -827,6 +833,7 @@ export class ChatGateway extends BaseGateway {
 	@SubscribeMessage('on-line')
 	  handleOnLine(client: Socket, login: string){
 		const loginBack: string = client.handshake.query.login as string;
+		console.log("On-line: " + login + " - " + loginBack);
 		this.pongservice.addUserToList(loginBack)
 	  }
 	

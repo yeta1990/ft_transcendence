@@ -236,7 +236,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 				if (isWebAdmin) return u;
 			})))
 			.filter(u => u !== undefined)
-			console.log(activeWebAdminsInServer)
+			//console.log(activeWebAdminsInServer)
 
 
 		const usersArray = Array.from(this.chatService.getAllChatUsers());
@@ -255,13 +255,13 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
 	if (!roomIds) return [];
 	const usersRaw: Array<string> = Array.from(roomIds);
-	console.log("users raw")
-	console.log(usersRaw)
+	//console.log("users raw")
+	//onsole.log(usersRaw)
 	let usersWithCompleteData: Array<ChatUser> = new Array();
 	usersRaw.forEach(x => {
 		usersWithCompleteData.push(this.chatService.getAllChatUsers().get(x));
 	});
-	console.log(usersWithCompleteData)
+	//console.log(usersWithCompleteData)
     return (usersWithCompleteData);
   }
 
@@ -435,7 +435,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	    const socketIdsByLogin: Array<string> = this.getClientSocketIdsFromLogin(login);
   	  	//unsubscribe user from socket service
   	  	for (const clientId of socketIdsByLogin){
-  	  		console.log(clientId)
+  	  		//console.log(clientId)
   		  	if (bannedUsers && bannedUsers.length > 0) {
 				const blockedUsersByLogin: Array<string> =  bannedUsers
 				.map(m => m.login)
