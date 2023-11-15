@@ -522,4 +522,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     	});
 		this.modalService.openModal('template7', room);
 	}
+
+	joinUserToRoomAsViwer(room: string){
+		this.chatService.joinUserToRoomAsViwer(room);
+	}
 }

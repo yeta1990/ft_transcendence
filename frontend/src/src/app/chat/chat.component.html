@@ -4,7 +4,7 @@
       <ul class="channel-list">
       	  <div *ngFor="let room of myJointRoomList">
       	 	  <li *ngIf="room[0] === '#'" [class.active]="currentRoom ===room" class="d-flex"> 
-      	 	  	  <div class="p-2 flex-grow-1 link-channel" (click)="joinUserToRoom(room, '')">
+      	 	  	  <div class="p-2 flex-grow-1 link-channel" (click)="joinUserToRoom(room, '')"(click)="joinUserToRoomAsViwer(room)">
 					{{room}} <i *ngIf="isPrivateRoom(room)" class="bi bi-lock"></i>	
 				  </div>
 				<div class="p-2">

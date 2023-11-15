@@ -1,7 +1,9 @@
-<app-nav-bar/>
+<!--app-nav-bar/-->
 <!--button (click)="mode(1)">Normal</button>
 <button (click)="mode(2)">Insane</button-->
 <!--button (click)="mode('on-line')">On-line</button-->
-<canvas #gameCanvas width={{game.canvasWidth}} height={{game.canvasheight}}></canvas>
-<script type="text/javascript" src="pong.component.ts"></script>
-<app-chat/>
+<div>
+    <canvas #gameCanvas width={{game.canvasWidth}} height={{game.canvasheight}}></canvas>
+    <script type="text/javascript" src="pong.component.ts"></script>
+</div>
+<!--app-chat/-->

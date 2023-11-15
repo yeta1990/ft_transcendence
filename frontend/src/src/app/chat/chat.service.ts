@@ -210,4 +210,7 @@ export class ChatService {
 		this.socketService.sendMessageToServer(events.AdminRevokeChatOwnership, room);
 	}
 
+	joinUserToRoomAsViwer(room: string){
+		this.socketService.sendMessageToServer("joinGameAsViwer", room);
+	}
 }

@@ -144,6 +144,10 @@ export class PongComponent implements OnInit, OnDestroy {
             this.gameContext!.fillStyle = "#00FF00";
             let winner = this.game.playerOne + " WON!"
             this.gameContext!.fillText(winner, 250, 200);
+            var again = "Press ESC for play again";
+            var textWidth = this.gameContext!.measureText(again).width;
+            this.gameContext!.fillStyle = "#808080";
+            this.gameContext!.fillText(again, (this.canvas.width - textWidth) / 2, 250);
         } else if (this.game.playerTwoScore >= 3) { //POINTS
             //this.restartScores();
             this.gameContext!.fillStyle = "#FF0000";

@@ -39,7 +39,7 @@ export class PongService {
             0,                  //playerOneVel
 
 	        //PaddleTwoComponent
-	        700 - (20 + 20),    //playerTwoX    //this.canvas.width - (20 + 20),
+	        700 - (20 + 10),    //playerTwoX    //this.canvas.width - (20 + 20),
 	        400 /2 - 60 / 2,    //playerTwoY    //this.canvas.height / 2 - 60 / 2,
 	        10,                 //playerTwoW
 	        60,                 //playerTwoH
