@@ -37,6 +37,7 @@ export class UserProfileComponent implements OnInit {
   myIncomingFriendRequests: Array<string> = [];
   imagesBaseUrl: string = environment.apiUrl + '/uploads/'
   loaded: boolean = false;
+  found: boolean = true;
 
   constructor(
 		private profileService: UserProfileService,
@@ -54,6 +55,10 @@ export class UserProfileComponent implements OnInit {
 		const login = this.activateroute.snapshot.paramMap.get('login');
 		if ( login !== null ){
 			this.profileService.getUserIDByLogin(login).subscribe((userId: number) => {
+				if (userId === -1) {
+					this.found = false;
+					return ;
+				}
 				forkJoin([
 					this.profileService.getUserProfile(userId),
 					this.profileService.getUserAchievements(userId),
