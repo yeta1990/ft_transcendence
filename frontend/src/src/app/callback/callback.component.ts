@@ -94,6 +94,7 @@ export class CallbackComponent implements OnInit {
 			}
 		  } else {
 			console.log("El cierre del modal no está confirmado");
+			this.router.navigateByUrl('/login')
 		  }
 	  
 	  });
