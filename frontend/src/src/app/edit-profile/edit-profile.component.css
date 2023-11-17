@@ -1,5 +1,78 @@
-.tab {
-    display: inline-block;
-    width: 150px;
-    text-align: right;
+/* Estilos generales para el fondo */
+.background {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-bottom: 150px;
+    overflow: auto;
+}
+
+/* Estilos generales para el contenedor del perfil */
+.profile-container {
+    background-color: #000000;
+    min-width: 50%;
+    min-height: 60%;
+    margin-top: 2%;
+    position: relative;
+    border-radius: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Estilos generales para el contenedor del formulario */
+.form-container {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 200vh; /* Solo para propósitos de demostración, ajusta según sea necesario */
+    background-color: transparent;
+}
+
+/* Estilos para los títulos */
+.title01,
+.title02 {
+    font-family: "Roboto", sans-serif;
+    color: white;
+    font-size: 25px;
+    text-align: left;
+    margin-left: 5%;
+    text-transform: uppercase;
+}
+
+.title01 {
+    margin-top: 20px;
+}
+
+
+.title02 {
+    margin-top: 50px;
+}
+
+/* Estilos para los subtítulos */
+.subtitle,
+.subtitle2 {
+    font-family: "Roboto", sans-serif;
+    text-align: left;
+    margin-left: 5%;
+}
+
+.subtitle {
+    color: #999;
+    font-size: 14px;
+    margin-top: 30px;
+}
+
+.subtitle2 {
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    margin-left: 7%;
+    margin-top: 30px;
 }

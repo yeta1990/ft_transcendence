@@ -15,6 +15,7 @@ import { switchMap, takeUntil, tap } from 'rxjs/operators';
 import { ModalService } from '../modal/modal.service';
 import { Subscription } from "rxjs"
 import { ToasterService } from '../toaster/toaster.service';
+import { ValidationService } from './validation-service/validation-service.service';
 
 
 @Component({
@@ -36,6 +37,7 @@ export class EditProfileComponent implements  OnInit {
   private modalClosedSubscription: Subscription = {} as Subscription;
 
   editForm = this.editBuilder.group({
+    login:'',
 		firstName: '',
     lastName: '',
 		nick: '',
@@ -54,7 +56,8 @@ export class EditProfileComponent implements  OnInit {
     private location: Location,
     private activatedRoute: ActivatedRoute,
     private modalService: ModalService,
-    private toasterService: ToasterService
+    private toasterService: ToasterService,
+    private readonly validationService: ValidationService,
 	){
   }
 
@@ -73,6 +76,7 @@ export class EditProfileComponent implements  OnInit {
     this.newUser = this.user;
 	if (!this.newUser) return;
 
+    this.newUser.login = this.editForm.get('login')?.value!;
     this.newUser.firstName = this.editForm.get('firstName')?.value!;
     this.newUser.lastName = this.editForm.get('lastName')?.value!;
     this.newUser.nick = this.editForm.get('nick')?.value!;
@@ -144,7 +148,10 @@ export class EditProfileComponent implements  OnInit {
           if (id !== null && (id === this.user?.id || this.user?.userRole == UserRole.ADMIN)) {
             this.editForm.controls['firstName'].setValue(this.user!.firstName);
             this.editForm.controls['lastName'].setValue(this.user!.lastName);
-            this.editForm.controls['nick'].setValue(this.user!.nick);
+            this.editForm.get('nick')?.valueChanges.subscribe(() => {
+              const newNick = this.editForm.get('nick')?.value!;
+              this.validateNick(newNick);
+            });
             this.editForm.controls['email'].setValue(this.user!.email);
             this.mfaActivated = this.user?.mfa || false;
           } else {
@@ -159,6 +166,24 @@ export class EditProfileComponent implements  OnInit {
       }
     });
   }
+
+  validateNick(newNick: string | null): void {
+    if (newNick !== null) {
+      this.validationService.checkNickAvailability({ nick: newNick }).subscribe(
+        (response) => {
+          if (response == false) {
+            this.editForm.get('nick')?.setErrors({ 'nickTaken': true });
+            console.log("NOT AVAILABLE");
+          } else {
+            console.log("AVAILABLE");
+          }
+        },
+        (error) => {
+          console.error('Error al verificar el nick:', error);
+        }
+      );
+      }
+    }
 
   editProfile() {
 		
