@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { MyProfileService } from '../my-profile/my-profile.service';
 import { AuthService } from '../auth/auth.service';
 import { HomeService } from './home.service';
+import { PongComponent } from '../pong/pong.component';
 
 @Component({
   selector: 'app-home',
@@ -12,9 +13,11 @@ import { HomeService } from './home.service';
 export class HomeComponent {
 
   constructor(
+		private homeService: HomeService,
 		private profileService: MyProfileService,
 		private authService: AuthService,
-		private router: Router,
+		private router: Router
+
 	){
 		if (this.authService.isLoggedIn())
 		{
@@ -24,13 +27,5 @@ export class HomeComponent {
 		}
 	}
   allUsers(): void {
-	}
-
-	newRoom(){
-		this.newRoom();
-	}
-
-	onLine(){
-		this.onLine();
 	}
 }

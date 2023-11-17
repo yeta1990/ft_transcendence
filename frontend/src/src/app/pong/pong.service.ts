@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { SocketService } from '../socket.service';
 import { Subject, from, Observable } from  'rxjs';
 import { ChatMessage, GameRoom, SocketPayload } from '@shared/types';
+import { PongComponent } from './pong.component';
 
 @Injectable({
   providedIn: 'root'
@@ -10,15 +11,16 @@ export class PongService {
 
   public _onlineBoolean: boolean = false;
   constructor(private socketService: SocketService) {
+    
 	}
 
   get onlineBoolean(): boolean {
     return this._onlineBoolean;
   }
 
-  set onlineBoolean(value: boolean) {
-    this._onlineBoolean = value;
-  }
+  // set onlineBoolean(value: boolean) {
+  //   this._onlineBoolean = value;
+  // }
 	forceInit() {
 		if (!this.socketService.isConnected()) this.socketService.initializeSocket("/game")
 	}

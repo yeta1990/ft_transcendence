@@ -151,8 +151,8 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   async handleDisconnect(socket: Socket): Promise<void> {
 		if (!socket) return;
 		//const user = this.user.get(socket.id)
-		const login: string = this.chatService.getChatUserBySocketId(socket.id)?.login
-		//if (!user) return;
+		const login: string = this.chatService.getChatUserBySocketId(socket.id)?.login;
+		if (!login) return;
   	  //const login: string = user.login
 		this.logger.log(`Socket client disconnected: ${socket.id}`)
 	  this.chatService.deleteChatUserBySocketId(socket.id)

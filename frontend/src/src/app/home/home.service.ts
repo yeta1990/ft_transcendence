@@ -16,16 +16,8 @@ export class HomeService {
   constructor(
     private httpClient: HttpClient, 
     private pongService: PongService, 
-    private gameRoom: PongComponent,
+    //private gameRoom: PongComponent,
     private myProfileService: MyProfileService,
     private route: ActivatedRoute) {}
     
-    newRoom(){
-      this.gameRoom = new PongComponent(this.pongService, this.myProfileService, this.route);
-    }
-
-    onLine() {
-      this.pongService.onlineBoolean = true;
-      this.gameRoom = new PongComponent(this.pongService, this.myProfileService, this.route);
-    }
   }
