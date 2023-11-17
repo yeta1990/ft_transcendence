@@ -741,7 +741,7 @@ export class ChatGateway extends BaseGateway {
 			}
 		});
 		const successfulJoin = await 
-		  this.joinUserToRoom(client.id, login, room, "");
+		  this.joinUserToRoom(client.id, login, room, null);
 	}
 
 @SubscribeMessage('joinGame')
@@ -780,7 +780,7 @@ export class ChatGateway extends BaseGateway {
 			  }
 		  });
   		const successfulJoin = await 
-		  this.joinUserToRoom(clientSocketId, login, room, "");
+		  this.joinUserToRoom(clientSocketId, login, room, null);
 
   		if (successfulJoin){
 			//const response: ChatMessage = generateJoinResponse(originalRoom);

@@ -341,6 +341,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		let hardJoin: boolean = true; //login wasn't in channel with other client
 	  	const roomExists: boolean = await this.chatService.isRoomCreated(room);
 		if (!roomExists){
+			console.log("password + ", password)
 			const successfulCreatedAndJoin: boolean = await this.createNewRoomAndJoin(clientId, login, room, password)
 			if (!successfulCreatedAndJoin) return false;
 		}
