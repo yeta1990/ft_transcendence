@@ -387,11 +387,13 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	    const socketIdsByLogin = this.getClientSocketIdsFromLogin(login);
 	    const joinedRoomsByLogin: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(login);
 	    const privateRoomsByLogin: Array<string> = await this.chatService.getMyPrivateRooms(login);
+	    if (socketIdsByLogin){
 	  	socketIdsByLogin.forEach(socketId => {
 	  	  this.server.in(socketId).socketsJoin(room)
 		  this.server.to(socketId).emit(events.ListMyJoinedRooms, joinedRoomsByLogin);
 		  this.server.to(socketId).emit(events.ListMyPrivateRooms, privateRoomsByLogin);
 	  	});
+	  	}
 
 	  	//announce the rest of the channel a new user has joined
 	  	if (hardJoin && !room.includes(':') && !room.includes('@')){

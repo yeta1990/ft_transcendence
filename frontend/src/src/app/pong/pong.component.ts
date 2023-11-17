@@ -54,6 +54,7 @@ export class PongComponent implements OnInit, OnDestroy {
         .subscribe((payload: SocketPayload) => {
             if (payload.event === 'gameStatus'){ 
                 this.game = payload.data;
+                this.chatService.setCurrentRoom(payload.data.room);
                 this.canvas = this.gameCanvas?.nativeElement;
                 this.gameContext = this.canvas?.getContext('2d');
                 requestAnimationFrame(this.gameLoop);
@@ -70,7 +71,9 @@ export class PongComponent implements OnInit, OnDestroy {
                 }
             }
             if (payload.event === 'getStatus'){
-                if(this.chatService.getCurrentRoom() == payload.data.room)
+            	console.log(this.chatService.getCurrentRoom())
+            	console.log(payload.data.room)
+				if(this.chatService.getCurrentRoom() == payload.data.room)
                     this.game = payload.data;
             }               
         }));
@@ -167,7 +170,7 @@ export class PongComponent implements OnInit, OnDestroy {
             this.pongService.playOnLine(this.playerLogin);
         }
         else{
-            this.pongService.joinUserToRoom("#pongRoom");
+        	if (this.chatService.getCurrentRoom() != "#pongService_" + this.playerLogin) this.pongService.joinUserToRoom("#pongRoom");
         }
     }
 

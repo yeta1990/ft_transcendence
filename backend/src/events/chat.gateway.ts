@@ -735,11 +735,6 @@ export class ChatGateway extends BaseGateway {
   	async handleJoinRoomGameAsViwer(client: Socket, room: string): Promise<void>{
 		const login: string = client.handshake.query.login as string;
 		const rooms :Array<string> = this.getActiveRooms();
-		rooms.forEach(element => {
-			if (element.includes("#pongRoom")){
-				this.removeUserFromRoom(element, login);
-			}
-		});
 		const successfulJoin = await 
 		  this.joinUserToRoom(client.id, login, room, null);
 	}
@@ -774,11 +769,6 @@ export class ChatGateway extends BaseGateway {
 		console.log("Try join..");
   		const wasUserAlreadyActiveInRoom: boolean = await this.isUserAlreadyActiveInRoomGame(clientSocketId, room);
 		  const rooms :Array<string> = this.getActiveRooms();
-		  rooms.forEach(element => {
-			  if (element.includes("#pongRoom")){
-				  this.removeUserFromRoom(element, login);
-			  }
-		  });
   		const successfulJoin = await 
 		  this.joinUserToRoom(clientSocketId, login, room, null);
 
