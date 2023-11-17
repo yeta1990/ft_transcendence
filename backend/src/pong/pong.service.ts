@@ -9,13 +9,31 @@ export class PongService {
     public game: GameRoom;
     //public gameGateaway: GameGateway;
     //public baseGateway: BaseGateway;
-    public gameGateaway: ChatGateway;
+    
     games: Map<string, GameRoom> = new Map<string, GameRoom>;
     public numberOfGames: number = 0;
     public interval: any = 0;
-
+    public gameGateaway: ChatGateway;
     private matchMaking: Array<string> = new Array<string>;
-
+    constructor() {
+        setInterval(()=>{
+            //this.updateBall(element.room)
+            this.games.forEach(element => {
+                this.updateBall(element.room)  
+                if (element.playerTwo == "") {
+                    this.updateComputer(element);
+                }              
+                this.move(element);
+                const targetUsers: Array<ChatUser> = this.gameGateaway
+                .getActiveUsersInRoom(element.room);
+                for (let i = 0; i < targetUsers.length; i++){
+                    //console.log("\t-> " + targetUsers[i].login + " in " + game.room);
+                    this.gameGateaway.server.to(targetUsers[i].client_id).emit('getStatus', element);
+                } 
+            });
+                        
+        },1000/64)
+    }
     initGame (name: string, gameGateaway: ChatGateway, viwer: number, nick:string): GameRoom {
         
         if (this.games.get(name))
@@ -80,7 +98,7 @@ export class PongService {
         this.randomDir(name);
         this.numberOfGames++;
 
-        this.updateGame(gameGateaway, this.games.get(name))
+        //this.updateGame(gameGateaway, this.games.get(name))
         // if (this.numberOfGames == 1){
         //     this.updateGame(gameGateaway)
         // }
@@ -315,6 +333,7 @@ export class PongService {
 
     disconectPlayer(room:string, login:string) {
         var g = this.games.get(room)
+        if (!g.playerOne || !g.playerTwo) {return;}
        if (g.playerOne == login){
            g.playerOne = "";
        }         
@@ -326,6 +345,7 @@ export class PongService {
         if (g.playerOne == "" && g.playerTwo == "") {
             this.games.delete(room);
         }
+
 //        clearInterval(g.interval);
     }
 }

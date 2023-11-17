@@ -10,6 +10,7 @@ import { MyProfileService } from '../my-profile/my-profile.service';
 import { User } from '../user';
 import { AppRoutingModule } from '../app-routing-module/app-routing-module.module';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ChatService } from '../chat/chat.service';
 
 @Component({
   selector: 'app-pong',
@@ -36,6 +37,7 @@ export class PongComponent implements OnInit, OnDestroy {
         private pongService:PongService,
         private myProfileService: MyProfileService,
         private route: ActivatedRoute,
+        private chatService: ChatService,
         //private pongService: PongService,
     ){
         //window.location.reload();
@@ -68,8 +70,8 @@ export class PongComponent implements OnInit, OnDestroy {
                 }
             }
             if (payload.event === 'getStatus'){
-            
-                this.game = payload.data;
+                if(this.chatService.getCurrentRoom() == payload.data.room)
+                    this.game = payload.data;
             }               
         }));
         if (!this.online && !this.contected) { 

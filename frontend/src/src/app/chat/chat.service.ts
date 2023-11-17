@@ -18,7 +18,7 @@ export class ChatService {
 	private myBlockedUsers: Array<string> = []
 	activeUsers: Array<ChatUser> = [];
 	loginNickEquivalence: Array<any> = []
-
+	currentRoom: string = ""
 
 	constructor(private socketService: SocketService) {
 	}
@@ -32,6 +32,14 @@ export class ChatService {
 //	getChatUserBySocketId()
 
 //	getChatUsersByLogin()
+	getCurrentRoom(): string {
+		return this.currentRoom
+	}
+
+	setCurrentRoom(room: string): void {
+		if (room === undefined) this.currentRoom = ""
+		this.currentRoom = room;
+	}
 
 	setActiveUsers(activeUsers: Array<ChatUser>){
 		this.activeUsers = activeUsers;

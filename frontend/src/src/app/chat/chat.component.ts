@@ -24,7 +24,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	newMessage: string = '';
 	messageList: Map<string, ChatMessage[]> = new Map<string, ChatMessage[]>();
-	currentRoom: string;
+	//currentRoom: string;
 	roomList: string[] = [""];
 	availableRoomsList: string[] = [];
 	myJointRoomList: string[] = [];
@@ -50,13 +50,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		private authService: AuthService
 
    ) {
-		this.currentRoom = "";
-		this.messageList.set(this.currentRoom, new Array<ChatMessage>);
+		
+		//this.currentRoom = this.getCurrentRoom();
+		this.messageList.set(this.getCurrentRoom(), new Array<ChatMessage>);
 		this.profileService.getUserDetails()
 			.subscribe(
 				(response: User) => {this.myUser= response;},
 			(error) => {console.log(error);}
 			);
+   }
+
+   getCurrentRoom(): string {
+		return this.chatService.getCurrentRoom()
    }
 
 //   joinUserToRoom(roomAndPass: string): void {
@@ -143,8 +148,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					)
 
 
-					if (!(this.availableRoomsList).includes(this.currentRoom)){ 
-						this.currentRoom = ""
+					if (!(this.availableRoomsList).includes(this.getCurrentRoom())){ 
+						this.chatService.setCurrentRoom("")
 //						this.myJointRoomList.filter(r => r != )
 					}
 				}
@@ -156,11 +161,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 //					console.log(payload.data)
 					this.myJointRoomList = Array.from(payload.data)	
 					if (this.myJointRoomList.length == 0){
-						this.currentRoom = "";
+						this.chatService.setCurrentRoom("")
 					}
-					else if (!this.myJointRoomList.includes(this.currentRoom)){
-						this.currentRoom = this.myJointRoomList[0];
-						this.joinUserToRoom(this.currentRoom, "")
+					else if (!this.myJointRoomList.includes(this.getCurrentRoom())){
+						this.chatService.setCurrentRoom(this.myJointRoomList[0]);
+						this.joinUserToRoom(this.getCurrentRoom(), "")
 					}
 				}
 				else if (payload.event === 'system'){
@@ -175,10 +180,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					this.toasterService.launchToaster(ToastValues.ERROR, payload.data.message)
 				}
 				else if (payload.event === 'join'){
-					this.currentRoom = payload.data.room;
+					this.chatService.setCurrentRoom(payload.data.room);
 					//check if the messageList map has space to store the room messages to prevent errors, but only 100% necessary in joinmp
 					if (!this.messageList.has(payload.data.room)){
-						this.messageList.set(this.currentRoom, new Array<ChatMessage>);
+						this.messageList.set(this.getCurrentRoom(), new Array<ChatMessage>);
 					}
 				}
 				else if (payload.event === 'joinmp'){
@@ -253,7 +258,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			return ;
 		const splittedCommand: Array<string> = command.split(" ");
 		if (splittedCommand[0] === '/help'){
-			this.sendMessageToChat("help", this.currentRoom, command);
+			this.sendMessageToChat("help", this.getCurrentRoom(), command);
 		}
 		else if (splittedCommand[0] === '/join' && splittedCommand.length > 2){
 			//channel list comma-separated and password
@@ -322,7 +327,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			this.processCommandToSend(messageToSend);
 		}
 		else if (messageToSend){
-			this.sendMessageToChat("message", this.currentRoom, messageToSend);
+			this.sendMessageToChat("message", this.getCurrentRoom(), messageToSend);
 		}
 		this.messageToChat.get('newMessage')!.setValue('');
 	}
