@@ -24,6 +24,11 @@ export class CallbackComponent implements OnInit {
 	) {}
 
 	code: string = '';
+	username: string = '';
+	password:string = '';
+	showWarning: boolean = false;
+	passwordEnabled: boolean = false;
+
 	private modalClosedSubscription: Subscription = {} as Subscription;
 
 	ngOnInit() {
@@ -102,5 +107,20 @@ export class CallbackComponent implements OnInit {
 
 	validateCode(code: string): boolean {
 		return /^[a-fA-F0-9]{64}$/.test(code);
+	}
+
+
+	onUsernameInput() {
+		this.showWarning = this.username.length > 0 || this.password.length > 0;
+	}
+
+	onPasswordInput() {
+		this.onUsernameInput();
+	}
+
+	onOAuth42MouseEnter() {
+	}
+
+	onOAuth42MouseLeave() {
 	}
 }
