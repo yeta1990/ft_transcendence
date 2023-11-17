@@ -34,6 +34,8 @@ export class PongService {
                         
         },1000/64)
     }
+
+
     initGame (name: string, gameGateaway: ChatGateway, viwer: number, nick:string): GameRoom {
         
         if (this.games.get(name))
@@ -233,10 +235,9 @@ export class PongService {
     }
 
     keyStatus(room: string, key: number, nick:string){
-    	console.log("key status " + key + " - " + nick);
         var g = this.games.get(room);
-        console.log(g.playerOne)
         if ((nick == g.playerOne) || (nick == g.playerTwo)){
+        	console.log(g)
             if(key == 27){
                 if (g.pause == true){
                     if(g.finish){

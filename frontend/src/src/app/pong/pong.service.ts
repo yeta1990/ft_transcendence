@@ -9,6 +9,7 @@ import { PongComponent } from './pong.component';
 })
 export class PongService {
 
+	eventSubscribed: boolean = false;
   public _onlineBoolean: boolean = false;
   constructor(private socketService: SocketService) {
     
@@ -18,6 +19,8 @@ export class PongService {
     return this._onlineBoolean;
   }
 
+	setEventSubscribed(active: boolean){ this.eventSubscribed = active}
+	getEventSubscribed(): boolean {return this.eventSubscribed}
   // set onlineBoolean(value: boolean) {
   //   this._onlineBoolean = value;
   // }

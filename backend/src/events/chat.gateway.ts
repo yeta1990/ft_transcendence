@@ -781,6 +781,7 @@ export class ChatGateway extends BaseGateway {
 			this.pongservice.setPlayer(room, login);			
 			console.log("Join succed to: " + response.room);
 			
+			console.log(response)
 			this.messageToClient(clientSocketId, 'gameStatus', response);
 
 			//sending old messages of the room, except for those of users that banned
@@ -829,6 +830,7 @@ export class ChatGateway extends BaseGateway {
 	
 	@SubscribeMessage('keydown')
  	handleMove(client: Socket, payload: any){
+ 		console.log(payload.key)
 		const login: string = client.handshake.query.login as string;
 		this.pongservice.keyStatus(payload.room, payload.key, login);
  	}
@@ -836,7 +838,7 @@ export class ChatGateway extends BaseGateway {
 	@SubscribeMessage('keyup')
  	handleMoveStop(client: Socket, payload: any){
 		const login: string = client.handshake.query.login as string;
-		this.pongservice.keyStatus(payload.room, 0, login);
+		if (payload.key != 27) this.pongservice.keyStatus(payload.room, 0, login);
  	}
 
 

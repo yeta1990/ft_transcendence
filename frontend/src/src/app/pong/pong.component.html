@@ -3,8 +3,8 @@
 <!--button (click)="subscribeToRoom(false)">Play</button-->
 <button (click)="mode('')">Play</button>
 <button (click)="mode('on-line')">On-line</button>
-<div>
-    <canvas #gameCanvas width={{game.canvasWidth}} height={{game.canvasheight}}></canvas>
+<div >
+    <canvas [hidden]="visibleCanvas()" #gameCanvas width={{game.canvasWidth}} height={{game.canvasheight}}></canvas>
     <script type="text/javascript" src="pong.component.ts"></script>
 </div>
 <!--app-chat/-->
