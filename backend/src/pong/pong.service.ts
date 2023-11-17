@@ -294,8 +294,8 @@ export class PongService {
         this.matchMaking.push(login);
         console.log("Waiting list: " + this.matchMaking);
         if (this.matchMaking.length >= 2){
-            //this.disconectPlayer("#pongRoom_" + this.matchMaking[0], this.matchMaking[0]);
-            //this.disconectPlayer("#pongRoom_" + this.matchMaking[1], this.matchMaking[1]);
+            this.disconectPlayer("#pongRoom_" + this.matchMaking[0], this.matchMaking[0]);
+            this.disconectPlayer("#pongRoom_" + this.matchMaking[1], this.matchMaking[1]);
             const room: string = "#pongRoom_" + this.matchMaking[0] + "+" + this.matchMaking[1];
             const idsPlayerOne: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMaking[0]);
             const idsPlayerTwo: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMaking[1]);
@@ -309,24 +309,23 @@ export class PongService {
             }
             //Remove both 
             this.matchMaking.shift();
-            
             this.matchMaking.shift();
         }
     }
 
     disconectPlayer(room:string, login:string) {
         var g = this.games.get(room)
-//        if (g.playerOne == login){
-//            g.playerOne = "";
-//        }         
-//        if (g.playerTwo == login){
-//            g.playerTwo = "";
-//        }
+       if (g.playerOne == login){
+           g.playerOne = "";
+       }         
+       if (g.playerTwo == login){
+           g.playerTwo = "";
+       }
         console.log("disconnect player: " + room)
         this.gameGateaway.removeUserFromRoom(room, login) 
-//         if (g.playerOne == "" && g.playerTwo == "") {
-//             this.games.delete(room);
-//         }
+        if (g.playerOne == "" && g.playerTwo == "") {
+            this.games.delete(room);
+        }
 //        clearInterval(g.interval);
     }
 }

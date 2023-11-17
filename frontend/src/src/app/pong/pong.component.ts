@@ -39,8 +39,62 @@ export class PongComponent implements OnInit, OnDestroy {
         //private pongService: PongService,
     ){
         //window.location.reload();
-        //this.online = this.route.snapshot.data['online'];
-        // this.online = this.pongService.onlineBoolean;
+        this.online = this.route.snapshot.data['online'];
+        this.online = this.pongService.onlineBoolean;
+        console.log("ONLINE-->" + this.online);
+        //this.game.gameMode = 0;
+        console.log("Try subscribe");
+        //this.pongService.joinUserToRoom("#pongRoom");
+        this.subscriptions.add(
+        this.pongService
+        .getMessage()
+        .pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
+        .subscribe((payload: SocketPayload) => {
+            if (payload.event === 'gameStatus'){ 
+                this.game = payload.data;
+                this.canvas = this.gameCanvas?.nativeElement;
+                this.gameContext = this.canvas?.getContext('2d');
+                requestAnimationFrame(this.gameLoop);
+                if (this.game.playerOne == this.playerLogin){
+                    console.log("Player ONE " + this.playerLogin);
+                    this.playerOne = true;
+                } else if (this.game.playerTwo == this.playerLogin){
+                    console.log("Player TWO");
+                    this.playerTwo = true;
+                }
+                else{
+                    this.game.ballX = payload.data.ballX;
+                    this.game.ballY = payload.data.ballY;
+                }
+            }
+            if (payload.event === 'getStatus'){
+            
+                this.game = payload.data;
+            }               
+        }));
+        if (!this.online && !this.contected) { 
+            console.log("Try join Room: #pongRoom");     
+            this.pongService.joinUserToRoom("#pongRoom");            
+            this.contected = true;
+        }
+        // else if (this.online && !this.contected) {
+        //     console.log("Player: " + this.playerLogin);
+        //     this.pongService.playOnLine(this.playerLogin);
+        //     this.contected = true;
+        // }        
+        window.addEventListener('keydown', (e) => {
+            if(this.playerOne || this.playerTwo)
+                this.pongService.sendSignal("keydown", this.game.room, e.which);
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if(this.playerOne || this.playerTwo)
+                this.pongService.sendSignal("keyup", this.game.room, e.which);
+        });
+    }
+
+    subscribeToRoom(online: boolean){
+        // this.online = online;
         // console.log("ONLINE-->" + this.online);
         // //this.game.gameMode = 0;
         // console.log("Try subscribe");
@@ -93,60 +147,6 @@ export class PongComponent implements OnInit, OnDestroy {
         // });
     }
 
-    subscribeToRoom(online: boolean){
-        this.online = online;
-        console.log("ONLINE-->" + this.online);
-        //this.game.gameMode = 0;
-        console.log("Try subscribe");
-        //this.pongService.joinUserToRoom("#pongRoom");
-        this.subscriptions.add(
-        this.pongService
-        .getMessage()
-        .pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
-        .subscribe((payload: SocketPayload) => {
-            if (payload.event === 'gameStatus'){ 
-                this.game = payload.data;
-                this.canvas = this.gameCanvas?.nativeElement;
-                this.gameContext = this.canvas?.getContext('2d');
-                requestAnimationFrame(this.gameLoop);
-                if (this.game.playerOne == this.playerLogin){
-                    console.log("Player ONE " + this.playerLogin);
-                    this.playerOne = true;
-                } else if (this.game.playerTwo == this.playerLogin){
-                    console.log("Player TWO");
-                    this.playerTwo = true;
-                }
-                else{
-                    this.game.ballX = payload.data.ballX;
-                    this.game.ballY = payload.data.ballY;
-                }
-            }
-            if (payload.event === 'getStatus'){
-            
-                this.game = payload.data;
-            }               
-        }));
-        if (!this.online && !this.contected) { 
-            console.log("Try join Room: #pongRoom");     
-            this.pongService.joinUserToRoom("#pongRoom");            
-            this.contected = true;
-        }
-        else if (this.online && !this.contected) {
-            console.log("Player: " + this.playerLogin);
-            this.pongService.playOnLine(this.playerLogin);
-            this.contected = true;
-        }        
-        window.addEventListener('keydown', (e) => {
-            if(this.playerOne || this.playerTwo)
-                this.pongService.sendSignal("keydown", this.game.room, e.which);
-        });
-
-        window.addEventListener('keyup', (e) => {
-            if(this.playerOne || this.playerTwo)
-                this.pongService.sendSignal("keyup", this.game.room, e.which);
-        });
-    }
-
     async ngOnInit() {
         this.pongService.forceInit();
         await this.myProfileService.getUserDetails()
@@ -163,6 +163,9 @@ export class PongComponent implements OnInit, OnDestroy {
         if (m == "on-line"){
             console.log(this.playerLogin + " join match making list ");
             this.pongService.playOnLine(this.playerLogin);
+        }
+        else{
+            this.pongService.joinUserToRoom("#pongRoom");
         }
     }
 
