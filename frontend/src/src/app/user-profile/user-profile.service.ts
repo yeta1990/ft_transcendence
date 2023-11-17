@@ -17,9 +17,16 @@ export class UserProfileService {
 		return this.httpClient.get<number>(environment.apiUrl + '/user/id/' + login)
 	}
 
+  getMyIncomingFriendRequests(myId: number){
+		return this.httpClient.get<User>(environment.apiUrl + '/user/'+myId)
+  }
+
   getUserProfile(id: number): Observable<User> {
 		return this.httpClient.get<User>(environment.apiUrl + '/user/' + id)
 	}
+  isMyFirstLogin(login: boolean){
+		return this.httpClient.get<User>(environment.apiUrl + '/user/first-login/'+login)
+  }
 
   getUserAchievements(id: number): Observable<Achievement[]> {
     return this.httpClient.get<Achievement[]>(environment.apiUrl + '/user/' + id + '/achievements')
@@ -30,4 +37,34 @@ export class UserProfileService {
         })
       );
   }
+
+  getMyBlockedUsers(): Observable<Array<string>> {
+	return this.httpClient.get<Array<string>>(environment.apiUrl+'/user/my-blocked')
+  }
+
+	blockUser(login: string) {
+		return this.httpClient.post<Array<string>>(environment.apiUrl+'/user/block?login='+login, {})
+	}
+
+	removeFriendship(login: string) {
+		return this.httpClient.post<Array<string>>(environment.apiUrl+'/user/friendship-remove?login='+login, {})
+	}
+
+	unBlockUser(login: string) {
+		return this.httpClient.post<Array<string>>(environment.apiUrl+'/user/unblock?login='+login, {})
+	}
+
+	sendFriendShipRequest(login:string){
+		return this.httpClient.get<boolean>(environment.apiUrl+'/user/friendshiprequest?login='+login)
+	}
+
+	acceptFriendShipRequest(login:string){
+		return this.httpClient.post<Array<string>>(environment.apiUrl+'/user/friendship/accept?login='+login, {})
+	}
+
+	rejectFriendshipRequest(login:string){
+		return this.httpClient.post<Array<string>>(environment.apiUrl+'/user/friendship/request/reject?login='+login, {})
+	}
+
+
 }

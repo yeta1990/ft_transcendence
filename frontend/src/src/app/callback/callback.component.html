@@ -1,1 +1,40 @@
-<p>I'm your callback and I'm waiting to the 42 API to confirm you are who you say!</p>
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Personalizado</title>
+  <link rel="stylesheet" href="callback.component.css"> 
+</head>
+
+<body>
+  <div class="profile-container">
+    <h1 class="app-title">Ft_Trascendence</h1>
+    <button class="oauth42-button">
+      <span class="spinner"></span>
+    </button>   
+    <input type="username" class="username-input" placeholder="Correo electrónico" [(ngModel)]="username" (input)="onUsernameInput()">
+    <input type="password" class="password-input" placeholder="Contraseña" [(ngModel)]="password" (input)="onPasswordInput()">
+    <p class="warning-text" *ngIf="showWarning">La funcionalidad de autenticación por contraseña no está habilitada. Por favor, accede a través del botón de Outh42.</p>
+    <div class="remember-toggle">
+        <span class="toggle-label">Recuérdame</span>
+        <div class="toggle-switch"></div>
+      </div>
+    <button class="access-button" [disabled]="!passwordEnabled">Acceda ahora</button>
+    <div class="register-section">
+        <p class="no-account-text">¿No tienes una cuenta de 42?, 
+          <a href="https://candidatura.42madrid.com/users/sign_up" target="_blank" class="signup-link">Apúntate</a>
+        </p>
+        
+    </div>
+    <router-outlet></router-outlet>
+  </div>
+</body>
+
+</html>
+
+
+<router-outlet></router-outlet>
+

@@ -10,6 +10,7 @@ import { MyProfileService } from '../my-profile/my-profile.service';
 import { ToasterService } from '../toaster/toaster.service'
 import { ModalService } from '../modal/modal.service'
 import { AuthService } from '../auth/auth.service'
+import { UserStatus } from '@shared/enum';
  
 @Component({
   selector: 'app-chat',
@@ -27,12 +28,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	roomList: string[] = [""];
 	availableRoomsList: string[] = [];
 	myJointRoomList: string[] = [];
-	myPrivateMessageRooms: string[] = [];
-	activeUsers: Array<string> = [];
+	myPrivateMessageRooms: any[] = [];
+//	activeUsers: Array<string> = [];
 	roomsMetaData: Map<string, RoomMetaData> = new Map<string, RoomMetaData>();
+	loginNickEquivalence: Map<string, string> =new Map();
 	myUser: User | undefined;
 	private subscriptions = new Subscription();
-	myBlockedUsers: Array<string> = []
 
 	destroy: Subject<any> = new Subject();
 	private modalClosedSubscription: Subscription = {} as Subscription;
@@ -69,6 +70,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		}
 		//sending only one signal to the server with the raw rooms string
 		this.chatService.joinUserToRoom([room, pass]);
+   }
+   getMyBlockedUsers(): Array<string> {
+		return this.chatService.getMyBlockedUsers()
    }
 
 	makeRoomAdmin(login:string, room: string){
@@ -184,7 +188,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					}
 				}
 				else if (payload.event === events.ActiveUsers){
-					this.activeUsers = payload.data;
+					this.chatService.setActiveUsers(payload.data)
 				}
 				else if (payload.event === events.RoomMetaData){
 					console.log("-------rooms metadata--------")
@@ -198,16 +202,20 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					for (const el of it){
 						console.log(JSON.stringify(el))
 					}
-					console.log("-----end of rooms metadata-----")
+
+//					console.log(payload.data.loginNickEquivalence)
 				}
 				else if (payload.event === events.BlockedUsers){
-					this.myBlockedUsers = payload.data;
+					this.chatService.setMyBlockedUsers(payload.data)
 				}
 				else if (payload.event === events.Kicked){
 					this.authService.logout()	
 				}
 				else if (payload.event === events.AllHistoricalMessages){
 					
+				}
+				else if (payload.event === events.LoginNickEquivalence){
+					this.chatService.setLoginNickEquivalence(payload.data)
 				}
         		this.scrollToBottom();
 			})
@@ -328,12 +336,59 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		console.log("go to chat room " + room);
 	}
 
+	getNickEquivalence(login: string): string {
+		return this.chatService.getLoginNickEquivalence().find(u => u.login === login).nick
+	}
+
 	isPrivateRoom(room: string): boolean {
 		if (this.roomsMetaData.has(room)){
 			const b = this.roomsMetaData.get(room)!.hasPass;
 			return b;
 		}
 		return false
+	}
+
+	getActiveUsers() {
+		return this.chatService.getActiveUsers()
+	}
+
+	isUserActive(login: string): UserStatus {
+		return this.chatService.isUserActive(login)
+	}
+
+	isSilenced(room:string, login:string): boolean {
+		const foundRoom  =   this.roomsMetaData.get(room)
+		if (!foundRoom) return false;
+		const silenced: Array<string> = foundRoom.silenced.map(f => f.login)
+		return silenced.includes(login)
+	}
+
+	isOwner(room: string, login: string): boolean {
+		if (login == null) return false;
+		const foundRoom = this.roomsMetaData.get(room)
+		if (!foundRoom) return false;
+		return foundRoom.owner === login
+	}
+
+	isAdmin(room: string, login: string): boolean {
+		const foundRoom  =   this.roomsMetaData.get(room)
+		if (!foundRoom) return false;
+		const admins: Array<string> = foundRoom.admins.map(f => f.login)
+		return admins.includes(login)
+	}
+
+	isUser(room: string, login: string):boolean {
+		const foundRoom  =   this.roomsMetaData.get(room)
+		if (!foundRoom) return false;
+		const users: Array<string> = foundRoom.users.map(f => f.login)
+		return users.includes(login)
+	}
+
+	isBanned(room: string, login:string): boolean {
+		const foundRoom  =   this.roomsMetaData.get(room)
+		if (!foundRoom) return false;
+		const banned: Array<string> = foundRoom.banned.map(f => f.login)
+		return banned.includes(login)
 	}
 
 	launchToast() {
@@ -384,52 +439,52 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
 
-	banUserFromRoomModal(nick: string, room: string){
+	banUserFromRoomModal(login: string, room: string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const confirm: boolean = this.modalService.getConfirmationInput();
       		if (confirm){
       			const banConfirmation = this.modalService.getModalData()[0];
-				this.banUserFromRoom(nick, room)
+				this.banUserFromRoom(login, room)
 			}
 			this.modalClosedSubscription.unsubscribe();
     	});
-		this.modalService.openModal('template3', [nick, room]);
+		this.modalService.openModal('template3', [this.getNickEquivalence(login), room]);
 	}
 
-	unBanUserFromRoomModal(nick: string, room: string){
+	unBanUserFromRoomModal(login: string, room: string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const confirm: boolean = this.modalService.getConfirmationInput();
       		if (confirm){
       			const banConfirmation = this.modalService.getModalData()[0];
-				this.unBanUserFromRoom(nick, room)
+				this.unBanUserFromRoom(login, room)
 			}
 			this.modalClosedSubscription.unsubscribe();
     	});
-		this.modalService.openModal('template3b', [nick, room]);
+		this.modalService.openModal('template3b', [this.getNickEquivalence(login), room]);
 	}
 
-	blockUserModal(targetUser: string) {
+	blockUserModal(login: string) {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const confirm: boolean = this.modalService.getConfirmationInput();
       		if (confirm){
       			const banConfirmation = this.modalService.getModalData()[0];
-				this.chatService.banUser2User(targetUser)
+				this.chatService.banUser2User(login)
 			}
 			this.modalClosedSubscription.unsubscribe();
     	});
-		this.modalService.openModal('template4', targetUser);
+		this.modalService.openModal('template4', this.getNickEquivalence(login));
 	}
 
-	unBlockUserModal(targetUser: string) {
+	unBlockUserModal(login: string) {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const confirm: boolean = this.modalService.getConfirmationInput();
       		if (confirm){
       			const banConfirmation = this.modalService.getModalData()[0];
-				this.chatService.noBanUser2User(targetUser)
+				this.chatService.noBanUser2User(login)
 			}
 			this.modalClosedSubscription.unsubscribe();
     	});
-		this.modalService.openModal('template5', targetUser);
+		this.modalService.openModal('template5', this.getNickEquivalence(login));
 	}
 
 	changePassToRoomModal(room:string){

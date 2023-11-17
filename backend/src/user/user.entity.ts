@@ -53,7 +53,8 @@ export class User {
 	userRole: UserRole;
 
 	@Column({
-		default:false
+		default:false,
+		type: 'boolean'
 	})
 	mfa: boolean;
 
@@ -61,7 +62,7 @@ export class User {
 		nullable: true,
 		default: undefined,
 	})
-	mfaSecret: string;
+	mfaSecret?: string;
 
 	@Column('text',{ 
 		array: true,
@@ -72,7 +73,7 @@ export class User {
 	// PERSONALIZACION -------------------------------------
 
 	@Column({
-		default: '' //Poner ruta de imagen por defecto
+		default: 'avatar.png' //Poner ruta de imagen por defecto
 	})
 	image: string;
 
@@ -134,34 +135,20 @@ export class User {
 	@JoinTable()
 	bannedUsers: User[];
 
+	@Column("text", {array:true, default: []})
+	friends: string[];
 
-
-	// AMIGOS ------------------------------------------------
-
-	@ManyToMany(() => Friend)
-	@JoinTable({
-		name: 'user_friends',
-		joinColumns: [
-		{
-			name: 'user_id',
-			referencedColumnName: 'id',
-		}
-		],
-		inverseJoinColumns: [
-		{
-			name: 'friend_id',
-			referencedColumnName: 'id',
-		}
-		],
-	})
-	friends: Friend[];
-
+	@Column("text", {array:true, default: []})
+	incomingFriendRequests: string[];
 
 	//Baneo de usuario de la web
 	@Column({
 		default:false
 	})
 	isBanned: boolean
+
+	@Column({default: true})
+	firstLogin: boolean;
 
 }
 

@@ -9,6 +9,9 @@ import { Achievement, AchievementsData } from '@shared/achievement'
 import { forkJoin } from 'rxjs';
 import { Location } from '@angular/common';
 import { UserModule } from '../user/user.module';
+import {ChatService} from '../chat/chat.service'
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 
 @Component({
@@ -30,8 +33,9 @@ export class UserProfileComponent implements OnInit {
   achievementsStatus: { name: string; achieved: boolean }[] = [];
   editingField: string | null = null;
   editedFields: { [key: string]: any } = {};
-
-
+  myLogin: string;
+  myIncomingFriendRequests: Array<string> = [];
+  imagesBaseUrl: string = environment.apiUrl + '/uploads/'
 
   constructor(
 		private profileService: UserProfileService,
@@ -39,7 +43,13 @@ export class UserProfileComponent implements OnInit {
 		private router: Router,
     	private activateroute: ActivatedRoute,
 		private location: Location,
-	) {}
+		private chatService: ChatService,
+		private httpClient: HttpClient
+	) {
+		this.myLogin = this.authService.getDecodedAccessToken(this.authService.getUserToken()!).login;
+		const currentID = this.authService.getDecodedAccessToken(this.authService.getUserToken()!).id;
+		this.profileService.getMyIncomingFriendRequests(currentID).subscribe((fr: User) => this.myIncomingFriendRequests = fr.incomingFriendRequests)
+	}
 
 	allUsers(): void {
 		console.log("All users login list:");
@@ -47,8 +57,9 @@ export class UserProfileComponent implements OnInit {
 	}
 
 	ngOnInit() {
+
 		const login = this.activateroute.snapshot.paramMap.get('login');
-		if ( login !== null )
+		if ( login !== null ){
 			this.profileService.getUserIDByLogin(login).subscribe((userId: number) => {
 				forkJoin([
 					this.profileService.getUserProfile(userId),
@@ -64,6 +75,8 @@ export class UserProfileComponent implements OnInit {
 				});
 				this.check_admin_level(userId);
 			});
+			this.profileService.getMyBlockedUsers().subscribe(users =>this.chatService.setMyBlockedUsers(users))
+		}
 	  }
 
 	  check_admin_level(userId: number) {
@@ -78,6 +91,28 @@ export class UserProfileComponent implements OnInit {
 		  this.editedFields[fieldName] = this.user[fieldName as keyof User];
 		  }
 		}
+		
+	
+	  isBlocked(): boolean {
+	  	  if (this.user){
+				return this.chatService.getMyBlockedUsers().includes(this.user!.login)
+		  }
+		  return false;
+	  }
+
+	  async blockUser(login:string) {
+		this.profileService.blockUser(login)
+			.subscribe(users => 
+				this.chatService.setMyBlockedUsers(users)
+			)
+	  }
+
+	  async unBlockUser(login:string) {
+		this.profileService.unBlockUser(login)
+			.subscribe(users => 
+				this.chatService.setMyBlockedUsers(users)
+			)
+	  }
 
 	  progressStyles: { [key: string]: string } = {};
 
@@ -88,7 +123,7 @@ export class UserProfileComponent implements OnInit {
 		if (totalMatches !== 0) {
 			loosePercentage = (user.losses / totalMatches) * 100;
 		}
-	  
+
 		this.gradientStart = Math.max(0, loosePercentage - 10); // Limitando entre 0 y 100
 		this.gradientEnd = Math.min(100, loosePercentage + 10); // Limitando entre 0 y 100;
 		
@@ -131,4 +166,38 @@ export class UserProfileComponent implements OnInit {
 		this.location.back(); // Navegar a la página anterior
 	}
 	
+	sendFriendShipRequest(login:string){
+		return this.profileService.sendFriendShipRequest(login)
+			.subscribe(r => {if (r) this.user!.incomingFriendRequests.push(this.myLogin)})
+	}
+
+	acceptFriendShipRequest(login:string){
+		return this.profileService.acceptFriendShipRequest(login)
+			.subscribe(r => {
+				if (r) {
+					this.user!.incomingFriendRequests = this.user!.incomingFriendRequests.filter(l => l != this.myLogin)
+					this.myIncomingFriendRequests = this.myIncomingFriendRequests.filter(l => l != login)
+					this.user!.friends.push(this.myLogin)
+				}
+			})
+	}
+
+	rejectFriendshipRequest(login:string){
+		return this.profileService.rejectFriendshipRequest(login)
+			.subscribe(r => {
+				if (r) {
+					this.user!.incomingFriendRequests = this.user!.incomingFriendRequests.filter(l => l != this.myLogin)
+					this.myIncomingFriendRequests = this.myIncomingFriendRequests.filter(l => l != login)
+				}
+			})
+	}
+
+	removeFriendship(login:string) {
+		return this.profileService.removeFriendship(login)
+			.subscribe(r => {if (r){
+				this.user!.friends = this.user!.friends.filter(f => f != this.myLogin)
+				this.myIncomingFriendRequests = this.myIncomingFriendRequests.filter(l => l != login)
+	 			}
+			} )
+	}
 }

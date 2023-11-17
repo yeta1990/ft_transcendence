@@ -2,9 +2,9 @@ import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DataSource, getConnection } from 'typeorm';
+import { DataSource, getConnection, UsingJoinTableIsNotAllowedError } from 'typeorm';
 
 import { AuthModule } from './auth/auth.module'
 import { AuthController } from './auth/auth.controller'
@@ -24,25 +24,44 @@ import { ChatModule } from './chat/chat.module';
 import { HashService } from './hash/hash.service';
 import {InvalidTokens} from './auth/invalid-tokens-entity'
 import { TokenValidationMiddleware } from './token-validation/token-validation.middleware'
+import * as Joi from '@hapi/joi';
+import { config } from 'process';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
  
 @Module({
   imports: [
   	ConfigModule.forRoot({
+		validationSchema: Joi.object({
+			POSTGRES_HOST: Joi.string().required(),
+			POSTGRES_PORT: Joi.number().required(),
+			POSTGRES_USER: Joi.string().required(),
+			POSTGRES_PASSWORD: Joi.string().required(),
+			POSTGRES_DATABASE: Joi.string().required(),
+			PORT: Joi.number(),
+		}),
 		envFilePath: '.env',
+	}),
+	ServeStaticModule.forRoot({
+		rootPath: join(__dirname, '../..', 'uploads'),
+		serveRoot: '/uploads',
 	}),
 	AuthModule,
 	UserModule,
-	TypeOrmModule.forRoot({
-		type: 'postgres',
-		host: process.env.POSTGRES_HOST,
-		port: parseInt(process.env.POSTGRES_PORT),
-		username: process.env.POSTGRES_USER,
-		password: process.env.POSTGRES_PASSWORD,
-		database: process.env.POSTGRES_DATABASE,
-		entities: [User, Friend, Achievement, Room, ChatMessage, InvalidTokens],
-		synchronize: true, // creo que esto hay que cambiarlo para subirlo a producción
-		logging: false //useful for debugging errors in typeorm/postgres
-
+	TypeOrmModule.forRootAsync({
+		imports: [ConfigModule],
+		inject: [ConfigService],
+		useFactory: (configService: ConfigService) => ({ 
+			type: 'postgres',
+			host: configService.get('POSTGRES_HOST'),
+			port: configService.get('POSTGRES_PORT'),
+			username: configService.get('POSTGRES_USER'),
+			password: configService.get('POSTGRES_PASSWORD'),
+			database: configService.get('POSTGRES_DATABASE'),
+			entities: [User, Friend, Achievement, Room, ChatMessage, InvalidTokens],
+			synchronize: true, // creo que esto hay que cambiarlo para subirlo a producción
+			logging: false //useful for debugging errors in typeorm/postgres
+		})
 	}),
 	HttpModule,
 	EventsModule,

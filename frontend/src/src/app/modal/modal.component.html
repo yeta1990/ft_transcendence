@@ -257,6 +257,83 @@
         </div>
       </ng-template>
 
+	  <ng-template [ngSwitchCase]="'enableMfaTemplate'">
+		<div id="enableMfaModal">
+		  <div class="modal-header">
+			<h1 class="modal-title fs-5">Recibir códigos de una app de autenticación</h1>
+			 <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<p>Cada vez que te autenticas, además de validar la cuenta de 42, tendrás que usar una app de autenticación para generar un código de un solo uso.</p>
+	  
+			<p class="font-weight-bold">Paso 1: Escanea el siguiente código QR o introduce el secreto manualmente en tu app de autenticación</p>
+	  
+			<div class="modal-body text-center"> 
+				<img [src]="getQrCodeUrl()" alt="Código QR" class="img-fluid mx-auto d-block"> 
+			</div>
+	  
+			<hr class="my-3" style="width: 60%; margin: 0 auto;">
+	  
+			<p class="font-weight-bold">Paso 2: Introducir el código de 6 dígitos que ves en la app de autenticación</p>
+	  
+			<div class="mb-3">
+			  <label for="authCodeInput" class="form-label">Código de autenticación</label>
+			  <input type="text" class="form-control" id="authCodeInput" [(ngModel)]="inputValue" name="authCodeInput">
+			</div>
+	  
+			<button type="button" class="btn btn-primary btn-block" (click)="saveAndCloseModal()">Confirmar</button>
+		  </div>
+		</div>
+	  </ng-template>
+	  
+	  <ng-template [ngSwitchCase]="'disableMfaTemplate'">
+		<div id="disableMfaModal">
+		  <div class="modal-header">
+			<h1 class="modal-title fs-5">Deshabilitar la autenticación de dos factores</h1>
+			<button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<p><strong class="text-danger">ADVERTENCIA:</strong> Deshabilitar la autenticación en dos pasos hará que tu cuenta sea menos segura. ¿Estás seguro de que quieres continuar?</p>
+			<div class="mb-3">
+			  <label for="authCodeInput" class="form-label">Código de autenticación</label>
+			  <input type="text" class="form-control" id="authCodeInput" [(ngModel)]="inputValue" name="authCodeInput">
+			</div>
+			<p style="font-style: italic; font-size: 0.875rem;">Para deshabilitar el 2FA queremos comprobar por última vez que eres tú realmente quien quiere hacerlo, por ello te pedimos que introduzcas el número una última vez.</p>
+	  
+			<div class="d-flex justify-content-between">
+			  <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+			  <button type="button" class="btn btn-danger" (click)="confirmationButton()">Deshabilitar</button>
+			</div>
+		  </div>
+		</div>
+	  </ng-template>
+	  
+
+	  <ng-template [ngSwitchCase]="'verifyMfaTemplate'">
+	  <div id="verifyMfaModal">
+		<div class="modal-header">
+		  <h1 class="modal-title fs-5">FT_TRASCENDENCE: Login</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		</div>
+		<div class="modal-body">
+		  <p class="text-center font-weight-bold">Introduce el código de seguridad para continuar</p>
+	  
+		  <p class="text-center">Parece que este es un nuevo dispositivo, navegador o localización. Por favor, introduce el código de seguridad de tu app de autenticación.
+			<a href="https://support.google.com/accounts/answer/1066447?hl=en&co=GENIE.Platform%3DAndroid" target="_blank">MÁS INFORMACIÓN.</a></p>
+	  	  
+		  <div class="mb-3 text-center">
+			<label for="authCodeInput" class="form-label">Código de seguridad</label>
+			<input type="text" class="form-control" id="authCodeInput" [(ngModel)]="inputValue" name="authCodeInput" maxlength="6" pattern="[0-9]{6}">
+		  </div>
+	  
+		  <div class="text-center">
+			<button type="button" class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+			<button type="button" class="btn btn-primary" [disabled]="inputValue.length !== 6" (click)="confirmationButton()">Continuar</button>
+		  </div>
+		</div>
+	  </div>
+	</ng-template>
+
     </ng-container>
   </div>
 </div>
