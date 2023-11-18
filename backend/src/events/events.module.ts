@@ -13,11 +13,12 @@ import { Room } from '../chat/room.entity';
 import { HashService } from '../hash/hash.service';
 import { UserModule } from '../user/user.module';
 import { PongService } from 'src/pong/pong.service';
+import { PongModule } from 'src/pong/pong.module';
 import { ChatAdminService } from '../chat/chat-admin/chat-admin.service'
 
 @Module({
 	imports: [TypeOrmModule.forFeature([Room, User, ChatMessage]), forwardRef(() =>AuthModule), HttpModule, forwardRef(()=>UserModule)],
-  	providers: [ChatGateway, ChatService, ChatAdminService, RoomService, ChatMessageService, GameGateway, HashService, PongService],
+  	providers: [ChatGateway, ChatService, ChatAdminService, RoomService, ChatMessageService, GameGateway, HashService, PongService ],
   	exports: [ChatGateway]
 
 })

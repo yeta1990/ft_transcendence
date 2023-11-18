@@ -1,5 +1,5 @@
 import { SubscribeMessage, WebSocketGateway, WsResponse } from '@nestjs/websockets';
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger, forwardRef } from '@nestjs/common';
 import { BaseGateway } from './base.gateway';
 import { Socket } from 'socket.io';
 import { ChatMessage, SocketPayload, RoomMetaData, GameRoom } from '@shared/types';
@@ -20,6 +20,7 @@ export class ChatGateway extends BaseGateway {
 
   constructor(private chatMessageService: ChatMessageService, 
   			 private chatAdminService: ChatAdminService,
+			 @Inject(forwardRef(() => PongService))
 			 private pongservice:PongService) {
   			 	 super();
   			 	 this.gatewayName = "ChatGateway"
@@ -30,7 +31,6 @@ export class ChatGateway extends BaseGateway {
   //separate afterInit from the base class
   afterInit(): void {
 	this.chatService.getUsersObservable().subscribe(trigger=> {
-		console.log("yeeeessssssss")
 		this.emitUpdateUsersAndRoomsMetadata()
 	}
 	)
@@ -784,7 +784,7 @@ export class ChatGateway extends BaseGateway {
 			console.log("login " + login);
 			const response: GameRoom = this.pongservice.initGame(room, this, userInRoom.length, login);
 			//var userInRoom = this.getActiveUsersInRoom('#pongRoom');
-			this.pongservice.setPlayer(room, login);			
+			this.pongservice.setPlayer(room, login);
 			console.log("Join succed to: " + response.room);
 			
 			console.log(response)
