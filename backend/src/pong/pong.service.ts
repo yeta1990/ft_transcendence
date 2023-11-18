@@ -237,7 +237,7 @@ export class PongService {
     keyStatus(room: string, key: number, nick:string){
         var g = this.games.get(room);
         if ((nick == g.playerOne) || (nick == g.playerTwo)){
-        	console.log(g)
+//        	console.log(g)
             if(key == 27){
                 if (g.pause == true){
                     if(g.finish){

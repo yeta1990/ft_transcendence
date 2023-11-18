@@ -836,7 +836,6 @@ export class ChatGateway extends BaseGateway {
 	
 	@SubscribeMessage('keydown')
  	handleMove(client: Socket, payload: any){
- 		console.log(payload.key)
 		const login: string = client.handshake.query.login as string;
 		this.pongservice.keyStatus(payload.room, payload.key, login);
  	}
