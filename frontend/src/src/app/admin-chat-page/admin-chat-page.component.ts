@@ -138,7 +138,12 @@ export class AdminChatPageComponent implements OnInit {
 	}
 
 	getNickEquivalence(login: string): string {
-		return this.chatService.getLoginNickEquivalence().find(u => u.login === login)?.nick
+		const loginEquivalence: Array<any> | undefined = this.chatService.getLoginNickEquivalence()
+		if (loginEquivalence){
+			const foundUser = loginEquivalence.find(u => u.login === login)
+			if (foundUser) return foundUser.nick
+		}
+		return login;
 	}
 
 	isOwner(room: string, login: string): boolean {

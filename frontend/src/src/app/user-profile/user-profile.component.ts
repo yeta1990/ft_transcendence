@@ -36,6 +36,8 @@ export class UserProfileComponent implements OnInit {
   myLogin: string;
   myIncomingFriendRequests: Array<string> = [];
   imagesBaseUrl: string = environment.apiUrl + '/uploads/'
+  loaded: boolean = false;
+  found: boolean = true;
 
   constructor(
 		private profileService: UserProfileService,
@@ -49,6 +51,36 @@ export class UserProfileComponent implements OnInit {
 		this.myLogin = this.authService.getDecodedAccessToken(this.authService.getUserToken()!).login;
 		const currentID = this.authService.getDecodedAccessToken(this.authService.getUserToken()!).id;
 		this.profileService.getMyIncomingFriendRequests(currentID).subscribe((fr: User) => this.myIncomingFriendRequests = fr.incomingFriendRequests)
+
+		const login = this.activateroute.snapshot.paramMap.get('login');
+		if ( login !== null ){
+			this.profileService.getUserIDByLogin(login).subscribe((userId: number) => {
+				if (userId === -1) {
+					this.found = false;
+					return ;
+				}
+				forkJoin([
+					this.profileService.getUserProfile(userId),
+					this.profileService.getUserAchievements(userId),
+					this.profileService.getMyBlockedUsers()
+				]).subscribe(([userProfile, userAchievements, blockedUsers]: [User, Achievement[], Array<any>]) => {
+					this.user = userProfile;
+					this.userAchievements = userAchievements;
+					console.log('User:', this.user);
+					console.log('User Achievements:', this.userAchievements);
+					this.calculateProgressStyles(this.user);
+					this.achievementsStatus = this.getAchievementsStatus();
+					console.log('ALL Achievements:', this.achievementsStatus);
+				    this.chatService.setMyBlockedUsers(blockedUsers);
+					this.check_admin_level(userId);
+					this.loaded = true;
+				});
+
+//				this.profileService.getMyBlockedUsers().subscribe(users =>this.chatService.setMyBlockedUsers(users))
+
+			});
+
+		}
 	}
 
 	allUsers(): void {
@@ -58,6 +90,7 @@ export class UserProfileComponent implements OnInit {
 
 	ngOnInit() {
 
+		/*
 		const login = this.activateroute.snapshot.paramMap.get('login');
 		if ( login !== null ){
 			this.profileService.getUserIDByLogin(login).subscribe((userId: number) => {
@@ -77,6 +110,7 @@ export class UserProfileComponent implements OnInit {
 			});
 			this.profileService.getMyBlockedUsers().subscribe(users =>this.chatService.setMyBlockedUsers(users))
 		}
+		*/
 	  }
 
 	  check_admin_level(userId: number) {

@@ -1,6 +1,6 @@
-
 <app-nav-bar/>
-<div class="background">
+<app-page404 *ngIf="found === false"/>
+<div class="background" *ngIf="found === true && loaded === true">
 	<div class="profile-container">
 	  <div class="avatar-container">
 	  <img class="avatar" [src]="imagesBaseUrl + user?.image" alt="User Avatar" />

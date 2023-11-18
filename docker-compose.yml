@@ -1,6 +1,19 @@
 version: "3"
 
 services:
+    tx_nginx:
+        image: tx_nginx
+        container_name: tx_nginx
+        build: ./nginx
+        depends_on:
+            - tx_front
+        volumes:
+            - tx_front_volume:/usr/src/app/
+        ports:
+            - 80:80
+        restart: on-failure
+        networks:
+            - ft_transcendence
     tx_front:
         image: tx_front
         container_name: tx_front
@@ -14,10 +27,9 @@ services:
             'frontend/.env'
         restart: on-failure
         volumes:
-            - tx_front_volume:/usr/src/app
+            - tx_front_volume:/usr/src/app/
             - tx_shared_volume:/usr/src/app/shared
         tty: true
-        user: "${UID}:${GID}"
         networks:
             - ft_transcendence
     tx_nest:
@@ -88,12 +100,6 @@ volumes:
             type: none
             o: bind
             device: "${PWD}/shared"
-    tx_data_volume:
-            driver: local
-            driver_opts:
-                type: none
-                o: bind
-                device: "{PWD}/data"
 
 networks:
   ft_transcendence:

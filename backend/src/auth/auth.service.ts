@@ -54,6 +54,7 @@ export class AuthService {
 			data = await this.confirmAuthFrom42(code);
 		}
 		catch(error){
+			console.log(error)
 			throw new UnauthorizedException();
 		}
 

@@ -5,6 +5,7 @@
     <thead>
       <tr>
         <th>Login</th>
+        <th>Nick</th>
         <th>Role</th>
         <th>Actions</th>
       </tr>
@@ -12,6 +13,7 @@
     <tbody>
       <tr *ngFor="let user of allUsers">
         <td>{{ user.login }}</td>
+        <td>{{ user.nick}}</td>
         <td>
           	{{ user.userRole < 5 ? 'User' : user.userRole > 5 ? 'Owner' : 'Admin' }}
         </td>

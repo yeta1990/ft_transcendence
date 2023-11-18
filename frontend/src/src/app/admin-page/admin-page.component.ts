@@ -6,7 +6,7 @@ import { ToasterService } from '../toaster/toaster.service'
 import { ModalService } from '../modal/modal.service'
 import { AdminPageService} from './admin-page.service' 
 import { ChatService } from '../chat/chat.service'
-
+  
 @Component({
   selector: 'app-admin-page',
   templateUrl: './admin-page.component.html',
@@ -21,7 +21,7 @@ export class AdminPageComponent {
 		private toasterService: ToasterService,
 		private chatService: ChatService
 			   ) {
-
+ 
 		this.allUsersService.getUsers()
 			.subscribe(
 				(response:User[]) => {this.allUsers = response; console.log(response)})

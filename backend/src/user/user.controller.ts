@@ -186,7 +186,7 @@ export class UserController {
 	  return this.service.getUserAchievements(id);
 	}
 
-
+	//we should remove this too
 	@Post()
 	public createUser(@Body() body: CreateUserDto): Promise<User>{
 		return this.service.createUser(body);
