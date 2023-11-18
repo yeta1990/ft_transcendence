@@ -1,10 +1,10 @@
-<app-nav-bar/>
-<button (click)="mode(1)">Normal</button>
-<button (click)="mode(2)">Insane</button>
-<canvas #gameCanvas width=700 height=400></canvas>
-<h2>Instructions:</h2>
-<h4>Press space for start game</h4>
-<h4>Press escape for pause game</h4>
-<h4>Move left paddle up and down with the arrow keys</h4>
-<h4>Mode Insane, computer never loose.... WUHAHAHAHA!</h4>
-<script type="text/javascript" src="pong.component.ts"></script>
+<!--app-nav-bar/-->
+<!--button (click)="mode(1)">Normal</button-->
+<!--button (click)="subscribeToRoom(false)">Play</button-->
+<button (click)="mode('')">Play</button>
+<button (click)="mode('on-line')">On-line</button>
+<div >
+    <canvas [hidden]="visibleCanvas()" #gameCanvas width={{game.canvasWidth}} height={{game.canvasheight}}></canvas>
+    <script type="text/javascript" src="pong.component.ts"></script>
+</div>
+<!--app-chat/-->

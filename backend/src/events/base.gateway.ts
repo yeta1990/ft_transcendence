@@ -149,9 +149,12 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   async handleDisconnect(socket: Socket): Promise<void> {
-  	  const login: string = this.chatService.getChatUserBySocketId(socket.id)?.login
-  	  if (!login) return;
-	  this.logger.log(`Socket client disconnected: ${socket.id}`)
+		if (!socket) return;
+		//const user = this.user.get(socket.id)
+		const login: string = this.chatService.getChatUserBySocketId(socket.id)?.login;
+		if (!login) return;
+  	  //const login: string = user.login
+		this.logger.log(`Socket client disconnected: ${socket.id}`)
 	  this.chatService.deleteChatUserBySocketId(socket.id)
 	  this.logger.log(this.getNumberOfConnectedUsers() + " users connected")
 
@@ -169,7 +172,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  		  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
 		  }
   	  }
-  }
+	}
 
   //socket rooms, not db rooms
   //all rooms are created in db, but not necessarily in the socket server
@@ -233,7 +236,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 				if (isWebAdmin) return u;
 			})))
 			.filter(u => u !== undefined)
-			console.log(activeWebAdminsInServer)
+			//console.log(activeWebAdminsInServer)
 
 
 		const usersArray = Array.from(this.chatService.getAllChatUsers());
@@ -252,17 +255,18 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
 	if (!roomIds) return [];
 	const usersRaw: Array<string> = Array.from(roomIds);
-	console.log("users raw")
-	console.log(usersRaw)
+	//console.log("users raw")
+	//onsole.log(usersRaw)
 	let usersWithCompleteData: Array<ChatUser> = new Array();
 	usersRaw.forEach(x => {
 		usersWithCompleteData.push(this.chatService.getAllChatUsers().get(x));
 	});
-	console.log(usersWithCompleteData)
+	//console.log(usersWithCompleteData)
     return (usersWithCompleteData);
   }
 
   getClientSocketIdsFromLogin(login: string): Array<string>{
+	if (!login) return;
 	const clientsIterator = this.chatService.getAllChatUsers().entries();
 	const clientSocketIds = []
 
@@ -337,6 +341,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		let hardJoin: boolean = true; //login wasn't in channel with other client
 	  	const roomExists: boolean = await this.chatService.isRoomCreated(room);
 		if (!roomExists){
+			console.log("password + ", password)
 			const successfulCreatedAndJoin: boolean = await this.createNewRoomAndJoin(clientId, login, room, password)
 			if (!successfulCreatedAndJoin) return false;
 		}
@@ -382,11 +387,13 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	    const socketIdsByLogin = this.getClientSocketIdsFromLogin(login);
 	    const joinedRoomsByLogin: Array<string> = await this.chatService.getAllJoinedRoomsByOneUser(login);
 	    const privateRoomsByLogin: Array<string> = await this.chatService.getMyPrivateRooms(login);
+	    if (socketIdsByLogin){
 	  	socketIdsByLogin.forEach(socketId => {
 	  	  this.server.in(socketId).socketsJoin(room)
 		  this.server.to(socketId).emit(events.ListMyJoinedRooms, joinedRoomsByLogin);
 		  this.server.to(socketId).emit(events.ListMyPrivateRooms, privateRoomsByLogin);
 	  	});
+	  	}
 
 	  	//announce the rest of the channel a new user has joined
 	  	if (hardJoin && !room.includes(':') && !room.includes('@')){
@@ -431,7 +438,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	    const socketIdsByLogin: Array<string> = this.getClientSocketIdsFromLogin(login);
   	  	//unsubscribe user from socket service
   	  	for (const clientId of socketIdsByLogin){
-  	  		console.log(clientId)
+  	  		//console.log(clientId)
   		  	if (bannedUsers && bannedUsers.length > 0) {
 				const blockedUsersByLogin: Array<string> =  bannedUsers
 				.map(m => m.login)

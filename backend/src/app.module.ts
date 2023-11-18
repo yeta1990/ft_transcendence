@@ -22,6 +22,7 @@ import { HttpModule } from '@nestjs/axios';
 import { EventsModule } from './events/events.module';
 import { ChatModule } from './chat/chat.module';
 import { HashService } from './hash/hash.service';
+import { PongModule } from './pong/pong.module';
 import {InvalidTokens} from './auth/invalid-tokens-entity'
 import { TokenValidationMiddleware } from './token-validation/token-validation.middleware'
 import * as Joi from 'joi';
@@ -66,6 +67,7 @@ import { join } from 'path';
 	HttpModule,
 	EventsModule,
 	ChatModule,
+	PongModule,
 	TypeOrmModule.forFeature([Achievement]),
   ],
   controllers: [AppController, UserController],

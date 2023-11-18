@@ -28,6 +28,9 @@ import { AdminPageComponent } from './admin-page/admin-page.component';
 import { AdminChatPageComponent } from './admin-chat-page/admin-chat-page.component';
 import { FriendsComponent } from './friends/friends.component'
 import { Page404Component } from './page404/page404.component'
+import { PaddleComponent } from './pong/paddle/paddle.component';
+import { EntityComponent } from './pong/entity/entity.component';
+import { RoomComponent } from './pong/room/room.component'
 
 
 @NgModule({
@@ -44,6 +47,9 @@ import { Page404Component } from './page404/page404.component'
     PongComponent,
     ToasterComponent,
     ModalComponent,
+    PaddleComponent,
+    EntityComponent,
+    RoomComponent,
     AdminPageComponent,
     AdminChatPageComponent,
     FriendsComponent,
