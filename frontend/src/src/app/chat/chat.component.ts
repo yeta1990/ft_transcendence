@@ -123,7 +123,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	//subscription to all events from the service
 	ngOnInit(): void {
 		this.chatService.forceInit();
-		this.profileService.getUserDetails()
 		this.subscriptions.add(
 			this.chatService
 			.getMessage()
@@ -341,8 +340,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		console.log("go to chat room " + room);
 	}
 
-	getNickEquivalence(login: string): string {
-		return this.chatService.getLoginNickEquivalence().find(u => u.login === login).nick
+	getNickEquivalence(login: string): string | null{
+		const loginEquivalence: Array<any> | undefined = this.chatService.getLoginNickEquivalence()
+		if (loginEquivalence){
+			const foundUser = loginEquivalence.find(u => u.login === login)
+			//console.log(foundUser)
+			if (foundUser) return foundUser.nick
+		}
+		return login;
+			
 	}
 
 	isPrivateRoom(room: string): boolean {

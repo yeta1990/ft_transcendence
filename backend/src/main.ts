@@ -6,9 +6,9 @@ import { config }  from 'dotenv';
 config(); // to load process.env from here
 
 function isOriginAllowed(origin: string) {
-	const allowedOrigins = ['http://localhost:3000', 'http://localhost:4200'];
+	const allowedOrigins = ['http://localhost', 'http://localhost:80','http://localhost:3000', 'http://localhost:4200'];
 	const allowedLastDigits = ['1', '2', '3', '4', '5', '6']; // Últimos dígitos permitidos
-	const portToAllow = ':4200';
+	const portToAllow = ':80';
 
 	// Verificamos si el origen es una URL válida
 	const urlPattern = /^(https?:\/\/)?([a-z\d.-]+|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:[0-9]{1,5})?([/?].*)?$/;
@@ -16,9 +16,11 @@ function isOriginAllowed(origin: string) {
 	if (!matches) {
 	return false; // Si no es una URL válida, la rechazamos
 	}
-
+ 
 	// Verificamos si el origen es localhost
 	if (allowedOrigins.includes(origin)) {
+		console.log(origin)
+		console.log("allowed origins")
 		return true;
 	}
 	const [, , hostname, port, path] = matches;
@@ -50,17 +52,18 @@ async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
 
 	app.enableCors({
+		
 		origin: (origin, callback) => {
-			if (!origin || isOriginAllowed(origin)) {
+			if ((!origin) || isOriginAllowed(origin)) {
 				callback(null, true);
 			} else {
 				callback( new Error('CORS not allowed'));
 			}
-		},
-		methods: 'GET,PUT,POST,DELETE',
-		allowedHeaders: 'Content-Type, Authorization',
+		}
+		//methods: 'GET,PUT,POST,DELETE',
+//		allowedHeaders: 'Content-Type, Authorization',
 	});
-	
+
 	app.use((req, res, next) => {
 		console.log(`Solicitud CORS: ${req.method} ${req.url}`);
 		next();

@@ -53,7 +53,8 @@ export class User {
 	userRole: UserRole;
 
 	@Column({
-		default:false
+		default:false,
+		type: 'boolean'
 	})
 	mfa: boolean;
 
@@ -61,7 +62,7 @@ export class User {
 		nullable: true,
 		default: undefined,
 	})
-	mfaSecret: string;
+	mfaSecret?: string;
 
 	@Column('text',{ 
 		array: true,
@@ -72,7 +73,7 @@ export class User {
 	// PERSONALIZACION -------------------------------------
 
 	@Column({
-		default: '' //Poner ruta de imagen por defecto
+		default: 'avatar.png' //Poner ruta de imagen por defecto
 	})
 	image: string;
 
@@ -145,6 +146,9 @@ export class User {
 		default:false
 	})
 	isBanned: boolean
+
+	@Column({default: true})
+	firstLogin: boolean;
 
 }
 

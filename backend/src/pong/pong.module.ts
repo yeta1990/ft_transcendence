@@ -1,7 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PongService } from './pong.service';
+import {ChatModule} from '../chat/chat.module'
+import {EventsModule } from '../events/events.module'
 
 @Module({
-  providers: [PongService]
+  providers: [],
+  	exports: []
 })
 export class PongModule {}

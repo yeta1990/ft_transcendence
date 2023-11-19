@@ -1,5 +1,5 @@
 import { SubscribeMessage, WebSocketGateway, WsResponse } from '@nestjs/websockets';
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger, forwardRef } from '@nestjs/common';
 import { BaseGateway } from './base.gateway';
 import { Socket } from 'socket.io';
 import { ChatMessage, SocketPayload, RoomMetaData, GameRoom } from '@shared/types';
@@ -20,6 +20,7 @@ export class ChatGateway extends BaseGateway {
 
   constructor(private chatMessageService: ChatMessageService, 
   			 private chatAdminService: ChatAdminService,
+			 @Inject(forwardRef(() => PongService))
 			 private pongservice:PongService) {
   			 	 super();
   			 	 this.gatewayName = "ChatGateway"
@@ -30,7 +31,6 @@ export class ChatGateway extends BaseGateway {
   //separate afterInit from the base class
   afterInit(): void {
 	this.chatService.getUsersObservable().subscribe(trigger=> {
-		console.log("yeeeessssssss")
 		this.emitUpdateUsersAndRoomsMetadata()
 	}
 	)
@@ -199,6 +199,9 @@ export class ChatGateway extends BaseGateway {
 				oldMessagesInRoom.name = originalRoom
 				oldMessagesInRoom.messages.map(m => m.room = originalRoom)
 			}
+			const loginNickEquivalence: Array<any> = await this.
+				getAllChatUsersWithNickEquivalence()
+			this.server.to(clientSocketId).emit(events.LoginNickEquivalence, loginNickEquivalence)
 			for (let message of oldMessagesInRoom.messages){
 				if (!usersThatHaveBanned.includes(message.login)){
 					this.messageToClient(clientSocketId, "message", message)
@@ -596,6 +599,9 @@ export class ChatGateway extends BaseGateway {
 		const hasExecutorPrivileges: boolean = (await this.userService.getUserByLogin(emisorLogin)).userRole >= 5 ? true : false
 		if (!hasExecutorPrivileges) return ;
 
+		const loginNickEquivalence: Array<any> = await this.
+			getAllChatUsersWithNickEquivalence()
+		this.server.to(client.id).emit(events.LoginNickEquivalence, loginNickEquivalence)
 		
 		this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
 		const allHistoricalMessages: Array<RoomMessages> = await this.chatMessageService.getAllMessagesFromAllRooms()
@@ -778,7 +784,7 @@ export class ChatGateway extends BaseGateway {
 			console.log("login " + login);
 			const response: GameRoom = this.pongservice.initGame(room, this, userInRoom.length, login);
 			//var userInRoom = this.getActiveUsersInRoom('#pongRoom');
-			this.pongservice.setPlayer(room, login);			
+			this.pongservice.setPlayer(room, login);
 			console.log("Join succed to: " + response.room);
 			
 			console.log(response)
@@ -830,7 +836,6 @@ export class ChatGateway extends BaseGateway {
 	
 	@SubscribeMessage('keydown')
  	handleMove(client: Socket, payload: any){
- 		console.log(payload.key)
 		const login: string = client.handshake.query.login as string;
 		this.pongservice.keyStatus(payload.room, payload.key, login);
  	}

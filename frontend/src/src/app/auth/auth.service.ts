@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { User } from '../user';
-import { Observable } from "rxjs";
-import { tap, shareReplay } from "rxjs/operators";
-import * as moment from "moment";
+import { BehaviorSubject, Observable, of } from "rxjs";
+import { tap, shareReplay, catchError, map } from "rxjs/operators";
 import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
-import jwt_decode from 'jwt-decode';
+import * as jwt_decode from 'jwt-decode';
 import { ChatService } from '../chat/chat.service'
 
 @Injectable({
@@ -20,23 +19,23 @@ export class AuthService {
         private router: Router,
 		private chatService: ChatService
     ) { }
-
-/*
- *  old login function
- *
-	login(nick: string, email: string){
-		return this.http.post<User>('http://localhost:3000/auth/login', {nick, email})
-			.pipe(tap((res: any) => this.setSession(res)))
-			.pipe(shareReplay())
-			//We are calling shareReplay to prevent the receiver of this Observable from accidentally triggering multiple POST requests due to multiple subscriptions.
-	}
-	*/
+  private authToken: any;
 
 	login(code: string){
-		return this.http.post<User>(environment.apiUrl + '/auth/login', {code})
-			.pipe(tap((res: any) => this.setSession(res)))
-			.pipe(shareReplay())
-			//We are calling shareReplay to prevent the receiver of this Observable from accidentally triggering multiple POST requests due to multiple subscriptions.
+		return this.http.post<any>(environment.apiUrl + '/auth/login', {code})
+			.pipe(
+				map((res: any) => {
+					if (res.requiresMFA) {
+						this.authToken = res.authResult;
+					}
+					else {
+						this.setSession(res.authResult);
+						this.redirectToHome();
+					}
+					return { requiresMFA: res.requiresMFA, userId: res.userId };
+				}),
+			shareReplay()
+		);
 	}
 
 	logout() {
@@ -46,20 +45,41 @@ export class AuthService {
         this.router.navigateByUrl('/login');
     }
 
+	validateMfa(userId: number, loginCode: string) : Observable<boolean> {
+		const message: string = "Token para validar mfa"
+		return this.http.post<any>(environment.apiUrl + '/2fa/auth/', { userId, loginCode, message })
+		.pipe(
+			map(response =>{
+				if (response) {
+					console.log("El codigo está bien");
+					this.setSession(this.authToken);
+					this.redirectToHome();
+					return true;
+				}
+				console.log("He recibido respuesta");
+				return false;
+			}),
+			catchError((error) => {
+				console.error('Error en la validación MFA:', error);
+				return of(false);
+			})
+		);
+	  }
+
 	redirectToHome() {
         this.router.navigateByUrl('/home');
     }
 
 	private setSession(authResult: any) {
 		console.log("Consigo entrar en setSession");
+		console.log(authResult);
         localStorage.setItem("access_token", authResult.access_token);
         localStorage.setItem("expires_at", authResult.expires_at);
     }
 
     public isLoggedIn() {
-    	let a:boolean = moment().isBefore(this.getExpiration());
-		
-    	return a;
+    	const current: Date = new Date()
+    	return (this.getExpiration() > current)
     }
 
     isLoggedOut() {
@@ -68,7 +88,7 @@ export class AuthService {
 
 	getDecodedAccessToken(token: string): any {
 		try {
-	   		return jwt_decode(token);
+	   		return jwt_decode.jwtDecode(token);
 		} catch(Error) {
 			return null;
 		}
@@ -85,7 +105,7 @@ export class AuthService {
 			expiration = parseInt(decodedAccessToken.exp) * 1000;
 		} catch(Error) {
 		}
-        return moment(expiration);
+        return new Date(expiration);
     }
 
 	getUserToken() {

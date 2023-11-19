@@ -1,22 +1,47 @@
 <app-nav-bar/>
 
-<form [formGroup]="editForm" (ngSubmit)="onSubmit()">
-	<br />
-    <label class="tab" for="name">Name&emsp;</label>
-	<input id="name" type="text" formControlName="firstName" placeholder={{user?.firstName}}>
-	<br />
-	<br />
-    <label class="tab" for="lastName">Last Name&emsp;</label>
-	<input id="lastName" type="text" formControlName="lastName" placeholder="{{user?.lastName}}">
-	<br />
-	<br />
-	<label class="tab" for="nick">Nick&emsp;</label>
-	<input id="nick" type="text" formControlName="nick" placeholder="{{user?.nick}}">
-	<br />
-	<br />
-	<label class="tab" for="email">Email&emsp;</label>
-	<input id="email" type="text" formControlName="email" placeholder="{{user?.email}}">
-	<br />
-	<br />
-	<button class="button" type="submit">Submit</button>
-</form> 
+<div class="container mt-4">
+	<h2>Edit Profile</h2>
+	<form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+		<div class="form-group">
+			<label for="name">Name</label>
+			<input id="name" type="text" class="form-control" formControlName="firstName" placeholder="{{ user?.firstName }}">
+		</div>
+
+		<div class="form-group">
+			<label for="lastName">Last Name</label>
+			<input id="lastName" type="text" class="form-control" formControlName="lastName" placeholder="{{ user?.lastName }}">
+		</div>
+
+		<div class="form-group">
+			<label for="nick">Nick</label>
+			<input id="nick" type="text" class="form-control" formControlName="nick" placeholder="{{ user?.nick }}">
+		</div>
+
+		<div class="form-group">
+			<label for="email">Email</label>
+			<input id="email" type="text" class="form-control" formControlName="email" placeholder="{{ user?.email }}">
+		</div>
+
+		<br>
+
+		<!-- Botón para activar/desactivar MFA -->
+		<div *ngIf="!mfaActivated">
+			<button class="btn btn-success" type="button" (click)="connectMfa()">Enable Two-Factor Authentication (MFA)</button>
+		</div>
+		<!-- Botón para desconectar MFA -->
+		<div *ngIf="mfaActivated">
+			<button class="btn btn-danger" type="button" (click)="disconnectMfa()">Disconnect Two-Factor Authentication (MFA)</button>
+		</div>
+        <br />
+	    <br />
+	    <label class="tab" for="file">Change profile picture&emsp;</label>
+	    <input id="file" type="file" (change)="onFileChange($event)" >
+        <button *ngIf="formData.has('image')" type="button" class="btn btn-danger" (click)="clearFile()">Unselect</button>
+        <br />
+        <br />
+		<button class="btn btn-primary mt-3" type="submit">Submit</button>
+		<app-modal></app-modal>
+	</form>
+</div>
+	

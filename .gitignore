@@ -23,3 +23,7 @@ srcs/*
 tty
 *.log
 NetrwTreeListing
+
+frontend/node_modules/
+
+frontend/src/src/environments/environment.ts

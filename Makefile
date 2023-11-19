@@ -37,7 +37,7 @@ fbuild: ## Builds images before starting containers. NO-CACHE option.
 
 composeup: ## Starts and runs containers in the background, print new container names.
 	@echo "\n$(GR)[$(B)'$(NAME)': $(GR)Starting Containers in background. Please wait...]${END}"
-	@docker-compose up -d tx_front tx_nest tx_postgres
+	@docker-compose up -d tx_front tx_nest tx_postgres tx_nginx
 	@echo "\n$(G)[$(B)'$(NAME)': $(G)All containers started and running. Enjoy          ]${END}\n"
 
 up: ## Removes unused containers and starts and runs containers in the background.

@@ -62,10 +62,13 @@ export class ChatService {
 
 	setUserStatusIsPlaying(login: string):void {
 		this.users.forEach((chatUser: ChatUser, key: string) => {
+			console.log(chatUser)
   			if (chatUser.login === login) {
     			chatUser.status = UserStatus.PLAYING;
   			}
-		});	
+		});
+
+		console.log(JSON.stringify(this.users))
 		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
 	}
 

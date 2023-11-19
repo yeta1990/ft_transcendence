@@ -7,11 +7,16 @@ import {
 	Param, 
 	Post,
 	UseGuards,
-	Query
+	Query,
+	UploadedFile,
+	UseInterceptors,
+	ParseFilePipeBuilder,
+	HttpStatus
+
 } from '@nestjs/common';
 
 import { AuthGuard } from '../auth/auth.guard';
-
+import {FileInterceptor} from '@nestjs/platform-express'
 import { UserService } from './user.service';
 import { CreateUserDto } from './user.dto';
 import { User } from './user.entity';
@@ -24,6 +29,9 @@ import { JwtService } from '@nestjs/jwt';
 import { ValidationFunctions } from '@shared/user.functions'
 import { Achievement } from '@shared/achievement';
 import { ChatService } from '../chat/chat.service'
+import { diskStorage } from 'multer'
+import { generateRandomString } from '@shared/functions'
+import { extname } from 'path'
 
 @Controller('user')
 export class UserController {
@@ -153,20 +161,32 @@ export class UserController {
 	public getUser(@Param('id', ParseIntPipe) id: number): Promise<User>{
 		return this.service.getUser(id);
 	}
+
+	@UseGuards(AuthGuard)
+	@Get('first-login/:login')
+	public async isMyFirst(@Param('login') login: string): Promise<boolean> {
+		const user: User = await this.service.getUserByLogin(login);
+		if (user.firstLogin){
+			user.firstLogin = false;
+			await this.service.saveUser(user)
+			return true;
+		}
+		return false
+	}
 	
-	//@UseGuards(AuthGuard)
+	@UseGuards(AuthGuard)
 	@Get('id/:login')
 	public getUserIdByLogin(@Param('login') login: string): Promise<number> {
 	  return this.service.getUserIdByLogin(login);
 	}
 
-	//@UseGuards(AuthGuard)
+	@UseGuards(AuthGuard)
 	@Get(':id/achievements')
 	public getUserAchievements(@Param('id', ParseIntPipe) id: number): Promise<Achievement[]> {
 	  return this.service.getUserAchievements(id);
 	}
 
-
+	//we should remove this too
 	@Post()
 	public createUser(@Body() body: CreateUserDto): Promise<User>{
 		return this.service.createUser(body);
@@ -203,7 +223,25 @@ export class UserController {
 
 		return { isValid: isValidDB };
 	}
-
+	
+	@UseGuards(AuthGuard)
+	@Post('upload')
+	@UseInterceptors(FileInterceptor('image', {
+		limits:{ fileSize: 1048576},
+		fileFilter: (req:any , file:any, cb:any) => {
+			cb(null, true)
+		},
+		storage: diskStorage({
+			destination: './uploads',
+			filename: (req, file, cb) => {
+				console.log(file)
+				cb(null, generateRandomString(16) + extname(file.originalname))
+			}
+		})
+	}))
+	uploadFile(@Body() body: any, @UploadedFile() file: Express.Multer.File) {
+		return {image: file.filename}
+	}
 	
 
 }

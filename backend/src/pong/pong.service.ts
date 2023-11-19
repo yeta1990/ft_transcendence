@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ChatMessage, SocketPayload, GameRoom, ChatUser } from '@shared/types';
 import { GameGateway } from 'src/events/game.gateway';
 import { BaseGateway } from 'src/events/base.gateway';
 import { ChatGateway } from 'src/events/chat.gateway';
+import {ChatService} from '../chat/chat.service'
 @Injectable()
 export class PongService {
 
@@ -13,9 +14,13 @@ export class PongService {
     games: Map<string, GameRoom> = new Map<string, GameRoom>;
     public numberOfGames: number = 0;
     public interval: any = 0;
-    public gameGateaway: ChatGateway;
     private matchMaking: Array<string> = new Array<string>;
-    constructor() {
+
+    constructor(
+    	@Inject(forwardRef(() => ChatGateway))
+    	private gameGateaway: ChatGateway,
+		@Inject(forwardRef(() => ChatService))
+    	private chatService: ChatService) {
         setInterval(()=>{
             //this.updateBall(element.room)
             this.games.forEach(element => {
@@ -25,7 +30,7 @@ export class PongService {
                 }              
                 this.move(element);
                 const targetUsers: Array<ChatUser> = this.gameGateaway
-                .getActiveUsersInRoom(element.room);
+                	.getActiveUsersInRoom(element.room);
                 for (let i = 0; i < targetUsers.length; i++){
                     //console.log("\t-> " + targetUsers[i].login + " in " + game.room);
                     this.gameGateaway.server.to(targetUsers[i].client_id).emit('getStatus', element);
@@ -34,7 +39,7 @@ export class PongService {
                         
         },1000/64)
     }
-
+  
 
     initGame (name: string, gameGateaway: ChatGateway, viwer: number, nick:string): GameRoom {
         
@@ -50,7 +55,7 @@ export class PongService {
 	        0,                  //y
 	        0,                  //height           
 
-	        //PaddleOneComponent
+	        //PaddleOneComponent 
 	        20,                 //playerOneX
 	        400 /2 - 60 / 2,    //playerOneY    //this.canvas.height / 2 - 60 / 2,
 	        10,                 //playerOneW
@@ -189,6 +194,8 @@ export class PongService {
         if (g.playerOneScore >= 3 || g.playerTwoScore >= 3){
             g.pause = true;
             g.finish = true;
+            this.chatService.setUserStatusIsActive(g.playerOne)
+            this.chatService.setUserStatusIsActive(g.playerTwo)
         }
     }
 
@@ -237,7 +244,7 @@ export class PongService {
     keyStatus(room: string, key: number, nick:string){
         var g = this.games.get(room);
         if ((nick == g.playerOne) || (nick == g.playerTwo)){
-        	console.log(g)
+//        	console.log(g)
             if(key == 27){
                 if (g.pause == true){
                     if(g.finish){
@@ -326,6 +333,8 @@ export class PongService {
             for (let element of idsPlayerTwo) {
                 await this.gameGateaway.joinRoutineGame(element, this.matchMaking[1], room, "", "join")
             }
+            this.chatService.setUserStatusIsPlaying(this.matchMaking[0])
+            this.chatService.setUserStatusIsPlaying(this.matchMaking[1])
             //Remove both 
             this.matchMaking.shift();
             this.matchMaking.shift();
