@@ -98,7 +98,10 @@ export class PongService {
             viwer,              //viwer
             "",                 //playerOne
             "",                 //playerTwo
-			0
+			0,                  //intarval
+            false,              //inestableball;
+            false,              //reverseMoveOne;
+            false,              //reverseMoveTwo;
         );
         
         this.games.set(name, this.game);
@@ -226,18 +229,18 @@ export class PongService {
 
     move(g: GameRoom){
         g.playerOneY += g.playerOneVel * g.playerOneS;
-        if(g.playerOneY <= 20) {
+        if(g.playerOneY <= 20 || (g.playerOneY + g.playerOneH >= g.canvasheight - 20)) {
             g.playerOneVel = 0;
-        }else if (g.playerOneY + g.playerOneH >= g.canvasheight - 20){
-            g.playerOneVel = 0;
-        }
+         }//else if (g.playerOneY + g.playerOneH >= g.canvasheight - 20){
+        //     g.playerOneVel = 0;
+        // }
         if (g.playerTwo != ""){
             g.playerTwoY += g.playerTwoVel * g.playerTwoS;
-            if(g.playerTwoY <= 20) {
+            if(g.playerTwoY <= 20 || (g.playerTwoY + g.playerTwoH >= g.canvasheight - 20)) {
                 g.playerTwoVel = 0;
-            }else if (g.playerTwoY + g.playerTwoH >= g.canvasheight - 20){
-                g.playerTwoVel = 0;
-            }
+            }//else if (g.playerTwoY + g.playerTwoH >= g.canvasheight - 20){
+            //     g.playerTwoVel = 0;
+            // }
         }           
     }
 
@@ -248,7 +251,8 @@ export class PongService {
             if(key == 27){
                 if (g.pause == true){
                     if(g.finish){
-                        this.restartScores(g);
+                        this.restartPowers(g);
+                        this.restartScores(g);                      
                     }
                     g.pause = false;
                 }
@@ -260,6 +264,13 @@ export class PongService {
         }
         if (g.pause) { return;}
         if (nick == g.playerOne) {
+            if(g.reverseMoveOne){
+                if (key == 87 || key == 38) {
+                    key = 83;
+                } else if (key == 83 || key == 40) {
+                    key = 87;
+                }
+            }
             if ((key === 87 && (g.playerOneY > 20)) || (key === 38 && (g.playerOneY > 20))){ //w
                 g.playerOneVel = -1;
             } else if ((key === 83 && (g.playerOneY + g.playerOneH < g.canvasheight - 20))
@@ -268,8 +279,23 @@ export class PongService {
             } else {
                 g.playerOneVel = 0;
             }
+            if (key === 49){ //1
+                //this.inestableBall(g);
+                //this.biggerPaddle(nick, g);
+                //this.smallerPaddle(nick, g);
+                //this.fasterPaddle(nick, g);
+                //this.slowerPaddle(nick, g);
+                this.reverseMove(nick, g);
+            }
         }
         if (nick == g.playerTwo){
+            if(g.reverseMoveTwo){
+                if (key == 87 || key == 38) {
+                    key = 83;
+                } else if (key == 83 || key == 40) {
+                    key = 87;
+                }
+            }
             if (key === 87 && (g.playerTwoY > 20)){ //w
                 g.playerTwoVel = -1;
             } else if ( key === 83 && (g.playerTwoY + g.playerTwoH < g.canvasheight - 20)) {//s
@@ -378,4 +404,142 @@ export class PongService {
 
 //        clearInterval(g.interval);
     }
+
+    //POWERS
+    restartPowers(g: GameRoom) {
+        console.log("RESET");
+        g.ballSpeed = 5;
+        g.playerOneH = 60;
+        g.playerTwoH = 60;
+        g.playerOneS = 10;
+        g.playerTwoS = 10;
+        g.playerOneY = 400 /2 - 60 / 2;
+        g.playerTwoY = 400 /2 - 60 / 2,
+        g.inestableBall = false;
+        g.reverseMoveOne = false;
+        g.reverseMoveTwo = false;
+    }
+    async inestableBall(g: GameRoom) {
+        if(g.inestableBall) {return;}
+        g.inestableBall = true;
+        const speeds :Array<number> = [5, 2, 7, 10, 15];
+        g.ballSpeed = speeds[Math.floor(Math.random() * speeds.length)];
+        const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
+
+        let count = 0;
+        while (count < 60) { //seconds
+          count++;
+          await waitSeg(1);
+      
+          if (count % 10 === 0) {
+            g.ballSpeed = speeds[Math.floor(Math.random() * speeds.length)];
+            console.log("change speed " + g.ballSpeed);
+          }
+        }
+        g.inestableBall = false;
+        g.ballSpeed = 5;   
+    }
+
+    async biggerPaddle(login: string, g:GameRoom){
+        const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
+        if (login == g.playerOne) {
+            g.playerOneH = 100;
+        }
+        else if (login == g.playerTwo) {
+            g.playerTwoH = 100;
+        }
+        let count = 0;
+        while (count < 30) { // seconds
+            count++;
+            await waitSeg(1);
+        }
+        if (login == g.playerOne) {
+            g.playerOneH = 60;
+        }
+        else if (login == g.playerTwo) {
+            g.playerTwoH = 60;
+        }
+    }
+
+    async smallerPaddle(login: string, g:GameRoom){
+        const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
+        if (login == g.playerOne) {
+            g.playerTwoH = 30;
+        }
+        else if (login == g.playerTwo) {
+            g.playerOneH = 30;
+        }
+        let count = 0;
+        while (count < 30) { // seconds
+            count++;
+            await waitSeg(1);
+        }
+        if (login == g.playerOne) {
+            g.playerTwoH = 60;
+        }
+        else if (login == g.playerTwo) {
+            g.playerOneH = 60;
+        }
+    }
+
+    async slowerPaddle(login: string, g:GameRoom){
+        const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
+        if (login == g.playerOne) {
+            g.playerTwoS = 5;
+        }
+        else if (login == g.playerTwo) {
+            g.playerOneS = 5;
+        }
+        let count = 0;
+        while (count < 30) { // seconds
+            count++;
+            await waitSeg(1);
+        }
+        if (login == g.playerOne) {
+            g.playerTwoS = 10;
+        }
+        else if (login == g.playerTwo) {
+            g.playerOneS = 10;
+        }
+    }
+
+    async fasterPaddle(login: string, g:GameRoom){
+        const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
+        if (login == g.playerOne) {
+            g.playerOneS = 20;
+        }
+        else if (login == g.playerTwo) {
+            g.playerTwoS = 20;
+        }
+        let count = 0;
+        while (count < 30) { // seconds
+            count++;
+            await waitSeg(1);
+        }
+        if (login == g.playerOne) {
+            g.playerOneS = 10;
+        }
+        else if (login == g.playerTwo) {
+            g.playerTwoS = 10;
+        }
+    }
+
+    async reverseMove(login: string, g:GameRoom) {
+        if(g.reverseMoveOne || g.reverseMoveTwo) {return;}
+        const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
+        if (login == g.playerOne) {
+            g.reverseMoveTwo = true;
+        }
+        else if (login == g.playerTwo) {
+            g.reverseMoveOne = true;
+        }
+        let count = 0;
+        while (count < 15) { // seconds
+            count++;
+            await waitSeg(1);
+        }
+        g.reverseMoveOne = false;
+        g.reverseMoveTwo = false;
+    }
+
 }

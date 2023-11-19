@@ -117,7 +117,12 @@ export class GameRoom {
 	public playerTwo:string,
 
 	//Interval 
-	public interval: any
+	public interval: any,
+	//Powers
+	public inestableBall: boolean,
+	public reverseMoveOne: boolean,
+	public reverseMoveTwo:boolean,
+
  
 	){}
 }
