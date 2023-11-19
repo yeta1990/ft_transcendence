@@ -765,10 +765,10 @@ export class ChatGateway extends BaseGateway {
 			} 
 	  	} 	  
   	  //check if user is banned from channel
-  	  await this.joinRoutineGame(client.id, login, room, online, "join")
+  	  await this.joinRoutineGame(client.id, login, room, online, "join", false)
   	}
 
-  	async joinRoutineGame(clientSocketId: string, login: string, room: string, online: string, typeOfJoin: string){
+  	async joinRoutineGame(clientSocketId: string, login: string, room: string, online: string, typeOfJoin: string, allowedPowers: boolean){
 		if (online == 'alone')
 			room +=  "_" + login;
 		const originalRoom = room;
@@ -782,7 +782,7 @@ export class ChatGateway extends BaseGateway {
 			//const response: ChatMessage = generateJoinResponse(originalRoom);
 			var userInRoom = this.getActiveUsersInRoom(room);
 			console.log("login " + login);
-			const response: GameRoom = this.pongservice.initGame(room, this, userInRoom.length, login);
+			const response: GameRoom = this.pongservice.initGame(room, this, userInRoom.length, login, allowedPowers);
 			//var userInRoom = this.getActiveUsersInRoom('#pongRoom');
 			this.pongservice.setPlayer(room, login);
 			console.log("Join succed to: " + response.room);
@@ -832,7 +832,14 @@ export class ChatGateway extends BaseGateway {
 		const loginBack: string = client.handshake.query.login as string;
 		console.log("On-line: " + login + " - " + loginBack);
 		this.pongservice.addUserToList(loginBack)
-	  }
+	}
+
+	@SubscribeMessage('plus')
+	  handleOnLinePlus(client: Socket, login: string){
+		const loginBack: string = client.handshake.query.login as string;
+		console.log("On-linePlus: " + login + " - " + loginBack);
+		this.pongservice.addUserToListPlus(loginBack)
+	}
 	
 	@SubscribeMessage('keydown')
  	handleMove(client: Socket, payload: any){

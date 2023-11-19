@@ -145,16 +145,21 @@ export class PongComponent implements OnInit, OnDestroy {
         	});
         }
         this.pongService.forceInit();
-        if (this.online && !this.contected) {
-            this.pongService.playOnLine(this.playerLogin);
-            this.contected = true;
-        }
+        // if (this.online && !this.contected) {
+        //     this.pongService.playOnLine(this.playerLogin);
+        //     this.contected = true;
+        // }
     }
 
     mode(m: string) {
         if (m == "on-line"){
             console.log(this.playerLogin + " join match making list ");
-            this.pongService.playOnLine(this.playerLogin);
+            this.pongService.playOnLine(m,  this.playerLogin);
+            this.waitingList = "Waiting for other player";
+        }
+        else if (m == "plus"){
+            console.log(this.playerLogin + " join match making plus list ");
+            this.pongService.playOnLine(m, this.playerLogin);
             this.waitingList = "Waiting for other player";
         }
         else{

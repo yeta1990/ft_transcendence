@@ -123,6 +123,11 @@ export class GameRoom {
 	public reverseMoveOne: boolean,
 	public reverseMoveTwo:boolean,
 
+	public playerOnePowers: Array<string>,
+	public playerTwoPowers: Array<string>,
+
+	public powersAllow: boolean,
+
  
 	){}
 }
