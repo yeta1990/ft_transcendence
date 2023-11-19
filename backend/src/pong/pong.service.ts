@@ -191,7 +191,7 @@ export class PongService {
             g.ballY += g.ballYVel * g.ballSpeed;
     }
     checkScores(g: GameRoom){
-        if (g.playerOneScore >= 3 || g.playerTwoScore >= 3){
+        if (g.playerOneScore >= 5 || g.playerTwoScore >= 5){
             g.pause = true;
             g.finish = true;
             this.chatService.setUserStatusIsActive(g.playerOne)

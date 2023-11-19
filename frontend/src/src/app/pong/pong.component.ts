@@ -31,6 +31,8 @@ export class PongComponent implements OnInit, OnDestroy {
     public playerLogin:string = "";
     public online: boolean = false;
     public contected: boolean = false;
+    public msg:string="";
+    public waitingList="";
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
     constructor(
@@ -43,7 +45,7 @@ export class PongComponent implements OnInit, OnDestroy {
         //window.location.reload();
         this.online = this.route.snapshot.data['online'];
         this.online = this.pongService.onlineBoolean;
-        console.log("ONLINE-->" + this.online);
+        //console.log("ONLINE-->" + this.online);
         //this.pongService.getGame().gameMode = 0;
         console.log("Try subscribe");
         //this.pongService.joinUserToRoom("#pongRoom");
@@ -63,7 +65,9 @@ export class PongComponent implements OnInit, OnDestroy {
                 this.chatService.setCurrentRoom(payload.data.room);
         		this.canvas = this.gameCanvas?.nativeElement;
         		this.gameContext = this.canvas?.getContext('2d');
-//        		this.canvas.hidden = true; 
+//        		this.canvas.hidden = true;
+                this.msg = "Best of (9)"
+                this.waitingList = "";
                 requestAnimationFrame(this.gameLoop);
 
 				if (this.playerLogin == undefined || this.playerLogin.length == 0){
@@ -81,11 +85,16 @@ export class PongComponent implements OnInit, OnDestroy {
 				if(this.chatService.getCurrentRoom() == payload.data.room){
 					this.pongService.setGame(payload.data)
 					this.setGamePlayer()
+                    this.msg = "Best of (9)";
+                    if (payload.data.finish){
+                        this.msg = "Game has finish";
+                    }
 				}
             }               
         }));
         if (!this.online && !this.contected) { 
-            this.pongService.joinUserToRoom("#pongRoom");            
+            this.pongService.joinUserToRoom("#pongRoom");
+            this.msg = "Connecting to room..."            
             this.contected = true;
         }
     }
@@ -146,6 +155,7 @@ export class PongComponent implements OnInit, OnDestroy {
         if (m == "on-line"){
             console.log(this.playerLogin + " join match making list ");
             this.pongService.playOnLine(this.playerLogin);
+            this.waitingList = "Waiting for other player";
         }
         else{
         	console.log("joining")
@@ -181,7 +191,7 @@ export class PongComponent implements OnInit, OnDestroy {
         this.gameContext!.fillText(pOne, posOne, 50);
         this.gameContext!.fillText(ptwo, posTwo, 50);
         this.gameContext!.fillStyle = "#FF0000";
-        if (this.pongService.getGame().playerOneScore >= 3) { //POINTS
+        if (this.pongService.getGame().playerOneScore >= 5) { //POINTS
             //this.restartScores();
             this.gameContext!.fillStyle = "#00FF00";
             let winner = this.pongService.getGame().playerOne + " WON!"
@@ -190,7 +200,7 @@ export class PongComponent implements OnInit, OnDestroy {
             var textWidth = this.gameContext!.measureText(again).width;
             this.gameContext!.fillStyle = "#808080";
             this.gameContext!.fillText(again, (this.canvas.width - textWidth) / 2, 250);
-        } else if (this.pongService.getGame().playerTwoScore >= 3) { //POINTS
+        } else if (this.pongService.getGame().playerTwoScore >= 5) { //POINTS
             //this.restartScores();
             this.gameContext!.fillStyle = "#FF0000";
             let winner;
