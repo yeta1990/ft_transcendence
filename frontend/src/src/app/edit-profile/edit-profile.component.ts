@@ -16,6 +16,7 @@ import { ModalService } from '../modal/modal.service';
 import { Subscription } from "rxjs"
 import { ToasterService } from '../toaster/toaster.service';
 import { ValidationService } from './validation-service/validation-service.service';
+import { Campuses } from '@shared/enum';
 
 
 @Component({
@@ -31,8 +32,13 @@ export class EditProfileComponent implements  OnInit {
   editedFields: { [key: string]: any } = {};
   showMfaModal = false;
   mfaActivated : boolean = false;
+  tokenId: number = 0;
   selectedFile: File | null = null;
+  campusesTypes = Object.keys(Campuses);
   formData = new FormData();
+  isAdmin = false;
+  editEnabled = false;
+  loginEnabled = false;
 
   private modalClosedSubscription: Subscription = {} as Subscription;
 
@@ -42,6 +48,7 @@ export class EditProfileComponent implements  OnInit {
     lastName: '',
 		nick: '',
 		email: '',
+		campus: new FormControl(this.campusesTypes[0]),
     mfa: false,
 		file: ''
 	});
@@ -142,17 +149,23 @@ export class EditProfileComponent implements  OnInit {
           
           // Obtener el ID del usuario desde el token JWT
           const token = this.authService.getDecodedAccessToken(this.authService.getUserToken() ?? '');
-          const id = token?.id;
+          this.tokenId = token?.id;
   
           // Verificar si el usuario tiene un rol de administrador o si es el propio usuario conectado
-          if (id !== null && (id === this.user?.id || this.user?.userRole == UserRole.ADMIN)) {
+          if (this.tokenId !== null && (this.tokenId === this.user?.id || this.user?.userRole == UserRole.ADMIN)) {
+			if (this.user?.userRole == UserRole.ADMIN) {
+				this.isAdmin = true;
+			}
+			this.editForm.controls['login'].setValue(this.user!.login);
             this.editForm.controls['firstName'].setValue(this.user!.firstName);
             this.editForm.controls['lastName'].setValue(this.user!.lastName);
+			this.editForm.controls['nick'].setValue(this.user!.nick);
             this.editForm.get('nick')?.valueChanges.subscribe(() => {
               const newNick = this.editForm.get('nick')?.value!;
               this.validateNick(newNick);
             });
-            this.editForm.controls['email'].setValue(this.user!.email);
+            this.editForm.controls['email'].patchValue(this.user!.email);
+			this.editForm.controls['campus'].setValue(this.user!.campus);
             this.mfaActivated = this.user?.mfa || false;
           } else {
             // El usuario no tiene permiso para editar el perfil, redirige a la página anterior.
@@ -171,12 +184,11 @@ export class EditProfileComponent implements  OnInit {
     if (newNick !== null) {
       this.validationService.checkNickAvailability({ nick: newNick }).subscribe(
         (response) => {
-          if (response == false) {
-            this.editForm.get('nick')?.setErrors({ 'nickTaken': true });
-            console.log("NOT AVAILABLE");
-          } else {
-            console.log("AVAILABLE");
-          }
+			if (response == true || newNick === this.user?.nick) {
+				this.editForm.get('nick')?.setErrors(null);
+			} else {
+				this.editForm.get('nick')?.setErrors({ notAvailable: true });
+			}
         },
         (error) => {
           console.error('Error al verificar el nick:', error);
@@ -185,8 +197,16 @@ export class EditProfileComponent implements  OnInit {
       }
     }
 
-  editProfile() {
-		
+  editLogin() {
+	if (this.isAdmin) {
+        this.loginEnabled = true;
+    }
+  }
+
+  editEmail() {
+	if (this.user!.id === this.tokenId ) {
+        this.editEnabled = true;
+    }
   }
 
   	

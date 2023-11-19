@@ -13,10 +13,51 @@
 		<div class="profile-container">
 			<h1 class="title01">Configuración General</h1>
 			<p class="subtitle">Administra los detalles de la cuenta de usuario que has compartido con Ft_Trascendence, incluyendo tu nombre, información de contacto y más datos.</p>
-            <div class="form-container">
+            <form [formGroup]="editForm" class="form-container">
 				<h1 class="title02">Información de cuenta</h1>
-				<p class="subtitle2">ID:</p>
-            </div>
+				<p class="subtitle2">ID: <span class="user-id">{{ user?.id }}</span></p>
+				<div class="user-info-row">
+					<div class="lockInputBox">
+						<input type="text" name="login" required="required" id="login" formControlName="login" placeholder="{{ user?.login }}" [readonly]="!loginEnabled" [ngStyle]="loginEnabled ? {} : { 'background': '#999' }">
+						<span>Login</span>
+					</div>
+					<button (click)="editLogin()" [ngClass]="isAdmin ? 'button-edit' : 'button-no-edit'"></button>
+					<div class="lockInputBox">
+						<input type="text" name="email" required="required" id="email" formControlName="email" placeholder="{{ user?.email }}" [readonly]="!editEnabled" [ngStyle]="editEnabled ? {} : { 'background': '#999' }">
+						<span>Email</span>
+					</div>
+					<button (click)="editEmail()" class="button-edit"></button>
+				</div>
+				<h1 class="title02">Detalles personales</h1>
+				<p class="subtitle">Administra tu nombre e información de contacto. Estos detalles personales son privados y no se mostrarán a otros usuarios.</p>
+				<div class="user-info-row">
+					<div class="inputBox">
+						<input type="text" name="firstName" required="required" id="firstName" formControlName="firstName" placeholder="{{ user?.firstName }}">
+						<span>Nombre</span>
+					</div>
+					<div class="inputBox">
+						<input type="text" name="lastName" required="required" id="lastName" formControlName="lastName" placeholder="{{ user?.lastName }}">
+						<span>Apellidos</span>
+					</div>
+				</div>
+				<div class="user-info-row">
+					<div class="inputBox">
+						<input type="text" name="nick" required="required" id="nick" formControlName="nick" placeholder="{{ user?.nick }}">
+						<span>Apodo</span>
+					</div>
+					<select formControlName="campus" class="inputBox">
+						<option *ngFor="let option of campusesTypes">
+						{{ option }}
+						</option>
+						<span>Campus</span>
+					</select>
+				</div>
+				<div class="user-info-row">
+					<div *ngIf="editForm.get('nick')?.hasError('notAvailable')" class="error-message">
+						Este apodo no es correcto o ya está en uso.
+					</div>
+				</div>
+			</form>
         </div>
     </div>
 </body>

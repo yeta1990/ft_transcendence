@@ -30,7 +30,6 @@
 .form-container {
     top: 0;
     left: 0;
-    width: 100%;
     height: 200vh; /* Solo para propósitos de demostración, ajusta según sea necesario */
     background-color: transparent;
 }
@@ -74,5 +73,109 @@
     font-weight: bold;
     font-size: 16px;
     margin-left: 7%;
+    margin-top: 30px;
+}
+
+.user-id {
+    font-family: "Roboto", sans-serif;
+    color: white;
+	font-weight: lighter;
+	margin-left: 0.5em;
+}
+
+.user-info-row {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height:fit-content;
+	flex-direction: row;
+	gap: 1%;
+}
+
+.lockInputBox {
+	position: relative;
+	width:39%;
+}
+
+.inputBox {
+	position: relative;
+	width:45%;
+	margin-top: 3em;
+}
+
+.lockInputBox input,
+.inputBox input {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #444;
+	background : white;
+	border-radius: 5px;
+	outline: none;
+	color:#444;
+	font: 1em;
+}
+
+.inputBox span {
+	position: absolute;
+	left: 0;
+	padding: 10px;
+	pointer-events: none;
+	font-size: 1em;
+	color: white;
+	text-transform: uppercase;
+	transition: 0.5s;
+}
+
+.lockInputBox span,
+.lockInputBox span {
+	position: absolute;
+	left: 0;
+	pointer-events: none;
+	text-transform: uppercase;
+	color: white;
+	transform: translateX(15px) translateY(-9px);
+	font-size: 0.8em;
+	font-weight: bold;
+	padding: 0 10px;
+	background: #d4da5b;
+	border-radius: 5px;
+	align-items: center;
+}
+
+.inputBox :valid ~ span,
+.inputBox :focus ~ span {
+	color: white;
+	transform: translateX(15px) translateY(-9px);
+	font-size: 0.8em;
+	font-weight: bold;
+	padding: 0 10px;
+	background: #d4da5b;
+	border-radius: 5px;
+	align-items: center;
+}
+
+.button-edit, .button-no-edit {
+	width: 2.7em;
+    height: 2.7em;
+    background-color: #d4da5b;
+    border: none;
+    padding: 0.5em 1em;
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/0/00/OOjs_UI_icon_edit-ltr-invert.svg');
+	background-size: 60%;
+    background-position: center;
+	background-repeat: no-repeat;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+/* Estilos específicos para el botón de edición */
+.button-no-edit {
+    background-color: #ccc;
+	background-image: url('https://upload.wikimedia.org/wikipedia/commons/8/8b/OOjs_UI_icon_lock-ltr-invert.svg');
+}
+
+.error-message {
+    color: #d1434f;
+    font-size: 14px;
     margin-top: 30px;
 }
