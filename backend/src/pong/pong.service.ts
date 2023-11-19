@@ -341,6 +341,26 @@ export class PongService {
         }
     }
 
+    async ChallengeGame(loginPlayerOne: string, loginPlayerTwo: string, mode:string) {
+
+        this.disconectPlayer("#pongRoom_" + loginPlayerOne, loginPlayerOne);
+        this.disconectPlayer("#pongRoom_" + loginPlayerTwo, loginPlayerTwo);
+        const room: string = "#pongRoom_" + loginPlayerOne + "+" + loginPlayerTwo;
+        const idsPlayerOne: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(loginPlayerOne);
+        const idsPlayerTwo: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(loginPlayerTwo);
+            
+        for (let element of idsPlayerOne) {
+            await this.gameGateaway.joinRoutineGame(element, loginPlayerOne, room, "", "join")
+        }
+            
+        for (let element of idsPlayerTwo) {
+            await this.gameGateaway.joinRoutineGame(element, loginPlayerTwo, room, "", "join")
+        }
+        this.chatService.setUserStatusIsPlaying(this.matchMaking[0])
+        this.chatService.setUserStatusIsPlaying(this.matchMaking[1])
+    }
+    
+
     disconectPlayer(room:string, login:string) {
         var g = this.games.get(room)
         if (!g.playerOne || !g.playerTwo) {return;}
