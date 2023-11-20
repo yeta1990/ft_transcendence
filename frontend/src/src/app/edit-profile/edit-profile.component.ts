@@ -165,7 +165,10 @@ export class EditProfileComponent implements  OnInit {
               this.validateNick(newNick);
             });
             this.editForm.controls['email'].patchValue(this.user!.email);
-			this.editForm.controls['campus'].setValue(this.user!.campus);
+            const selectedCampus = this.user!.campus || '';
+            console.log(selectedCampus);
+            const numberCampus = Object.values(Campuses).indexOf(selectedCampus);
+            this.editForm.controls['campus'].setValue(this.campusesTypes[numberCampus]);
             this.mfaActivated = this.user?.mfa || false;
           } else {
             // El usuario no tiene permiso para editar el perfil, redirige a la página anterior.

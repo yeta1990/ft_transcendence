@@ -4,9 +4,10 @@
 //using fs throws an error
 const fs = require('fs-extra');
 const targetPath = './src/environments/environment.ts';
-require('dotenv').load();
+require('dotenv').config();
 // `environment.ts` file structure
 const envConfigFile = `export const environment = {
+	production: true,
    apiBaseUrl: '${process.env.BACKEND_IP}',
    apiUrl: '${process.env.BACKEND_IP}',
    frontendUrl: '${process.env.FRONTEND_URL}',
@@ -16,11 +17,22 @@ const envConfigFile = `export const environment = {
 //console.log('The file `environment.ts` will be written with the following content: \n');
 //console.log(envConfigFile);
 //
-fs.outputFile(targetPath, envConfigFile, function (err) {
-   if (err) {
-   	   console.log(err)
-//       throw console.error(err);
-   } else {
-       console.log(`Angular environment.ts file generated correctly at ${targetPath} \n`);
+
+async function generateEnvironmentFile() {
+   try {
+       await fs.outputFile(targetPath, envConfigFile);
+       console.log(`Angular environment.ts file generated correctly at ${targetPath}\n`);
+   } catch (err) {
+       console.error(err);
    }
-});
+}
+
+generateEnvironmentFile();
+// fs.outputFile(targetPath, envConfigFile, function (err) {
+//    if (err) {
+//    	   console.log(err)
+// //       throw console.error(err);
+//    } else {
+//        console.log(`Angular environment.ts file generated correctly at ${targetPath} \n`);
+//    }
+// });
