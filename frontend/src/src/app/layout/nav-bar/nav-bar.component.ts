@@ -93,6 +93,9 @@ export class NavBarComponent {
       			const challengeConfirmation = this.modalService.getModalData()[0];
 				this.chatService.acceptMatchProposal(login)
 			}
+			else{
+				this.chatService.cancelMatchProposal(login)
+			}
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template14', login);

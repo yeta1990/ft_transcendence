@@ -432,6 +432,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				this.waitForMatchAnswerModal(login)
 				return ;
 			}
+
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template9', login);
