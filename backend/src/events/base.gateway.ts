@@ -178,10 +178,11 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		  }
 		  //cancel all match proposals
 		  this.pongservice.cancelMatchProposal(login)
+		  this.pongservice.removeUserFromMatchMakingList(login)
 			
   	  }
 	}
-
+ 
   //socket rooms, not db rooms
   //all rooms are created in db, but not necessarily in the socket server
   getActiveRooms(): Array<string>{
