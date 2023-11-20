@@ -15,6 +15,7 @@ export class PongService {
     public numberOfGames: number = 0;
     public interval: any = 0;
     private matchMaking: Array<string> = new Array<string>;
+	private matchProposals: Map<string, string> = new Map()
 
     constructor(
     	@Inject(forwardRef(() => ChatGateway))
@@ -111,6 +112,40 @@ export class PongService {
         // }
         return (this.games.get(name));
     }
+
+	saveMatchProposal(senderLogin: string, targetLogin: string){
+		this.matchProposals.set(senderLogin, targetLogin)	
+		this.matchProposals.set(targetLogin, senderLogin)	
+	}
+
+	deleteMatchProposal(player1: string){
+		const player2 = this.matchProposals.get(player1)	
+		this.matchProposals.delete(player1)
+		if (player2 != undefined){
+			this.matchProposals.delete(player2)
+		}
+	}
+
+	hasAnotherProposal(login: string, targetLogin: string){
+		if (this.matchProposals.get(targetLogin) == undefined){
+			return false;	
+		}
+		else if (this.matchProposals.get(targetLogin) == login){
+			return false;
+		}
+		return true;
+	}
+
+	isAValidProposal(player1: string, player2: string)
+	{
+		return this.matchProposals.get(player1) == player2 || this.matchProposals.get(player2) == player1
+	}
+
+	cancelMatchProposal(player1: string){
+		const player2 = this.matchProposals.get(player1)
+		this.gameGateaway.sendCancelMatchProposal(player1, player2)
+		this.deleteMatchProposal(player1)
+	}
 
     updateGame(gameGateway :ChatGateway, game: GameRoom){
         //this.games.forEach(element => {

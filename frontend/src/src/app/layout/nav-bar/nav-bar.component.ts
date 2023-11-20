@@ -5,6 +5,7 @@ import { SocketPayload } from '@shared/types'
 import { events } from '@shared/const';
 import { AuthGuardService } from '../../auth/auth-guard.service';
 import { ChatService } from '../../chat/chat.service'
+import { ModalService } from '../../modal/modal.service'
 import { Subscription } from "rxjs"
 
 @Component({
@@ -16,12 +17,15 @@ export class NavBarComponent {
 
   @Input() public isUserLogged: boolean;
 
+	private modalClosedSubscription: Subscription = {} as Subscription;
+
 	private subscriptions = new Subscription();
    constructor(
        private authService: AuthService,
        private authGuardService: AuthGuardService,
        private router: Router,
-       private chatService: ChatService
+       private chatService: ChatService,
+		private modalService: ModalService,
 
     ) {
       this.isUserLogged = authService.isLoggedIn();
@@ -32,6 +36,14 @@ export class NavBarComponent {
 			.subscribe((payload: SocketPayload) => {
 				if (payload.event === events.ActiveUsers){
 					this.chatService.setActiveUsers(payload.data)
+				}
+				else if (payload.event === "sendMatchProposal"){
+					console.log("receiving match")
+					this.receiveMatchModal(payload.data)	
+				}
+				else if (payload.event === "cancelMatchProposal"){
+					console.log("cancel match")
+					this.modalService.closeModal();
 				}
 		})
 	  )
@@ -71,5 +83,20 @@ export class NavBarComponent {
   redirectToChatAdmin() {
       this.router.navigateByUrl('/admin-chat');
   }
+
+
+
+	receiveMatchModal(login: string){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm){
+      			const challengeConfirmation = this.modalService.getModalData()[0];
+				this.chatService.acceptMatchProposal(login)
+			}
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template14', login);
+	}
+
 
 }

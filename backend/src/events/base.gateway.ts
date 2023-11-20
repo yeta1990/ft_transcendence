@@ -20,6 +20,7 @@ import { ChatUser } from '@shared/types';
 import { map } from 'rxjs/operators';
 import {User} from '../user/user.entity'
 import {UserStatus} from '@shared/enum'
+import { PongService } from 'src/pong/pong.service';
 //this base class is used to log the initialization
 //and avoid code duplications in the gateways
 @Injectable()
@@ -49,6 +50,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   @Inject(UserService)
   protected userService: UserService;
+  
+  @Inject(forwardRef(() => PongService))
+  protected pongservice:PongService;
 
   constructor(){
 	this.rooms = new Set<string>();
@@ -172,6 +176,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  		    .getRoomMetaData(room)
 	  		  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
 		  }
+		  //cancel all match proposals
+		  this.pongservice.cancelMatchProposal(login)
+			
   	  }
 	}
 
@@ -459,5 +466,21 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 				socket.disconnect(true); 
 			}
 		}
+  }
+
+  public async sendCancelMatchProposal(player1: string, player2: string){
+	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(player2);
+	  	const emisorSocketIds: Array<string> = this.getClientSocketIdsFromLogin(player1);
+		if (targetSocketIds){
+		for (let i = 0; i < targetSocketIds.length; i++){
+			this.server.to(targetSocketIds[i]).emit("cancelMatchProposal", player1)
+		}
+		}
+		if (emisorSocketIds){
+		for (let i = 0; i < emisorSocketIds.length; i++){
+			this.server.to(emisorSocketIds[i]).emit("cancelMatchProposal", player2)
+		}
+		}
+  
   }
 }

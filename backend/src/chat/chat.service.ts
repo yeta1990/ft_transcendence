@@ -90,6 +90,17 @@ export class ChatService {
 		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
 	}
 
+	isAvailableToPlay(targetLogin: string): boolean{
+		let available: boolean = false;
+		this.users.forEach((chatUser: ChatUser, key: string) => {
+  			if (chatUser.login === targetLogin && chatUser.status == UserStatus.ONLINE) {
+				available = true;
+  			}
+		});
+		console.log(available)
+		return available;
+	}
+
 	public async createRoom(login: string, room: string, hasPass: boolean, password: string | undefined): Promise<boolean>{
 		const roomAlreadyExists = await this.roomRepository.findOne({ where: {name: room}});
 
