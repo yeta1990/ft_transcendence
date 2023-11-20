@@ -117,6 +117,9 @@ export class SocketService {
 			.on("cancelMatchProposal", (data:string) => {
 				this.message.next({event: "cancelMatchProposal", data});
 			})
+			.on("cancelOnline", (data:string) => {
+				this.message.next({event: "cancelOnline", data});
+			})
 		}
 	}
 

@@ -361,6 +361,7 @@ export class PongService {
             const idsPlayerOne: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMaking[0]);
             const idsPlayerTwo: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMaking[1]);
             
+			this.gameGateaway.sendCancelOnline(this.matchMaking[0], this.matchMaking[1])
             for (let element of idsPlayerOne) {
                 await this.gameGateaway.joinRoutineGame(element, this.matchMaking[0], room, "", "join")
             }
@@ -375,6 +376,11 @@ export class PongService {
             this.matchMaking.shift();
         }
     }
+
+	removeUserFromMatchMakingList(login: string){
+		this.matchMaking = this.matchMaking.filter(l => login != login)	
+		console.log(this.matchMaking)
+	}
 
     disconectPlayer(room:string, login:string) {
         var g = this.games.get(room)

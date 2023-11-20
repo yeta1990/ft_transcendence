@@ -483,4 +483,22 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		}
   
   }
+
+  public async sendCancelOnline(player1: string, player2: string){
+	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(player2);
+	  	const emisorSocketIds: Array<string> = this.getClientSocketIdsFromLogin(player1);
+		if (targetSocketIds){
+		for (let i = 0; i < targetSocketIds.length; i++){
+			this.server.to(targetSocketIds[i]).emit("cancelOnline", player1)
+		}
+		}
+		if (emisorSocketIds){
+		for (let i = 0; i < emisorSocketIds.length; i++){
+			this.server.to(emisorSocketIds[i]).emit("cancelOnline", player2)
+		}
+		}
+  
+  }
+	
+
 }

@@ -233,5 +233,9 @@ export class ChatService {
 		this.socketService.sendMessageToServer("cancelMatchProposal", targetLogin)	
 	}
 
+	leaveMatchMakingList(){
+		this.socketService.sendMessageToServer("cancelOnline", "")	
+	}
+
 
 }

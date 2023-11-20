@@ -11,6 +11,7 @@ import { User } from '../user';
 import { AppRoutingModule } from '../app-routing-module/app-routing-module.module';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ChatService } from '../chat/chat.service';
+import { ModalService } from '../modal/modal.service'
 
 @Component({
   selector: 'app-pong',
@@ -31,6 +32,7 @@ export class PongComponent implements OnInit, OnDestroy {
     public playerLogin:string = "";
     public online: boolean = false;
     public contected: boolean = false;
+	private modalClosedSubscription: Subscription = {} as Subscription;
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
     constructor(
@@ -38,6 +40,7 @@ export class PongComponent implements OnInit, OnDestroy {
         private myProfileService: MyProfileService,
         private route: ActivatedRoute,
         private chatService: ChatService,
+		private modalService: ModalService,
         //private pongService: PongService,
     ){
         //window.location.reload();
@@ -146,12 +149,21 @@ export class PongComponent implements OnInit, OnDestroy {
         if (m == "on-line"){
             console.log(this.playerLogin + " join match making list ");
             this.pongService.playOnLine(this.playerLogin);
+			this.waitForMatchAnswerModal()
         }
         else{
         	console.log("joining")
         	if (this.chatService.getCurrentRoom() != "#pongService_" + this.playerLogin) this.pongService.joinUserToRoom("#pongRoom");
         }
     }
+
+	waitForMatchAnswerModal(){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+			this.chatService.leaveMatchMakingList()
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template16', "");
+	}
 
     drawBoardDetails(){
 

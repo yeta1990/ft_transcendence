@@ -221,6 +221,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				else if (payload.event === events.LoginNickEquivalence){
 					this.chatService.setLoginNickEquivalence(payload.data)
 				}
+				else if (payload.event === 'cancelOnline'){
+					this.modalService.closeModal()
+				}
         		this.scrollToBottom();
 			})
 		);
@@ -426,7 +429,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       		if (confirm){
       			const challengeConfirmation = this.modalService.getModalData()[0];
 				this.chatService.sendMatchProposal(login)
-      			//to be done!!!
 				console.log("match challenge")
 				this.modalClosedSubscription.unsubscribe();
 				this.waitForMatchAnswerModal(login)
@@ -440,17 +442,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	waitForMatchAnswerModal(login: string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-      		const confirm: boolean = this.modalService.getConfirmationInput();
-			if (confirm){
-				this.chatService.cancelMatchProposal(login)
-				console.log("cancel match proposal")
-			}
+			this.chatService.cancelMatchProposal(login)
+			console.log("cancel match proposal")
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template15', login);
 	}
-
-
 
 
 	createChannelModal() {

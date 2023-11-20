@@ -274,6 +274,22 @@
         </div>
       </ng-template>
 
+      <ng-template [ngSwitchCase]="'template16'">
+        <div id="modal-content-template16">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Waiting somebody joins</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>Wait until anybody joins the matchmaking list.</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Leave match making list</button>&nbsp;
+
+      	  </div>
+        </div>
+      </ng-template>
+
       <ng-template [ngSwitchCase]="'template14'">
         <div id="modal-content-template14">
 		  <div class="modal-header">

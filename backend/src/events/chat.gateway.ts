@@ -831,7 +831,14 @@ export class ChatGateway extends BaseGateway {
 		console.log("On-line: " + login + " - " + loginBack);
 		this.pongservice.addUserToList(loginBack)
 	  }
-	
+
+	@SubscribeMessage('cancelOnline')
+	cancelMatchMakingUser(client: Socket, targetLogin: string){
+		const login: string = client.handshake.query.login as string;
+
+		this.pongservice.removeUserFromMatchMakingList(login)
+	}
+
 	@SubscribeMessage('keydown')
  	handleMove(client: Socket, payload: any){
 		const login: string = client.handshake.query.login as string;
@@ -876,6 +883,7 @@ export class ChatGateway extends BaseGateway {
 			}
 			this.pongservice.saveMatchProposal(login, targetLogin)
 			//remove from matchmaking list
+			this.pongservice.removeUserFromMatchMakingList(login)
 		} else if (targetHasAnotherProposal){
 	  	  this.messageToClient(client.id, "system", 
 	  			generateSocketErrorResponse("", `${targetLogin} is waiting for another match challenge`).data);
@@ -908,6 +916,9 @@ export class ChatGateway extends BaseGateway {
 		//delete match proposal
 		this.pongservice.deleteMatchProposal(login)
 		//remove from matchmaking list
+		this.pongservice.removeUserFromMatchMakingList(login)
+		this.pongservice.removeUserFromMatchMakingList(targetLogin)
+
 	}
 
 	@SubscribeMessage('cancelMatchProposal')
@@ -920,5 +931,6 @@ export class ChatGateway extends BaseGateway {
 
 		this.pongservice.cancelMatchProposal(login)
 	}
+
 
 }
