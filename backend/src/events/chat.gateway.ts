@@ -907,6 +907,8 @@ export class ChatGateway extends BaseGateway {
 		if (player1isAvailableToPlay && player2isAvailableToPlay){
 			//createGame
 			console.log("accepted game")
+			this.sendAcceptedGame(login, targetLogin)
+			this.pongservice.challengeGame(login, targetLogin, "normal")
 		}else{
 	  	  this.messageToClient(client.id, "system", 
 	  			generateSocketErrorResponse("", `The other player is now busy playing, please wait until player is free again and challenge him/her`).data);

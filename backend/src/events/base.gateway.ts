@@ -469,37 +469,32 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		}
   }
 
-  public async sendCancelMatchProposal(player1: string, player2: string){
+  public sendEventToBothPlayers(player1: string, player2: string, event: string): void{
 	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(player2);
 	  	const emisorSocketIds: Array<string> = this.getClientSocketIdsFromLogin(player1);
 		if (targetSocketIds){
 		for (let i = 0; i < targetSocketIds.length; i++){
-			this.server.to(targetSocketIds[i]).emit("cancelMatchProposal", player1)
+			this.server.to(targetSocketIds[i]).emit(event, player1)
 		}
 		}
 		if (emisorSocketIds){
 		for (let i = 0; i < emisorSocketIds.length; i++){
-			this.server.to(emisorSocketIds[i]).emit("cancelMatchProposal", player2)
+			this.server.to(emisorSocketIds[i]).emit(event, player2)
 		}
 		}
   
   }
 
-  public async sendCancelOnline(player1: string, player2: string){
-	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(player2);
-	  	const emisorSocketIds: Array<string> = this.getClientSocketIdsFromLogin(player1);
-		if (targetSocketIds){
-		for (let i = 0; i < targetSocketIds.length; i++){
-			this.server.to(targetSocketIds[i]).emit("cancelOnline", player1)
-		}
-		}
-		if (emisorSocketIds){
-		for (let i = 0; i < emisorSocketIds.length; i++){
-			this.server.to(emisorSocketIds[i]).emit("cancelOnline", player2)
-		}
-		}
-  
+  public sendCancelMatchProposal(player1: string, player2: string){
+	  	this.sendEventToBothPlayers(player1, player2, "cancelMatchProposal")
   }
-	
+
+  public sendCancelOnline(player1: string, player2: string){
+	  	this.sendEventToBothPlayers(player1, player2, "cancelOnline")
+  }
+
+  public sendAcceptedGame(player1: string, player2:string){
+	  	this.sendEventToBothPlayers(player1, player2, "acceptMatchProposal")
+  }
 
 }

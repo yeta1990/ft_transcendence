@@ -408,14 +408,17 @@ export class PongService {
 		console.log(this.matchMaking)
 	}
 
-    async ChallengeGame(loginPlayerOne: string, loginPlayerTwo: string, mode:string) {
+    async challengeGame(loginPlayerOne: string, loginPlayerTwo: string, mode:string) {
 
         this.disconectPlayer("#pongRoom_" + loginPlayerOne, loginPlayerOne);
         this.disconectPlayer("#pongRoom_" + loginPlayerTwo, loginPlayerTwo);
+		this.removeUserFromMatchMakingList(loginPlayerOne)
+		this.removeUserFromMatchMakingList(loginPlayerTwo)
         const room: string = "#pongRoom_" + loginPlayerOne + "+" + loginPlayerTwo;
         const idsPlayerOne: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(loginPlayerOne);
         const idsPlayerTwo: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(loginPlayerTwo);
             
+
         for (let element of idsPlayerOne) {
             await this.gameGateaway.joinRoutineGame(element, loginPlayerOne, room, "", "join")
         }
@@ -423,8 +426,9 @@ export class PongService {
         for (let element of idsPlayerTwo) {
             await this.gameGateaway.joinRoutineGame(element, loginPlayerTwo, room, "", "join")
         }
-        this.chatService.setUserStatusIsPlaying(this.matchMaking[0])
-        this.chatService.setUserStatusIsPlaying(this.matchMaking[1])
+        this.chatService.setUserStatusIsPlaying(loginPlayerOne)
+        this.chatService.setUserStatusIsPlaying(loginPlayerTwo)
+
     }
     
 

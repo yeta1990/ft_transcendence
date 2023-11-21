@@ -7,6 +7,7 @@ import { AuthGuardService } from '../../auth/auth-guard.service';
 import { ChatService } from '../../chat/chat.service'
 import { ModalService } from '../../modal/modal.service'
 import { Subscription } from "rxjs"
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-nav-bar',
@@ -25,8 +26,8 @@ export class NavBarComponent {
        private authGuardService: AuthGuardService,
        private router: Router,
        private chatService: ChatService,
-		private modalService: ModalService,
-
+	   private modalService: ModalService,
+	   private location: Location
     ) {
       this.isUserLogged = authService.isLoggedIn();
 	  this.chatService.forceInit()    
@@ -44,6 +45,12 @@ export class NavBarComponent {
 				else if (payload.event === "cancelMatchProposal"){
 					console.log("cancel match")
 					this.modalService.closeModal();
+				}
+				else if (payload.event === "acceptMatchProposal"){
+					this.modalService.closeModal();
+					if (!this.location.path().includes('home')){
+	  					this.router.navigateByUrl('/home');
+					}
 				}
 		})
 	  )
