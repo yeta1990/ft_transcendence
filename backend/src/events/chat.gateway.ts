@@ -837,7 +837,6 @@ export class ChatGateway extends BaseGateway {
 		const login: string = client.handshake.query.login as string;
 
 		this.pongservice.removeUserFromMatchMakingList(login)
-	}
 
 	}
 
@@ -917,7 +916,7 @@ export class ChatGateway extends BaseGateway {
 			//createGame
 			console.log("accepted game")
 			this.sendAcceptedGame(login, targetLogin)
-			this.pongservice.challengeGame(login, targetLogin, "normal")
+			this.pongservice.challengeGame(login, targetLogin, false)
 		}else{
 	  	  this.messageToClient(client.id, "system", 
 	  			generateSocketErrorResponse("", `The other player is now busy playing, please wait until player is free again and challenge him/her`).data);
