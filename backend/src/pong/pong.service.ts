@@ -47,7 +47,7 @@ export class PongService {
         if (this.games.get(name))
             return(this.games.get(name));
         console.log("Init -> " + name);
-        this.gameGateaway = gameGateaway;
+//        this.gameGateaway = gameGateaway;
         this.game = new GameRoom(
             name,               //room
 	        "Welcome",          //message
@@ -399,20 +399,22 @@ export class PongService {
                 await this.gameGateaway.joinRoutineGame(element, this.matchMaking[0], room, "", "join")
             }
             
+        	console.log("Waiting list (2): " + this.matchMaking);
             for (let element of idsPlayerTwo) {
+
                 await this.gameGateaway.joinRoutineGame(element, this.matchMaking[1], room, "", "join")
             }
             this.chatService.setUserStatusIsPlaying(this.matchMaking[0])
             this.chatService.setUserStatusIsPlaying(this.matchMaking[1])
             //Remove both 
-            this.matchMaking.shift();
-            this.matchMaking.shift();
+//            this.matchMaking.shift();
+//            this.matchMaking.shift();
         }
     }
 
 	removeUserFromMatchMakingList(login: string){
 		this.matchMaking = this.matchMaking.filter(l => login != login)	
-		console.log(this.matchMaking)
+		console.log("removing " + this.matchMaking)
 	}
 
     async challengeGame(loginPlayerOne: string, loginPlayerTwo: string, mode:string) {

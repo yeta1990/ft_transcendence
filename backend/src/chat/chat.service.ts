@@ -59,7 +59,7 @@ export class ChatService {
 		this.users.delete(socket_id)
 		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
 	}
-
+  
 	setUserStatusIsPlaying(login: string):void {
 		this.users.forEach((chatUser: ChatUser, key: string) => {
 			console.log(chatUser)

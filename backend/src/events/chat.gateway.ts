@@ -787,7 +787,7 @@ export class ChatGateway extends BaseGateway {
 			
 			console.log(response)
 			this.messageToClient(clientSocketId, 'gameStatus', response);
-
+ 
 			//sending old messages of the room, except for those of users that banned
 			//the new user trying to join
 			if (!wasUserAlreadyActiveInRoom){
@@ -851,7 +851,7 @@ export class ChatGateway extends BaseGateway {
 		if (payload.key != 27) this.pongservice.keyStatus(payload.room, 0, login);
  	}
 
-
+ 
 	@SubscribeMessage('updateGame')
   	handleGameUpdate(client: Socket, room: string) {
 		const response: GameRoom = this.pongservice.getStatus(room);

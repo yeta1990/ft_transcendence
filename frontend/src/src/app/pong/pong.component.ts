@@ -169,7 +169,10 @@ export class PongComponent implements OnInit, OnDestroy {
 
 	waitForMatchAnswerModal(){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-			this.chatService.leaveMatchMakingList()
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+			if (confirm){
+				this.chatService.leaveMatchMakingList()
+			}
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template16', "");
