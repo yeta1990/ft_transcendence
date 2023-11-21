@@ -4,6 +4,7 @@ import { GameGateway } from 'src/events/game.gateway';
 import { BaseGateway } from 'src/events/base.gateway';
 import { ChatGateway } from 'src/events/chat.gateway';
 import {ChatService} from '../chat/chat.service'
+import { log } from 'console';
 @Injectable()
 export class PongService {
 
@@ -16,7 +17,7 @@ export class PongService {
     public interval: any = 0;
     private matchMaking: Array<string> = new Array<string>;
 	private matchProposals: Map<string, string> = new Map()
-
+    private matchMakingPlus: Array<string> = new Array<string>;
     constructor(
     	@Inject(forwardRef(() => ChatGateway))
     	private gameGateaway: ChatGateway,
@@ -42,7 +43,7 @@ export class PongService {
     }
   
 
-    initGame (name: string, gameGateaway: ChatGateway, viwer: number, nick:string): GameRoom {
+    initGame (name: string, gameGateaway: ChatGateway, viwer: number, nick:string, allowedPowers:boolean): GameRoom {
         
         if (this.games.get(name))
             return(this.games.get(name));
@@ -103,9 +104,13 @@ export class PongService {
             false,              //inestableball;
             false,              //reverseMoveOne;
             false,              //reverseMoveTwo;
+            [],                 //playerOnePowers;
+            [],                 //playerTwoPowers;
+            allowedPowers,      //powersAllow;
         );
         
         this.games.set(name, this.game);
+        this.randomPowers(this.games.get(name));
         this.randomDir(name);
         this.numberOfGames++;
 
@@ -153,7 +158,7 @@ export class PongService {
     updateGame(gameGateway :ChatGateway, game: GameRoom){
         //this.games.forEach(element => {
             //element.gameMode = 1;
-            console.log("Update -> " + game.room);
+            //console.log("Update -> " + game.room);
             game.gameMode = 1;
             setInterval(()=>{
                 //this.updateBall(element.room)
@@ -318,13 +323,15 @@ export class PongService {
             } else {
                 g.playerOneVel = 0;
             }
-            if (key === 49){ //1
-                //this.inestableBall(g);
-                //this.biggerPaddle(nick, g);
-                //this.smallerPaddle(nick, g);
-                //this.fasterPaddle(nick, g);
-                //this.slowerPaddle(nick, g);
-                this.reverseMove(nick, g);
+            if (key === 49 && g.powersAllow){ //1
+                var power = g.playerOnePowers[0];
+                this.throwPower(power, nick, g);
+            }else if (key === 50 && g.powersAllow){ //2
+                var power = g.playerOnePowers[1];
+                this.throwPower(power, nick, g);
+            }else if (key === 51 && g.powersAllow){ //3
+                var power = g.playerOnePowers[2];
+                this.throwPower(power, nick, g);
             }
         }
         if (nick == g.playerTwo){
@@ -341,6 +348,16 @@ export class PongService {
                 g.playerTwoVel = 1;
             } else {
                 g.playerTwoVel = 0;
+            }
+            if (key === 49 && g.powersAllow){ //1
+                var power = g.playerTwoPowers[0];
+                this.throwPower(power, nick, g);
+            }else if (key === 50 && g.powersAllow){ //2
+                var power = g.playerTwoPowers[1];
+                this.throwPower(power, nick, g);
+            }else if (key === 51 && g.powersAllow){ //3
+                var power = g.playerTwoPowers[2];
+                this.throwPower(power, nick, g);
             }
         }
     }
@@ -396,13 +413,12 @@ export class PongService {
             
 			this.gameGateaway.sendCancelOnline(this.matchMaking[0], this.matchMaking[1])
             for (let element of idsPlayerOne) {
-                await this.gameGateaway.joinRoutineGame(element, this.matchMaking[0], room, "", "join")
+                await this.gameGateaway.joinRoutineGame(element, this.matchMaking[0], room, "", "join", false)
             }
             
         	console.log("Waiting list (2): " + this.matchMaking);
             for (let element of idsPlayerTwo) {
-
-                await this.gameGateaway.joinRoutineGame(element, this.matchMaking[1], room, "", "join")
+                await this.gameGateaway.joinRoutineGame(element, this.matchMaking[1], room, "", "join", false)
             }
             this.chatService.setUserStatusIsPlaying(this.matchMaking[0])
             this.chatService.setUserStatusIsPlaying(this.matchMaking[1])
@@ -412,13 +428,37 @@ export class PongService {
         }
     }
 
+    async addUserToListPlus(login: string) {
+        if (this.matchMakingPlus.includes(login)) { return; }
+        this.matchMakingPlus.push(login);
+        console.log("Waiting list Plus: " + this.matchMakingPlus);
+        if (this.matchMakingPlus.length >= 2){
+            this.disconectPlayer("#pongRoom_" + this.matchMakingPlus[0], this.matchMakingPlus[0]);
+            this.disconectPlayer("#pongRoom_" + this.matchMakingPlus[1], this.matchMakingPlus[1]);
+            const room: string = "#pongRoom_" + this.matchMakingPlus[0] + "+" + this.matchMakingPlus[1];
+            const idsPlayerOne: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMakingPlus[0]);
+            const idsPlayerTwo: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMakingPlus[1]);
+            
+            for (let element of idsPlayerOne) {
+                await this.gameGateaway.joinRoutineGame(element, this.matchMakingPlus[0], room, "", "join", true)
+            }
+            
+            for (let element of idsPlayerTwo) {
+                await this.gameGateaway.joinRoutineGame(element, this.matchMakingPlus[1], room, "", "join", true)
+            }
+            this.chatService.setUserStatusIsPlaying(this.matchMakingPlus[0])
+            this.chatService.setUserStatusIsPlaying(this.matchMakingPlus[1])
+            //Remove both 
+            this.matchMakingPlus.shift();
+            this.matchMakingPlus.shift();
+        }
+    }
 	removeUserFromMatchMakingList(login: string){
 		this.matchMaking = this.matchMaking.filter(l => login != login)	
 		console.log("removing " + this.matchMaking)
 	}
 
-    async challengeGame(loginPlayerOne: string, loginPlayerTwo: string, mode:string) {
-
+    async challengeGame(loginPlayerOne: string, loginPlayerTwo: string, allowedPowers:boolean) {
         this.disconectPlayer("#pongRoom_" + loginPlayerOne, loginPlayerOne);
         this.disconectPlayer("#pongRoom_" + loginPlayerTwo, loginPlayerTwo);
 		this.removeUserFromMatchMakingList(loginPlayerOne)
@@ -429,11 +469,11 @@ export class PongService {
             
 
         for (let element of idsPlayerOne) {
-            await this.gameGateaway.joinRoutineGame(element, loginPlayerOne, room, "", "join")
+            await this.gameGateaway.joinRoutineGame(element, loginPlayerOne, room, "", "join", allowedPowers)
         }
             
         for (let element of idsPlayerTwo) {
-            await this.gameGateaway.joinRoutineGame(element, loginPlayerTwo, room, "", "join")
+            await this.gameGateaway.joinRoutineGame(element, loginPlayerTwo, room, "", "join", allowedPowers)
         }
         this.chatService.setUserStatusIsPlaying(loginPlayerOne)
         this.chatService.setUserStatusIsPlaying(loginPlayerTwo)
@@ -460,6 +500,28 @@ export class PongService {
     }
 
     //POWERS
+
+    throwPower(power:string, login:string, g:GameRoom){
+
+        if (power == "InestableBall") {
+           this.inestableBall(g); 
+        }
+        else if(power =="BiggerPaddle"){
+            this.biggerPaddle(login, g);
+        }
+        else if(power =="SmallerPaddle"){
+            this.smallerPaddle(login, g);
+        }
+        else if(power =="FasterPaddle"){
+            this.fasterPaddle(login, g);
+        }
+        else if(power =="SlowerPaddle"){
+            this.fasterPaddle(login, g);
+        }
+        else if(power =="ReverseMove"){
+            this.reverseMove(login, g);
+        }
+    }
     restartPowers(g: GameRoom) {
         console.log("RESET");
         g.ballSpeed = 5;
@@ -472,7 +534,42 @@ export class PongService {
         g.inestableBall = false;
         g.reverseMoveOne = false;
         g.reverseMoveTwo = false;
+        this.randomPowers(g);
     }
+
+    randomPowers(g: GameRoom) {
+        var powers: Array<string> = ["InestableBall", "BiggerPaddle", "SmallerPaddle", "FasterPaddle", "SlowerPaddle", "ReverseMove"];
+        var p: string = "";
+        g.playerOnePowers = [];
+        g.playerTwoPowers = [];
+        var index: number;
+        //1st
+        index = Math.floor(Math.random() * powers.length);
+        p = powers[index]
+        g.playerOnePowers.push(p);
+        powers.splice(index, 1);
+        //2nd
+        index = Math.floor(Math.random() * powers.length);
+        p = powers[index]
+        g.playerOnePowers.push(p);
+        powers.splice(index, 1);
+        //3rd
+        index = Math.floor(Math.random() * powers.length);
+        p = powers[index]
+        g.playerOnePowers.push(p);
+        powers.splice(index, 1);
+        //
+        g.playerTwoPowers = powers;
+        console.log("POWERS");
+        console.log(g.playerOnePowers);
+        console.log(g.playerTwoPowers);
+    }
+    shuffleArray(array: any[]) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
     async inestableBall(g: GameRoom) {
         if(g.inestableBall) {return;}
         g.inestableBall = true;
@@ -595,5 +692,4 @@ export class PongService {
         g.reverseMoveOne = false;
         g.reverseMoveTwo = false;
     }
-
 }
