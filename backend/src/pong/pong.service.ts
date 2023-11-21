@@ -290,6 +290,10 @@ export class PongService {
                         this.restartScores(g);                      
                     }
                     g.pause = false;
+					if (g.playerTwo != ''){
+						this.chatService.setUserStatusIsPlaying(g.playerOne)
+						this.chatService.setUserStatusIsPlaying(g.playerTwo)
+					}
                 }
                 else {                    
                     g.pause = true
@@ -355,17 +359,20 @@ export class PongService {
         // }
         // PongService.init = true;
     }
-
+ 
     restartScores(g: GameRoom) {
         g.finish = false
         g.playerOneScore = 0;
         g.playerTwoScore = 0;
+		if (g.gameMode != 0){
+
+		}
     }
 
     setPlayerTwo(nick:string){
         this.game.playerTwo = nick;
       }
-    
+  
     setPlayer(room:string, nick:string) {
         var g = this.games.get(room)
         if (g.playerOne == ""){
