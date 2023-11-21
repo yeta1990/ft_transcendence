@@ -4,7 +4,10 @@ import { GameGateway } from 'src/events/game.gateway';
 import { BaseGateway } from 'src/events/base.gateway';
 import { ChatGateway } from 'src/events/chat.gateway';
 import {ChatService} from '../chat/chat.service'
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { log } from 'console';
+import { Game } from './game.entity'
 @Injectable()
 export class PongService {
 
@@ -18,6 +21,7 @@ export class PongService {
     private matchMaking: Array<string> = new Array<string>;
 	private matchProposals: Map<string, string> = new Map()
     private matchMakingPlus: Array<string> = new Array<string>;
+
     constructor(
     	@Inject(forwardRef(() => ChatGateway))
     	private gameGateaway: ChatGateway,
@@ -239,8 +243,10 @@ export class PongService {
             g.finish = true;
             this.chatService.setUserStatusIsActive(g.playerOne)
             this.chatService.setUserStatusIsActive(g.playerTwo)
+			this.chatService.saveGameResult(g)
         }
     }
+
 
     updateComputer(g: GameRoom){ 
  
