@@ -72,8 +72,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
       	const activeUsersInServer: Array<ChatUser> = this
       		.getActiveUsersInServer()
 
-			console.log("sending")
-			console.log(activeUsersInServer)
 		this.server.emit(events.ActiveUsers, activeUsersInServer)
 		this.roomService.getAllRoomsMetaData()
 			.then(r =>  this.server.emit(events.ListAllRooms, r))

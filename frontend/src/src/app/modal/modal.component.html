@@ -249,7 +249,7 @@
 		  </div>
 		  <div class="modal-body">
 			<div class="mb-3">
-          		<p>If you remove ban of {{getModalData()[0]}}, the user will be able to login in the site again.</p>
+          		<p>Do you want to play a pong game with {{getModalData()[0]}}?</p>
    		    </div>
    		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
    		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
@@ -293,7 +293,7 @@
       <ng-template [ngSwitchCase]="'template14'">
         <div id="modal-content-template14">
 		  <div class="modal-header">
-		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Remove ban of &#64;{{getModalData()[0]}}?</h1>
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Accept match with &#64;{{getModalData()[0]}}?</h1>
 		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		  </div>
 		  <div class="modal-body">
@@ -302,6 +302,22 @@
    		    </div>
    		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
    		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">No</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template17'">
+        <div id="modal-content-template17">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Waiting somebody joins</h1>
+		  <button (click)="confirmationButton()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>Wait until anybody joins the matchmaking plus list.</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Leave match making plus list</button>&nbsp;
 
       	  </div>
         </div>

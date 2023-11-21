@@ -164,6 +164,7 @@ export class PongComponent implements OnInit, OnDestroy {
         else if (m == "plus"){
             console.log(this.playerLogin + " join match making plus list ");
             this.pongService.playOnLine(m, this.playerLogin);
+			this.waitForMatchAnswerModalPlus()
             this.waitingList = "Waiting for other player";
         }
         else{
@@ -181,6 +182,17 @@ export class PongComponent implements OnInit, OnDestroy {
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template16', "");
+	}
+
+	waitForMatchAnswerModalPlus(){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+			if (confirm){
+				this.chatService.leaveMatchMakingListPlus()
+			}
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template17', "");
 	}
 
     drawBoardDetails(){

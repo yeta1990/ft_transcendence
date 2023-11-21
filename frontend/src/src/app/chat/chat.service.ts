@@ -237,5 +237,9 @@ export class ChatService {
 		this.socketService.sendMessageToServer("cancelOnline", "")	
 	}
 
+	leaveMatchMakingListPlus(){
+		this.socketService.sendMessageToServer("cancelOnlinePlus", "")	
+	}
+
 
 }

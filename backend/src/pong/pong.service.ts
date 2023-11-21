@@ -439,6 +439,7 @@ export class PongService {
             const idsPlayerOne: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMakingPlus[0]);
             const idsPlayerTwo: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMakingPlus[1]);
             
+			this.gameGateaway.sendCancelOnline(this.matchMakingPlus[0], this.matchMakingPlus[1])
             for (let element of idsPlayerOne) {
                 await this.gameGateaway.joinRoutineGame(element, this.matchMakingPlus[0], room, "", "join", true)
             }
@@ -455,7 +456,10 @@ export class PongService {
     }
 	removeUserFromMatchMakingList(login: string){
 		this.matchMaking = this.matchMaking.filter(l => login != login)	
-		console.log("removing " + this.matchMaking)
+	}
+
+	removeUserFromMatchMakingListPlus(login: string){
+		this.matchMakingPlus = this.matchMakingPlus.filter(l => login != login)	
 	}
 
     async challengeGame(loginPlayerOne: string, loginPlayerTwo: string, allowedPowers:boolean) {

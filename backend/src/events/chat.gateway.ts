@@ -835,9 +835,13 @@ export class ChatGateway extends BaseGateway {
 	@SubscribeMessage('cancelOnline')
 	cancelMatchMakingUser(client: Socket, targetLogin: string){
 		const login: string = client.handshake.query.login as string;
-
 		this.pongservice.removeUserFromMatchMakingList(login)
+	}
 
+	@SubscribeMessage('cancelOnlinePlus')
+	cancelMatchMakingUserPlus(client: Socket, targetLogin: string){
+		const login: string = client.handshake.query.login as string;
+		this.pongservice.removeUserFromMatchMakingListPlus(login)
 	}
 
 	@SubscribeMessage('plus')
@@ -846,7 +850,7 @@ export class ChatGateway extends BaseGateway {
 		console.log("On-linePlus: " + login + " - " + loginBack);
 		this.pongservice.addUserToListPlus(loginBack)
 	}
-	
+
 	@SubscribeMessage('keydown')
  	handleMove(client: Socket, payload: any){
 		const login: string = client.handshake.query.login as string;
