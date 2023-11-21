@@ -59,11 +59,23 @@
 					</div>
 				</div>
 				<div></div>
-				<div class="buttons-container">
-					<button type="button" (click)="discardChanges()">Discard Changes</button>
-					<button type="button" (click)="saveChanges()">Save</button>
-				  </div>
+				<div class="button-row">
+					<button class="discard-button" (click)="discardChanges()">Discard Changes</button>
+					<button class="button" (click)="saveChanges()">Save</button>
+				</div>
 			</form>
+			<hr>
+			<h1 class="title01">Autenticación Doble-Factor</h1>
+			<p class="subtitle">La autenticación de doble factor (2FA) es una capa adicional de seguridad diseñada para proteger tu cuenta contra accesos no autorizados. Esta función requiere la introducción de un código de seguridad adicional al iniciar sesión en la página. Descubre cómo configurarla viendo este video o siguiendo los pasos detallados en este artículo.</p>
+            <div class="button-row">
+				<div *ngIf="!mfaActivated">
+					<button class="btn btn-success" type="button" (click)="connectMfa()">Enable Two-Factor Authentication (MFA)</button>
+				</div>
+				<!-- Botón para desconectar MFA -->
+				<div *ngIf="mfaActivated">
+					<button class="btn btn-danger" type="button" (click)="disconnectMfa()">Disconnect Two-Factor Authentication (MFA)</button>
+				</div>
+			</div>
         </div>
     </div>
 </body>
@@ -72,7 +84,7 @@
 
 <div class="container mt-4">
 	<h2>Edit Profile</h2>
-	<form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+	<form [formGroup]="editForm">
 		<div class="form-group">
 			<label for="name">Login</label>
 			<input id="login" type="text" class="form-control" readonly formControlName="login" placeholder="{{ user?.login }}">
