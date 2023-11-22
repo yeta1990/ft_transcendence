@@ -1,8 +1,8 @@
 import { SubscribeMessage, WebSocketGateway, WsResponse } from '@nestjs/websockets';
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger, forwardRef } from '@nestjs/common';
 import { BaseGateway } from './base.gateway';
 import { Socket } from 'socket.io';
-import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
+import { ChatMessage, SocketPayload, RoomMetaData, GameRoom } from '@shared/types';
 import { events, values } from '@shared/const';
 import { generateSocketErrorResponse, generateSocketInformationResponse } from '@shared/functions';
 import { generateJoinResponse } from '@shared/functions';
@@ -11,6 +11,7 @@ import { ChatAdminService } from '../chat/chat-admin/chat-admin.service';
 import { User } from '../user/user.entity';
 import { RoomMessages, ChatUser } from '@shared/types';
 
+
 //https://stackoverflow.com/questions/69435506/how-to-pass-a-dynamic-port-to-the-websockets-gateway-in-nestjs
 @Injectable()
 @WebSocketGateway({ namespace: '/chat', cors: true } )
@@ -18,7 +19,7 @@ import { RoomMessages, ChatUser } from '@shared/types';
 export class ChatGateway extends BaseGateway {
 
   constructor(private chatMessageService: ChatMessageService, 
-  			 private chatAdminService: ChatAdminService) {
+  			 private chatAdminService: ChatAdminService){
   			 	 super();
   			 	 this.gatewayName = "ChatGateway"
 				 this.logger = new Logger(this.gatewayName);
@@ -28,7 +29,6 @@ export class ChatGateway extends BaseGateway {
   //separate afterInit from the base class
   afterInit(): void {
 	this.chatService.getUsersObservable().subscribe(trigger=> {
-		console.log("yeeeessssssss")
 		this.emitUpdateUsersAndRoomsMetadata()
 	}
 	)
@@ -197,6 +197,9 @@ export class ChatGateway extends BaseGateway {
 				oldMessagesInRoom.name = originalRoom
 				oldMessagesInRoom.messages.map(m => m.room = originalRoom)
 			}
+			const loginNickEquivalence: Array<any> = await this.
+				getAllChatUsersWithNickEquivalence()
+			this.server.to(clientSocketId).emit(events.LoginNickEquivalence, loginNickEquivalence)
 			for (let message of oldMessagesInRoom.messages){
 				if (!usersThatHaveBanned.includes(message.login)){
 					this.messageToClient(clientSocketId, "message", message)
@@ -594,6 +597,9 @@ export class ChatGateway extends BaseGateway {
 		const hasExecutorPrivileges: boolean = (await this.userService.getUserByLogin(emisorLogin)).userRole >= 5 ? true : false
 		if (!hasExecutorPrivileges) return ;
 
+		const loginNickEquivalence: Array<any> = await this.
+			getAllChatUsersWithNickEquivalence()
+		this.server.to(client.id).emit(events.LoginNickEquivalence, loginNickEquivalence)
 		
 		this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
 		const allHistoricalMessages: Array<RoomMessages> = await this.chatMessageService.getAllMessagesFromAllRooms()
@@ -727,6 +733,218 @@ export class ChatGateway extends BaseGateway {
 		    this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
 	  }
   }
+//===========================GAMEGATEWAY=====================================//
+
+@SubscribeMessage('joinGameAsViwer')
+  	async handleJoinRoomGameAsViwer(client: Socket, room: string): Promise<void>{
+		const login: string = client.handshake.query.login as string;
+		const rooms :Array<string> = this.getActiveRooms();
+		const successfulJoin = await 
+		  this.joinUserToRoom(client.id, login, room, null);
+	}
+
+@SubscribeMessage('joinGame')
+  	async handleJoinRoomGame(client: Socket, roomAndPassword: string): Promise<void>{
+		let room: string = roomAndPassword.split(" ", 2)[0];
+		//const pass: string | undefined = roomAndPassword.split(" ", 2)[1];
+		const online: string | undefined = roomAndPassword.split(" ", 2)[1];
+		const login: string = client.handshake.query.login as string;
+		if (room.length > 0 && room[0] != '#' && room[0] != '@'){
+  	  		room = '#' + room;
+  		}
+	  	for (const c of values.forbiddenChatRoomCharacters){
+			if (room.substr(1, room.length - 1).includes(c)){
+				this.server.to(client.id)
+					.emit("system", generateSocketErrorResponse(room, 
+					`Invalid name for the channel ${room}, try other`).data)
+					console.log("Error joining");
+
+				return ;
+			} 
+	  	} 	  
+  	  //check if user is banned from channel
+  	  await this.joinRoutineGame(client.id, login, room, online, "join", false)
+  	}
+
+  	async joinRoutineGame(clientSocketId: string, login: string, room: string, online: string, typeOfJoin: string, allowedPowers: boolean){
+		if (online == 'alone')
+			room +=  "_" + login;
+		const originalRoom = room;
+		console.log("Try join..");
+  		const wasUserAlreadyActiveInRoom: boolean = await this.isUserAlreadyActiveInRoomGame(clientSocketId, room);
+		  const rooms :Array<string> = this.getActiveRooms();
+  		const successfulJoin = await 
+		  this.joinUserToRoom(clientSocketId, login, room, null);
+
+  		if (successfulJoin){
+			//const response: ChatMessage = generateJoinResponse(originalRoom);
+			var userInRoom = this.getActiveUsersInRoom(room);
+			console.log("login " + login);
+			const response: GameRoom = this.pongservice.initGame(room, this, userInRoom.length, login, allowedPowers);
+			//var userInRoom = this.getActiveUsersInRoom('#pongRoom');
+			this.pongservice.setPlayer(room, login);
+			console.log("Join succed to: " + response.room);
+			
+			console.log(response)
+			this.messageToClient(clientSocketId, 'gameStatus', response);
+ 
+			//sending old messages of the room, except for those of users that banned
+			//the new user trying to join
+			if (!wasUserAlreadyActiveInRoom){
+				let oldMessagesInRoom: RoomMessages = await this.chatMessageService.getAllMessagesFromRoom(room);
+
+				//get all u2u bans to 'login'
+				//on every message, check the login of the sender, if it's one of
+				//the users that have banned the one trying to join,
+				//the message isn't send
+				const usersThatHaveBanned: Array<string> = (await this.userService.getUsersThatHaveBannedAnother(login)).map(u => u.login)
+
+				//using originalRoom is a way to handle the names of private rooms:
+				//in db are #2-8, for instance, but we send @login to the client as 
+				//a room name
+				if (originalRoom !== room){
+					oldMessagesInRoom.name = originalRoom
+					oldMessagesInRoom.messages.map(m => m.room = originalRoom)
+				}
+				for (let message of oldMessagesInRoom.messages){
+					if (!usersThatHaveBanned.includes(message.login)){
+						this.messageToClient(clientSocketId, "message", message)
+					}
+				}
+			}
+  		}
+	}
+	async isUserAlreadyActiveInRoomGame(clientSocketId: string, room: string){
+		try {
+			const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(room);
+				for (let i = 0; i < activeUsersInRoom.length; i++){
+				  if (clientSocketId === activeUsersInRoom[i].client_id){
+					  return true;
+					}
+				}
+		} catch {}
+		return (false)
+	}
+	@SubscribeMessage('on-line')
+	  handleOnLine(client: Socket, login: string){
+		const loginBack: string = client.handshake.query.login as string;
+		console.log("On-line: " + login + " - " + loginBack);
+		this.pongservice.addUserToList(loginBack)
+	  }
+
+	@SubscribeMessage('cancelOnline')
+	cancelMatchMakingUser(client: Socket, targetLogin: string){
+		const login: string = client.handshake.query.login as string;
+		this.pongservice.removeUserFromMatchMakingList(login)
+	}
+
+	@SubscribeMessage('cancelOnlinePlus')
+	cancelMatchMakingUserPlus(client: Socket, targetLogin: string){
+		const login: string = client.handshake.query.login as string;
+		this.pongservice.removeUserFromMatchMakingListPlus(login)
+	}
+
+	@SubscribeMessage('plus')
+	  handleOnLinePlus(client: Socket, login: string){
+		const loginBack: string = client.handshake.query.login as string;
+		console.log("On-linePlus: " + login + " - " + loginBack);
+		this.pongservice.addUserToListPlus(loginBack)
+	}
+
+	@SubscribeMessage('keydown')
+ 	handleMove(client: Socket, payload: any){
+		const login: string = client.handshake.query.login as string;
+		this.pongservice.keyStatus(payload.room, payload.key, login);
+ 	}
+
+	@SubscribeMessage('keyup')
+ 	handleMoveStop(client: Socket, payload: any){
+		const login: string = client.handshake.query.login as string;
+		if (payload.key != 27) this.pongservice.keyStatus(payload.room, 0, login);
+ 	}
+
+ 
+	@SubscribeMessage('updateGame')
+  	handleGameUpdate(client: Socket, room: string) {
+		const response: GameRoom = this.pongservice.getStatus(room);
+		const targetUsers: Array<ChatUser> = this.getActiveUsersInRoom(room);
+		for (let i = 0; i < targetUsers.length; i++){
+			this.server.to(targetUsers[i].client_id).emit('getStatus', response);
+		}	
+  	}
+
+	@SubscribeMessage('sendMatchProposal')
+	async sendMatchProposal(client: Socket, targetLogin: string){
+		const login: string = client.handshake.query.login as string;
+		//check banned
+
+	  	if (await this.userService
+	  	  .isUserBannedFromUser(targetLogin, login)){
+	  	  this.messageToClient(client.id, "system", 
+	  			generateSocketErrorResponse("", `You can't send a match challenge because you are banned from: ${targetLogin}`).data);
+		  return this.pongservice.cancelMatchProposal(login)
+	  	}
+
+		//check available
+		const isAvailableToPlay = this.chatService.isAvailableToPlay(targetLogin)
+		const targetHasAnotherProposal = this.pongservice.hasAnotherProposal(login, targetLogin)
+		if (isAvailableToPlay && !targetHasAnotherProposal){
+	  		const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(targetLogin);
+			for (let i = 0; i < targetSocketIds.length; i++){
+				this.server.to(targetSocketIds[i]).emit("sendMatchProposal", login)
+			}
+			this.pongservice.saveMatchProposal(login, targetLogin)
+			//remove from matchmaking list
+			this.pongservice.removeUserFromMatchMakingList(login)
+		} else if (targetHasAnotherProposal){
+	  	  this.messageToClient(client.id, "system", 
+	  			generateSocketErrorResponse("", `${targetLogin} is waiting for another match challenge`).data);
+		  this.pongservice.cancelMatchProposal(login)
+		}
+
+	}
+
+	@SubscribeMessage('acceptMatchProposal')
+	acceptedMatchProposal(client: Socket, targetLogin: string){
+		const login: string = client.handshake.query.login as string;
+
+		//check there was a previous proposal
+		const validProposal: boolean = this.pongservice.isAValidProposal(login, targetLogin)
+		if (!validProposal) return ;
+		
+		//both are available to play
+
+		const player1isAvailableToPlay = this.chatService.isAvailableToPlay(login)
+		const player2isAvailableToPlay = this.chatService.isAvailableToPlay(targetLogin)
+		if (player1isAvailableToPlay && player2isAvailableToPlay){
+			//createGame
+			console.log("accepted game")
+			this.sendAcceptedGame(login, targetLogin)
+			this.pongservice.challengeGame(login, targetLogin, false)
+		}else{
+	  	  this.messageToClient(client.id, "system", 
+	  			generateSocketErrorResponse("", `The other player is now busy playing, please wait until player is free again and challenge him/her`).data);
+
+		}
+
+		//delete match proposal
+		this.pongservice.deleteMatchProposal(login)
+		//remove from matchmaking list
+		this.pongservice.removeUserFromMatchMakingList(login)
+		this.pongservice.removeUserFromMatchMakingList(targetLogin)
+
+	}
+
+	@SubscribeMessage('cancelMatchProposal')
+	cancelMatchProposal(client: Socket, targetLogin: string){
+		const login: string = client.handshake.query.login as string;
+
+		//check if there was a previous proposal
+		const validProposal: boolean = this.pongservice.isAValidProposal(login, targetLogin)
+		if (!validProposal) return ;
+
+		this.pongservice.cancelMatchProposal(login)
+	}
 
 
 }

@@ -13,6 +13,7 @@ import { PongComponent } from '../pong/pong.component';
 import { AdminPageComponent } from '../admin-page/admin-page.component';
 import {AdminChatPageComponent } from '../admin-chat-page/admin-chat-page.component';
 import {FriendsComponent} from '../friends/friends.component'
+import {Page404Component} from '../page404/page404.component'
 
 
 //routes are doubly protected:
@@ -91,7 +92,17 @@ const routes: Routes = [
 		component: PongComponent,
 		canActivate: [AuthGuard],
 		data: {
-			logCheck: true
+			logCheck: true,
+			online: false
+		  },
+	},
+	{
+		path: 'on-line',
+		component: PongComponent,
+		canActivate: [AuthGuard],
+		data: {
+			logCheck: true,
+			online: true
 		  },
 	},
 	{
@@ -110,6 +121,11 @@ const routes: Routes = [
 			adminCheck: true
 		  },
 	},
+	{	
+		path: '**',
+		pathMatch: 'full',
+		component: Page404Component
+	}
 
 ];
 

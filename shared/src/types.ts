@@ -54,3 +54,80 @@ export interface ToastData {
   message: string;
   id: number;
 }
+
+export type GameStatus = {
+	room: string;
+	message: string;
+	nick: string;
+	date: Date;
+	player1:boolean; 
+}
+
+export class GameRoom {
+	constructor(
+	public room: string,
+	public message: string,
+	public login: string,
+	public date: Date,
+	public y: number,
+	public height: number,
+
+	//PaddleOneComponent
+	public playerOneX: number,
+	public playerOneY: number,
+	public playerOneW: number,
+	public playerOneH: number,
+	public playerOneS: number,
+	public playerOneVel:number,
+
+	//PaddleTwoComponent
+	public playerTwoX: number,
+	public playerTwoY: number,
+	public playerTwoW: number,
+	public playerTwoH: number,
+	public playerTwoS: number,
+	public playerTwoVel: number,
+
+	//Canvas
+	public canvasheight: number,
+	public canvasWidth: number,
+
+	//Ball
+	public ballHeight: number,
+	public ballWidth: number,
+	public ballSpeed: number,
+	public ballXVel: number,
+	public ballYVel: number,
+	public ballX: number,
+	public ballY: number,
+	public ballDir: number,
+
+	//Scores
+	public playerOneScore: number,
+	public playerTwoScore: number,
+
+	//Mode
+	public gameMode: number, //0 for pause or stopped
+	public pause: boolean,
+	public finish: boolean,
+
+	//Viwer
+	public viwer:number,
+	public playerOne:string,
+	public playerTwo:string,
+
+	//Interval 
+	public interval: any,
+	//Powers
+	public inestableBall: boolean,
+	public reverseMoveOne: boolean,
+	public reverseMoveTwo:boolean,
+
+	public playerOnePowers: Array<string>,
+	public playerTwoPowers: Array<string>,
+
+	public powersAllow: boolean,
+
+ 
+	){}
+}

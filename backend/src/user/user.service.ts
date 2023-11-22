@@ -119,7 +119,7 @@ export class UserService {
 		if (user) {
 			return user.id;
 		}
-		throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+		return -1
 	}
 
 	public async isNickAvailable(nick: string): Promise<boolean> {

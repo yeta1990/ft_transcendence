@@ -3,7 +3,7 @@ import { Subject, from, Observable } from  'rxjs';
 import { io, Socket } from "socket.io-client";
 import { events } from '@shared/const';
 import { environment } from '../environments/environment'
-import { ChatMessage, SocketPayload, RoomMetaData } from '@shared/types';
+import { ChatMessage, SocketPayload, RoomMetaData, GameRoom } from '@shared/types';
 import { Location } from '@angular/common';
 import {RoomMessages, ChatUser } from '@shared/types'
 
@@ -91,6 +91,17 @@ export class SocketService {
 			.on('system-error', (data: ChatMessage) => {
 				this.message.next({event: 'system-error', data});
 			})
+			.on('getSignal', (data: number) => {				
+				this.message.next({event: 'direction', data});
+				console.log("direction: " + data);	
+			})
+			.on('gameStatus', (data: GameRoom) => {
+				//console.log("join received: " + JSON.stringify(data.room));
+				this.message.next({event: 'gameStatus', data});
+			})
+			.on('getStatus', (data: GameRoom) => {
+				this.message.next({event: 'getStatus', data});
+			})
 			.on(events.AllHistoricalMessages, (data: any) => {
 				this.message.next({event: events.AllHistoricalMessages, data});
 			})
@@ -99,6 +110,18 @@ export class SocketService {
 			})
 			.on(events.LoginNickEquivalence, (data: Array<any>) => {
 				this.message.next({event: events.LoginNickEquivalence, data});
+			})
+			.on("sendMatchProposal", (data:string) => {
+				this.message.next({event: "sendMatchProposal", data});
+			})
+			.on("cancelMatchProposal", (data:string) => {
+				this.message.next({event: "cancelMatchProposal", data});
+			})
+			.on("cancelOnline", (data:string) => {
+				this.message.next({event: "cancelOnline", data});
+			})
+			.on("acceptMatchProposal", (data:string) => {
+				this.message.next({event: "acceptMatchProposal", data});
 			})
 		}
 	}
@@ -126,6 +149,7 @@ export class SocketService {
   }
 
   disconnectClient(){
+  	  console.log("sending disconnect")
 	if (this.socket) this.socket.emit(events.SoftDisconnect);
   }
 
@@ -138,4 +162,12 @@ export class SocketService {
   }
 
 
+
+  sendSignal(type: string, payload: ChatMessage){
+	this.socket.emit(type, payload);
+  }
+
+  sendMove(type: string, room: string, key: number){
+	this.socket.emit(type, {room, key});
+  }
 }

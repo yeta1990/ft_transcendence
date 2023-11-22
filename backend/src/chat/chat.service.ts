@@ -5,12 +5,13 @@ import { HashService } from '../hash/hash.service';
 import { Repository } from 'typeorm';
 import { Room } from './room.entity';
 import { RoomService } from './room/room.service';
-import {ChatUser} from '@shared/types'
+import {ChatUser, GameRoom} from '@shared/types'
 import {UserStatus} from '@shared/enum'
 import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
 import { ChatGateway } from '../events/chat.gateway'
 import { BehaviorSubject, Observable } from 'rxjs';
+import { Game } from '../pong/game.entity'
 
 @Injectable()
 export class ChatService {
@@ -25,6 +26,9 @@ export class ChatService {
 
 	@InjectRepository(User)
 	private readonly userRepository: Repository<User>;
+
+	@InjectRepository(Game)
+	private readonly gameRepository: Repository<Game>;
 
 	constructor(private httpService: HttpService, private hashService: HashService, private userService: UserService, 
 				@Inject(forwardRef(() => RoomService))
@@ -59,13 +63,16 @@ export class ChatService {
 		this.users.delete(socket_id)
 		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
 	}
-
+  
 	setUserStatusIsPlaying(login: string):void {
 		this.users.forEach((chatUser: ChatUser, key: string) => {
+			console.log(chatUser)
   			if (chatUser.login === login) {
     			chatUser.status = UserStatus.PLAYING;
   			}
-		});	
+		});
+
+		console.log(JSON.stringify(this.users))
 		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
 	}
 
@@ -85,6 +92,17 @@ export class ChatService {
   			}
 		});
 		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
+	}
+
+	isAvailableToPlay(targetLogin: string): boolean{
+		let available: boolean = false;
+		this.users.forEach((chatUser: ChatUser, key: string) => {
+  			if (chatUser.login === targetLogin && chatUser.status == UserStatus.ONLINE) {
+				available = true;
+  			}
+		});
+		console.log(available)
+		return available;
 	}
 
 	public async createRoom(login: string, room: string, hasPass: boolean, password: string | undefined): Promise<boolean>{
@@ -541,6 +559,16 @@ export class ChatService {
 		return this.roomRepository
 			.findOne({select: {hasPass: true }, where: {name: room}})
 			.then(o => o.hasPass);
+	}
+
+	public saveGameResult(g: GameRoom){
+		const result = {
+			"player1": g.playerOne,
+			"player2": g.playerTwo,
+			"player1Points": g.playerOneScore,
+			"player2Points": g.playerTwoScore,
+		}
+		this.gameRepository.save(result)
 	}
 
 }

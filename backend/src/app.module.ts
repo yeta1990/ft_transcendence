@@ -22,9 +22,11 @@ import { HttpModule } from '@nestjs/axios';
 import { EventsModule } from './events/events.module';
 import { ChatModule } from './chat/chat.module';
 import { HashService } from './hash/hash.service';
+import { PongModule } from './pong/pong.module';
+import { Game } from './pong/game.entity';
 import {InvalidTokens} from './auth/invalid-tokens-entity'
 import { TokenValidationMiddleware } from './token-validation/token-validation.middleware'
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { config } from 'process';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
@@ -58,7 +60,7 @@ import { join } from 'path';
 			username: configService.get('POSTGRES_USER'),
 			password: configService.get('POSTGRES_PASSWORD'),
 			database: configService.get('POSTGRES_DATABASE'),
-			entities: [User, Friend, Achievement, Room, ChatMessage, InvalidTokens],
+			entities: [User, Friend, Achievement, Room, ChatMessage, InvalidTokens, Game],
 			synchronize: true, // creo que esto hay que cambiarlo para subirlo a producción
 			logging: false //useful for debugging errors in typeorm/postgres
 		})
@@ -66,6 +68,7 @@ import { join } from 'path';
 	HttpModule,
 	EventsModule,
 	ChatModule,
+	PongModule,
 	TypeOrmModule.forFeature([Achievement]),
   ],
   controllers: [AppController, UserController],

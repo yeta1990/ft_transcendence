@@ -18,7 +18,7 @@ export class ChatService {
 	private myBlockedUsers: Array<string> = []
 	activeUsers: Array<ChatUser> = [];
 	loginNickEquivalence: Array<any> = []
-
+	currentRoom: string = ""
 
 	constructor(private socketService: SocketService) {
 	}
@@ -32,6 +32,14 @@ export class ChatService {
 //	getChatUserBySocketId()
 
 //	getChatUsersByLogin()
+	getCurrentRoom(): string {
+		return this.currentRoom
+	}
+
+	setCurrentRoom(room: string): void {
+		if (room === undefined) this.currentRoom = ""
+		this.currentRoom = room;
+	}
 
 	setActiveUsers(activeUsers: Array<ChatUser>){
 		this.activeUsers = activeUsers;
@@ -209,5 +217,29 @@ export class ChatService {
 		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
 		this.socketService.sendMessageToServer(events.AdminRevokeChatOwnership, room);
 	}
+
+	joinUserToRoomAsViwer(room: string){
+		this.socketService.sendMessageToServer("joinGameAsViwer", room);
+	}
+	
+	sendMatchProposal(targetLogin: string){
+		this.socketService.sendMessageToServer("sendMatchProposal", targetLogin)	
+	}
+	acceptMatchProposal(targetLogin: string){
+		this.socketService.sendMessageToServer("acceptMatchProposal", targetLogin)	
+	}
+
+	cancelMatchProposal(targetLogin: string){
+		this.socketService.sendMessageToServer("cancelMatchProposal", targetLogin)	
+	}
+
+	leaveMatchMakingList(){
+		this.socketService.sendMessageToServer("cancelOnline", "")	
+	}
+
+	leaveMatchMakingListPlus(){
+		this.socketService.sendMessageToServer("cancelOnlinePlus", "")	
+	}
+
 
 }
