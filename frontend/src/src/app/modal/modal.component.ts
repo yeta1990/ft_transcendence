@@ -67,11 +67,5 @@ export class ModalComponent {
   }
 
 
-  @HostListener('document:keydown.escape', ['$event']) 
-  onKeydownHandler(event: KeyboardEvent): void {
-    if (this.modalService.isModalOpen()) {
-      this.closeModal(); 
-    }
-  }
 }
 

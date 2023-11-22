@@ -221,4 +221,25 @@ export class ChatService {
 	joinUserToRoomAsViwer(room: string){
 		this.socketService.sendMessageToServer("joinGameAsViwer", room);
 	}
+	
+	sendMatchProposal(targetLogin: string){
+		this.socketService.sendMessageToServer("sendMatchProposal", targetLogin)	
+	}
+	acceptMatchProposal(targetLogin: string){
+		this.socketService.sendMessageToServer("acceptMatchProposal", targetLogin)	
+	}
+
+	cancelMatchProposal(targetLogin: string){
+		this.socketService.sendMessageToServer("cancelMatchProposal", targetLogin)	
+	}
+
+	leaveMatchMakingList(){
+		this.socketService.sendMessageToServer("cancelOnline", "")	
+	}
+
+	leaveMatchMakingListPlus(){
+		this.socketService.sendMessageToServer("cancelOnlinePlus", "")	
+	}
+
+
 }

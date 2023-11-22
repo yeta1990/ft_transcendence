@@ -10,7 +10,7 @@ import { ChatMessageService } from '../chat/chat-message/chat-message.service';
 import { ChatAdminService } from '../chat/chat-admin/chat-admin.service';
 import { User } from '../user/user.entity';
 import { RoomMessages, ChatUser } from '@shared/types';
-import { PongService } from 'src/pong/pong.service';
+
 
 //https://stackoverflow.com/questions/69435506/how-to-pass-a-dynamic-port-to-the-websockets-gateway-in-nestjs
 @Injectable()
@@ -19,9 +19,7 @@ import { PongService } from 'src/pong/pong.service';
 export class ChatGateway extends BaseGateway {
 
   constructor(private chatMessageService: ChatMessageService, 
-  			 private chatAdminService: ChatAdminService,
-			 @Inject(forwardRef(() => PongService))
-			 private pongservice:PongService) {
+  			 private chatAdminService: ChatAdminService){
   			 	 super();
   			 	 this.gatewayName = "ChatGateway"
 				 this.logger = new Logger(this.gatewayName);
@@ -789,7 +787,7 @@ export class ChatGateway extends BaseGateway {
 			
 			console.log(response)
 			this.messageToClient(clientSocketId, 'gameStatus', response);
-
+ 
 			//sending old messages of the room, except for those of users that banned
 			//the new user trying to join
 			if (!wasUserAlreadyActiveInRoom){
@@ -832,6 +830,18 @@ export class ChatGateway extends BaseGateway {
 		const loginBack: string = client.handshake.query.login as string;
 		console.log("On-line: " + login + " - " + loginBack);
 		this.pongservice.addUserToList(loginBack)
+	  }
+
+	@SubscribeMessage('cancelOnline')
+	cancelMatchMakingUser(client: Socket, targetLogin: string){
+		const login: string = client.handshake.query.login as string;
+		this.pongservice.removeUserFromMatchMakingList(login)
+	}
+
+	@SubscribeMessage('cancelOnlinePlus')
+	cancelMatchMakingUserPlus(client: Socket, targetLogin: string){
+		const login: string = client.handshake.query.login as string;
+		this.pongservice.removeUserFromMatchMakingListPlus(login)
 	}
 
 	@SubscribeMessage('plus')
@@ -840,7 +850,7 @@ export class ChatGateway extends BaseGateway {
 		console.log("On-linePlus: " + login + " - " + loginBack);
 		this.pongservice.addUserToListPlus(loginBack)
 	}
-	
+
 	@SubscribeMessage('keydown')
  	handleMove(client: Socket, payload: any){
 		const login: string = client.handshake.query.login as string;
@@ -853,7 +863,7 @@ export class ChatGateway extends BaseGateway {
 		if (payload.key != 27) this.pongservice.keyStatus(payload.room, 0, login);
  	}
 
-
+ 
 	@SubscribeMessage('updateGame')
   	handleGameUpdate(client: Socket, room: string) {
 		const response: GameRoom = this.pongservice.getStatus(room);
@@ -862,4 +872,79 @@ export class ChatGateway extends BaseGateway {
 			this.server.to(targetUsers[i].client_id).emit('getStatus', response);
 		}	
   	}
+
+	@SubscribeMessage('sendMatchProposal')
+	async sendMatchProposal(client: Socket, targetLogin: string){
+		const login: string = client.handshake.query.login as string;
+		//check banned
+
+	  	if (await this.userService
+	  	  .isUserBannedFromUser(targetLogin, login)){
+	  	  this.messageToClient(client.id, "system", 
+	  			generateSocketErrorResponse("", `You can't send a match challenge because you are banned from: ${targetLogin}`).data);
+		  return this.pongservice.cancelMatchProposal(login)
+	  	}
+
+		//check available
+		const isAvailableToPlay = this.chatService.isAvailableToPlay(targetLogin)
+		const targetHasAnotherProposal = this.pongservice.hasAnotherProposal(login, targetLogin)
+		if (isAvailableToPlay && !targetHasAnotherProposal){
+	  		const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(targetLogin);
+			for (let i = 0; i < targetSocketIds.length; i++){
+				this.server.to(targetSocketIds[i]).emit("sendMatchProposal", login)
+			}
+			this.pongservice.saveMatchProposal(login, targetLogin)
+			//remove from matchmaking list
+			this.pongservice.removeUserFromMatchMakingList(login)
+		} else if (targetHasAnotherProposal){
+	  	  this.messageToClient(client.id, "system", 
+	  			generateSocketErrorResponse("", `${targetLogin} is waiting for another match challenge`).data);
+		  this.pongservice.cancelMatchProposal(login)
+		}
+
+	}
+
+	@SubscribeMessage('acceptMatchProposal')
+	acceptedMatchProposal(client: Socket, targetLogin: string){
+		const login: string = client.handshake.query.login as string;
+
+		//check there was a previous proposal
+		const validProposal: boolean = this.pongservice.isAValidProposal(login, targetLogin)
+		if (!validProposal) return ;
+		
+		//both are available to play
+
+		const player1isAvailableToPlay = this.chatService.isAvailableToPlay(login)
+		const player2isAvailableToPlay = this.chatService.isAvailableToPlay(targetLogin)
+		if (player1isAvailableToPlay && player2isAvailableToPlay){
+			//createGame
+			console.log("accepted game")
+			this.sendAcceptedGame(login, targetLogin)
+			this.pongservice.challengeGame(login, targetLogin, false)
+		}else{
+	  	  this.messageToClient(client.id, "system", 
+	  			generateSocketErrorResponse("", `The other player is now busy playing, please wait until player is free again and challenge him/her`).data);
+
+		}
+
+		//delete match proposal
+		this.pongservice.deleteMatchProposal(login)
+		//remove from matchmaking list
+		this.pongservice.removeUserFromMatchMakingList(login)
+		this.pongservice.removeUserFromMatchMakingList(targetLogin)
+
+	}
+
+	@SubscribeMessage('cancelMatchProposal')
+	cancelMatchProposal(client: Socket, targetLogin: string){
+		const login: string = client.handshake.query.login as string;
+
+		//check if there was a previous proposal
+		const validProposal: boolean = this.pongservice.isAValidProposal(login, targetLogin)
+		if (!validProposal) return ;
+
+		this.pongservice.cancelMatchProposal(login)
+	}
+
+
 }

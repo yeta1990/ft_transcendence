@@ -4,7 +4,10 @@ import { GameGateway } from 'src/events/game.gateway';
 import { BaseGateway } from 'src/events/base.gateway';
 import { ChatGateway } from 'src/events/chat.gateway';
 import {ChatService} from '../chat/chat.service'
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { log } from 'console';
+import { Game } from './game.entity'
 @Injectable()
 export class PongService {
 
@@ -16,7 +19,9 @@ export class PongService {
     public numberOfGames: number = 0;
     public interval: any = 0;
     private matchMaking: Array<string> = new Array<string>;
+	private matchProposals: Map<string, string> = new Map()
     private matchMakingPlus: Array<string> = new Array<string>;
+
     constructor(
     	@Inject(forwardRef(() => ChatGateway))
     	private gameGateaway: ChatGateway,
@@ -47,7 +52,7 @@ export class PongService {
         if (this.games.get(name))
             return(this.games.get(name));
         console.log("Init -> " + name);
-        this.gameGateaway = gameGateaway;
+//        this.gameGateaway = gameGateaway;
         this.game = new GameRoom(
             name,               //room
 	        "Welcome",          //message
@@ -119,6 +124,40 @@ export class PongService {
         // }
         return (this.games.get(name));
     }
+
+	saveMatchProposal(senderLogin: string, targetLogin: string){
+		this.matchProposals.set(senderLogin, targetLogin)	
+		this.matchProposals.set(targetLogin, senderLogin)	
+	}
+
+	deleteMatchProposal(player1: string){
+		const player2 = this.matchProposals.get(player1)	
+		this.matchProposals.delete(player1)
+		if (player2 != undefined){
+			this.matchProposals.delete(player2)
+		}
+	}
+
+	hasAnotherProposal(login: string, targetLogin: string){
+		if (this.matchProposals.get(targetLogin) == undefined){
+			return false;	
+		}
+		else if (this.matchProposals.get(targetLogin) == login){
+			return false;
+		}
+		return true;
+	}
+
+	isAValidProposal(player1: string, player2: string)
+	{
+		return this.matchProposals.get(player1) == player2 || this.matchProposals.get(player2) == player1
+	}
+
+	cancelMatchProposal(player1: string){
+		const player2 = this.matchProposals.get(player1)
+		this.gameGateaway.sendCancelMatchProposal(player1, player2)
+		this.deleteMatchProposal(player1)
+	}
 
     updateGame(gameGateway :ChatGateway, game: GameRoom){
         //this.games.forEach(element => {
@@ -204,8 +243,10 @@ export class PongService {
             g.finish = true;
             this.chatService.setUserStatusIsActive(g.playerOne)
             this.chatService.setUserStatusIsActive(g.playerTwo)
+			this.chatService.saveGameResult(g)
         }
     }
+
 
     updateComputer(g: GameRoom){ 
  
@@ -260,6 +301,10 @@ export class PongService {
                         this.restartScores(g);                      
                     }
                     g.pause = false;
+					if (g.playerTwo != ''){
+						this.chatService.setUserStatusIsPlaying(g.playerOne)
+						this.chatService.setUserStatusIsPlaying(g.playerTwo)
+					}
                 }
                 else {                    
                     g.pause = true
@@ -337,17 +382,20 @@ export class PongService {
         // }
         // PongService.init = true;
     }
-
+ 
     restartScores(g: GameRoom) {
         g.finish = false
         g.playerOneScore = 0;
         g.playerTwoScore = 0;
+		if (g.gameMode != 0){
+
+		}
     }
 
     setPlayerTwo(nick:string){
         this.game.playerTwo = nick;
       }
-    
+  
     setPlayer(room:string, nick:string) {
         var g = this.games.get(room)
         if (g.playerOne == ""){
@@ -369,18 +417,20 @@ export class PongService {
             const idsPlayerOne: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMaking[0]);
             const idsPlayerTwo: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMaking[1]);
             
+			this.gameGateaway.sendCancelOnline(this.matchMaking[0], this.matchMaking[1])
             for (let element of idsPlayerOne) {
                 await this.gameGateaway.joinRoutineGame(element, this.matchMaking[0], room, "", "join", false)
             }
             
+        	console.log("Waiting list (2): " + this.matchMaking);
             for (let element of idsPlayerTwo) {
                 await this.gameGateaway.joinRoutineGame(element, this.matchMaking[1], room, "", "join", false)
             }
             this.chatService.setUserStatusIsPlaying(this.matchMaking[0])
             this.chatService.setUserStatusIsPlaying(this.matchMaking[1])
             //Remove both 
-            this.matchMaking.shift();
-            this.matchMaking.shift();
+//            this.matchMaking.shift();
+//            this.matchMaking.shift();
         }
     }
 
@@ -395,6 +445,7 @@ export class PongService {
             const idsPlayerOne: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMakingPlus[0]);
             const idsPlayerTwo: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMakingPlus[1]);
             
+			this.gameGateaway.sendCancelOnline(this.matchMakingPlus[0], this.matchMakingPlus[1])
             for (let element of idsPlayerOne) {
                 await this.gameGateaway.joinRoutineGame(element, this.matchMakingPlus[0], room, "", "join", true)
             }
@@ -409,16 +460,24 @@ export class PongService {
             this.matchMakingPlus.shift();
         }
     }
+	removeUserFromMatchMakingList(login: string){
+		this.matchMaking = this.matchMaking.filter(l => login != login)	
+	}
 
-    async ChallengeGame(loginPlayerOne: string, loginPlayerTwo: string, allowedPowers:boolean) {
+	removeUserFromMatchMakingListPlus(login: string){
+		this.matchMakingPlus = this.matchMakingPlus.filter(l => login != login)	
+	}
 
-
+    async challengeGame(loginPlayerOne: string, loginPlayerTwo: string, allowedPowers:boolean) {
         this.disconectPlayer("#pongRoom_" + loginPlayerOne, loginPlayerOne);
         this.disconectPlayer("#pongRoom_" + loginPlayerTwo, loginPlayerTwo);
+		this.removeUserFromMatchMakingList(loginPlayerOne)
+		this.removeUserFromMatchMakingList(loginPlayerTwo)
         const room: string = "#pongRoom_" + loginPlayerOne + "+" + loginPlayerTwo;
         const idsPlayerOne: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(loginPlayerOne);
         const idsPlayerTwo: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(loginPlayerTwo);
             
+
         for (let element of idsPlayerOne) {
             await this.gameGateaway.joinRoutineGame(element, loginPlayerOne, room, "", "join", allowedPowers)
         }
@@ -426,8 +485,9 @@ export class PongService {
         for (let element of idsPlayerTwo) {
             await this.gameGateaway.joinRoutineGame(element, loginPlayerTwo, room, "", "join", allowedPowers)
         }
-        this.chatService.setUserStatusIsPlaying(this.matchMaking[0])
-        this.chatService.setUserStatusIsPlaying(this.matchMaking[1])
+        this.chatService.setUserStatusIsPlaying(loginPlayerOne)
+        this.chatService.setUserStatusIsPlaying(loginPlayerTwo)
+
     }
     
 

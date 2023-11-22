@@ -221,6 +221,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				else if (payload.event === events.LoginNickEquivalence){
 					this.chatService.setLoginNickEquivalence(payload.data)
 				}
+				else if (payload.event === 'cancelOnline'){
+					this.modalService.closeModal()
+				}
         		this.scrollToBottom();
 			})
 		);
@@ -418,20 +421,34 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.modalService.openModal('template1', room);
 	}
 
+
+
 	challengeMatchModal(login: string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const confirm: boolean = this.modalService.getConfirmationInput();
       		if (confirm){
       			const challengeConfirmation = this.modalService.getModalData()[0];
-      			//to be done!!!
-      			//a function to drive the user to a wait room or something ...
-      			//maybe sending a gameService event
+				this.chatService.sendMatchProposal(login)
 				console.log("match challenge")
+				this.modalClosedSubscription.unsubscribe();
+				this.waitForMatchAnswerModal(login)
+				return ;
 			}
+
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template9', login);
 	}
+
+	waitForMatchAnswerModal(login: string){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+			this.chatService.cancelMatchProposal(login)
+			console.log("cancel match proposal")
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template15', login);
+	}
+
 
 	createChannelModal() {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {

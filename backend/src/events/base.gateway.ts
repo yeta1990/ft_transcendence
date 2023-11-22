@@ -20,6 +20,7 @@ import { ChatUser } from '@shared/types';
 import { map } from 'rxjs/operators';
 import {User} from '../user/user.entity'
 import {UserStatus} from '@shared/enum'
+import { PongService } from 'src/pong/pong.service';
 //this base class is used to log the initialization
 //and avoid code duplications in the gateways
 @Injectable()
@@ -49,6 +50,9 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   @Inject(UserService)
   protected userService: UserService;
+  
+  @Inject(forwardRef(() => PongService))
+  protected pongservice:PongService;
 
   constructor(){
 	this.rooms = new Set<string>();
@@ -68,8 +72,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
       	const activeUsersInServer: Array<ChatUser> = this
       		.getActiveUsersInServer()
 
-			console.log("sending")
-			console.log(activeUsersInServer)
 		this.server.emit(events.ActiveUsers, activeUsersInServer)
 		this.roomService.getAllRoomsMetaData()
 			.then(r =>  this.server.emit(events.ListAllRooms, r))
@@ -172,9 +174,13 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  		    .getRoomMetaData(room)
 	  		  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
 		  }
+		  //cancel all match proposals
+		  this.pongservice.cancelMatchProposal(login)
+		  this.pongservice.removeUserFromMatchMakingList(login)
+			
   	  }
 	}
-
+ 
   //socket rooms, not db rooms
   //all rooms are created in db, but not necessarily in the socket server
   getActiveRooms(): Array<string>{
@@ -460,4 +466,33 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 			}
 		}
   }
+
+  public sendEventToBothPlayers(player1: string, player2: string, event: string): void{
+	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(player2);
+	  	const emisorSocketIds: Array<string> = this.getClientSocketIdsFromLogin(player1);
+		if (targetSocketIds){
+		for (let i = 0; i < targetSocketIds.length; i++){
+			this.server.to(targetSocketIds[i]).emit(event, player1)
+		}
+		}
+		if (emisorSocketIds){
+		for (let i = 0; i < emisorSocketIds.length; i++){
+			this.server.to(emisorSocketIds[i]).emit(event, player2)
+		}
+		}
+  
+  }
+
+  public sendCancelMatchProposal(player1: string, player2: string){
+	  	this.sendEventToBothPlayers(player1, player2, "cancelMatchProposal")
+  }
+
+  public sendCancelOnline(player1: string, player2: string){
+	  	this.sendEventToBothPlayers(player1, player2, "cancelOnline")
+  }
+
+  public sendAcceptedGame(player1: string, player2:string){
+	  	this.sendEventToBothPlayers(player1, player2, "acceptMatchProposal")
+  }
+
 }

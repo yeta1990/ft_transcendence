@@ -11,6 +11,7 @@ import { User } from '../user';
 import { AppRoutingModule } from '../app-routing-module/app-routing-module.module';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ChatService } from '../chat/chat.service';
+import { ModalService } from '../modal/modal.service'
 
 @Component({
   selector: 'app-pong',
@@ -33,6 +34,7 @@ export class PongComponent implements OnInit, OnDestroy {
     public contected: boolean = false;
     public msg:string="";
     public waitingList="";
+	private modalClosedSubscription: Subscription = {} as Subscription;
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
     constructor(
@@ -40,6 +42,7 @@ export class PongComponent implements OnInit, OnDestroy {
         private myProfileService: MyProfileService,
         private route: ActivatedRoute,
         private chatService: ChatService,
+		private modalService: ModalService,
         //private pongService: PongService,
     ){
         //window.location.reload();
@@ -155,11 +158,13 @@ export class PongComponent implements OnInit, OnDestroy {
         if (m == "on-line"){
             console.log(this.playerLogin + " join match making list ");
             this.pongService.playOnLine(m,  this.playerLogin);
+			this.waitForMatchAnswerModal()
             this.waitingList = "Waiting for other player";
         }
         else if (m == "plus"){
             console.log(this.playerLogin + " join match making plus list ");
             this.pongService.playOnLine(m, this.playerLogin);
+			this.waitForMatchAnswerModalPlus()
             this.waitingList = "Waiting for other player";
         }
         else{
@@ -167,6 +172,28 @@ export class PongComponent implements OnInit, OnDestroy {
         	if (this.chatService.getCurrentRoom() != "#pongService_" + this.playerLogin) this.pongService.joinUserToRoom("#pongRoom");
         }
     }
+
+	waitForMatchAnswerModal(){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+			if (confirm){
+				this.chatService.leaveMatchMakingList()
+			}
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template16', "");
+	}
+
+	waitForMatchAnswerModalPlus(){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+			if (confirm){
+				this.chatService.leaveMatchMakingListPlus()
+			}
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template17', "");
+	}
 
     drawBoardDetails(){
 
