@@ -48,12 +48,12 @@
 }
 
 .title01 {
-    margin-top: 20px;
+    margin-top: 5%;
 }
 
 
 .title02 {
-    margin-top: 50px;
+    margin-top: 8%;
 }
 
 /* Estilos para los subtítulos */
@@ -89,6 +89,7 @@
 }
 
 .user-info-row {
+	margin-top: 2%;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -207,7 +208,7 @@
 .button-row {
 	display: flex;
 	justify-content: left;
-	margin-left: 4.5%;
+	margin: auto 4.5%;
 	min-height:fit-content;
 	flex-direction: row;
 	gap: 2%;
@@ -228,7 +229,7 @@
 	border-radius: 5px;
 	cursor: pointer;
 	font-weight: bold;
-	}
+}
 
 .discard-button {
 	background-color: #777;
@@ -236,5 +237,30 @@
 
 hr {
 	width: 93%;
-	margin: 7% auto;
+	margin: 5% auto;
+}
+
+.mfa-button-container {
+	position: relative;
+	flex-direction: row;
+	width: 35%;
+	margin: 5% 4.5%;
+ }
+
+.mfa-button {
+	font-family: "Roboto", sans-serif;
+	height: 2.7em;
+	background-color: #d4da5b;
+	color: white;
+	font-size: 16px;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	font-weight: bold;
+	width: 100%;
+ }
+
+.finish-block {
+	color: transparent;
+	margin: 5% auto;
 }
