@@ -19,6 +19,16 @@ export class PongService {
     return this._onlineBoolean;
   }
 
+    public game: GameRoom = {} as GameRoom;
+
+	getGame(): GameRoom {
+		return this.game;
+	}
+
+	setGame(game: GameRoom) {
+		this.game = game;	
+	}
+
 	setEventSubscribed(active: boolean){ this.eventSubscribed = active}
 	getEventSubscribed(): boolean {return this.eventSubscribed}
   // set onlineBoolean(value: boolean) {
@@ -35,6 +45,9 @@ export class PongService {
     //const date: Date = new Date();
 		//const payloadToSend: ChatMessage = { room, message, nick: "", date}
     //const payloadToSend: GameRoom = { room:room }
+//      	console.log(type)
+//      	console.log(room)
+//      	console.log(key)
 		this.socketService.sendMove(type, room, key);
 	}
 
@@ -56,8 +69,9 @@ export class PongService {
 		this.socketService.disconnectClient();
 	}
 
-  playOnLine(login: string) {
-    this.socketService.sendMessageToServer("on-line", login);
+  playOnLine(type:string, login: string) {
+    console.log("TYPE: " + type);
+    this.socketService.sendMessageToServer(type, login);
   }
 
 }

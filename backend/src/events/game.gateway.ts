@@ -15,7 +15,7 @@ import { PongService } from 'src/pong/pong.service';
 @WebSocketGateway({ namespace: '/game', cors: true } )
 export class GameGateway extends BaseGateway {
 
-  constructor(private chatMessageService: ChatMessageService, private pongservice:PongService) {
+  constructor(private chatMessageService: ChatMessageService) {
   	super();
   	this.gatewayName = "ChatGateway"
 	//this.gatewayName = "GameGateway"

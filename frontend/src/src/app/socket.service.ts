@@ -111,6 +111,18 @@ export class SocketService {
 			.on(events.LoginNickEquivalence, (data: Array<any>) => {
 				this.message.next({event: events.LoginNickEquivalence, data});
 			})
+			.on("sendMatchProposal", (data:string) => {
+				this.message.next({event: "sendMatchProposal", data});
+			})
+			.on("cancelMatchProposal", (data:string) => {
+				this.message.next({event: "cancelMatchProposal", data});
+			})
+			.on("cancelOnline", (data:string) => {
+				this.message.next({event: "cancelOnline", data});
+			})
+			.on("acceptMatchProposal", (data:string) => {
+				this.message.next({event: "acceptMatchProposal", data});
+			})
 		}
 	}
 

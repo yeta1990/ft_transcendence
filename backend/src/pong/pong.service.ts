@@ -1,8 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ChatMessage, SocketPayload, GameRoom, ChatUser } from '@shared/types';
 import { GameGateway } from 'src/events/game.gateway';
 import { BaseGateway } from 'src/events/base.gateway';
 import { ChatGateway } from 'src/events/chat.gateway';
+import {ChatService} from '../chat/chat.service'
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { log } from 'console';
+import { Game } from './game.entity'
 @Injectable()
 export class PongService {
 
@@ -13,9 +18,15 @@ export class PongService {
     games: Map<string, GameRoom> = new Map<string, GameRoom>;
     public numberOfGames: number = 0;
     public interval: any = 0;
-    public gameGateaway: ChatGateway;
     private matchMaking: Array<string> = new Array<string>;
-    constructor() {
+	private matchProposals: Map<string, string> = new Map()
+    private matchMakingPlus: Array<string> = new Array<string>;
+
+    constructor(
+    	@Inject(forwardRef(() => ChatGateway))
+    	private gameGateaway: ChatGateway,
+		@Inject(forwardRef(() => ChatService))
+    	private chatService: ChatService) {
         setInterval(()=>{
             //this.updateBall(element.room)
             this.games.forEach(element => {
@@ -25,7 +36,7 @@ export class PongService {
                 }              
                 this.move(element);
                 const targetUsers: Array<ChatUser> = this.gameGateaway
-                .getActiveUsersInRoom(element.room);
+                	.getActiveUsersInRoom(element.room);
                 for (let i = 0; i < targetUsers.length; i++){
                     //console.log("\t-> " + targetUsers[i].login + " in " + game.room);
                     this.gameGateaway.server.to(targetUsers[i].client_id).emit('getStatus', element);
@@ -34,14 +45,14 @@ export class PongService {
                         
         },1000/64)
     }
+  
 
-
-    initGame (name: string, gameGateaway: ChatGateway, viwer: number, nick:string): GameRoom {
+    initGame (name: string, gameGateaway: ChatGateway, viwer: number, nick:string, allowedPowers:boolean): GameRoom {
         
         if (this.games.get(name))
             return(this.games.get(name));
         console.log("Init -> " + name);
-        this.gameGateaway = gameGateaway;
+//        this.gameGateaway = gameGateaway;
         this.game = new GameRoom(
             name,               //room
 	        "Welcome",          //message
@@ -50,7 +61,7 @@ export class PongService {
 	        0,                  //y
 	        0,                  //height           
 
-	        //PaddleOneComponent
+	        //PaddleOneComponent 
 	        20,                 //playerOneX
 	        400 /2 - 60 / 2,    //playerOneY    //this.canvas.height / 2 - 60 / 2,
 	        10,                 //playerOneW
@@ -93,10 +104,17 @@ export class PongService {
             viwer,              //viwer
             "",                 //playerOne
             "",                 //playerTwo
-			0
+			0,                  //intarval
+            false,              //inestableball;
+            false,              //reverseMoveOne;
+            false,              //reverseMoveTwo;
+            [],                 //playerOnePowers;
+            [],                 //playerTwoPowers;
+            allowedPowers,      //powersAllow;
         );
         
         this.games.set(name, this.game);
+        this.randomPowers(this.games.get(name));
         this.randomDir(name);
         this.numberOfGames++;
 
@@ -107,10 +125,44 @@ export class PongService {
         return (this.games.get(name));
     }
 
+	saveMatchProposal(senderLogin: string, targetLogin: string){
+		this.matchProposals.set(senderLogin, targetLogin)	
+		this.matchProposals.set(targetLogin, senderLogin)	
+	}
+
+	deleteMatchProposal(player1: string){
+		const player2 = this.matchProposals.get(player1)	
+		this.matchProposals.delete(player1)
+		if (player2 != undefined){
+			this.matchProposals.delete(player2)
+		}
+	}
+
+	hasAnotherProposal(login: string, targetLogin: string){
+		if (this.matchProposals.get(targetLogin) == undefined){
+			return false;	
+		}
+		else if (this.matchProposals.get(targetLogin) == login){
+			return false;
+		}
+		return true;
+	}
+
+	isAValidProposal(player1: string, player2: string)
+	{
+		return this.matchProposals.get(player1) == player2 || this.matchProposals.get(player2) == player1
+	}
+
+	cancelMatchProposal(player1: string){
+		const player2 = this.matchProposals.get(player1)
+		this.gameGateaway.sendCancelMatchProposal(player1, player2)
+		this.deleteMatchProposal(player1)
+	}
+
     updateGame(gameGateway :ChatGateway, game: GameRoom){
         //this.games.forEach(element => {
             //element.gameMode = 1;
-            console.log("Update -> " + game.room);
+            //console.log("Update -> " + game.room);
             game.gameMode = 1;
             setInterval(()=>{
                 //this.updateBall(element.room)
@@ -186,11 +238,15 @@ export class PongService {
             g.ballY += g.ballYVel * g.ballSpeed;
     }
     checkScores(g: GameRoom){
-        if (g.playerOneScore >= 3 || g.playerTwoScore >= 3){
+        if (g.playerOneScore >= 5 || g.playerTwoScore >= 5){
             g.pause = true;
             g.finish = true;
+            this.chatService.setUserStatusIsActive(g.playerOne)
+            this.chatService.setUserStatusIsActive(g.playerTwo)
+			this.chatService.saveGameResult(g)
         }
     }
+
 
     updateComputer(g: GameRoom){ 
  
@@ -219,31 +275,36 @@ export class PongService {
 
     move(g: GameRoom){
         g.playerOneY += g.playerOneVel * g.playerOneS;
-        if(g.playerOneY <= 20) {
+        if(g.playerOneY <= 20 || (g.playerOneY + g.playerOneH >= g.canvasheight - 20)) {
             g.playerOneVel = 0;
-        }else if (g.playerOneY + g.playerOneH >= g.canvasheight - 20){
-            g.playerOneVel = 0;
-        }
+         }//else if (g.playerOneY + g.playerOneH >= g.canvasheight - 20){
+        //     g.playerOneVel = 0;
+        // }
         if (g.playerTwo != ""){
             g.playerTwoY += g.playerTwoVel * g.playerTwoS;
-            if(g.playerTwoY <= 20) {
+            if(g.playerTwoY <= 20 || (g.playerTwoY + g.playerTwoH >= g.canvasheight - 20)) {
                 g.playerTwoVel = 0;
-            }else if (g.playerTwoY + g.playerTwoH >= g.canvasheight - 20){
-                g.playerTwoVel = 0;
-            }
+            }//else if (g.playerTwoY + g.playerTwoH >= g.canvasheight - 20){
+            //     g.playerTwoVel = 0;
+            // }
         }           
     }
 
     keyStatus(room: string, key: number, nick:string){
         var g = this.games.get(room);
         if ((nick == g.playerOne) || (nick == g.playerTwo)){
-        	console.log(g)
+//        	console.log(g)
             if(key == 27){
                 if (g.pause == true){
                     if(g.finish){
-                        this.restartScores(g);
+                        this.restartPowers(g);
+                        this.restartScores(g);                      
                     }
                     g.pause = false;
+					if (g.playerTwo != ''){
+						this.chatService.setUserStatusIsPlaying(g.playerOne)
+						this.chatService.setUserStatusIsPlaying(g.playerTwo)
+					}
                 }
                 else {                    
                     g.pause = true
@@ -253,6 +314,13 @@ export class PongService {
         }
         if (g.pause) { return;}
         if (nick == g.playerOne) {
+            if(g.reverseMoveOne){
+                if (key == 87 || key == 38) {
+                    key = 83;
+                } else if (key == 83 || key == 40) {
+                    key = 87;
+                }
+            }
             if ((key === 87 && (g.playerOneY > 20)) || (key === 38 && (g.playerOneY > 20))){ //w
                 g.playerOneVel = -1;
             } else if ((key === 83 && (g.playerOneY + g.playerOneH < g.canvasheight - 20))
@@ -261,14 +329,41 @@ export class PongService {
             } else {
                 g.playerOneVel = 0;
             }
+            if (key === 49 && g.powersAllow){ //1
+                var power = g.playerOnePowers[0];
+                this.throwPower(power, nick, g);
+            }else if (key === 50 && g.powersAllow){ //2
+                var power = g.playerOnePowers[1];
+                this.throwPower(power, nick, g);
+            }else if (key === 51 && g.powersAllow){ //3
+                var power = g.playerOnePowers[2];
+                this.throwPower(power, nick, g);
+            }
         }
         if (nick == g.playerTwo){
+            if(g.reverseMoveTwo){
+                if (key == 87 || key == 38) {
+                    key = 83;
+                } else if (key == 83 || key == 40) {
+                    key = 87;
+                }
+            }
             if (key === 87 && (g.playerTwoY > 20)){ //w
                 g.playerTwoVel = -1;
             } else if ( key === 83 && (g.playerTwoY + g.playerTwoH < g.canvasheight - 20)) {//s
                 g.playerTwoVel = 1;
             } else {
                 g.playerTwoVel = 0;
+            }
+            if (key === 49 && g.powersAllow){ //1
+                var power = g.playerTwoPowers[0];
+                this.throwPower(power, nick, g);
+            }else if (key === 50 && g.powersAllow){ //2
+                var power = g.playerTwoPowers[1];
+                this.throwPower(power, nick, g);
+            }else if (key === 51 && g.powersAllow){ //3
+                var power = g.playerTwoPowers[2];
+                this.throwPower(power, nick, g);
             }
         }
     }
@@ -287,17 +382,20 @@ export class PongService {
         // }
         // PongService.init = true;
     }
-
+ 
     restartScores(g: GameRoom) {
         g.finish = false
         g.playerOneScore = 0;
         g.playerTwoScore = 0;
+		if (g.gameMode != 0){
+
+		}
     }
 
     setPlayerTwo(nick:string){
         this.game.playerTwo = nick;
       }
-    
+  
     setPlayer(room:string, nick:string) {
         var g = this.games.get(room)
         if (g.playerOne == ""){
@@ -319,18 +417,79 @@ export class PongService {
             const idsPlayerOne: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMaking[0]);
             const idsPlayerTwo: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMaking[1]);
             
+			this.gameGateaway.sendCancelOnline(this.matchMaking[0], this.matchMaking[1])
             for (let element of idsPlayerOne) {
-                await this.gameGateaway.joinRoutineGame(element, this.matchMaking[0], room, "", "join")
+                await this.gameGateaway.joinRoutineGame(element, this.matchMaking[0], room, "", "join", false)
+            }
+            
+        	console.log("Waiting list (2): " + this.matchMaking);
+            for (let element of idsPlayerTwo) {
+                await this.gameGateaway.joinRoutineGame(element, this.matchMaking[1], room, "", "join", false)
+            }
+            this.chatService.setUserStatusIsPlaying(this.matchMaking[0])
+            this.chatService.setUserStatusIsPlaying(this.matchMaking[1])
+            //Remove both 
+//            this.matchMaking.shift();
+//            this.matchMaking.shift();
+        }
+    }
+
+    async addUserToListPlus(login: string) {
+        if (this.matchMakingPlus.includes(login)) { return; }
+        this.matchMakingPlus.push(login);
+        console.log("Waiting list Plus: " + this.matchMakingPlus);
+        if (this.matchMakingPlus.length >= 2){
+            this.disconectPlayer("#pongRoom_" + this.matchMakingPlus[0], this.matchMakingPlus[0]);
+            this.disconectPlayer("#pongRoom_" + this.matchMakingPlus[1], this.matchMakingPlus[1]);
+            const room: string = "#pongRoom_" + this.matchMakingPlus[0] + "+" + this.matchMakingPlus[1];
+            const idsPlayerOne: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMakingPlus[0]);
+            const idsPlayerTwo: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(this.matchMakingPlus[1]);
+            
+			this.gameGateaway.sendCancelOnline(this.matchMakingPlus[0], this.matchMakingPlus[1])
+            for (let element of idsPlayerOne) {
+                await this.gameGateaway.joinRoutineGame(element, this.matchMakingPlus[0], room, "", "join", true)
             }
             
             for (let element of idsPlayerTwo) {
-                await this.gameGateaway.joinRoutineGame(element, this.matchMaking[1], room, "", "join")
+                await this.gameGateaway.joinRoutineGame(element, this.matchMakingPlus[1], room, "", "join", true)
             }
+            this.chatService.setUserStatusIsPlaying(this.matchMakingPlus[0])
+            this.chatService.setUserStatusIsPlaying(this.matchMakingPlus[1])
             //Remove both 
-            this.matchMaking.shift();
-            this.matchMaking.shift();
+            this.matchMakingPlus.shift();
+            this.matchMakingPlus.shift();
         }
     }
+	removeUserFromMatchMakingList(login: string){
+		this.matchMaking = this.matchMaking.filter(l => login != login)	
+	}
+
+	removeUserFromMatchMakingListPlus(login: string){
+		this.matchMakingPlus = this.matchMakingPlus.filter(l => login != login)	
+	}
+
+    async challengeGame(loginPlayerOne: string, loginPlayerTwo: string, allowedPowers:boolean) {
+        this.disconectPlayer("#pongRoom_" + loginPlayerOne, loginPlayerOne);
+        this.disconectPlayer("#pongRoom_" + loginPlayerTwo, loginPlayerTwo);
+		this.removeUserFromMatchMakingList(loginPlayerOne)
+		this.removeUserFromMatchMakingList(loginPlayerTwo)
+        const room: string = "#pongRoom_" + loginPlayerOne + "+" + loginPlayerTwo;
+        const idsPlayerOne: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(loginPlayerOne);
+        const idsPlayerTwo: Array<string> = this.gameGateaway.getClientSocketIdsFromLogin(loginPlayerTwo);
+            
+
+        for (let element of idsPlayerOne) {
+            await this.gameGateaway.joinRoutineGame(element, loginPlayerOne, room, "", "join", allowedPowers)
+        }
+            
+        for (let element of idsPlayerTwo) {
+            await this.gameGateaway.joinRoutineGame(element, loginPlayerTwo, room, "", "join", allowedPowers)
+        }
+        this.chatService.setUserStatusIsPlaying(loginPlayerOne)
+        this.chatService.setUserStatusIsPlaying(loginPlayerTwo)
+
+    }
+    
 
     disconectPlayer(room:string, login:string) {
         var g = this.games.get(room)
@@ -348,5 +507,199 @@ export class PongService {
         }
 
 //        clearInterval(g.interval);
+    }
+
+    //POWERS
+
+    throwPower(power:string, login:string, g:GameRoom){
+
+        if (power == "InestableBall") {
+           this.inestableBall(g); 
+        }
+        else if(power =="BiggerPaddle"){
+            this.biggerPaddle(login, g);
+        }
+        else if(power =="SmallerPaddle"){
+            this.smallerPaddle(login, g);
+        }
+        else if(power =="FasterPaddle"){
+            this.fasterPaddle(login, g);
+        }
+        else if(power =="SlowerPaddle"){
+            this.fasterPaddle(login, g);
+        }
+        else if(power =="ReverseMove"){
+            this.reverseMove(login, g);
+        }
+    }
+    restartPowers(g: GameRoom) {
+        console.log("RESET");
+        g.ballSpeed = 5;
+        g.playerOneH = 60;
+        g.playerTwoH = 60;
+        g.playerOneS = 10;
+        g.playerTwoS = 10;
+        g.playerOneY = 400 /2 - 60 / 2;
+        g.playerTwoY = 400 /2 - 60 / 2,
+        g.inestableBall = false;
+        g.reverseMoveOne = false;
+        g.reverseMoveTwo = false;
+        this.randomPowers(g);
+    }
+
+    randomPowers(g: GameRoom) {
+        var powers: Array<string> = ["InestableBall", "BiggerPaddle", "SmallerPaddle", "FasterPaddle", "SlowerPaddle", "ReverseMove"];
+        var p: string = "";
+        g.playerOnePowers = [];
+        g.playerTwoPowers = [];
+        var index: number;
+        //1st
+        index = Math.floor(Math.random() * powers.length);
+        p = powers[index]
+        g.playerOnePowers.push(p);
+        powers.splice(index, 1);
+        //2nd
+        index = Math.floor(Math.random() * powers.length);
+        p = powers[index]
+        g.playerOnePowers.push(p);
+        powers.splice(index, 1);
+        //3rd
+        index = Math.floor(Math.random() * powers.length);
+        p = powers[index]
+        g.playerOnePowers.push(p);
+        powers.splice(index, 1);
+        //
+        g.playerTwoPowers = powers;
+        console.log("POWERS");
+        console.log(g.playerOnePowers);
+        console.log(g.playerTwoPowers);
+    }
+    shuffleArray(array: any[]) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+    async inestableBall(g: GameRoom) {
+        if(g.inestableBall) {return;}
+        g.inestableBall = true;
+        const speeds :Array<number> = [5, 2, 7, 10, 15];
+        g.ballSpeed = speeds[Math.floor(Math.random() * speeds.length)];
+        const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
+
+        let count = 0;
+        while (count < 60) { //seconds
+          count++;
+          await waitSeg(1);
+      
+          if (count % 10 === 0) {
+            g.ballSpeed = speeds[Math.floor(Math.random() * speeds.length)];
+            console.log("change speed " + g.ballSpeed);
+          }
+        }
+        g.inestableBall = false;
+        g.ballSpeed = 5;   
+    }
+
+    async biggerPaddle(login: string, g:GameRoom){
+        const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
+        if (login == g.playerOne) {
+            g.playerOneH = 100;
+        }
+        else if (login == g.playerTwo) {
+            g.playerTwoH = 100;
+        }
+        let count = 0;
+        while (count < 30) { // seconds
+            count++;
+            await waitSeg(1);
+        }
+        if (login == g.playerOne) {
+            g.playerOneH = 60;
+        }
+        else if (login == g.playerTwo) {
+            g.playerTwoH = 60;
+        }
+    }
+
+    async smallerPaddle(login: string, g:GameRoom){
+        const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
+        if (login == g.playerOne) {
+            g.playerTwoH = 30;
+        }
+        else if (login == g.playerTwo) {
+            g.playerOneH = 30;
+        }
+        let count = 0;
+        while (count < 30) { // seconds
+            count++;
+            await waitSeg(1);
+        }
+        if (login == g.playerOne) {
+            g.playerTwoH = 60;
+        }
+        else if (login == g.playerTwo) {
+            g.playerOneH = 60;
+        }
+    }
+
+    async slowerPaddle(login: string, g:GameRoom){
+        const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
+        if (login == g.playerOne) {
+            g.playerTwoS = 5;
+        }
+        else if (login == g.playerTwo) {
+            g.playerOneS = 5;
+        }
+        let count = 0;
+        while (count < 30) { // seconds
+            count++;
+            await waitSeg(1);
+        }
+        if (login == g.playerOne) {
+            g.playerTwoS = 10;
+        }
+        else if (login == g.playerTwo) {
+            g.playerOneS = 10;
+        }
+    }
+
+    async fasterPaddle(login: string, g:GameRoom){
+        const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
+        if (login == g.playerOne) {
+            g.playerOneS = 20;
+        }
+        else if (login == g.playerTwo) {
+            g.playerTwoS = 20;
+        }
+        let count = 0;
+        while (count < 30) { // seconds
+            count++;
+            await waitSeg(1);
+        }
+        if (login == g.playerOne) {
+            g.playerOneS = 10;
+        }
+        else if (login == g.playerTwo) {
+            g.playerTwoS = 10;
+        }
+    }
+
+    async reverseMove(login: string, g:GameRoom) {
+        if(g.reverseMoveOne || g.reverseMoveTwo) {return;}
+        const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
+        if (login == g.playerOne) {
+            g.reverseMoveTwo = true;
+        }
+        else if (login == g.playerTwo) {
+            g.reverseMoveOne = true;
+        }
+        let count = 0;
+        while (count < 15) { // seconds
+            count++;
+            await waitSeg(1);
+        }
+        g.reverseMoveOne = false;
+        g.reverseMoveTwo = false;
     }
 }

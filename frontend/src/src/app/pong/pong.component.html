@@ -3,8 +3,13 @@
 <!--button (click)="subscribeToRoom(false)">Play</button-->
 <button (click)="mode('')">Play</button>
 <button (click)="mode('on-line')">On-line</button>
+<button (click)="mode('plus')">Plus</button>
+<h2>{{this.msg}}</h2>
 <div >
-    <canvas [hidden]="visibleCanvas()" #gameCanvas width={{game.canvasWidth}} height={{game.canvasheight}}></canvas>
+    <canvas [hidden]="visibleCanvas()" #gameCanvas width={{getGame().canvasWidth}} height={{getGame().canvasheight}}></canvas>
     <script type="text/javascript" src="pong.component.ts"></script>
 </div>
+<h2>{{this.waitingList}}</h2>
+<h3>Player One powers: {{getGame().playerOnePowers}}</h3>
+<h3>Player Two powers: {{getGame().playerTwoPowers}}</h3>
 <!--app-chat/-->
