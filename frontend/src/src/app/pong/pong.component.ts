@@ -34,6 +34,7 @@ export class PongComponent implements OnInit, OnDestroy {
     public contected: boolean = false;
     public msg:string="";
     public waitingList="";
+    public powers:string="";
 	private modalClosedSubscription: Subscription = {} as Subscription;
 
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
@@ -107,13 +108,20 @@ export class PongComponent implements OnInit, OnDestroy {
 	}
 
 	setGamePlayer(): void {
+        var p: string[]=["", "", ""];
     	if (this.pongService.getGame().playerOne == this.playerLogin){
 //       		console.log("Player ONE " + this.playerLogin);
            this.playerOne = true;
+            p = this.pongService.getGame().playerTwoPowers;
 		} else if (this.pongService.getGame().playerTwo == this.playerLogin){
 //            console.log("Player TWO");
             this.playerTwo = true;
+            p = this.pongService.getGame().playerTwoPowers;
         }
+        if(this.pongService.getGame().powersAllow){
+            this.powers = "(1)" + p[0] + " - (2)" + p[1] + " - (3)" + p[2];
+        }
+            
 	}
  
     visibleCanvas(): boolean {
