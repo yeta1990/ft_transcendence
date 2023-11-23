@@ -561,14 +561,36 @@ export class ChatService {
 			.then(o => o.hasPass);
 	}
 
-	public saveGameResult(g: GameRoom){
+	public calcularNuevoElo(eloJugador1, eloJugador2, resultadoJugador1): any{
+		const kFactor = 32;
+
+		const expectedPlayer1 = 1 / (1 + Math.pow(10, (eloJugador2 - eloJugador1) / 400))
+		const expectedPlayer2 = 1 / (1 + Math.pow(10, (eloJugador1 - eloJugador2) / 400))
+
+		const nuevoEloJugador1 = eloJugador1 + kFactor * (resultadoJugador1 - expectedPlayer1)
+		const nuevoEloJugador2 = eloJugador2 + kFactor * ((1 - resultadoJugador1) - expectedPlayer2)
+		return {nuevoEloJugador1, nuevoEloJugador2}
+			
+	}
+
+	public async saveGameResult(g: GameRoom){
 		const result = {
 			"player1": g.playerOne,
 			"player2": g.playerTwo,
 			"player1Points": g.playerOneScore,
 			"player2Points": g.playerTwoScore,
 		}
-		this.gameRepository.save(result)
+		await this.gameRepository.save(result)
+		const user1: User = await this.userService.getUserByLogin(g.playerOne)
+		const user2: User = await this.userService.getUserByLogin(g.playerTwo)
+		const resultForelo = function() { 
+			if (g.playerOneScore > g.playerTwoScore) return 1
+			else if (g.playerOneScore < g.playerTwoScore) return 0
+			else return 0.5
+		}
+		const newElos: {} = this.calcularNuevoElo(user1.elo, user2.elo, resultForelo)
+		
+//		this.userRepository.save(user1)
 	}
 
 }
