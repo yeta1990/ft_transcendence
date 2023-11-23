@@ -8,7 +8,7 @@ config(); // to load process.env from here
 function isOriginAllowed(origin: string) {
 	const allowedOrigins = ['http://localhost', 'http://localhost:80','http://localhost:3000', 'http://localhost:4200'];
 	const allowedLastDigits = ['1', '2', '3', '4', '5', '6']; // Últimos dígitos permitidos
-	const portToAllow = ':80';
+	const portsToAllow = [':4200', ':80'];
 
 	// Verificamos si el origen es una URL válida
 	const urlPattern = /^(https?:\/\/)?([a-z\d.-]+|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:[0-9]{1,5})?([/?].*)?$/;
@@ -37,13 +37,17 @@ function isOriginAllowed(origin: string) {
 	const thirdComponent = parseInt(ipComponents[2]);
 	const lastComponent = ipComponents[3];
 
-	if (port === portToAllow && allowedLastDigits.includes(lastComponent) && firstComponent === '10' &&
+	//console.log("PORT: " + port + "\nPORT TO ALLOW: " + portToAllow + "\nHOSTNAME_PARTS: " + firstComponent + ", " + secondComponent + ", " + thirdComponent + ", " + lastComponent + ".")
+
+	if (portsToAllow.includes(port) && allowedLastDigits.includes(lastComponent) && firstComponent === '10' &&
 		((secondComponent === '11' && thirdComponent >= 1 && thirdComponent <= 17) ||
 		(secondComponent === '12' && thirdComponent >= 1 && thirdComponent <= 19) ||
 		(secondComponent === '13' && thirdComponent >= 1 && thirdComponent <= 14))
 	) {
+		console.log("RET: true");
 		return true;
 	}
+	console.log("RET: false");
 	return false;
 }
 
@@ -54,7 +58,9 @@ async function bootstrap() {
 	app.enableCors({
 		
 		origin: (origin, callback) => {
+			console.log("ORIGIN: " + origin);
 			if ((!origin) || isOriginAllowed(origin)) {
+				console.log("CORS allowed");
 				callback(null, true);
 			} else {
 				callback( new Error('CORS not allowed'));
