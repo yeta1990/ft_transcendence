@@ -27,15 +27,20 @@ export class CallbackComponent implements OnInit {
 	private modalClosedSubscription: Subscription = {} as Subscription;
 
 	ngOnInit() {
-		this.route.queryParams.subscribe(params => {
-			this.code = params['code'];
-			this.authenticate(this.code);
-//            this.router.navigateByUrl('/my-profile');
-		});
+		try {
+			console.log("Estoy en Callback!!");
+			this.route.queryParams.subscribe(params => {
+				this.code = params['code'];
+				this.authenticate(this.code);
+			});
+		} catch {
+			this.router.navigateByUrl('/login')
+		}
 	}
 
 	authenticate(code: string) {
 		if (code && this.validateCode(code)) {
+			console.log("HE validado el código");
 			this.authService.login(code)
 			.subscribe(
 				(response) => {
