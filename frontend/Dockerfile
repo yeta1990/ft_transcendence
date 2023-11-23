@@ -1,5 +1,6 @@
-FROM node:lts as build
+FROM node:lts-bullseye as build
 
+RUN npm cache clean -f
 RUN npm install -g npm@latest
 RUN npm install -g @angular/cli
 
