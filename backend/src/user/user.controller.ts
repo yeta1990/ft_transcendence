@@ -155,7 +155,7 @@ export class UserController {
 	public findAll(): Promise<User[]> {
 		return this.service.getAllUsers();
 	}
-	
+
 	@UseGuards(AuthGuard)
 	@Get(':id')
 	public getUser(@Param('id', ParseIntPipe) id: number): Promise<User>{
@@ -177,7 +177,13 @@ export class UserController {
 	@UseGuards(AuthGuard)
 	@Get('id/:login')
 	public getUserIdByLogin(@Param('login') login: string): Promise<number> {
-	  return this.service.getUserIdByLogin(login);
+		return this.service.getUserIdByLogin(login);
+	}
+
+	@UseGuards(AuthGuard)
+	@Get(':login/games')
+	public getGamesByUser(@Param('login') login: string): Promise<any> {
+		return this.service.getGamesByUser(login)
 	}
 
 	@UseGuards(AuthGuard)

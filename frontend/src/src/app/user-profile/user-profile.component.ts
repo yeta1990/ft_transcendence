@@ -38,6 +38,7 @@ export class UserProfileComponent implements OnInit {
   imagesBaseUrl: string = environment.apiUrl + '/uploads/'
   loaded: boolean = false;
   found: boolean = true;
+  games: any = {}
 
   constructor(
 		private profileService: UserProfileService,
@@ -62,8 +63,9 @@ export class UserProfileComponent implements OnInit {
 				forkJoin([
 					this.profileService.getUserProfile(userId),
 					this.profileService.getUserAchievements(userId),
-					this.profileService.getMyBlockedUsers()
-				]).subscribe(([userProfile, userAchievements, blockedUsers]: [User, Achievement[], Array<any>]) => {
+					this.profileService.getMyBlockedUsers(),
+					this.profileService.getGamesOfUser(login)
+				]).subscribe(([userProfile, userAchievements, blockedUsers, games]: [User, Achievement[], Array<any>, any]) => {
 					this.user = userProfile;
 					this.userAchievements = userAchievements;
 					console.log('User:', this.user);
@@ -74,6 +76,7 @@ export class UserProfileComponent implements OnInit {
 				    this.chatService.setMyBlockedUsers(blockedUsers);
 					this.check_admin_level(userId);
 					this.loaded = true;
+					this.games = games
 				});
 
 //				this.profileService.getMyBlockedUsers().subscribe(users =>this.chatService.setMyBlockedUsers(users))
@@ -160,7 +163,7 @@ export class UserProfileComponent implements OnInit {
 
 		this.gradientStart = Math.max(0, loosePercentage - 10); // Limitando entre 0 y 100
 		this.gradientEnd = Math.min(100, loosePercentage + 10); // Limitando entre 0 y 100;
-		
+
 		this.userRank = getEloRank(user.elo);
 		console.log('ELO Rank:', this.userRank);
 
