@@ -122,6 +122,7 @@ export class PongComponent implements OnInit, OnDestroy {
     onResize(event:any) {
         this.innerWidth = window.innerWidth;
         var g = this.pongService.getGame();
+
         if (this.innerWidth < 750){ 
             g.canvasWidth = 350;
             g.canvasheight = 200;
@@ -146,7 +147,7 @@ export class PongComponent implements OnInit, OnDestroy {
     	if (this.pongService.getGame().playerOne == this.playerLogin){
 //       		console.log("Player ONE " + this.playerLogin);
            this.playerOne = true;
-            p = this.pongService.getGame().playerTwoPowers;
+            p = this.pongService.getGame().playerOnePowers;
 		} else if (this.pongService.getGame().playerTwo == this.playerLogin){
 //            console.log("Player TWO");
             this.playerTwo = true;

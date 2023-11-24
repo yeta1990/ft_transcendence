@@ -491,19 +491,21 @@ export class PongService {
     }
     
 
-    disconectPlayer(room:string, login:string) {
+    async disconectPlayer(room:string, login:string) {
         var g = this.games.get(room)
         if (!g.playerOne || !g.playerTwo) {return;}
-       if (g.playerOne == login){
-           g.playerOne = "";
-       }         
-       if (g.playerTwo == login){
-           g.playerTwo = "";
-       }
+    //    if (g.playerOne == login){
+    //        g.playerOne = "";
+    //    }         
+    //    if (g.playerTwo == login){
+    //        g.playerTwo = "";
+    //    }
         console.log("disconnect player: " + room)
         this.gameGateaway.removeUserFromRoom(room, login) 
         if (g.playerOne == "" && g.playerTwo == "") {
             this.games.delete(room);
+            this.chatService.deleteRoom(room);
+            this.chatService.emitUpdateUsersAndRoomsMetadata();
         }
 
 //        clearInterval(g.interval);
@@ -587,12 +589,13 @@ export class PongService {
         g.ballSpeed = speeds[Math.floor(Math.random() * speeds.length)];
         const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
 
+
         let count = 0;
-        while (count < 60) { //seconds
+        while (count < 30) { //seconds
           count++;
           await waitSeg(1);
       
-          if (count % 10 === 0) {
+          if (count % 5 === 0) {
             g.ballSpeed = speeds[Math.floor(Math.random() * speeds.length)];
             console.log("change speed " + g.ballSpeed);
           }
@@ -695,7 +698,7 @@ export class PongService {
             g.reverseMoveOne = true;
         }
         let count = 0;
-        while (count < 15) { // seconds
+        while (count < 10) { // seconds
             count++;
             await waitSeg(1);
         }
