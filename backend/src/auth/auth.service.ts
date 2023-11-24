@@ -50,6 +50,7 @@ export class AuthService {
 
 	async signIn(code: string ): Promise<any> {
 		let data: authData42;
+		console.log("He llegado al signIn");
 		try{
 			data = await this.confirmAuthFrom42(code);
 		}

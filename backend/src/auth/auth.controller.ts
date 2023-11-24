@@ -17,6 +17,7 @@ export class AuthController {
 	@Post('login')
 	login(@Body() body: LoginBody)
 	{
+		console.log("He llegado a auth.controller");
 		return this.authService.signIn(body.code);
 	}
 	/*
