@@ -22,6 +22,7 @@ export class AuthService {
   private authToken: any;
 
 	login(code: string){
+		console.log("He llegado a login");
 		return this.http.post<any>(environment.apiUrl + '/auth/login', {code})
 			.pipe(
 				map((res: any) => {
