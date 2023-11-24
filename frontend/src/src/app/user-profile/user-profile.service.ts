@@ -66,5 +66,8 @@ export class UserProfileService {
 		return this.httpClient.post<Array<string>>(environment.apiUrl+'/user/friendship/request/reject?login='+login, {})
 	}
 
+	getGamesOfUser(login: string){
+		return this.httpClient.get<Array<any>>(environment.apiUrl+'/user/'+login+'/games')
+	}
 
 }
