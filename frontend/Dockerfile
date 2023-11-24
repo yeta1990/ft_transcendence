@@ -1,6 +1,6 @@
 FROM node:lts-bullseye as build
 
-RUN npm cache clean -f
+RUN npm cache clean -force
 RUN npm install -g npm@latest
 RUN npm install -g @angular/cli
 
@@ -20,6 +20,7 @@ COPY ./install_angular_dependencies.sh /
 EXPOSE 4200
 RUN git config --global user.email "albgarci@students.42madrid.com"
 RUN git config --global user.name "albgarci"
+RUN npm cache clean -force && npm update
 RUN npm install
 
 ENTRYPOINT ["/install_angular_dependencies.sh"]
