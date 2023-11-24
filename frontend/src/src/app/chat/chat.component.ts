@@ -129,6 +129,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			.pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
 			.subscribe((payload: SocketPayload) => {
 				if (payload.event === 'message'){
+					if (!this.messageList.get(payload.data.room)){
+						this.messageList.set(payload.data.room, new Array<ChatMessage>);
+					}
 					this.messageList.get(payload.data.room)!.push(payload.data);
 				}
 				else if (payload.event === events.ListAllRooms){
