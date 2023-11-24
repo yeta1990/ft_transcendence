@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, OnDestroy, Inject } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, OnDestroy, Inject, HostListener } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { PongService } from './pong.service';
 import { Subject, Subscription, pipe } from "rxjs"
@@ -34,8 +34,12 @@ export class PongComponent implements OnInit, OnDestroy {
     public contected: boolean = false;
     public msg:string="";
     public waitingList="";
+    public powers:string="";
 	private modalClosedSubscription: Subscription = {} as Subscription;
+    public innerWidth: any;
+    private coef:number = 1;
 
+    
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
     constructor(
         private pongService:PongService,
@@ -86,6 +90,19 @@ export class PongComponent implements OnInit, OnDestroy {
             }
             if (payload.event === 'getStatus'){
 				if(this.chatService.getCurrentRoom() == payload.data.room){
+                    if (this.innerWidth < 750){ 
+                        payload.data.canvasWidth = 350;
+                        payload.data.canvasheight = 200;
+                        // this.canvas = this.gameCanvas?.nativeElement;
+        	            // this.gameContext = this.canvas?.getContext('2d');
+                        this.coef = 0.5;
+                    } else if (this.innerWidth >= 750){
+                        // payload.data.canvasWidth = 700;
+                        // payload.data.canvasheight = 400;
+                        // this.canvas = this.gameCanvas?.nativeElement;
+        	            // this.gameContext = this.canvas?.getContext('2d');
+                        this.coef = 1;
+                    }
 					this.pongService.setGame(payload.data)
 					this.setGamePlayer()
                     this.msg = "Best of (9)";
@@ -101,19 +118,44 @@ export class PongComponent implements OnInit, OnDestroy {
             this.contected = true;
         }
     }
+    @HostListener('window:resize', ['$event'])
+    onResize(event:any) {
+        this.innerWidth = window.innerWidth;
+        var g = this.pongService.getGame();
+        if (this.innerWidth < 750){ 
+            g.canvasWidth = 350;
+            g.canvasheight = 200;
+            this.canvas = this.gameCanvas?.nativeElement;
+        	this.gameContext = this.canvas?.getContext('2d');
+            this.coef = 0.5;
+        } else if (this.innerWidth >= 750){
+            g.canvasWidth = 700;
+            g.canvasheight = 400;
+            this.canvas = this.gameCanvas?.nativeElement;
+        	this.gameContext = this.canvas?.getContext('2d');
+            this.coef = 1;
+        }
+    }
 
 	getGame(): GameRoom {
 		return this.pongService.getGame()	
 	}
 
 	setGamePlayer(): void {
+        var p: string[]=["", "", ""];
     	if (this.pongService.getGame().playerOne == this.playerLogin){
 //       		console.log("Player ONE " + this.playerLogin);
            this.playerOne = true;
+            p = this.pongService.getGame().playerTwoPowers;
 		} else if (this.pongService.getGame().playerTwo == this.playerLogin){
 //            console.log("Player TWO");
             this.playerTwo = true;
+            p = this.pongService.getGame().playerTwoPowers;
         }
+        if(this.pongService.getGame().powersAllow){
+            this.powers = "(1)" + p[0] + " - (2)" + p[1] + " - (3)" + p[2];
+        }
+            
 	}
  
     visibleCanvas(): boolean {
@@ -125,6 +167,7 @@ export class PongComponent implements OnInit, OnDestroy {
 	}
 
     async ngOnInit() {
+        this.innerWidth = window.innerWidth;
         if (!this.pongService.getEventSubscribed()){
         	this.pongService.setEventSubscribed(true)
         	window.addEventListener('keydown', (e) => {
@@ -198,8 +241,8 @@ export class PongComponent implements OnInit, OnDestroy {
     drawBoardDetails(){
 
         this.gameContext.strokeStyle = "#fff";
-        this.gameContext.lineWidth = 5;
-        this.gameContext.strokeRect(10,10,this.canvas.width - 20 ,this.canvas.height - 20);
+        this.gameContext.lineWidth = 5 * this.coef;
+        this.gameContext.strokeRect(10 * this.coef,10 * this.coef,this.canvas.width - 20 * this.coef,this.canvas.height - 20 * this.coef);
 
         //draw center lines
         if (this.gameCanvas) {
@@ -211,6 +254,7 @@ export class PongComponent implements OnInit, OnDestroy {
         }
         //draw scores and check end game
         this.gameContext!.font = '36px Arial';
+        if (this.innerWidth < 750) { this.gameContext!.font = '18px Arial';}
         var pOne = this.pongService.getGame().playerOne + " " + this.pongService.getGame().playerOneScore;
         var ptwo: string;
         if (this.pongService.getGame().playerTwo)
@@ -220,18 +264,18 @@ export class PongComponent implements OnInit, OnDestroy {
         var posOne = ((this.canvas.width / 2) - pOne.length) / 2;
         var posTwo = (this.canvas.width / 2) + 20;
         this.gameContext!.fillStyle = "#808080";
-        this.gameContext!.fillText(pOne, posOne, 50);
-        this.gameContext!.fillText(ptwo, posTwo, 50);
+        this.gameContext!.fillText(pOne, posOne, 50 * this.coef);
+        this.gameContext!.fillText(ptwo, posTwo, 50 * this.coef);
         this.gameContext!.fillStyle = "#FF0000";
         if (this.pongService.getGame().playerOneScore >= 5) { //POINTS
             //this.restartScores();
             this.gameContext!.fillStyle = "#00FF00";
             let winner = this.pongService.getGame().playerOne + " WON!"
-            this.gameContext!.fillText(winner, 250, 200);
+            this.gameContext!.fillText(winner, 250 * this.coef, 200 * this.coef);
             var again = "Press ESC for play again";
             var textWidth = this.gameContext!.measureText(again).width;
             this.gameContext!.fillStyle = "#808080";
-            this.gameContext!.fillText(again, (this.canvas.width - textWidth) / 2, 250);
+            this.gameContext!.fillText(again, (this.canvas.width - textWidth) / 2, 250 * this.coef);
         } else if (this.pongService.getGame().playerTwoScore >= 5) { //POINTS
             //this.restartScores();
             this.gameContext!.fillStyle = "#FF0000";
@@ -241,28 +285,28 @@ export class PongComponent implements OnInit, OnDestroy {
             } else{
                 winner =  "Computer WON!"
             }
-            this.gameContext!.fillText(winner, 250, 200);
+            this.gameContext!.fillText(winner, 250 * this.coef, 200 * this.coef);
             var again = "Press ESC for play again";
             var textWidth = this.gameContext!.measureText(again).width;
             this.gameContext!.fillStyle = "#808080";
-            this.gameContext!.fillText(again, (this.canvas.width - textWidth) / 2, 250);
+            this.gameContext!.fillText(again, (this.canvas.width - textWidth) / 2, 250 * this.coef);
         }
         //draw pause if not finish game
         if (this.pongService.getGame().pause && !this.pongService.getGame().finish) {
             this.gameContext!.fillStyle = "#00FF00";
-            this.gameContext!.fillText("PAUSE", 290, 200);
+            this.gameContext!.fillText("PAUSE", 290 * this.coef, 200 * this.coef);
             this.gameContext!.fillStyle = "#808080";
             var again = "Press ESC play";
             var textWidth = this.gameContext!.measureText(again).width;
-            this.gameContext!.fillText(again, (this.canvas.width - textWidth) / 2, 250);
+            this.gameContext!.fillText(again, (this.canvas.width - textWidth) / 2, 250 * this.coef);
             var up = "UP: W / ↑"
             var textWidth = this.gameContext!.measureText(up).width;
             const xOne = (this.canvas.width / 2 - textWidth) / 2;
             var down = "DOWN: S / ↓"
             textWidth = this.gameContext!.measureText(down).width;
             const xTwo = (this.canvas.width / 2 - textWidth) / 2 + (this.canvas.width / 2) ;
-            this.gameContext!.fillText(up, xOne, this.canvas.height - 50);
-            this.gameContext!.fillText(down, xTwo, this.canvas.height - 50);
+            this.gameContext!.fillText(up, xOne, this.canvas.height - 50 * this.coef);
+            this.gameContext!.fillText(down, xTwo, this.canvas.height - 50 * this.coef);
         }
     }
 
@@ -286,33 +330,33 @@ export class PongComponent implements OnInit, OnDestroy {
         this.gameContext.fillStyle = "#fff";
         this.drawRoundedRect(
             this.gameContext,
-            this.pongService.getGame().playerOneX,
-            this.pongService.getGame().playerOneY,
-            this.pongService.getGame().playerOneW,
-            this.pongService.getGame().playerOneH,
-            5
+            this.pongService.getGame().playerOneX * this.coef,
+            this.pongService.getGame().playerOneY * this.coef,
+            this.pongService.getGame().playerOneW * this.coef,
+            this.pongService.getGame().playerOneH * this.coef,
+            5 * this.coef
         );
         this.gameContext.fill();
         //player2
         this.gameContext.fillStyle = "#fff";
         this.drawRoundedRect(
             this.gameContext,
-            this.pongService.getGame().playerTwoX,
-            this.pongService.getGame().playerTwoY,
-            this.pongService.getGame().playerTwoW,
-            this.pongService.getGame().playerTwoH,
-            5
+            this.pongService.getGame().playerTwoX * this.coef,
+            this.pongService.getGame().playerTwoY * this.coef,
+            this.pongService.getGame().playerTwoW * this.coef,
+            this.pongService.getGame().playerTwoH * this.coef,
+            5 * this.coef
         );
         this.gameContext.fill();
         //ball
         this.gameContext.fillStyle = "#fff";
         this.drawRoundedRect(
             this.gameContext,
-            this.pongService.getGame().ballX,
-            this.pongService.getGame().ballY,
-            this.pongService.getGame().ballWidth,
-            this.pongService.getGame().ballHeight,
-            5
+            this.pongService.getGame().ballX * this.coef,
+            this.pongService.getGame().ballY * this.coef,
+            this.pongService.getGame().ballWidth * this.coef,
+            this.pongService.getGame().ballHeight * this.coef,
+            5 * this.coef
         );
         this.gameContext.fill();
     }

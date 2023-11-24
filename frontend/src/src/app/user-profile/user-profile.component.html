@@ -68,5 +68,11 @@
 		</button>
 	  <!-- Aquí irá el resto del contenido del perfil -->
 	</div>
+	Games:
+	<div *ngFor="let game of games">
+		{{game.player1}} {{game.player1Points}} - {{game.player2}} {{game.player2Points}} 
+	</div>
+
   </div>
+
 <router-outlet>
