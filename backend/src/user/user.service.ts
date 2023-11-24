@@ -4,6 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { Repository, Connection } from 'typeorm';
 import { CreateUserDto } from './user.dto';
 import { User } from './user.entity';
+import { Game } from '../pong/game.entity'
 import { catchError, lastValueFrom, map } from 'rxjs';
 import { Achievement } from './achievement/achievement.entity';
 import { UserRole } from '@shared/enum';
@@ -12,6 +13,9 @@ import { UserRole } from '@shared/enum';
 export class UserService {
 	@InjectRepository(User)
 	private readonly repository: Repository<User>;
+
+	@InjectRepository(Game)
+	private readonly gameRepository: Repository<Game>;
 
 	@InjectRepository(Achievement)
     private readonly achievementRepository: Repository<Achievement>;
@@ -311,4 +315,13 @@ export class UserService {
 		console.log(user2.friends)
 		return user1.friends;
 	}
+
+	//games
+	public async getGamesByUser(login): Promise<any>{
+		return this.gameRepository.find({
+			where: [{player1: login}, {player2:login}]
+		})
+	
+	}
+	
 }
