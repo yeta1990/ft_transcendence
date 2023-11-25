@@ -123,6 +123,13 @@ export class SocketService {
 			.on("acceptMatchProposal", (data:string) => {
 				this.message.next({event: "acceptMatchProposal", data});
 			})
+			.on("otherPlayerPart", (data:string) => {
+				this.message.next({event: "otherPlayerPart", data});
+			})
+			.on("otherPlayerCameBack", (data:string) => {
+				this.message.next({event: "otherPlayerCameBack", data});
+			})
+
 		}
 	}
 

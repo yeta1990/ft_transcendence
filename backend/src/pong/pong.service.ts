@@ -1,5 +1,6 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ChatMessage, SocketPayload, GameRoom, ChatUser } from '@shared/types';
+import { waitSeg } from '@shared/functions'
 import { GameGateway } from 'src/events/game.gateway';
 import { BaseGateway } from 'src/events/base.gateway';
 import { ChatGateway } from 'src/events/chat.gateway';
@@ -292,6 +293,7 @@ export class PongService {
 
     keyStatus(room: string, key: number, nick:string){
         var g = this.games.get(room);
+        if (!g) return;
         if ((nick == g.playerOne) || (nick == g.playerTwo)){
 //        	console.log(g)
             if(key == 27){
@@ -493,6 +495,7 @@ export class PongService {
 
     async disconectPlayer(room:string, login:string) {
         var g = this.games.get(room)
+        if (!g) return;
         if (!g.playerOne || !g.playerTwo) {return;}
     //    if (g.playerOne == login){
     //        g.playerOne = "";
@@ -705,4 +708,96 @@ export class PongService {
         g.reverseMoveOne = false;
         g.reverseMoveTwo = false;
     }
+
+	gamesWhereUserWasPlaying(login: string): Array<string>{
+		if (!login) return
+		let games: Array<string> = [];
+		for (let [key, value] of this.games){
+			if(value.playerOne === login || value.playerTwo === login){
+				games.push(key);
+			}
+		}
+		return games;
+	}
+
+	pauseGame(gameName: string) {
+		let game = this.games.get(gameName)
+		if (!game) return;
+		game.pause = true;
+		this.games.set(gameName, game)
+	}
+
+	async waitForPlayerReconnect(login: string): Promise<void>{
+		let games: Array<string> = this.gamesWhereUserWasPlaying(login)
+		if (games.length == 0) return;
+        //pause games
+      	for (let game of games){
+			this.pauseGame(game)
+      	} 
+
+      	let theOtherPlayers: Set<string> = new Set()
+      	for (let game of games){
+			if (this.games.get(game).playerOne == login){
+				theOtherPlayers.add(this.games.get(game).playerTwo)
+			}else{
+				theOtherPlayers.add(this.games.get(game).playerOne)
+			}
+      	}
+		this.gameGateaway.sendOtherPlayerPart(Array.from(theOtherPlayers), login)
+		//send event to the other player to show a modal
+
+		for (let i = 0; i < 10; i++){
+			for (let game of games){
+				//check whether the other player is active or not
+       			const activeUsers: Array<ChatUser> = this.gameGateaway
+        	   		.getActiveUsersInRoom(game);
+        	   	const activeLogins: Array<string> = activeUsers.map(u => u.login)
+
+				console.log(activeLogins)
+				if (!activeLogins.includes(this.games.get(game).playerOne) && 
+					!activeLogins.includes(this.games.get(game).playerTwo)){
+					await this.chatService.deleteRoom(game)
+					await this.gameGateaway.destroyEmptyRooms(game)
+					this.games.delete(game)
+					games = games.filter(g => g != game)
+					theOtherPlayers.delete(game)
+
+				}else if(activeLogins.includes(login)){
+					//send signal to two players to reactivate 
+					//if other player != ""
+					this.gameGateaway.sendOtherPlayerCameBack(Array.from(theOtherPlayers), login)
+            		this.chatService.setUserStatusIsPlaying(login)
+					//send signal to user to go to the left room??? join...
+					return ;
+				}
+        	}
+			await waitSeg(1)
+        }
+
+		for (let game of games){
+			let endGame = this.games.get(game)
+			if (!endGame) return;
+			if (endGame.playerOne == login){
+				endGame.playerOneScore = 5
+				endGame.playerTwoScore = 0
+			} else {
+				endGame.playerOneScore = 0
+				endGame.playerTwoScore = 5
+			}
+			endGame.finish = true;
+			this.chatService.saveGameResult(endGame)
+        	//end game, save results
+
+        	//delete room
+			await this.chatService.deleteRoom(game)
+			await this.gameGateaway.destroyEmptyRooms(game)
+
+			if (this.games.get(game).playerOne == login){
+            	this.chatService.setUserStatusIsActive(this.games.get(game).playerTwo)
+            } else {
+            	this.chatService.setUserStatusIsActive(this.games.get(game).playerOne)
+            }
+			this.games.delete(game)
+		}
+	}
 }

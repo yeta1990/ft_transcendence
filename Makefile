@@ -69,11 +69,11 @@ clean: ## Stop containers. Remove containers. Remove data folders. Remove all un
 fclean:	clean ## Cleans and removes development folders and files.
 	@echo "\n$(GR)[Cleaning $(B)'Develop Folders'$(GR). Please wait...                  ]${END}"
 	@rm -rf database/data/*
-	@rm -rf frontend/srcs/node_modules
-	@rm -rf frontend/srcs/.angular
-	@rm -rf frontend/srcs/package-lock.json
-	@rm -rf srcs/node_modules
-	@rm -rf srcs/package-lock.json
+	@rm -rf frontend/src/node_modules
+	@rm -rf frontend/src/.angular
+	@rm -rf frontend/src/package-lock.json
+	@rm -rf backend/node_modules
+	@rm -rf backend/package-lock.json
 	@echo "$(G)[Removed $(B) Folders $(G)successfully                                   ]$(END)\n"
 
 prune: ## Clean up unused Docker resources.

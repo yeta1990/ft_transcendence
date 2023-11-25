@@ -3,6 +3,7 @@ import { ChatService } from './chat.service';
 import { FormBuilder } from '@angular/forms';
 import { ChatMessage, SocketPayload, RoomMetaData, ToastData } from '@shared/types';
 import { events, ToastValues } from '@shared/const';
+import { waitSeg } from '@shared/functions';
 import { takeUntil } from "rxjs/operators"
 import { Subject, Subscription, pipe } from "rxjs"
 import { User } from '../user';
@@ -129,6 +130,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			.pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
 			.subscribe((payload: SocketPayload) => {
 				if (payload.event === 'message'){
+					if (!this.messageList.get(payload.data.room)){
+						this.messageList.set(payload.data.room, new Array<ChatMessage>);
+					}
 					this.messageList.get(payload.data.room)!.push(payload.data);
 				}
 				else if (payload.event === events.ListAllRooms){
@@ -222,6 +226,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					this.chatService.setLoginNickEquivalence(payload.data)
 				}
 				else if (payload.event === 'cancelOnline'){
+					this.modalService.closeModal()
+				}
+				else if (payload.event === 'otherPlayerPart'){
+					this.blockGameModal(payload.data)
+				}
+				else if (payload.event === 'otherPlayerCameBack'){
 					this.modalService.closeModal()
 				}
         		this.scrollToBottom();
@@ -554,4 +564,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	joinUserToRoomAsViwer(room: string){
 		this.chatService.joinUserToRoomAsViwer(room);
 	}
+
+	async blockGameModal(login: string){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+
+			this.modalClosedSubscription.unsubscribe();
+			
+    	});
+		this.modalService.openModal('template18', login);
+		for (let i = 0; i < 11; i++){
+			await waitSeg(1)
+		}
+		this.modalService.closeModal()
+	}
+
 }

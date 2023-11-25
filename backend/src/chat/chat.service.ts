@@ -576,6 +576,10 @@ export class ChatService {
 	}
 
 	public async saveGameResult(g: GameRoom){
+		if (g.powersAllow) return;
+		const user1: User = await this.userService.getUserByLogin(g.playerOne)
+		const user2: User = await this.userService.getUserByLogin(g.playerTwo)
+		if (!user1 || !user2 || g.playerOne == "" || g.playerTwo == "") return;
 		const result = {
 			"player1": g.playerOne,
 			"player2": g.playerTwo,
@@ -583,16 +587,20 @@ export class ChatService {
 			"player2Points": g.playerTwoScore,
 		}
 		await this.gameRepository.save(result)
-		const user1: User = await this.userService.getUserByLogin(g.playerOne)
-		const user2: User = await this.userService.getUserByLogin(g.playerTwo)
 		const resultForelo = function() { 
 			if (g.playerOneScore > g.playerTwoScore) return 1
 			else if (g.playerOneScore < g.playerTwoScore) return 0
 			else return 0.5
 		}
-		const newElos: {} = this.calcularNuevoElo(user1.elo, user2.elo, resultForelo)
+
+		const newElos = this.calcularNuevoElo(user1.elo, user2.elo, resultForelo)
+		console.log(newElos)
+		console.log(newElos.nuevoEloJugador1)
+//		user1.elo = newElos.nuevoEloJugador1
+//		user2.elo = newElos.nuevoEloJugador2
 		
-//		this.userRepository.save(user1)
+//		await this.userRepository.save(user1)
+//		await this.userRepository.save(user2)
 	}
 
 }
