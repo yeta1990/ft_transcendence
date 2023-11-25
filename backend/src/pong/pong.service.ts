@@ -1,5 +1,6 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ChatMessage, SocketPayload, GameRoom, ChatUser } from '@shared/types';
+import { waitSeg } from '@shared/functions'
 import { GameGateway } from 'src/events/game.gateway';
 import { BaseGateway } from 'src/events/base.gateway';
 import { ChatGateway } from 'src/events/chat.gateway';
@@ -724,7 +725,7 @@ export class PongService {
 	}
 
 	async waitForPlayerReconnect(login: string): Promise<void>{
-		const games: Array<string> = this.gamesWhereUserWasPlaying(login)
+		let games: Array<string> = this.gamesWhereUserWasPlaying(login)
 		if (games.length == 0) return;
         //pause games
       	for (let game of games){
@@ -732,25 +733,44 @@ export class PongService {
       	} 
 		//send event to the other player to show a modal
 
-		for (let game of games){
-			//check whether the other player is active or not
+		for (let i = 0; i < 10; i++){
+			for (let game of games){
+				//check whether the other player is active or not
+       			const activeUsers: Array<ChatUser> = this.gameGateaway
+        	   		.getActiveUsersInRoom(game);
+        	   	const activeLogins: Array<string> = activeUsers.map(u => u.login)
 
-       		const activeUsers: Array<ChatUser> = this.gameGateaway
-           		.getActiveUsersInRoom(game);
-			if (!activeUsers.includes[this.games.get(game).playerOne] && 
-				!activeUsers.includes[this.games.get(game).playerTwo]){
-				//destroy room if both users are disconnected
-				await this.chatService.deleteRoom(game)
-				await this.gameGateaway.destroyEmptyRooms(game)
-				return ;
+				if (!activeLogins.includes(this.games.get(game).playerOne) && 
+					!activeLogins.includes(this.games.get(game).playerTwo)){
+					await this.chatService.deleteRoom(game)
+					await this.gameGateaway.destroyEmptyRooms(game)
+					this.games.delete(game)
+					games = games.filter(g => g != game)
 
-			}else if(activeUsers.includes[login]){
-				//send signal to two players to reactivate 
-				
-			}
-
+				}else if(activeUsers.includes[login]){
+					//send signal to two players to reactivate 
+					//if other player != ""
+					//setUserstatusIsPlaying(login)
+					//send signal to user to go to the left room??? join...
+					return ;
+				}
+				await waitSeg(1)
+        	}
         }
 
+		for (let game of games){
+        	//end game, save results
 
+        	//delete room
+			await this.chatService.deleteRoom(game)
+			await this.gameGateaway.destroyEmptyRooms(game)
+
+			if (this.games.get(game).playerOne == login){
+            	this.chatService.setUserStatusIsActive(this.games.get(game).playerTwo)
+            }else {
+            	this.chatService.setUserStatusIsActive(this.games.get(game).playerOne)
+            }
+			this.games.delete(game)
+		}
 	}
 }
