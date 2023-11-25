@@ -564,11 +564,23 @@ export class ChatService {
 	public calcularNuevoElo(eloJugador1, eloJugador2, resultadoJugador1): any{
 		const kFactor = 32;
 
+		if (isNaN(eloJugador1) || isNaN(eloJugador2) || isNaN(resultadoJugador1)) {
+			console.log('Los parámetros deben ser números válidos');
+		  }
+		  if (resultadoJugador1 < 0 || resultadoJugador1 > 1) {
+			console.log('El resultado debe ser un número entre 0 y 1');
+		  }
+
 		const expectedPlayer1 = 1 / (1 + Math.pow(10, (eloJugador2 - eloJugador1) / 400))
 		const expectedPlayer2 = 1 / (1 + Math.pow(10, (eloJugador1 - eloJugador2) / 400))
 
 		const nuevoEloJugador1 = eloJugador1 + kFactor * (resultadoJugador1 - expectedPlayer1)
 		const nuevoEloJugador2 = eloJugador2 + kFactor * ((1 - resultadoJugador1) - expectedPlayer2)
+
+		if (isNaN(nuevoEloJugador1) || isNaN(nuevoEloJugador2)) {
+			console.log('Hubo un error al calcular el nuevo Elo');
+		  }
+
 		return {nuevoEloJugador1, nuevoEloJugador2}
 			
 	}
@@ -591,6 +603,7 @@ export class ChatService {
 			else return 0.5
 		}
 
+		console.log("USER1 ELO: " + user1.elo + "\nUSER2 ELO: " + user2.elo + "\nRESULTFORELO: " + resultForelo);
 		const newElos = this.calcularNuevoElo(user1.elo, user2.elo, resultForelo)
 		console.log(newElos)
 		console.log(newElos.nuevoEloJugador1)
