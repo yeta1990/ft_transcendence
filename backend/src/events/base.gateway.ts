@@ -177,6 +177,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		  //cancel all match proposals
 		  this.pongservice.cancelMatchProposal(login)
 		  this.pongservice.removeUserFromMatchMakingList(login)
+		  this.pongservice.waitForPlayerReconnect(login)
 			
   	  }
 	}

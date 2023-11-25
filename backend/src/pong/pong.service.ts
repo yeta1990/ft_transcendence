@@ -292,6 +292,7 @@ export class PongService {
 
     keyStatus(room: string, key: number, nick:string){
         var g = this.games.get(room);
+        if (!g) return;
         if ((nick == g.playerOne) || (nick == g.playerTwo)){
 //        	console.log(g)
             if(key == 27){
@@ -493,6 +494,7 @@ export class PongService {
 
     disconectPlayer(room:string, login:string) {
         var g = this.games.get(room)
+        if (!g) return;
         if (!g.playerOne || !g.playerTwo) {return;}
        if (g.playerOne == login){
            g.playerOne = "";
@@ -702,4 +704,53 @@ export class PongService {
         g.reverseMoveOne = false;
         g.reverseMoveTwo = false;
     }
+
+	gamesWhereUserWasPlaying(login: string): Array<string>{
+		if (!login) return
+		let games: Array<string> = [];
+		for (let [key, value] of this.games){
+			if(value.playerOne === login || value.playerTwo === login){
+				games.push(key);
+			}
+		}
+		return games;
+	}
+
+	pauseGame(gameName: string) {
+		let game = this.games.get(gameName)
+		if (!game) return;
+		game.pause = true;
+		this.games.set(gameName, game)
+	}
+
+	async waitForPlayerReconnect(login: string): Promise<void>{
+		const games: Array<string> = this.gamesWhereUserWasPlaying(login)
+		if (games.length == 0) return;
+        //pause games
+      	for (let game of games){
+			this.pauseGame(game)
+      	} 
+		//send event to the other player to show a modal
+
+		for (let game of games){
+			//check whether the other player is active or not
+
+       		const activeUsers: Array<ChatUser> = this.gameGateaway
+           		.getActiveUsersInRoom(game);
+			if (!activeUsers.includes[this.games.get(game).playerOne] && 
+				!activeUsers.includes[this.games.get(game).playerTwo]){
+				//destroy room if both users are disconnected
+				await this.chatService.deleteRoom(game)
+				await this.gameGateaway.destroyEmptyRooms(game)
+				return ;
+
+			}else if(activeUsers.includes[login]){
+				//send signal to two players to reactivate 
+				
+			}
+
+        }
+
+
+	}
 }
