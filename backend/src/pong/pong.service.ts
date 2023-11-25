@@ -731,6 +731,16 @@ export class PongService {
       	for (let game of games){
 			this.pauseGame(game)
       	} 
+
+      	let theOtherPlayers: Set<string> = new Set()
+      	for (let game of games){
+			if (this.games.get(game).playerOne == login){
+				theOtherPlayers.add(this.games.get(game).playerTwo)
+			}else{
+				theOtherPlayers.add(this.games.get(game).playerOne)
+			}
+      	}
+		this.gameGateaway.sendOtherPlayerPart(Array.from(theOtherPlayers), login)
 		//send event to the other player to show a modal
 
 		for (let i = 0; i < 10; i++){
@@ -740,25 +750,39 @@ export class PongService {
         	   		.getActiveUsersInRoom(game);
         	   	const activeLogins: Array<string> = activeUsers.map(u => u.login)
 
+				console.log(activeLogins)
 				if (!activeLogins.includes(this.games.get(game).playerOne) && 
 					!activeLogins.includes(this.games.get(game).playerTwo)){
 					await this.chatService.deleteRoom(game)
 					await this.gameGateaway.destroyEmptyRooms(game)
 					this.games.delete(game)
 					games = games.filter(g => g != game)
+					theOtherPlayers.delete(game)
 
-				}else if(activeUsers.includes[login]){
+				}else if(activeLogins.includes(login)){
 					//send signal to two players to reactivate 
 					//if other player != ""
-					//setUserstatusIsPlaying(login)
+					this.gameGateaway.sendOtherPlayerCameBack(Array.from(theOtherPlayers), login)
+            		this.chatService.setUserStatusIsPlaying(login)
 					//send signal to user to go to the left room??? join...
 					return ;
 				}
-				await waitSeg(1)
         	}
+			await waitSeg(1)
         }
 
 		for (let game of games){
+			let endGame = this.games.get(game)
+			if (!endGame) return;
+			if (endGame.playerOne == login){
+				endGame.playerOneScore = 5
+				endGame.playerTwoScore = 0
+			} else {
+				endGame.playerOneScore = 0
+				endGame.playerTwoScore = 5
+			}
+			endGame.finish = true;
+			this.chatService.saveGameResult(endGame)
         	//end game, save results
 
         	//delete room
@@ -767,7 +791,7 @@ export class PongService {
 
 			if (this.games.get(game).playerOne == login){
             	this.chatService.setUserStatusIsActive(this.games.get(game).playerTwo)
-            }else {
+            } else {
             	this.chatService.setUserStatusIsActive(this.games.get(game).playerOne)
             }
 			this.games.delete(game)
