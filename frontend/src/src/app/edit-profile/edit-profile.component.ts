@@ -16,6 +16,7 @@ import { UserProfileService } from '../user-profile/user-profile.service';
 import { ModalService } from '../modal/modal.service';
 import { ToasterService } from '../toaster/toaster.service';
 import { ValidationService } from './validation-service/validation-service.service';
+import { ImageService } from './ImageService/image-service.service';
 
 // Enums, Constantes o Tipos Compartidos
 import { User } from '../user';
@@ -23,7 +24,7 @@ import { ToastValues } from '@shared/const';
 import { Campuses, UserRole } from '@shared/enum';
 
 // Librerías de Terceros
-import { of, Subscription } from 'rxjs';
+import { lastValueFrom, of, Subscription } from 'rxjs';
 
 
 @Component({
@@ -47,6 +48,8 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 	editEnabled = false;
 	loginEnabled = false;
 	originalFormValues: any;
+	imagesBaseUrl: string = environment.apiUrl + '/uploads/'
+	public avatarImages: string[] = [];
 
 	private modalClosedSubscription: Subscription = new Subscription();
 
@@ -73,6 +76,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 		private toasterService: ToasterService,
 		private readonly validationService: ValidationService,
 		private twoFactorAuthService: TwoFactorAuthService,
+		private imageService: ImageService,
 		){
 	}
 
@@ -97,6 +101,14 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 		this.twoFactorAuthService.getMfaActivatedObservable().subscribe((mfaActivated: boolean) => {
 			this.mfaActivated = mfaActivated;
 		});
+		this.imageService.getAvatarImages().subscribe(
+			(images) => {
+			  this.avatarImages = images;
+			},
+			(error) => {
+			  console.error('Error fetching avatar images:', error);
+			}
+		  );
 	}
 
 	ngOnDestroy(): void {
@@ -256,9 +268,22 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 			console.log('Imagen subida:', response);
 			return response;
 		} catch (error) {
+			this.handleUploadError(error);
 			throw error;
 		}
 	}
+
+	handleUploadError(error: any): void {
+		let errorMessage = 'Se produjo un error al cargar la imagen.';
+	  
+		if (error && error.error && error.error.error) {
+		  errorMessage = error.error.error;
+		} else if (error && error.error && error.error.message) {
+		  errorMessage = error.error.message;
+		}
+	  
+		this.toasterService.launchToaster(ToastValues.ERROR, 'Error al cargar imagen');
+	  }
 
 	onFileChange(event: any): void {
 		const file = event.target.files[0];
@@ -277,6 +302,27 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 		}
 		this.formData.delete('image')
 	}
+
+	async onFileInputClick(): Promise<void> {
+		const images = await lastValueFrom(this.imageService.getAvatarImages());
+		this.openImageModal(images);
+		console.log(images);
+	  }
+	
+	  openImageModal(images: string[]): void {
+		const modalData = {
+			images: images,
+			onSelectImage: (selectedImage: string) => {
+			  // Lógica a realizar cuando se selecciona una imagen
+			  console.log('Imagen seleccionada:', selectedImage);
+			  // Cierra el modal si es necesario
+			  // this.modalService.closeModal(); // Asegúrate de tener un método closeModal en tu servicio
+			},
+		  };
+		
+		  // Abre el modal con la información
+		  this.modalService.openModal('imageGalleryTemplate', modalData);
+	  }
 
 	// FUNCIONES RELACIONADAS CON 2FA ------------------------------------------------
 

@@ -1,0 +1,54 @@
+
+.image-gallery {
+	display: flex;
+	flex-wrap: wrap; 
+  }
+  
+
+.image-container {
+	flex: 0 0 calc(20% - 20px);
+	margin: 10px;
+	box-sizing: border-box;
+	position: relative;
+  }
+
+  .image-container.selected-image::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	border: 5px solid #d4da5b;
+	box-sizing: border-box;
+  }
+  
+  .gallery-image {
+	width: 100%; 
+	height: auto; 
+	cursor: pointer; 
+  }
+  
+
+  .gallery-image:hover {
+	opacity: 0.8; 
+  }
+
+  /* Ajustes de estilo para el contenedor de carga */
+.upload-container {
+  width: 74px;
+  height: 87px;
+  background-color: transparent;
+  border: 2px solid #d4da5b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin: 10px;
+}
+
+/* Ajustes de estilo para el icono de carga */
+.upload-icon {
+  font-size: 24px;
+  color: #d4da5b;
+}

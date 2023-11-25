@@ -1,6 +1,7 @@
 // modal.component.ts
 import { Component, HostListener } from '@angular/core';
 import { ModalService } from './modal.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-modal',
@@ -13,6 +14,9 @@ export class ModalComponent {
   checkboxInput: boolean = false;
   confirmationInput: boolean = false;
   modalData: any;
+  imagesBaseUrl: string = environment.apiUrl + '/uploads/'
+  selectedImage: string | null = null;
+  formData: FormData = new FormData();
 
   constructor(private modalService: ModalService) {
  	this.modalData = this.modalService.getModalData() 
@@ -66,6 +70,41 @@ export class ModalComponent {
     return ''; // o alguna URL predeterminada o manejo de errores
   }
 
+  getImages(): string[] {
+    const data = this.modalService.getModalData();
+    return data[0].images;
+  }
 
+  onImageSelect(selectedImage: string): void {
+    console.log('Imagen seleccionada:', selectedImage);
+    if (this.selectedImage === selectedImage) {
+      this.selectedImage = null;
+    } else {
+      this.selectedImage = selectedImage;
+    }
+  }
+
+  isImageSelected(image: string): boolean {
+    return this.selectedImage === image;
+  }
+
+  openFileInput(): void {
+    const fileInput = document.getElementById('file');
+    if (fileInput) {
+      fileInput.click();
+    }
+  }
+
+  onFileChange(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.formData.append('image', file);
+    }
+  }
+
+  clearFile(): void {
+    this.formData.delete('image');
+  }
+  
 }
 

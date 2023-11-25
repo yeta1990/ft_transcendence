@@ -21,6 +21,8 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './user.dto';
 import { User } from './user.entity';
 import { UserId } from './user.decorator';
+import { join } from 'path';
+import * as fs from 'fs';
 
 //2 imports added to force login as a user
 import { JwtPayload } from 'jsonwebtoken';
@@ -44,11 +46,36 @@ export class UserController {
 	@Inject(ChatService)
 	private chatService: ChatService;
 
+	private readonly defaultImagesPath = './uploads';
+
 	@UseGuards(AuthGuard)
 	@Get()
 	public whoAmI(@UserId() id: number): Promise<User>{
 		return this.getUser(id);
 	}
+
+	@UseGuards(AuthGuard)
+	@Get('default-images')
+	public getAllAvatarImages(): any {
+	  const avatarImages: { images: string[] } = { images: [] };
+	  console.log("Entré en la ruta defaultImages");
+	  try {
+		const files = fs.readdirSync(this.defaultImagesPath);
+		var i = 0;
+		files.forEach((file) => {
+		  if (file.startsWith('Avatar_')) {
+			i += 1;
+			console.log("Number of avatars: " + i);
+			avatarImages.images.push(file);
+		  }
+		});
+	  } catch (error) {
+		console.error('Error reading default images:', error);
+	  }
+	
+	  return avatarImages;
+	}
+
 
 	@UseGuards(AuthGuard)
 	@Post('grant-admin')
@@ -215,6 +242,7 @@ export class UserController {
 		};
 	}
 
+	@UseGuards(AuthGuard)
 	@Post('check-username')
 	public async checkUsername(@Body() body: { username: string }): Promise<{ isValid: boolean }> {
 		const { username } = body;
@@ -229,25 +257,36 @@ export class UserController {
 
 		return { isValid: isValidDB };
 	}
+
+
 	
 	@UseGuards(AuthGuard)
 	@Post('upload')
 	@UseInterceptors(FileInterceptor('image', {
 		limits:{ fileSize: 1048576},
 		fileFilter: (req:any , file:any, cb:any) => {
+			const allowedMimeTypes = ['image/jpeg', 'image/png'];
+			if (!allowedMimeTypes.includes(file.mimetype)) {
+				req.fileValidationError = 'Formato de archivo no permitido';
+				return cb(null, false, new Error('Formato de archivo no permitido'));
+			  }
 			cb(null, true)
 		},
 		storage: diskStorage({
 			destination: './uploads',
 			filename: (req, file, cb) => {
 				console.log(file)
-				cb(null, generateRandomString(16) + extname(file.originalname))
+				var sanitize = require("sanitize-filename");
+				const safeFileName = sanitize(generateRandomString(16) + extname(file.originalname));
+				cb(null, safeFileName);
 			}
 		})
 	}))
 	uploadFile(@Body() body: any, @UploadedFile() file: Express.Multer.File) {
-		return {image: file.filename}
+		if (body.fileValidationError) {
+			return { error: body.fileValidationError };
+		  }
+		  return { image: file.filename };
 	}
-	
 
 }

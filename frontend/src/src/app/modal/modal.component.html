@@ -400,6 +400,36 @@
 	  </div>
 	</ng-template>
 
+
+	<ng-template [ngSwitchCase]="'imageGalleryTemplate'">
+		<div id="imageGalleryTemplate">
+		  <div class="modal-header">
+			<h1 class="modal-title fs-5">FT_TRASCENDENCE: Gallery</h1>
+			<button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<p class="text-center font-weight-bold">Selecciona una imagen</p>
+			<div class="image-gallery">
+			  <div *ngFor="let image of getImages()" (click)="onImageSelect(image)" class="image-container" [class.selected-image]="selectedImage === image">
+				<img [src]="imagesBaseUrl + image" alt="Avatar Image" class="gallery-image">
+			  </div>
+			  <div class="upload-container" (click)="openFileInput()">
+				<div class="upload-icon">+</div>
+			  </div>
+			<input id="file" type="file" (change)="onFileChange($event)" style="display: none;">
+			<button *ngIf="formData.has('image')" type="button" class="btn btn-danger" (click)="clearFile()">Unselect</button>
+			
+			</div>
+		  </div>
+		  <div class="text-center">
+			<button type="button" class="btn btn-primary" [disabled]="!selectedImage" (click)="confirmationButton()">Continuar</button>
+		  </div>
+		  <br>
+		</div>
+	  </ng-template>
+
+
+
     </ng-container>
   </div>
 </div>

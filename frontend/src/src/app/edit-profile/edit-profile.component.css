@@ -56,6 +56,25 @@
     margin-top: 8%;
 }
 
+.avatar-container {
+	position: relative;
+	top: -50px; /* Ajusta la posición vertical de la imagen */
+	left: 50%; /* Centrar la imagen horizontalmente */
+	transform: translateX(-50%);
+	width: 200px; /* Tamaño fijo de la imagen */
+	height: 200px; /* Tamaño fijo de la imagen */
+	border: 5px solid white;
+	border-radius: 5%;
+	overflow: hidden;
+	position: relative;
+  }
+  
+  .avatar {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+  }
+  
 /* Estilos para los subtítulos */
 .subtitle,
 .subtitle2 {
@@ -160,7 +179,9 @@
 	align-items: center;
 }
 
-.button-edit, .button-no-edit {
+.button-edit,
+.button-no-edit,
+.avatar-button-edit {
 	width: 2.7em;
     height: 2.7em;
     background-color: #d4da5b;
@@ -173,6 +194,14 @@
     border-radius: 5px;
     overflow: hidden;
 }
+
+.avatar-button-edit {
+	position: absolute;
+	top: 5px; /* Ajusta la posición vertical del botón */
+	right: 5px; /* Ajusta la posición horizontal del botón */
+	padding: 5px;
+	cursor: pointer;
+  }
 
 /* Estilos específicos para el botón de edición */
 .button-no-edit {
@@ -236,8 +265,9 @@
 }
 
 hr {
+	position:relative;
 	width: 93%;
-	margin: 5% auto;
+	margin: 12% auto;
 }
 
 .mfa-button-container {
