@@ -177,6 +177,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		  //cancel all match proposals
 		  this.pongservice.cancelMatchProposal(login)
 		  this.pongservice.removeUserFromMatchMakingList(login)
+		  this.pongservice.waitForPlayerReconnect(login)
 			
   	  }
 	}
@@ -465,6 +466,28 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 				socket.disconnect(true); 
 			}
 		}
+  }
+
+  public sendOtherPlayerPart(players: Array<string>, login: string): void{
+		for (let player of players){
+  	    	const socketIds: Array<string> = this.getClientSocketIdsFromLogin(player)
+			if (socketIds){
+				for (let i = 0; i < socketIds.length; i++){
+					this.server.to(socketIds[i]).emit("otherPlayerPart", login)
+				}
+			}
+  	    }
+  }
+
+  public sendOtherPlayerCameBack(players: Array<string>, login:string): void{
+		for (let player of players){
+  	    	const socketIds: Array<string> = this.getClientSocketIdsFromLogin(player)
+			if (socketIds){
+				for (let i = 0; i < socketIds.length; i++){
+					this.server.to(socketIds[i]).emit("otherPlayerCameBack", login)
+				}
+			}
+  	    }
   }
 
   public sendEventToBothPlayers(player1: string, player2: string, event: string): void{

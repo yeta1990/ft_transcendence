@@ -175,7 +175,7 @@ export class PongComponent implements OnInit, OnDestroy {
 					this.setGamePlayer()
 				}
 
-        	    if(this.playerOne || this.playerTwo){
+        	    if(!this.modalService.isModalOpen() && (this.playerOne || this.playerTwo)){
 
         	       this.pongService.sendSignal("keydown", this.pongService.getGame().room, e.which);
 				}
@@ -185,7 +185,7 @@ export class PongComponent implements OnInit, OnDestroy {
 				if (!this.playerOne && !this.playerTwo){
 					this.setGamePlayer()	
 				}
-        	    if(this.playerOne || this.playerTwo){
+        	    if(!this.modalService.isModalOpen() && (this.playerOne || this.playerTwo)){
         	        this.pongService.sendSignal("keyup", this.pongService.getGame().room, e.which);
 					}
         	});
