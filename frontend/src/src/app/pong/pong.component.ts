@@ -35,6 +35,8 @@ export class PongComponent implements OnInit, OnDestroy {
     public msg:string="";
     public waitingList="";
     public powers:string="";
+    public pOne:any;
+    public pTwo:any;
 	private modalClosedSubscription: Subscription = {} as Subscription;
     public innerWidth: any;
     private coef:number = 1;
@@ -93,14 +95,8 @@ export class PongComponent implements OnInit, OnDestroy {
                     if (this.innerWidth < 750){ 
                         payload.data.canvasWidth = 350;
                         payload.data.canvasheight = 200;
-                        // this.canvas = this.gameCanvas?.nativeElement;
-        	            // this.gameContext = this.canvas?.getContext('2d');
                         this.coef = 0.5;
                     } else if (this.innerWidth >= 750){
-                        // payload.data.canvasWidth = 700;
-                        // payload.data.canvasheight = 400;
-                        // this.canvas = this.gameCanvas?.nativeElement;
-        	            // this.gameContext = this.canvas?.getContext('2d');
                         this.coef = 1;
                     }
 					this.pongService.setGame(payload.data)
@@ -143,18 +139,18 @@ export class PongComponent implements OnInit, OnDestroy {
 	}
 
 	setGamePlayer(): void {
-        var p: string[]=["", "", ""];
     	if (this.pongService.getGame().playerOne == this.playerLogin){
 //       		console.log("Player ONE " + this.playerLogin);
            this.playerOne = true;
-            p = this.pongService.getGame().playerOnePowers;
+            
 		} else if (this.pongService.getGame().playerTwo == this.playerLogin){
 //            console.log("Player TWO");
             this.playerTwo = true;
-            p = this.pongService.getGame().playerTwoPowers;
+            
         }
         if(this.pongService.getGame().powersAllow){
-            this.powers = "(1)" + p[0] + " - (2)" + p[1] + " - (3)" + p[2];
+            this.pOne = this.pongService.getGame().playerOnePowers;
+            this.pTwo = this.pongService.getGame().playerTwoPowers;
         }
             
 	}

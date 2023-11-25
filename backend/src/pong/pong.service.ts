@@ -109,6 +109,12 @@ export class PongService {
             false,              //inestableball;
             false,              //reverseMoveOne;
             false,              //reverseMoveTwo;
+            false,              //inestableBallUse;
+	        false,              //biggerPaddleUse;
+	        false,              //smallerPaddleUse;
+	        false,              //slowerPaddleUse;
+	        false,              //fasterPaddleUse;
+	        false,              //reverseMoveUse;
             [],                 //playerOnePowers;
             [],                 //playerTwoPowers;
             allowedPowers,      //powersAllow;
@@ -549,6 +555,14 @@ export class PongService {
         g.inestableBall = false;
         g.reverseMoveOne = false;
         g.reverseMoveTwo = false;
+
+        g.inestableBallUse = false;
+        g.biggerPaddleUse = false;
+        g.smallerPaddleUse = false;
+        g.slowerPaddleUse = false;
+        g.fasterPaddleUse = false;
+        g.reverseMoveUse = false;
+
         this.randomPowers(g);
     }
 
@@ -586,9 +600,10 @@ export class PongService {
         }
       }
     async inestableBall(g: GameRoom) {
-        if(g.inestableBall) {return;}
+        if(g.inestableBall || g.inestableBallUse) {return;}
         g.inestableBall = true;
-        const speeds :Array<number> = [5, 2, 7, 10, 15];
+        g.inestableBallUse = true;
+        const speeds :Array<number> = [5, 2, 7, 10];
         g.ballSpeed = speeds[Math.floor(Math.random() * speeds.length)];
         const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
 
@@ -608,6 +623,8 @@ export class PongService {
     }
 
     async biggerPaddle(login: string, g:GameRoom){
+        if(g.biggerPaddleUse) {return;}
+        g.biggerPaddleUse = true;
         const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
         if (login == g.playerOne) {
             g.playerOneH = 100;
@@ -616,7 +633,7 @@ export class PongService {
             g.playerTwoH = 100;
         }
         let count = 0;
-        while (count < 30) { // seconds
+        while (count < 15) { // seconds
             count++;
             await waitSeg(1);
         }
@@ -629,6 +646,8 @@ export class PongService {
     }
 
     async smallerPaddle(login: string, g:GameRoom){
+        if(g.smallerPaddleUse) {return;}
+        g.smallerPaddleUse = true;
         const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
         if (login == g.playerOne) {
             g.playerTwoH = 30;
@@ -637,7 +656,7 @@ export class PongService {
             g.playerOneH = 30;
         }
         let count = 0;
-        while (count < 30) { // seconds
+        while (count < 15) { // seconds
             count++;
             await waitSeg(1);
         }
@@ -650,6 +669,8 @@ export class PongService {
     }
 
     async slowerPaddle(login: string, g:GameRoom){
+        if(g.slowerPaddleUse) {return;}
+        g.slowerPaddleUse = true;
         const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
         if (login == g.playerOne) {
             g.playerTwoS = 5;
@@ -658,7 +679,7 @@ export class PongService {
             g.playerOneS = 5;
         }
         let count = 0;
-        while (count < 30) { // seconds
+        while (count < 15) { // seconds
             count++;
             await waitSeg(1);
         }
@@ -671,6 +692,8 @@ export class PongService {
     }
 
     async fasterPaddle(login: string, g:GameRoom){
+        if(g.fasterPaddleUse) {return;}
+        g.fasterPaddleUse = true;
         const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
         if (login == g.playerOne) {
             g.playerOneS = 20;
@@ -679,7 +702,7 @@ export class PongService {
             g.playerTwoS = 20;
         }
         let count = 0;
-        while (count < 30) { // seconds
+        while (count < 15) { // seconds
             count++;
             await waitSeg(1);
         }
@@ -692,6 +715,8 @@ export class PongService {
     }
 
     async reverseMove(login: string, g:GameRoom) {
+        if(g.reverseMoveUse) {return;}
+        g.reverseMoveUse = true;
         if(g.reverseMoveOne || g.reverseMoveTwo) {return;}
         const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
         if (login == g.playerOne) {
