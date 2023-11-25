@@ -69,7 +69,7 @@ export class NavBarComponent {
     // Obtén el nombre de usuario del JWT
     const userName = this.authService.getUserNameFromToken();
     if (userName) {
-      this.router.navigate(['/user-profile', userName]);
+      this.router.navigate(['/user-profile/' + userName]);
     } else {
 	  this.router.navigateByUrl('/home');
     }
