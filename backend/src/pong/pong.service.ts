@@ -727,10 +727,21 @@ export class PongService {
 	async waitForPlayerReconnect(login: string): Promise<void>{
 		let games: Array<string> = this.gamesWhereUserWasPlaying(login)
 		if (games.length == 0) return;
+
+		//delete games finished
+      	for (let game of games){
+			if (this.games.get(game).finish == true){
+					await this.chatService.deleteRoom(game)
+					await this.gameGateaway.destroyEmptyRooms(game)
+					this.games.delete(game)
+					games = games.filter(g => g != game)
+			}
+      	}
+
         //pause games
       	for (let game of games){
 			this.pauseGame(game)
-      	} 
+      	}
 
       	let theOtherPlayers: Set<string> = new Set()
       	for (let game of games){
