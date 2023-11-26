@@ -617,17 +617,43 @@ export class ChatService {
 				const debutAchievement = await this.userService.getAchievementByName('Grand Debut')
 				user1.achievements.push(debutAchievement)
 			}
+			if (g.playerOneScore == 5 && g.playerTwoScore == 0){
+				const flawlessAchievement = await this.userService.getAchievementByName('Flawless Victory')
+				user1.achievements.push(flawlessAchievement)
+				
+			}
 			user1.wins += 1;
+			user1.winningStreak +=1;
+			if (user1.winningStreak >= 5){
+				const risingStarAchievement = await this.userService.getAchievementByName('Rising Star')
+				user1.achievements.push(risingStarAchievement)
+				
+			}
 			user2.losses += 1;
+			user2.winningStreak = 0;
 		}
 		else{
 			if (user2.wins === 0){
 				const debutAchievement = await this.userService.getAchievementByName('Grand Debut')
 				user2.achievements.push(debutAchievement)
 			}
+			if (g.playerOneScore == 0 && g.playerTwoScore == 5){
+				const flawlessAchievement = await this.userService.getAchievementByName('Flawless Victory')
+				user2.achievements.push(flawlessAchievement)
+				
+			}
 			user2.wins += 1;
+			user2.winningStreak +=1;
+			if (user2.winningStreak >= 5){
+				const risingStarAchievement = await this.userService.getAchievementByName('Rising Star')
+				user1.achievements.push(risingStarAchievement)
+				
+			}
 			user1.losses += 1;
+			user1.winningStreak = 0;
 		}
+		
+
 		
 		await this.userRepository.save(user1)
 		await this.userRepository.save(user2)
