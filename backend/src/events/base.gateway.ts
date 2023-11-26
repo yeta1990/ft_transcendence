@@ -311,6 +311,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   public async createNewRoomAndJoin(clientId: string, creatorLogin: string, room: string, password: string | undefined): Promise<boolean>{
+  	  	
 		const hasPass:boolean = password != undefined ? true : false;
 		await this
 			.chatService

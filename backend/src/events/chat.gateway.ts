@@ -237,13 +237,24 @@ export class ChatGateway extends BaseGateway {
   	  if (room.length > 0 && room[0] != '#' && room[0] != '@'){
   	  	room = '#' + room;
   	  }
-	  for (const c of values.forbiddenChatRoomCharacters){
-		if (room.substr(1, room.length - 1).includes(c)){
-			this.server.to(client.id)
-				.emit("system", generateSocketErrorResponse(room, 
-					`Invalid name for the channel ${room}, try other`).data)
-			return ;
-		}
+	  const roomExists: boolean = await this.chatService.isRoomCreated(room);
+	  if (!roomExists){
+  	  	for (const invalid of values.forbiddenNewChatRoomStrings){
+			if (room.includes(invalid)){
+				this.server.to(client.id)
+					.emit("system", generateSocketErrorResponse(room, 
+						`Invalid name for the channel ${room}, try other`).data)
+				return ;
+			}
+  	  	}
+	    for (const c of values.forbiddenChatRoomCharacters){
+			if (room.substr(1, room.length - 1).includes(c)){
+				this.server.to(client.id)
+					.emit("system", generateSocketErrorResponse(room, 
+						`Invalid name for the channel ${room}, try other`).data)
+				return ;
+			}
+	  	}
 	  }
 
   	  //check if user is banned from channel
