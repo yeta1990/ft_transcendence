@@ -11,7 +11,7 @@ import { User } from '../user';
 import { AppRoutingModule } from '../app-routing-module/app-routing-module.module';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ChatService } from '../chat/chat.service';
-import { ModalService } from '../modal/modal.service'
+import { ModalService } from '../modal/modal.service';
 
 @Component({
   selector: 'app-pong',
@@ -41,6 +41,7 @@ export class PongComponent implements OnInit, OnDestroy {
     public innerWidth: any;
     private coef:number = 1;
     buttonStates: boolean[] = [false, false, false, false, false, false];
+    
 
     
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
@@ -78,6 +79,7 @@ export class PongComponent implements OnInit, OnDestroy {
 //        		this.canvas.hidden = true;
                 this.msg = "Best of (9)"
                 this.waitingList = "";
+                //this.updatePowers();
                 requestAnimationFrame(this.gameLoop);
 
 				if (this.playerLogin == undefined || this.playerLogin.length == 0){
@@ -97,7 +99,8 @@ export class PongComponent implements OnInit, OnDestroy {
                     payload.data.canvasWidth = 700 * this.coef;
                     payload.data.canvasheight = 400 * this.coef;
 					this.pongService.setGame(payload.data)
-					this.setGamePlayer()
+					this.setGamePlayer();
+                    this.updatePowers();
                     this.msg = "Best of (9)";
                     if (payload.data.finish){
                         this.msg = "Game has finished";
@@ -136,12 +139,43 @@ export class PongComponent implements OnInit, OnDestroy {
             this.playerTwo = true;
             
         }
-        // if(this.pongService.getGame().powersAllow){
+        if(this.pongService.getGame().powersAllow){
             this.pOne = this.pongService.getGame().playerOnePowers;
             this.pTwo = this.pongService.getGame().playerTwoPowers;
-        // }
+        }
             
 	}
+
+    updatePowers(): void{
+        this.buttonStates[0] = this.isPowerUsed(this.pOne[0]);
+        this.buttonStates[1] = this.isPowerUsed(this.pOne[1]);
+        this.buttonStates[2] = this.isPowerUsed(this.pOne[2]);
+
+        this.buttonStates[3] = this.isPowerUsed(this.pTwo[0]);
+        this.buttonStates[4] = this.isPowerUsed(this.pTwo[1]);
+        this.buttonStates[5] = this.isPowerUsed(this.pTwo[2]);
+    }
+    isPowerUsed(power:string):boolean{
+        if (power == "InestableBall") {
+            return this.pongService.getGame().inestableBallUse;
+        }
+        else if(power =="BiggerPaddle"){
+            return this.pongService.getGame().biggerPaddleUse;
+        }
+        else if(power =="SmallerPaddle"){
+            return this.pongService.getGame().smallerPaddleUse;
+        }
+        else if(power =="FasterPaddle"){
+            return this.pongService.getGame().fasterPaddleUse;
+        }
+        else if(power =="SlowerPaddle"){
+            return this.pongService.getGame().slowerPaddleUse;
+        }
+        else if(power =="ReverseMove"){
+            return this.pongService.getGame().reverseMoveUse;
+        }
+        return false;
+    }
  
     visibleCanvas(): boolean {
 		return 	!this.getCurrentRoom().includes('#pongRoom_')
@@ -163,9 +197,9 @@ export class PongComponent implements OnInit, OnDestroy {
 
         	    if(!this.modalService.isModalOpen() && (this.playerOne || this.playerTwo)){
                     const player = this.playerOne ? 0 : 3;
-                    const index = e.which - 49;
-                    this.buttonStates[player + index] = true;
-        	       this.pongService.sendSignal("keydown", this.pongService.getGame().room, e.which);
+                    // const index = e.which - 49;
+                    // this.buttonStates[player + index] = true;
+        	        this.pongService.sendSignal("keydown", this.pongService.getGame().room, e.which);
 				}
         	});
 
