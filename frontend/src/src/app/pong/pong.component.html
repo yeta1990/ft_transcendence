@@ -1,21 +1,66 @@
 <!--app-nav-bar/-->
 <!--button (click)="mode(1)">Normal</button-->
 <!--button (click)="subscribeToRoom(false)">Play</button-->
-<button (click)="mode('')">Play</button>
-<button (click)="mode('on-line')">On-line</button>
-<button (click)="mode('plus')">Plus</button>
+<button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('')">Play</button>
+<button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('on-line')">On-line</button>
+<button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('plus')">Plus</button>
 <h2>{{this.msg}}</h2>
 <div >
     <canvas [hidden]="visibleCanvas()" #gameCanvas width={{getGame().canvasWidth}} height={{getGame().canvasheight}}></canvas>
     <script type="text/javascript" src="pong.component.ts"></script>
 </div>
 <h2>{{this.waitingList}}</h2>
+<div *ngIf="getGame().powersAllow" class="container">
+  <div class="column">
+    <h2>{{getGame().playerOne}}</h2>
+    <div class="line">
+      <div class="squareR">
+        <h2>1</h2>
+      </div>
+      <h2>{{this.pOne[0]}}</h2>
+    </div>
+    <div class="line">
+      <div class="squareR">
+        <h2>2</h2>
+      </div>
+      <h2>{{this.pOne[1]}}</h2>
+    </div>
+    <div class="line">
+      <div class="squareR">
+       <h2>3</h2>
+      </div>
+      <h2>{{this.pOne[2]}}</h2>
+    </div>
+  </div>
+  <div class="column">
+    <h2>{{getGame().playerTwo}}</h2>
+    <div class="line">
+      <h2>{{this.pTwo[0]}}</h2>
+      <div class="squareL">
+        <h2>1</h2>
+      </div>
+    </div>
+    <div class="line">
+      <h2>{{this.pTwo[1]}}</h2>
+      <div class="squareL">
+        <h2>2</h2>
+      </div>
+    </div>
+    <div class="line">
+      <h2>{{this.pTwo[2]}}</h2>
+      <div class="squareL">
+       <h2>3</h2>
+      </div>
+    </div>
+  </div>
+</div>
 <h2>{{this.powers}}</h2>
 <!--h3>Player One powers: {{getGame().playerOnePowers}}</h3>
     {{this.innerWidth}}
 <h3>Player Two powers: {{getGame().playerTwoPowers}}</h3-->
-<h4>Power List</h4>
-  <ul>
+
+<h4 *ngIf="getGame().powersAllow">Power List</h4>
+  <ul *ngIf="getGame().powersAllow">
     <li><strong>SmallerPaddle:</strong> Make your opponent paddle smaller.</li>
     <li><strong>BiggerPaddle:</strong> Make your own paddle bigger!</li>
     <li><strong>InestableBall:</strong> Every ten seconds the ball's speed changes.</li>

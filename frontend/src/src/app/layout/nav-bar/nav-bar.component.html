@@ -5,7 +5,7 @@
     <app-button class="left" dir="/all-users" value='Users'></app-button>
 
     <button class="blue left" (click)="redirectToFriends()" value='Friends'>Friends</button>
-    <button class="blue left" (click)="redirectToGame()" value='Play'>Play</button>
+    <!--button class="blue left" (click)="redirectToGame()" value='Play'>Play</button-->
     <button *ngIf="hasAdminPrivileges()" class="blue left" (click)="redirectToAdmin()" value='Admin'>Admin</button>
     <button *ngIf="hasAdminPrivileges()" class="blue left" (click)="redirectToChatAdmin()" value='Chat admin'>Chat admin</button>
     <button class="blue left" (click)="redirectToMyProfile()" value='MyProfile'>MyProfile</button>

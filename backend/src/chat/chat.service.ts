@@ -493,7 +493,9 @@ export class ChatService {
 		return true
 	}
 
-
+	public emitUpdateUsersAndRoomsMetadata(){
+		this.chatGateway.emitUpdateUsersAndRoomsMetadata();
+	}
 	async generatePrivateRoomName(originLogin: string, destinationLogin: string): Promise<string | undefined>{
 		const originUser: User = await this.userService.getUserByLogin(originLogin);
 		const destinationUser: User = await this.userService.getUserByLogin(destinationLogin);
