@@ -1,15 +1,27 @@
+<!-- <div class="topnav">
+    <button [disabled]="getUserStatus()==3" class="nav-button" (click)="redirectTo('/home')" value="Home">Home
+    </button>
+    <button [disabled]="this.getUserStatus()==3" class="nav-button" (click)="redirectTo('/all-users')" value='Users'>Users</button>
+
+    <button [disabled]="this.getUserStatus()==3" class="nav-button" (click)="redirectToFriends()" value='Friends'>Friends</button>
+    <!--button class="blue left" (click)="redirectToGame()" value='Play'>Play</button-->
+    <!-- <button [disabled]="this.getUserStatus()==3" *ngIf="hasAdminPrivileges()" class="nav-button" (click)="redirectToAdmin()" value='Admin'>Admin</button>
+    <button [disabled]="this.getUserStatus()==3" *ngIf="hasAdminPrivileges()" class="nav-button" (click)="redirectToChatAdmin()" value='Chat admin'>Chat admin</button>
+    <button [disabled]="this.getUserStatus()==3" class="nav-button" (click)="redirectToMyProfile()" value='MyProfile'>MyProfile</button>
+
+    <button [disabled]="this.getUserStatus()==3" class="right" (click)="redirectTo('/login')" value='Login' *ngIf="!isUserLogged"></button>
+    <button class="nav-button right" value='Logout' *ngIf="isUserLogged" (click)=logout()>Logout</button>
+</div> -->
+
 <div class="topnav">
-    <app-button class="left" dir="/home" value="Home">
-        <img src="../../../assets/cadiz.png" alt="logo"/>
-    </app-button>
-    <app-button class="left" dir="/all-users" value='Users'></app-button>
-
-    <button class="blue left" (click)="redirectToFriends()" value='Friends'>Friends</button>
-    <button class="blue left" (click)="redirectToGame()" value='Play'>Play</button>
-    <button *ngIf="hasAdminPrivileges()" class="blue left" (click)="redirectToAdmin()" value='Admin'>Admin</button>
-    <button *ngIf="hasAdminPrivileges()" class="blue left" (click)="redirectToChatAdmin()" value='Chat admin'>Chat admin</button>
-    <button class="blue left" (click)="redirectToMyProfile()" value='MyProfile'>MyProfile</button>
-
-    <app-button class="right" dir="/login" value='Login' *ngIf="!isUserLogged"></app-button>
-    <button class="blue right" value='Logout' *ngIf="isUserLogged" (click)=logout()>Logout</button>
+    <div class="nav-buttons-left">
+        <button [disabled]="getUserStatus()==3" class="nav-button" (click)="redirectTo('/home')" value="Home">Home</button>
+        <button [disabled]="this.getUserStatus()==3" class="nav-button" (click)="redirectTo('/all-users')" value='Users'>Users</button>
+        <button [disabled]="this.getUserStatus()==3" class="nav-button" (click)="redirectToFriends()" value='Friends'>Friends</button>
+        <button [disabled]="this.getUserStatus()==3" *ngIf="hasAdminPrivileges()" class="nav-button" (click)="redirectToAdmin()" value='Admin'>Admin</button>
+        <button [disabled]="this.getUserStatus()==3" *ngIf="hasAdminPrivileges()" class="nav-button" (click)="redirectToChatAdmin()" value='Chat admin'>Chat admin</button>
+        <button [disabled]="this.getUserStatus()==3" class="nav-button" (click)="redirectToMyProfile()" value='MyProfile'>MyProfile</button>
+    </div>
+    <button [disabled]="this.getUserStatus()==3" class="nav-button right" (click)="redirectTo('/login')" value='Login' *ngIf="!isUserLogged"></button>
+    <button class="logout-button right" value='Logout' *ngIf="isUserLogged" (click)=logout()>Logout</button>
 </div>

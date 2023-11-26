@@ -116,12 +116,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.chatService.removePassOfRoom(room)
 	}
 
-	rejectReplayProposal(login: string){
-		this.chatService.rejectReplayProposal(login)
-	}
-	sendReplayProposal(login: string){
-		this.chatService.sendReplayProposal(login)
-	}
 
 	leaveRoom(room: string): void{
 		this.chatService.partFromRoom(room);	
@@ -232,18 +226,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				else if (payload.event === events.LoginNickEquivalence){
 					this.chatService.setLoginNickEquivalence(payload.data)
 				}
-				else if (payload.event === 'cancelOnline'){
-					this.modalService.closeModal()
-				}
 				else if (payload.event === 'otherPlayerPart'){
 					this.blockGameModal(payload.data)
 				}
 				else if (payload.event === 'otherPlayerCameBack'){
 					this.modalService.closeModal()
-				}
-				else if (payload.event === 'replayGameProposal'){
-					this.replayModal(payload.data)
-//					this.modalService.closeModal()
 				}
         		this.scrollToBottom();
 			})
@@ -275,81 +262,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		} catch (err) {}
 	}
 
-	processCommandToSend(command: string): void {
-		//possibly unnecessary this check
-		if (!command)
-			return ;
-		const splittedCommand: Array<string> = command.split(" ");
-		if (splittedCommand[0] === '/help'){
-			this.sendMessageToChat("help", this.getCurrentRoom(), command);
-		}
-		else if (splittedCommand[0] === '/join' && splittedCommand.length > 2){
-			//channel list comma-separated and password
-			this.joinUserToRoom(splittedCommand[1], splittedCommand[2]);
-		}
-		else if (splittedCommand[0] === '/join'){
-			//channel list comma-separated and password
-			this.joinUserToRoom(splittedCommand[1], '');
-		}
-		else if (splittedCommand[0] === '/part'){
-			//channel list comma-separated and password
-			this.chatService.partFromRoom(splittedCommand[1]);
-			this.messageList.delete(splittedCommand[1]);
-		}
-		else if (splittedCommand[0] === '/admin'){
-			if (splittedCommand.length < 3)
-				return ;
-			this.chatService.makeRoomAdmin(splittedCommand[1], splittedCommand[2])
-		}
-		else if (splittedCommand[0] === '/noadmin'){
-			if (splittedCommand.length < 3)
-				return ;
-			this.chatService.removeRoomAdmin(splittedCommand[1], splittedCommand[2])
-		}
-		else if (splittedCommand[0] === '/ban'){
-			if (splittedCommand.length < 3)
-				return ;
-			this.chatService.banUserFromRoom(splittedCommand[1], splittedCommand[2])
-		}
-		else if (splittedCommand[0] === '/noban'){
-			if (splittedCommand.length < 3)
-				return ;
-			this.chatService.removeBanFromRoom(splittedCommand[1], splittedCommand[2])
-		}
-		else if (splittedCommand[0] === '/mp'){
-			if (splittedCommand.length < 3)
-				return ;
-			this.chatService.sendPrivateMessage(splittedCommand[1], command.split(":", 2)[1])
-		}
-		else if (splittedCommand[0] === '/banuser'){
-			if (splittedCommand.length < 2)
-				return ;
-			this.chatService.banUser2User(splittedCommand[1])
-		}
-		else if (splittedCommand[0] === '/nobanuser'){
-			if (splittedCommand.length < 2)
-				return ;
-			this.chatService.noBanUser2User(splittedCommand[1])
-		}
-		else if (splittedCommand[0] === '/' + events.Pass){
-			if (splittedCommand.length < 3)
-				return ;
-			this.chatService.addPassToRoom(splittedCommand[1], command.split(" ", 3)[2])
-		}
-		else if (splittedCommand[0] === '/' + events.RemovePass){
-			if (splittedCommand.length < 2)
-				return ;
-			this.chatService.removePassOfRoom(splittedCommand[1])
-		}
-	}
-
-
 	processMessageToSend(): void {
 		const messageToSend: string = this.messageToChat.get('newMessage')!.value || "";
-		if (messageToSend && messageToSend[0] === '/'){
-			this.processCommandToSend(messageToSend);
-		}
-		else if (messageToSend){
+		if (messageToSend){
 			this.sendMessageToChat("message", this.getCurrentRoom(), messageToSend);
 		}
 		this.messageToChat.get('newMessage')!.setValue('');
@@ -489,6 +404,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
 	banUserFromRoomModal(login: string, room: string){
+		if (room.includes("pongRoom") && room.includes(login)) return this.toasterService.launchToaster(ToastValues.ERROR, "You can't ban the other player of the room")
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const confirm: boolean = this.modalService.getConfirmationInput();
       		if (confirm){
@@ -587,31 +503,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			await waitSeg(1)
 		}
 		this.modalService.closeModal()
-	}
-	waitForReplayMatchAnswerModal(login: string){
-		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-			this.chatService.cancelMatchProposal(login)
-			console.log("cancel match proposal")
-			this.modalClosedSubscription.unsubscribe();
-    	});
-		this.modalService.openModal('template15', login);
-	}
-
-	replayModal(login: string): void {
-		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-      		const confirm: boolean = this.modalService.getConfirmationInput();
-			const wantToReplay = this.modalService.getModalData()[0];
-			console.log(wantToReplay)
-      		if (confirm){
-      			this.sendReplayProposal(login)
-				this.waitForReplayMatchAnswerModal(login)
-			}
-			else if (wantToReplay== "no"){
-				this.rejectReplayProposal(this.getCurrentRoom())
-			}
-			this.modalClosedSubscription.unsubscribe();
-    	});
-		this.modalService.openModal('template19', login);
 	}
 
 }
