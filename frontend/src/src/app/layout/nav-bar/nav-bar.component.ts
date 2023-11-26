@@ -40,6 +40,9 @@ export class NavBarComponent {
 				if (payload.event === events.ActiveUsers){
 					this.chatService.setActiveUsers(payload.data)
 				}
+				else if (payload.event === events.ListAllRooms){
+					this.chatService.setAvailableRoomsList(payload.data.map((r:any) => r.room))
+				}
 				else if (payload.event === "sendMatchProposal"){
 					console.log("receiving match")
 					this.receiveMatchModal(payload.data)	

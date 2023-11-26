@@ -744,6 +744,11 @@ export class ChatGateway extends BaseGateway {
 		  this.joinUserToRoom(client.id, login, room, null);
 	}
 
+@SubscribeMessage('spectatorTo')
+  	async spectatorTo(client: Socket, room: string): Promise<void>{
+  		this.handleJoinRoomGameAsViwer(client, room)
+	}
+
 @SubscribeMessage('joinGame')
   	async handleJoinRoomGame(client: Socket, roomAndPassword: string): Promise<void>{
 		let room: string = roomAndPassword.split(" ", 2)[0];

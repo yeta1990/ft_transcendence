@@ -156,6 +156,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 						this.chatService.setCurrentRoom("")
 //						this.myJointRoomList.filter(r => r != )
 					}
+					console.log("setting available room list " + this.availableRoomsList)
+					this.chatService.setAvailableRoomsList(this.availableRoomsList);
 				}
 				else if (payload.event === events.ListMyPrivateRooms){
 					this.myPrivateMessageRooms = Array.from(payload.data);
@@ -208,9 +210,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 						this.roomsMetaData.set(payload.data.room, payload.data)
 					}
 					const it = this.roomsMetaData.entries();
-					for (const el of it){
-						console.log(JSON.stringify(el))
-					}
+//					for (const el of it){
+//						console.log(JSON.stringify(el))
+//					}
 
 //					console.log(payload.data.loginNickEquivalence)
 				}

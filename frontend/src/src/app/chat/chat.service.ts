@@ -19,6 +19,7 @@ export class ChatService {
 	activeUsers: Array<ChatUser> = [];
 	loginNickEquivalence: Array<any> = []
 	currentRoom: string = ""
+	availableRoomsList: string[] = [];
 
 	constructor(private socketService: SocketService) {
 	}
@@ -39,6 +40,15 @@ export class ChatService {
 	setCurrentRoom(room: string): void {
 		if (room === undefined) this.currentRoom = ""
 		this.currentRoom = room;
+	}
+
+	setAvailableRoomsList(roomList: Array<string>): void {
+		console.log("setting " + roomList) 
+		this.availableRoomsList = roomList
+	}
+
+	getAvailableRoomsList(): Array<string>{
+		return this.availableRoomsList
 	}
 
 	setActiveUsers(activeUsers: Array<ChatUser>){
@@ -225,6 +235,10 @@ export class ChatService {
 
 	joinUserToRoomAsViwer(room: string){
 		this.socketService.sendMessageToServer("joinGameAsViwer", room);
+	}
+
+	spectatorTo(room: string){
+		this.socketService.sendMessageToServer("spectator", room);
 	}
 	
 	sendMatchProposal(targetLogin: string){

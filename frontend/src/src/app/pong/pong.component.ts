@@ -103,7 +103,9 @@ export class PongComponent implements OnInit, OnDestroy {
                     payload.data.canvasheight = 400 * this.coef;
 					this.pongService.setGame(payload.data)
 					this.setGamePlayer();
-                    this.updatePowers();
+					if (payload.data.allowedPowers = true){
+                    	this.updatePowers();
+                    }
                     this.msg = "Best of (9)";
                     if (payload.data.finish){
                         this.msg = "Game has finished";
@@ -150,13 +152,15 @@ export class PongComponent implements OnInit, OnDestroy {
 	}
 
     updatePowers(): void{
-        this.buttonStates[0] = this.isPowerUsed(this.pOne[0]);
-        this.buttonStates[1] = this.isPowerUsed(this.pOne[1]);
-        this.buttonStates[2] = this.isPowerUsed(this.pOne[2]);
+    	if (this.pOne && this.pTwo){
+        	this.buttonStates[0] = this.isPowerUsed(this.pOne[0]);
+        	this.buttonStates[1] = this.isPowerUsed(this.pOne[1]);
+        	this.buttonStates[2] = this.isPowerUsed(this.pOne[2]);
 
-        this.buttonStates[3] = this.isPowerUsed(this.pTwo[0]);
-        this.buttonStates[4] = this.isPowerUsed(this.pTwo[1]);
-        this.buttonStates[5] = this.isPowerUsed(this.pTwo[2]);
+        	this.buttonStates[3] = this.isPowerUsed(this.pTwo[0]);
+        	this.buttonStates[4] = this.isPowerUsed(this.pTwo[1]);
+        	this.buttonStates[5] = this.isPowerUsed(this.pTwo[2]);
+        }
     }
     isPowerUsed(power:string):boolean{
         if (power == "InestableBall") {
