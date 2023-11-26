@@ -574,8 +574,8 @@ export class ChatService {
 		const expectedPlayer1 = 1 / (1 + Math.pow(10, (eloJugador2 - eloJugador1) / 400))
 		const expectedPlayer2 = 1 / (1 + Math.pow(10, (eloJugador1 - eloJugador2) / 400))
 
-		const nuevoEloJugador1 = eloJugador1 + kFactor * (resultadoJugador1 - expectedPlayer1)
-		const nuevoEloJugador2 = eloJugador2 + kFactor * ((1 - resultadoJugador1) - expectedPlayer2)
+		const nuevoEloJugador1 = Math.round(eloJugador1 + kFactor * (resultadoJugador1 - expectedPlayer1))
+		const nuevoEloJugador2 = Math.round(eloJugador2 + kFactor * ((1 - resultadoJugador1) - expectedPlayer2))
 
 		if (isNaN(nuevoEloJugador1) || isNaN(nuevoEloJugador2)) {
 			console.log('Hubo un error al calcular el nuevo Elo');
@@ -583,6 +583,11 @@ export class ChatService {
 
 		return {nuevoEloJugador1, nuevoEloJugador2}
 			
+	}
+	private calculateResultForelo(playerOneScore, playerTwoScore):number { 
+			if (playerOneScore > playerTwoScore) return 1
+			else if (playerOneScore < playerTwoScore) return 0
+			else return 0.5
 	}
 
 	public async saveGameResult(g: GameRoom){
@@ -597,21 +602,24 @@ export class ChatService {
 			"player2Points": g.playerTwoScore,
 		}
 		await this.gameRepository.save(result)
-		const resultForelo = function() { 
-			if (g.playerOneScore > g.playerTwoScore) return 1
-			else if (g.playerOneScore < g.playerTwoScore) return 0
-			else return 0.5
-		}
-
+		const resultForelo = this.calculateResultForelo(g.playerOneScore, g.playerTwoScore)
 		console.log("USER1 ELO: " + user1.elo + "\nUSER2 ELO: " + user2.elo + "\nRESULTFORELO: " + resultForelo);
 		const newElos = this.calcularNuevoElo(user1.elo, user2.elo, resultForelo)
-		console.log(newElos)
+		console.log(newElos) 
 		console.log(newElos.nuevoEloJugador1)
-//		user1.elo = newElos.nuevoEloJugador1
-//		user2.elo = newElos.nuevoEloJugador2
+		user1.elo = newElos.nuevoEloJugador1
+		user2.elo = newElos.nuevoEloJugador2
+		if (resultForelo === 1){
+			user1.wins += 1;
+			user2.losses += 1;
+		}
+		else{
+			user2.wins += 1;
+			user1.losses += 1;
+		}
 		
-//		await this.userRepository.save(user1)
-//		await this.userRepository.save(user2)
+		await this.userRepository.save(user1)
+		await this.userRepository.save(user2)
 	}
 
 }

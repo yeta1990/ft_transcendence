@@ -52,7 +52,7 @@ export class PongService {
         
         if (this.games.get(name))
             return(this.games.get(name));
-        console.log("Init -> " + name);
+//        console.log("Init -> " + name);
 //        this.gameGateaway = gameGateaway;
         this.game = new GameRoom(
             name,               //room
@@ -431,8 +431,8 @@ export class PongService {
             this.chatService.setUserStatusIsPlaying(this.matchMaking[0])
             this.chatService.setUserStatusIsPlaying(this.matchMaking[1])
             //Remove both 
-//            this.matchMaking.shift();
-//            this.matchMaking.shift();
+            this.matchMaking.shift();
+            this.matchMaking.shift();
         }
     }
 
@@ -750,9 +750,9 @@ export class PongService {
         	   		.getActiveUsersInRoom(game);
         	   	const activeLogins: Array<string> = activeUsers.map(u => u.login)
 
-				console.log(activeLogins)
+//				console.log(activeLogins)
 				if (!activeLogins.includes(this.games.get(game).playerOne) && 
-					!activeLogins.includes(this.games.get(game).playerTwo)){
+				!activeLogins.includes(this.games.get(game).playerTwo)){
 					await this.chatService.deleteRoom(game)
 					await this.gameGateaway.destroyEmptyRooms(game)
 					this.games.delete(game)
@@ -775,11 +775,11 @@ export class PongService {
 			let endGame = this.games.get(game)
 			if (!endGame) return;
 			if (endGame.playerOne == login){
-				endGame.playerOneScore = 5
-				endGame.playerTwoScore = 0
-			} else {
 				endGame.playerOneScore = 0
 				endGame.playerTwoScore = 5
+			} else {
+				endGame.playerOneScore = 5
+				endGame.playerTwoScore = 0
 			}
 			endGame.finish = true;
 			this.chatService.saveGameResult(endGame)

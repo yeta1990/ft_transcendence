@@ -785,7 +785,7 @@ export class ChatGateway extends BaseGateway {
 			this.pongservice.setPlayer(room, login);
 			console.log("Join succed to: " + response.room);
 			
-			console.log(response)
+//			console.log(response)
 			this.messageToClient(clientSocketId, 'gameStatus', response);
  
 			//sending old messages of the room, except for those of users that banned
