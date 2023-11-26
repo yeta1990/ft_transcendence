@@ -1,10 +1,25 @@
 <!--app-nav-bar/-->
 <!--button (click)="mode(1)">Normal</button-->
 <!--button (click)="subscribeToRoom(false)">Play</button-->
-<button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('')">Play</button>
-<button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('on-line')">On-line</button>
-<button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('plus')">Plus</button>
+
+<div class="text-block">
+  <div class="text block">
+    <p>Welcome to the game configuration section! Here, you have the power to tailor your gaming experience to match your preferences. Feel free to explore and choose from the buttons below to customize the game type according to what suits you best. Whether it's a standard match, an exciting online duel, or an enhanced gameplay experience with additional features, the choice is yours. Click on the buttons to configure your game and embark on an adventure that aligns perfectly with your gaming style. Let the games begin!</p>
+  </div>
+  </div>
+<div class="botones-contenedor">
+    <button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('')">vs Computer</button>
+    <button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('on-line')">PvP (Elo mode)</button>
+    <button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('plus')">PvP (Fun mode)</button>
+</div>
+
+<br>
 <h2>{{this.msg}}</h2>
+<br>
+<!-- <button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('')">Play</button>
+<button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('on-line')">On-line</button>
+<button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('plus')">Plus</button> -->
+
 <div >
     <canvas [hidden]="visibleCanvas()" #gameCanvas width={{getGame().canvasWidth}} height={{getGame().canvasheight}}></canvas>
     <script type="text/javascript" src="pong.component.ts"></script>
