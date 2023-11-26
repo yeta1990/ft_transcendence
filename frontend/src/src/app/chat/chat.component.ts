@@ -404,6 +404,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
 	banUserFromRoomModal(login: string, room: string){
+		if (room.includes("pongRoom") && room.includes(login)) return this.toasterService.launchToaster(ToastValues.ERROR, "You can't ban the other player of the room")
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const confirm: boolean = this.modalService.getConfirmationInput();
       		if (confirm){

@@ -816,6 +816,7 @@ export class PongService {
 
 //				console.log(activeLogins)
                 if(!activeLogins){}
+                else if(!this.games.get(game)){}
 				else if (!activeLogins.includes(this.games.get(game).playerOne) && 
 				!activeLogins.includes(this.games.get(game).playerTwo)){
 					await this.chatService.deleteRoom(game)

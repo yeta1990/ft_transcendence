@@ -70,6 +70,9 @@ export class PongComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
         .subscribe((payload: SocketPayload) => {
             if (payload.event === 'gameStatus'){ 
+                this.coef = this.innerWidth / 1400
+                payload.data.canvasWidth = 700 * this.coef;
+                payload.data.canvasheight = 400 * this.coef;
 				this.pongService.setGame(payload.data)
                 this.chatService.setCurrentRoom(payload.data.room);
         		this.canvas = this.gameCanvas?.nativeElement;

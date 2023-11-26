@@ -416,6 +416,7 @@ export class ChatGateway extends BaseGateway {
 
   @SubscribeMessage('ban')
   async banUserOfRoom(client: Socket, payload: ChatMessage){
+	  if (payload.room.includes("pongRoom")) return
 	  const login: string = client.handshake.query.login as string;
 	  const banOk: boolean = await this
 	  	.chatService
