@@ -841,11 +841,11 @@ export class PongService {
 			let endGame = this.games.get(game)
 			if (!endGame) return;
 			if (endGame.playerOne == login){
-				endGame.playerOneScore = 0
+				endGame.playerOneScore = 1
 				endGame.playerTwoScore = 5
 			} else {
 				endGame.playerOneScore = 5
-				endGame.playerTwoScore = 0
+				endGame.playerTwoScore = 1
 			}
 			endGame.finish = true;
 			this.chatService.saveGameResult(endGame)
