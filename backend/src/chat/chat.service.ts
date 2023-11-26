@@ -611,11 +611,20 @@ export class ChatService {
 		console.log(newElos.nuevoEloJugador1)
 		user1.elo = newElos.nuevoEloJugador1
 		user2.elo = newElos.nuevoEloJugador2
+
 		if (resultForelo === 1){
+			if (user1.wins === 0){
+				const debutAchievement = await this.userService.getAchievementByName('Grand Debut')
+				user1.achievements.push(debutAchievement)
+			}
 			user1.wins += 1;
 			user2.losses += 1;
 		}
 		else{
+			if (user2.wins === 0){
+				const debutAchievement = await this.userService.getAchievementByName('Grand Debut')
+				user2.achievements.push(debutAchievement)
+			}
 			user2.wins += 1;
 			user1.losses += 1;
 		}

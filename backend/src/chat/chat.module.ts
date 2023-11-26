@@ -15,10 +15,11 @@ import {EventsModule} from '../events/events.module'
 import {AuthService} from '../auth/auth.service'
 import {PongService} from '../pong/pong.service'
 import {Game} from '../pong/game.entity'
-
+import {Achievement} from '../user/achievement/achievement.entity'
+ 
 @Module({
 	
-	imports: [TypeOrmModule.forFeature([Room, User, ChatMessage, Game]), HttpModule, forwardRef(() => UserModule), EventsModule],
+	imports: [TypeOrmModule.forFeature([Room, User, ChatMessage, Game, Achievement]), HttpModule, forwardRef(() => UserModule), EventsModule],
 	exports: [RoomService, ChatService, PongService ],
 	providers: [BaseGateway, ChatService, PongService, HashService, RoomService, ChatMessageService, ChatAdminService, AuthService]
 })
