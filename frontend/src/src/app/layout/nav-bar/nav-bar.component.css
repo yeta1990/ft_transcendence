@@ -1,4 +1,4 @@
-/* Add a black background color to the top navigation */
+/* Add a black background color to the top navigation
 .topnav {
     background-color: #333;
     overflow: hidden;
@@ -18,4 +18,67 @@
     padding: 10px 25px;
     text-decoration: none;
     font-size: 17px;
+} */
+
+.topnav {
+    background-color: #d4da5b; /* Fondo verde */
+    overflow: hidden;
+    display: flex; /* Utilizamos flexbox para alinear elementos */
+    justify-content: space-between; /* Distribuye los elementos de manera uniforme en el contenedor */
+    padding: 5px 10px;
+    height: 50px;
+}
+
+.nav-buttons-left {
+    display: flex;
+}
+
+.nav-button,
+.logout-button {
+    font-family: "Roboto", sans-serif;
+    position: relative;
+    color: white; /* Texto blanco */
+    text-align: center;
+    padding: 10px 23px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold; /* Texto en negrita */
+    background-color: transparent; /* Fondo transparente para hacer el botón invisible */
+    border: 2px solid transparent;
+    width: calc(100% - 20px);
+    margin-right: 10px; /* Espacio entre botones */
+    width: 100%;
+}
+
+.logout-button {
+    width: 10%;
+    background-color: #777;
+    border-radius: 10px;
+
+}
+
+.nav-button:hover{
+    border: 2px solid white;
+    background-color: rgba(122, 122, 122, 0.6);
+    border-radius: 10px;
+}
+
+.logout-button:hover {
+    border: 2px solid white;
+    background-color: #666;
+    border-radius: 10px;
+}
+
+.nav-button:after {
+    content: "";
+    position: absolute;
+    top: 10%;
+    right: -8px;
+    height: 80%;
+    width: 2px;
+    background-color: white;
+}
+
+.right {
+    margin-left: auto; /* Mueve los botones de la derecha al extremo derecho */
 }
