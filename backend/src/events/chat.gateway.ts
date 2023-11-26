@@ -373,6 +373,14 @@ export class ChatGateway extends BaseGateway {
   @SubscribeMessage(events.Pass)
   async addPassToRoom(client: Socket, payload: ChatMessage){
 	  const login: string = client.handshake.query.login as string;
+  	  	for (const invalid of values.forbiddenNewChatRoomStrings){
+			if (payload.room.includes(invalid)){
+				this.server.to(client.id)
+					.emit("system", generateSocketErrorResponse(payload.room, 
+						`Can't make a game room private${payload.room}`).data)
+				return ;
+			}
+  	  	}
 	  const passAdded: boolean = await this.chatService.addPassToRoom(login, payload.room, payload.message);
 	  if (passAdded)
 	 	{

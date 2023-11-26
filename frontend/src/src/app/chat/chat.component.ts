@@ -300,6 +300,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		return false
 	}
 
+	isGameRoom(room:string): boolean {
+		return room.includes("pongRoom")
+	}
+
 	getActiveUsers() {
 		return this.chatService.getActiveUsers()
 	}

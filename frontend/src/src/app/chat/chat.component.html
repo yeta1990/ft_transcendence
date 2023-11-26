@@ -55,6 +55,7 @@
 -->
 
 <span class="p-2" *ngIf="!isPrivateRoom(getCurrentRoom()) && getCurrentRoom().includes('@')"> (private messages with {{getCurrentRoom()}})</span>
+	<span *ngIf="!isGameRoom(getCurrentRoom())">
       	<span class="p-2" *ngIf="!isPrivateRoom(getCurrentRoom()) && !getCurrentRoom().includes('@')"> (public chat room)
 		<button type="button" class="p-2 btn btn-outline-light" *ngIf="myUser?.login === roomsMetaData.get(getCurrentRoom())?.owner" (click)="addPassToRoomModal(getCurrentRoom())" > Make channel private
       	</button>
@@ -72,6 +73,7 @@
 
 		</span>
 		</span>
+	</span>
 		</div>
 
       	<h2 class="column-heading" *ngIf="getCurrentRoom().length === 0">
