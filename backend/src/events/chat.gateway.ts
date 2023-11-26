@@ -946,5 +946,22 @@ export class ChatGateway extends BaseGateway {
 		this.pongservice.cancelMatchProposal(login)
 	}
 
+	@SubscribeMessage('rejectReplayProposal')
+	rejectReplayProposal(client: Socket, game: string){
+		this.pongservice.rejectReplayProposal(game)
+	}
+	
+	@SubscribeMessage('sendReplayProposal')
+	sendReplayProposal(client: Socket, targetLogin: string){
+		const login: string = client.handshake.query.login as string;
+
+		//if the other user has already accepted, start the game
+		const validProposal: boolean = this.pongservice.isAValidProposal(login, targetLogin)
+		if (validProposal){
+			this.acceptedMatchProposal(client, targetLogin)
+		}else{
+			this.pongservice.saveMatchProposal(login, targetLogin)
+		}
+	}
 
 }
