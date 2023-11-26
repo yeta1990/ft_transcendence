@@ -301,7 +301,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	}
 
 	isGameRoom(room:string): boolean {
-		return room.includes("pongRoom")
+		return room.includes("pongRoom") && !room.includes('pongRoom_undefined')
 	}
 
 	getActiveUsers() {
@@ -509,6 +509,24 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			await waitSeg(1)
 		}
 		this.modalService.closeModal()
+	}
+
+	translateGameRoomNames(room:string ): string {
+		if (this.myUser && room == '#pongRoom_' + this.myUser!.login){
+			return "You vs computer"
+		}else if (room.includes('pongRoom') && room.includes('+')){
+			const indexStart = room.indexOf('_') + 1; 
+			const indexEnd = room.indexOf('+');
+			const login1 = room.substring(indexStart, indexEnd);
+			const login2 = room.substring(room.indexOf('+') + 1);
+			return this.getNickEquivalence(login1) + ' vs ' + this.getNickEquivalence(login2)
+		}
+		else if(room.includes('#pongRoom')){
+			const indexStart = room.indexOf('_') + 1; 
+			const login = room.substring(indexStart);
+			return this.getNickEquivalence(login) + ' vs computer'
+		}
+		return room
 	}
 
 }

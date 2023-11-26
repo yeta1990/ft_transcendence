@@ -549,6 +549,7 @@ export class ChatGateway extends BaseGateway {
   async part(client: Socket, room: string): Promise<void>{
 	const login: string = client.handshake.query.login as string;
 	const socketIdsByLogin: Array<string> = this.getClientSocketIdsFromLogin(login);
+
 	if (socketIdsByLogin.length === 0)
 		return generateSocketErrorResponse(room, `Error`)
 	const successfulPart: boolean = await this.removeUserFromRoom(room, login);
@@ -558,12 +559,16 @@ export class ChatGateway extends BaseGateway {
 	  	socketIdsByLogin.forEach(socketId => {
 		  this.server.to(socketId).emit(events.ListMyJoinedRooms, joinedRoomsByLogin);
 		  this.server.to(socketId).emit(events.ListMyPrivateRooms, privateRoomsByLogin);
-		  this.server.to(socketId).emit("system", generateSocketInformationResponse(room, `you've left ${room}`).data);
+		  if (!room.includes('pongRoom')){
+		  	this.server.to(socketId).emit("system", generateSocketInformationResponse(room, `you've left ${room}`).data);
+		  }
 	  	});
 
-   	    const user: User = await this.userService.getUserByLogin(login)
-	 	const roomInfo: SocketPayload = generateSocketInformationResponse(room, `user ${user.nick} has left room ${room}`)
-	  	this.broadCastToRoom(roomInfo.event, roomInfo.data)
+		  if (!room.includes('pongRoom')){
+   	    	const user: User = await this.userService.getUserByLogin(login)
+	 		const roomInfo: SocketPayload = generateSocketInformationResponse(room, `user ${user.nick} has left room ${room}`)
+	  		this.broadCastToRoom(roomInfo.event, roomInfo.data)
+	  	}
 	}
 	else{
 		this.server.to(client.id)

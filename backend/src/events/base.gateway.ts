@@ -406,7 +406,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  	}
 
 	  	//announce the rest of the channel a new user has joined
-	  	if (hardJoin && !room.includes(':') && !room.includes('@')){
+	  	if (hardJoin && !room.includes(':') && !room.includes('@') && !room.includes('pongRoom')){
 	  		const user: User = await this.userService.getUserByLogin(login)
 	  		const socketInfo: SocketPayload = generateSocketInformationResponse(room, `user ${user.nick} has joined room ${room}`)
 			this.broadCastToRoomExceptForSomeUsers(socketInfo.event, socketInfo.data, [login])
