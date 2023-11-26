@@ -92,7 +92,7 @@ export class PongComponent implements OnInit, OnDestroy {
             }
             if (payload.event === 'getStatus'){
 				if(this.chatService.getCurrentRoom() == payload.data.room){
-                    this.coef = this.innerWidth / 700
+                    this.coef = this.innerWidth / 1400
                     payload.data.canvasWidth = 700 * this.coef;
                     payload.data.canvasheight = 400 * this.coef;
 					this.pongService.setGame(payload.data)
@@ -114,7 +114,7 @@ export class PongComponent implements OnInit, OnDestroy {
     onResize(event:any) {
         this.innerWidth = window.innerWidth;
         var g = this.pongService.getGame();
-        this.coef = this.innerWidth / 700;
+        this.coef = this.innerWidth / 1400;
         g.canvasWidth = 700 * this.coef;
         g.canvasheight = 400 * this.coef;
         this.canvas = this.gameCanvas?.nativeElement;
