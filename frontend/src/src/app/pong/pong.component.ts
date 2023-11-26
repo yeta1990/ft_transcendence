@@ -40,6 +40,7 @@ export class PongComponent implements OnInit, OnDestroy {
 	private modalClosedSubscription: Subscription = {} as Subscription;
     public innerWidth: any;
     private coef:number = 1;
+    buttonStates: boolean[] = [false, false, false, false, false, false];
 
     
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
@@ -148,10 +149,10 @@ export class PongComponent implements OnInit, OnDestroy {
             this.playerTwo = true;
             
         }
-        if(this.pongService.getGame().powersAllow){
+        // if(this.pongService.getGame().powersAllow){
             this.pOne = this.pongService.getGame().playerOnePowers;
             this.pTwo = this.pongService.getGame().playerTwoPowers;
-        }
+        // }
             
 	}
  
@@ -168,12 +169,15 @@ export class PongComponent implements OnInit, OnDestroy {
         if (!this.pongService.getEventSubscribed()){
         	this.pongService.setEventSubscribed(true)
         	window.addEventListener('keydown', (e) => {
+
 				if (!this.playerOne || !this.playerTwo){
 					this.setGamePlayer()
 				}
 
         	    if(!this.modalService.isModalOpen() && (this.playerOne || this.playerTwo)){
-
+                    const player = this.playerOne ? 0 : 3;
+                    const index = e.which - 49;
+                    this.buttonStates[player + index] = true;
         	       this.pongService.sendSignal("keydown", this.pongService.getGame().room, e.which);
 				}
         	});
@@ -373,6 +377,10 @@ export class PongComponent implements OnInit, OnDestroy {
         requestAnimationFrame(this.gameLoop);
     }
 
+    handleButtonClick(index: number): void {
+        // Lógica para manejar el clic del botón si es necesario
+      }
+
     ngOnDestroy() {
 		console.log("destroy")
         this.subscriptions.unsubscribe();
@@ -388,7 +396,11 @@ export class PongComponent implements OnInit, OnDestroy {
         //console.log("DISCONECT");
 		this.pongService.disconnectClient();
 	}
+
+
 }
+
+
 
 
 enum KeyBindings{
