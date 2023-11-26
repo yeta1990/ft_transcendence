@@ -1,5 +1,6 @@
 .DS_Store
 *sql
+backend/uploads/*
 backend/node_modules
 backend/dist
 backend/.env
