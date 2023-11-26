@@ -14,11 +14,9 @@ import { ToastValues } from '@shared/const'
     trigger('fadeInOut', [
       state('hidden', style({
         opacity: 0,
-        display: 'none'
       })),
       state('visible', style({
         opacity: 1,
-        display: 'block'
       })),
       transition('visible => hidden', animate('0.5s')),
     ])

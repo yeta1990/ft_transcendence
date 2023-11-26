@@ -3,6 +3,7 @@ import { AllUsersService } from '../all-users/all-users.service'
 import { AuthService } from '../auth/auth.service'
 import { ChatService } from '../chat/chat.service'
 import {UserProfileService} from '../user-profile/user-profile.service'
+import { Router } from '@angular/router';
 import {User} from '../user'
 import {ChatUser} from '@shared/types'
 import {UserStatus} from '@shared/enum'
@@ -20,7 +21,7 @@ export class FriendsComponent {
 	incomingFriendRequests: User[] = []
 	myLogin: string;
     imagesBaseUrl: string = environment.apiUrl + '/uploads/'
-	constructor(private usersService: AllUsersService, private authService: AuthService, private profileService: UserProfileService, private chatService: ChatService) {
+	constructor(private usersService: AllUsersService, private authService: AuthService, private profileService: UserProfileService, private chatService: ChatService, private router: Router){
 		this.myLogin = this.authService.getUserNameFromToken() as string
 		this.usersService.getUsers()
 			.subscribe(r=> {
@@ -39,6 +40,25 @@ export class FriendsComponent {
 
 	getUserStatus(login: string): UserStatus {
 		return this.chatService.getUserStatus(login)
+	}
+
+	getAvailableRoomsList(): Array<string>{
+		return this.chatService.getAvailableRoomsList()
+	}
+
+	spectatorTo(room:string): void {
+
+	}
+
+	getGameRoom(login: string): string {
+		const availableRoomsList: Array<string> = this.getAvailableRoomsList()
+//		console.log(availableRoomsList)
+		for (let room of availableRoomsList){
+			if (room.includes('pongRoom') && room.includes(login) && room.includes('+')){
+				return room;
+			}
+		}
+		return "Isn't playing"
 	}
 
 	acceptFriendShipRequest(login:string){
