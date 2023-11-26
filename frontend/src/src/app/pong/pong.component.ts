@@ -47,7 +47,7 @@ export class PongComponent implements OnInit, OnDestroy {
         private pongService:PongService,
         private myProfileService: MyProfileService,
         private route: ActivatedRoute,
-        private chatService: ChatService,
+        public chatService: ChatService,
 		private modalService: ModalService,
         //private pongService: PongService,
     ){
@@ -103,7 +103,7 @@ export class PongComponent implements OnInit, OnDestroy {
 					this.setGamePlayer()
                     this.msg = "Best of (9)";
                     if (payload.data.finish){
-                        this.msg = "Game has finish";
+                        this.msg = "Game has finished";
                     }
 				}
             }               
@@ -195,6 +195,7 @@ export class PongComponent implements OnInit, OnDestroy {
     }
 
     mode(m: string) {
+        console.log("STATUS " + this.chatService.getUserStatus(this.playerLogin));
         if (m == "on-line"){
             console.log(this.playerLogin + " join match making list ");
             this.pongService.playOnLine(m,  this.playerLogin);

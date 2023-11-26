@@ -779,7 +779,8 @@ export class PongService {
         	   	const activeLogins: Array<string> = activeUsers.map(u => u.login)
 
 //				console.log(activeLogins)
-				if (!activeLogins.includes(this.games.get(game).playerOne) && 
+                if(!activeLogins){}
+				else if (!activeLogins.includes(this.games.get(game).playerOne) && 
 				!activeLogins.includes(this.games.get(game).playerTwo)){
 					await this.chatService.deleteRoom(game)
 					await this.gameGateaway.destroyEmptyRooms(game)
