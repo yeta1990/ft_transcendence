@@ -55,6 +55,7 @@ export class CallbackComponent implements OnInit {
 					} else {
 						console.log("User is logged in");
 						const login: any = this.authService.getUserNameFromToken()
+						if (!login) return;
 						this.userProfileService
 							.isMyFirstLogin(login)
 							.subscribe(firstLogin => {

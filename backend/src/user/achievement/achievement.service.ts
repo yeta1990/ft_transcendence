@@ -29,4 +29,13 @@ export class AchievementService implements OnModuleInit {
       }
     }
   }
+  	public async getAchievementByName(name: string): Promise<Achievement | undefined>{
+		const achievement = await this.achievementRepository.findOne({
+			where: {
+				name: name
+			}
+		})
+		return achievement
+  	}
+
 }

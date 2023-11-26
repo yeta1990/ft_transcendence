@@ -72,7 +72,7 @@ export class AuthGuardService  {
 	private checkUserPermissions(route: ActivatedRouteSnapshot): Observable<boolean | UrlTree> {
 		// Comprueba si el usuario es el "propio" usuario
 		const login = route.paramMap.get('login');
-		if (login !== null) {
+		if (login) {
 			return this.userProfileService.getUserIDByLogin(login).pipe(
 				switchMap((userId: number | null) => {
 					if (!this.auth.isLoggedIn() || userId === null) {

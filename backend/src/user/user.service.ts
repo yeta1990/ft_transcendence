@@ -7,6 +7,7 @@ import { User } from './user.entity';
 import { Game } from '../pong/game.entity'
 import { catchError, lastValueFrom, map } from 'rxjs';
 import { Achievement } from './achievement/achievement.entity';
+import { AchievementService } from './achievement/achievement.service';
 import { UserRole } from '@shared/enum';
  
 @Injectable()
@@ -20,7 +21,7 @@ export class UserService {
 	@InjectRepository(Achievement)
     private readonly achievementRepository: Repository<Achievement>;
 
-	constructor(private httpService: HttpService, @InjectConnection() private readonly connection: Connection) {}
+	constructor(private httpService: HttpService, private achievementService: AchievementService, @InjectConnection() private readonly connection: Connection) {}
 
 
 	public async whoAmI(token: string): Promise<any>
@@ -67,7 +68,7 @@ export class UserService {
 
 	public async getUserByLogin(login: string): Promise<User | undefined>{
 		const user =  await this.repository.findOne({
-			relations: ['ownedRooms', 'bannedUsers'],
+			relations: ['ownedRooms', 'bannedUsers', 'achievements'],
 			where: {
 				login: login,
 			},
@@ -337,5 +338,10 @@ export class UserService {
 		})
 	
 	}
+
+  	public async getAchievementByName(name: string): Promise<Achievement | undefined>{
+  		const achievement: Achievement | undefined  = await this.achievementService.getAchievementByName(name)
+		return achievement
+  	}
 	
 }

@@ -123,6 +123,13 @@ export class GameRoom {
 	public reverseMoveOne: boolean,
 	public reverseMoveTwo:boolean,
 
+	public inestableBallUse: boolean,
+	public biggerPaddleUse: boolean,
+	public smallerPaddleUse: boolean,
+	public slowerPaddleUse: boolean,
+	public fasterPaddleUse: boolean,
+	public reverseMoveUse:boolean,
+
 	public playerOnePowers: Array<string>,
 	public playerTwoPowers: Array<string>,
 

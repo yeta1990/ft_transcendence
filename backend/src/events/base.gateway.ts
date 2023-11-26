@@ -175,8 +175,10 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  		  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
 		  }
 		  //cancel all match proposals
+		  console.log("hard disconenct")
 		  this.pongservice.cancelMatchProposal(login)
 		  this.pongservice.removeUserFromMatchMakingList(login)
+		  this.pongservice.waitForPlayerReconnect(login)
 			
   	  }
 	}
@@ -467,6 +469,28 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		}
   }
 
+  public sendOtherPlayerPart(players: Array<string>, login: string): void{
+		for (let player of players){
+  	    	const socketIds: Array<string> = this.getClientSocketIdsFromLogin(player)
+			if (socketIds){
+				for (let i = 0; i < socketIds.length; i++){
+					this.server.to(socketIds[i]).emit("otherPlayerPart", login)
+				}
+			}
+  	    }
+  }
+
+  public sendOtherPlayerCameBack(players: Array<string>, login:string): void{
+		for (let player of players){
+  	    	const socketIds: Array<string> = this.getClientSocketIdsFromLogin(player)
+			if (socketIds){
+				for (let i = 0; i < socketIds.length; i++){
+					this.server.to(socketIds[i]).emit("otherPlayerCameBack", login)
+				}
+			}
+  	    }
+  }
+
   public sendEventToBothPlayers(player1: string, player2: string, event: string): void{
 	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(player2);
 	  	const emisorSocketIds: Array<string> = this.getClientSocketIdsFromLogin(player1);
@@ -494,5 +518,14 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   public sendAcceptedGame(player1: string, player2:string){
 	  	this.sendEventToBothPlayers(player1, player2, "acceptMatchProposal")
   }
+
+  public sendReplay(player1: string, player2:string){
+	  	this.sendEventToBothPlayers(player1, player2, "replayGameProposal")
+  }
+
+  public rejectReplay(player1: string, player2: string){
+	  	this.sendEventToBothPlayers(player1, player2, "rejectReplay")
+  }
+
 
 }

@@ -323,6 +323,7 @@
         </div>
       </ng-template>
 
+
 	  <ng-template [ngSwitchCase]="'enableMfaTemplate'">
 		<div id="enableMfaModal">
 		  <div class="modal-header">
@@ -400,6 +401,36 @@
 	  </div>
 	</ng-template>
 
+      <ng-template [ngSwitchCase]="'template18'">
+        <div id="modal-content-template18">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Your opponent has disconnected</h1>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>Waiting for 10 seconds for the user to reconnect to resume the game. If the opponet doesn't connect, you win the game.</p>
+   		    </div>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template19'">
+        <div id="modal-content-template19">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Accept replay match with &#64;{{getModalData()[0]}}?</h1>
+		  <button (click)="noButton()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>Game finished. Do you want to play again against {{getModalData()[0]}}? If the user accepts, you will be able to start again, otherwise room will be destroyed.</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="noButton()" type="button" class="btn btn-outline-light">No</button>
+
+      	  </div>
+        </div>
+      </ng-template>
 
 	<ng-template [ngSwitchCase]="'imageGalleryTemplate'">
 		<div id="imageGalleryTemplate">

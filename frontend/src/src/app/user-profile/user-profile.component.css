@@ -297,6 +297,7 @@ flex: 1;
   .achieved {
     /* Estilos adicionales para logros logrados */
     opacity: 0.9; /* Sin transparencia */
+    background-color: #2d2d2d;
 }
 
 .not-achieved {

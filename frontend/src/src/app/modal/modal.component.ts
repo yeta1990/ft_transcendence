@@ -22,6 +22,19 @@ export class ModalComponent {
  	this.modalData = this.modalService.getModalData() 
   }
 
+  noButton(): void {
+	this.inputValue = "no";
+	this.inputValue2 = "";
+	this.checkboxInput = false;
+	this.confirmationInput = false;
+    this.modalService.setModalData(this.inputValue, this.inputValue2, this.confirmationInput);
+    this.modalService.closeModalWithData();
+	this.inputValue = "";
+	this.inputValue2 = "";
+	this.checkboxInput = false;
+	this.confirmationInput = false;
+
+  }
   closeModal(): void {
 	this.inputValue = "";
 	this.inputValue2 = "";

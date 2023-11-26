@@ -11,7 +11,7 @@ import { User } from '../user';
 import { AppRoutingModule } from '../app-routing-module/app-routing-module.module';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ChatService } from '../chat/chat.service';
-import { ModalService } from '../modal/modal.service'
+import { ModalService } from '../modal/modal.service';
 
 @Component({
   selector: 'app-pong',
@@ -35,9 +35,13 @@ export class PongComponent implements OnInit, OnDestroy {
     public msg:string="";
     public waitingList="";
     public powers:string="";
+    public pOne:any;
+    public pTwo:any;
 	private modalClosedSubscription: Subscription = {} as Subscription;
     public innerWidth: any;
     private coef:number = 1;
+    buttonStates: boolean[] = [false, false, false, false, false, false];
+    
 
     
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
@@ -45,7 +49,7 @@ export class PongComponent implements OnInit, OnDestroy {
         private pongService:PongService,
         private myProfileService: MyProfileService,
         private route: ActivatedRoute,
-        private chatService: ChatService,
+        public chatService: ChatService,
 		private modalService: ModalService,
         //private pongService: PongService,
     ){
@@ -68,6 +72,9 @@ export class PongComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
         .subscribe((payload: SocketPayload) => {
             if (payload.event === 'gameStatus'){ 
+                this.coef = this.innerWidth / 1400
+                payload.data.canvasWidth = 700 * this.coef;
+                payload.data.canvasheight = 400 * this.coef;
 				this.pongService.setGame(payload.data)
                 this.chatService.setCurrentRoom(payload.data.room);
         		this.canvas = this.gameCanvas?.nativeElement;
@@ -75,6 +82,7 @@ export class PongComponent implements OnInit, OnDestroy {
 //        		this.canvas.hidden = true;
                 this.msg = "Best of (9)"
                 this.waitingList = "";
+                //this.updatePowers();
                 requestAnimationFrame(this.gameLoop);
 
 				if (this.playerLogin == undefined || this.playerLogin.length == 0){
@@ -90,24 +98,15 @@ export class PongComponent implements OnInit, OnDestroy {
             }
             if (payload.event === 'getStatus'){
 				if(this.chatService.getCurrentRoom() == payload.data.room){
-                    if (this.innerWidth < 750){ 
-                        payload.data.canvasWidth = 350;
-                        payload.data.canvasheight = 200;
-                        // this.canvas = this.gameCanvas?.nativeElement;
-        	            // this.gameContext = this.canvas?.getContext('2d');
-                        this.coef = 0.5;
-                    } else if (this.innerWidth >= 750){
-                        // payload.data.canvasWidth = 700;
-                        // payload.data.canvasheight = 400;
-                        // this.canvas = this.gameCanvas?.nativeElement;
-        	            // this.gameContext = this.canvas?.getContext('2d');
-                        this.coef = 1;
-                    }
+                    this.coef = this.innerWidth / 1400
+                    payload.data.canvasWidth = 700 * this.coef;
+                    payload.data.canvasheight = 400 * this.coef;
 					this.pongService.setGame(payload.data)
-					this.setGamePlayer()
+					this.setGamePlayer();
+                    this.updatePowers();
                     this.msg = "Best of (9)";
                     if (payload.data.finish){
-                        this.msg = "Game has finish";
+                        this.msg = "Game has finished";
                     }
 				}
             }               
@@ -122,19 +121,11 @@ export class PongComponent implements OnInit, OnDestroy {
     onResize(event:any) {
         this.innerWidth = window.innerWidth;
         var g = this.pongService.getGame();
-        if (this.innerWidth < 750){ 
-            g.canvasWidth = 350;
-            g.canvasheight = 200;
-            this.canvas = this.gameCanvas?.nativeElement;
-        	this.gameContext = this.canvas?.getContext('2d');
-            this.coef = 0.5;
-        } else if (this.innerWidth >= 750){
-            g.canvasWidth = 700;
-            g.canvasheight = 400;
-            this.canvas = this.gameCanvas?.nativeElement;
-        	this.gameContext = this.canvas?.getContext('2d');
-            this.coef = 1;
-        }
+        this.coef = this.innerWidth / 1400;
+        g.canvasWidth = 700 * this.coef;
+        g.canvasheight = 400 * this.coef;
+        this.canvas = this.gameCanvas?.nativeElement;
+        this.gameContext = this.canvas?.getContext('2d');
     }
 
 	getGame(): GameRoom {
@@ -142,21 +133,52 @@ export class PongComponent implements OnInit, OnDestroy {
 	}
 
 	setGamePlayer(): void {
-        var p: string[]=["", "", ""];
     	if (this.pongService.getGame().playerOne == this.playerLogin){
 //       		console.log("Player ONE " + this.playerLogin);
            this.playerOne = true;
-            p = this.pongService.getGame().playerTwoPowers;
+            
 		} else if (this.pongService.getGame().playerTwo == this.playerLogin){
 //            console.log("Player TWO");
             this.playerTwo = true;
-            p = this.pongService.getGame().playerTwoPowers;
+            
         }
         if(this.pongService.getGame().powersAllow){
-            this.powers = "(1)" + p[0] + " - (2)" + p[1] + " - (3)" + p[2];
+            this.pOne = this.pongService.getGame().playerOnePowers;
+            this.pTwo = this.pongService.getGame().playerTwoPowers;
         }
             
 	}
+
+    updatePowers(): void{
+        this.buttonStates[0] = this.isPowerUsed(this.pOne[0]);
+        this.buttonStates[1] = this.isPowerUsed(this.pOne[1]);
+        this.buttonStates[2] = this.isPowerUsed(this.pOne[2]);
+
+        this.buttonStates[3] = this.isPowerUsed(this.pTwo[0]);
+        this.buttonStates[4] = this.isPowerUsed(this.pTwo[1]);
+        this.buttonStates[5] = this.isPowerUsed(this.pTwo[2]);
+    }
+    isPowerUsed(power:string):boolean{
+        if (power == "InestableBall") {
+            return this.pongService.getGame().inestableBallUse;
+        }
+        else if(power =="BiggerPaddle"){
+            return this.pongService.getGame().biggerPaddleUse;
+        }
+        else if(power =="SmallerPaddle"){
+            return this.pongService.getGame().smallerPaddleUse;
+        }
+        else if(power =="FasterPaddle"){
+            return this.pongService.getGame().fasterPaddleUse;
+        }
+        else if(power =="SlowerPaddle"){
+            return this.pongService.getGame().slowerPaddleUse;
+        }
+        else if(power =="ReverseMove"){
+            return this.pongService.getGame().reverseMoveUse;
+        }
+        return false;
+    }
  
     visibleCanvas(): boolean {
 		return 	!this.getCurrentRoom().includes('#pongRoom_')
@@ -171,13 +193,16 @@ export class PongComponent implements OnInit, OnDestroy {
         if (!this.pongService.getEventSubscribed()){
         	this.pongService.setEventSubscribed(true)
         	window.addEventListener('keydown', (e) => {
+
 				if (!this.playerOne || !this.playerTwo){
 					this.setGamePlayer()
 				}
 
-        	    if(this.playerOne || this.playerTwo){
-
-        	       this.pongService.sendSignal("keydown", this.pongService.getGame().room, e.which);
+        	    if(!this.modalService.isModalOpen() && (this.playerOne || this.playerTwo)){
+                    const player = this.playerOne ? 0 : 3;
+                    // const index = e.which - 49;
+                    // this.buttonStates[player + index] = true;
+        	        this.pongService.sendSignal("keydown", this.pongService.getGame().room, e.which);
 				}
         	});
 
@@ -185,7 +210,7 @@ export class PongComponent implements OnInit, OnDestroy {
 				if (!this.playerOne && !this.playerTwo){
 					this.setGamePlayer()	
 				}
-        	    if(this.playerOne || this.playerTwo){
+        	    if(!this.modalService.isModalOpen() && (this.playerOne || this.playerTwo)){
         	        this.pongService.sendSignal("keyup", this.pongService.getGame().room, e.which);
 					}
         	});
@@ -198,6 +223,7 @@ export class PongComponent implements OnInit, OnDestroy {
     }
 
     mode(m: string) {
+        console.log("STATUS " + this.chatService.getUserStatus(this.playerLogin));
         if (m == "on-line"){
             console.log(this.playerLogin + " join match making list ");
             this.pongService.playOnLine(m,  this.playerLogin);
@@ -253,8 +279,8 @@ export class PongComponent implements OnInit, OnDestroy {
             }
         }
         //draw scores and check end game
-        this.gameContext!.font = '36px Arial';
-        if (this.innerWidth < 750) { this.gameContext!.font = '18px Arial';}
+        var fontSize = 36 * this.coef;
+        this.gameContext!.font = fontSize + 'px Arial';
         var pOne = this.pongService.getGame().playerOne + " " + this.pongService.getGame().playerOneScore;
         var ptwo: string;
         if (this.pongService.getGame().playerTwo)
@@ -262,14 +288,14 @@ export class PongComponent implements OnInit, OnDestroy {
         else
             ptwo = this.pongService.getGame().playerTwoScore + " computer";
         var posOne = ((this.canvas.width / 2) - pOne.length) / 2;
-        var posTwo = (this.canvas.width / 2) + 20;
+        var posTwo = (this.canvas.width / 2) + 20 * this.coef;
         this.gameContext!.fillStyle = "#808080";
         this.gameContext!.fillText(pOne, posOne, 50 * this.coef);
         this.gameContext!.fillText(ptwo, posTwo, 50 * this.coef);
-        this.gameContext!.fillStyle = "#FF0000";
+        this.gameContext!.fillStyle = "#d1434f";
         if (this.pongService.getGame().playerOneScore >= 5) { //POINTS
             //this.restartScores();
-            this.gameContext!.fillStyle = "#00FF00";
+            this.gameContext!.fillStyle = "##d4da5b";
             let winner = this.pongService.getGame().playerOne + " WON!"
             this.gameContext!.fillText(winner, 250 * this.coef, 200 * this.coef);
             var again = "Press ESC for play again";
@@ -278,7 +304,7 @@ export class PongComponent implements OnInit, OnDestroy {
             this.gameContext!.fillText(again, (this.canvas.width - textWidth) / 2, 250 * this.coef);
         } else if (this.pongService.getGame().playerTwoScore >= 5) { //POINTS
             //this.restartScores();
-            this.gameContext!.fillStyle = "#FF0000";
+            this.gameContext!.fillStyle = "#d1434f";
             let winner;
             if (this.pongService.getGame().playerTwo != "") {
                 winner = this.pongService.getGame().playerTwo + " WON!"
@@ -293,7 +319,7 @@ export class PongComponent implements OnInit, OnDestroy {
         }
         //draw pause if not finish game
         if (this.pongService.getGame().pause && !this.pongService.getGame().finish) {
-            this.gameContext!.fillStyle = "#00FF00";
+            this.gameContext!.fillStyle = "#d4da5b";
             this.gameContext!.fillText("PAUSE", 290 * this.coef, 200 * this.coef);
             this.gameContext!.fillStyle = "#808080";
             var again = "Press ESC play";
@@ -376,6 +402,10 @@ export class PongComponent implements OnInit, OnDestroy {
         requestAnimationFrame(this.gameLoop);
     }
 
+    handleButtonClick(index: number): void {
+        // Lógica para manejar el clic del botón si es necesario
+      }
+
     ngOnDestroy() {
 		console.log("destroy")
         this.subscriptions.unsubscribe();
@@ -391,7 +421,11 @@ export class PongComponent implements OnInit, OnDestroy {
         //console.log("DISCONECT");
 		this.pongService.disconnectClient();
 	}
+
+
 }
+
+
 
 
 enum KeyBindings{

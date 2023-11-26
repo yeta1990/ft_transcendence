@@ -493,7 +493,9 @@ export class ChatService {
 		return true
 	}
 
-
+	public emitUpdateUsersAndRoomsMetadata(){
+		this.chatGateway.emitUpdateUsersAndRoomsMetadata();
+	}
 	async generatePrivateRoomName(originLogin: string, destinationLogin: string): Promise<string | undefined>{
 		const originUser: User = await this.userService.getUserByLogin(originLogin);
 		const destinationUser: User = await this.userService.getUserByLogin(destinationLogin);
@@ -564,16 +566,37 @@ export class ChatService {
 	public calcularNuevoElo(eloJugador1, eloJugador2, resultadoJugador1): any{
 		const kFactor = 32;
 
+		if (isNaN(eloJugador1) || isNaN(eloJugador2) || isNaN(resultadoJugador1)) {
+			console.log('Los parámetros deben ser números válidos');
+		  }
+		  if (resultadoJugador1 < 0 || resultadoJugador1 > 1) {
+			console.log('El resultado debe ser un número entre 0 y 1');
+		  }
+
 		const expectedPlayer1 = 1 / (1 + Math.pow(10, (eloJugador2 - eloJugador1) / 400))
 		const expectedPlayer2 = 1 / (1 + Math.pow(10, (eloJugador1 - eloJugador2) / 400))
 
-		const nuevoEloJugador1 = eloJugador1 + kFactor * (resultadoJugador1 - expectedPlayer1)
-		const nuevoEloJugador2 = eloJugador2 + kFactor * ((1 - resultadoJugador1) - expectedPlayer2)
+		const nuevoEloJugador1 = Math.round(eloJugador1 + kFactor * (resultadoJugador1 - expectedPlayer1))
+		const nuevoEloJugador2 = Math.round(eloJugador2 + kFactor * ((1 - resultadoJugador1) - expectedPlayer2))
+
+		if (isNaN(nuevoEloJugador1) || isNaN(nuevoEloJugador2)) {
+			console.log('Hubo un error al calcular el nuevo Elo');
+		  }
+
 		return {nuevoEloJugador1, nuevoEloJugador2}
 			
 	}
+	private calculateResultForelo(playerOneScore, playerTwoScore):number { 
+			if (playerOneScore > playerTwoScore) return 1
+			else if (playerOneScore < playerTwoScore) return 0
+			else return 0.5
+	}
 
 	public async saveGameResult(g: GameRoom){
+		if (g.powersAllow) return;
+		const user1: User = await this.userService.getUserByLogin(g.playerOne)
+		const user2: User = await this.userService.getUserByLogin(g.playerTwo)
+		if (!user1 || !user2 || g.playerOne == "" || g.playerTwo == "") return;
 		const result = {
 			"player1": g.playerOne,
 			"player2": g.playerTwo,
@@ -581,16 +604,59 @@ export class ChatService {
 			"player2Points": g.playerTwoScore,
 		}
 		await this.gameRepository.save(result)
-		const user1: User = await this.userService.getUserByLogin(g.playerOne)
-		const user2: User = await this.userService.getUserByLogin(g.playerTwo)
-		const resultForelo = function() { 
-			if (g.playerOneScore > g.playerTwoScore) return 1
-			else if (g.playerOneScore < g.playerTwoScore) return 0
-			else return 0.5
+		const resultForelo = this.calculateResultForelo(g.playerOneScore, g.playerTwoScore)
+		console.log("USER1 ELO: " + user1.elo + "\nUSER2 ELO: " + user2.elo + "\nRESULTFORELO: " + resultForelo);
+		const newElos = this.calcularNuevoElo(user1.elo, user2.elo, resultForelo)
+		console.log(newElos) 
+		console.log(newElos.nuevoEloJugador1)
+		user1.elo = newElos.nuevoEloJugador1
+		user2.elo = newElos.nuevoEloJugador2
+
+		if (resultForelo === 1){
+			if (user1.wins === 0){
+				const debutAchievement = await this.userService.getAchievementByName('Grand Debut')
+				user1.achievements.push(debutAchievement)
+			}
+			if (g.playerOneScore == 5 && g.playerTwoScore == 0){
+				const flawlessAchievement = await this.userService.getAchievementByName('Flawless Victory')
+				user1.achievements.push(flawlessAchievement)
+				
+			}
+			user1.wins += 1;
+			user1.winningStreak +=1;
+			if (user1.winningStreak >= 5){
+				const risingStarAchievement = await this.userService.getAchievementByName('Rising Star')
+				user1.achievements.push(risingStarAchievement)
+				
+			}
+			user2.losses += 1;
+			user2.winningStreak = 0;
 		}
-		const newElos: {} = this.calcularNuevoElo(user1.elo, user2.elo, resultForelo)
+		else{
+			if (user2.wins === 0){
+				const debutAchievement = await this.userService.getAchievementByName('Grand Debut')
+				user2.achievements.push(debutAchievement)
+			}
+			if (g.playerOneScore == 0 && g.playerTwoScore == 5){
+				const flawlessAchievement = await this.userService.getAchievementByName('Flawless Victory')
+				user2.achievements.push(flawlessAchievement)
+				
+			}
+			user2.wins += 1;
+			user2.winningStreak +=1;
+			if (user2.winningStreak >= 5){
+				const risingStarAchievement = await this.userService.getAchievementByName('Rising Star')
+				user1.achievements.push(risingStarAchievement)
+				
+			}
+			user1.losses += 1;
+			user1.winningStreak = 0;
+		}
 		
-//		this.userRepository.save(user1)
+
+		
+		await this.userRepository.save(user1)
+		await this.userRepository.save(user2)
 	}
 
 }

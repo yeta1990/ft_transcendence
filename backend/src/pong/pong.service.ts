@@ -1,5 +1,6 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ChatMessage, SocketPayload, GameRoom, ChatUser } from '@shared/types';
+import { waitSeg } from '@shared/functions'
 import { GameGateway } from 'src/events/game.gateway';
 import { BaseGateway } from 'src/events/base.gateway';
 import { ChatGateway } from 'src/events/chat.gateway';
@@ -20,6 +21,7 @@ export class PongService {
     public interval: any = 0;
     private matchMaking: Array<string> = new Array<string>;
 	private matchProposals: Map<string, string> = new Map()
+	private matchReplay: Map<string, string> = new Map()
     private matchMakingPlus: Array<string> = new Array<string>;
 
     constructor(
@@ -51,7 +53,7 @@ export class PongService {
         
         if (this.games.get(name))
             return(this.games.get(name));
-        console.log("Init -> " + name);
+//        console.log("Init -> " + name);
 //        this.gameGateaway = gameGateaway;
         this.game = new GameRoom(
             name,               //room
@@ -108,6 +110,12 @@ export class PongService {
             false,              //inestableball;
             false,              //reverseMoveOne;
             false,              //reverseMoveTwo;
+            false,              //inestableBallUse;
+	        false,              //biggerPaddleUse;
+	        false,              //smallerPaddleUse;
+	        false,              //slowerPaddleUse;
+	        false,              //fasterPaddleUse;
+	        false,              //reverseMoveUse;
             [],                 //playerOnePowers;
             [],                 //playerTwoPowers;
             allowedPowers,      //powersAllow;
@@ -123,6 +131,28 @@ export class PongService {
         //     this.updateGame(gameGateaway)
         // }
         return (this.games.get(name));
+    }
+
+
+	async rejectReplayProposal(game: string){
+		const g = this.games.get(game)
+		if (g){
+			this.cancelMatchProposal(g.playerOne)
+			this.cancelMatchProposal(g.playerTwo)
+		}
+		await this.chatService.deleteRoom(game)
+		await this.gameGateaway.destroyEmptyRooms(game)
+
+		if (!this.games.get(game)) return;
+       	this.chatService.setUserStatusIsActive(this.games.get(game).playerTwo)
+        this.chatService.setUserStatusIsActive(this.games.get(game).playerOne)
+		this.games.delete(game)
+	}
+
+
+    saveMatchReplayProposal(senderLogin: string, targetLogin: string){
+		this.matchReplay.set(senderLogin, targetLogin)
+		this.matchReplay.set(targetLogin, senderLogin)
     }
 
 	saveMatchProposal(senderLogin: string, targetLogin: string){
@@ -237,13 +267,15 @@ export class PongService {
             g.ballX += g.ballXVel * g.ballSpeed;
             g.ballY += g.ballYVel * g.ballSpeed;
     }
-    checkScores(g: GameRoom){
+    async checkScores(g: GameRoom){
         if (g.playerOneScore >= 5 || g.playerTwoScore >= 5){
+        	console.log("check scores")
             g.pause = true;
             g.finish = true;
             this.chatService.setUserStatusIsActive(g.playerOne)
             this.chatService.setUserStatusIsActive(g.playerTwo)
-			this.chatService.saveGameResult(g)
+			await this.chatService.saveGameResult(g)
+			if (g.playerTwo != "")this.gameGateaway.sendReplay(g.playerOne, g.playerTwo)
         }
     }
 
@@ -292,6 +324,7 @@ export class PongService {
 
     keyStatus(room: string, key: number, nick:string){
         var g = this.games.get(room);
+        if (!g) return;
         if ((nick == g.playerOne) || (nick == g.playerTwo)){
 //        	console.log(g)
             if(key == 27){
@@ -429,8 +462,8 @@ export class PongService {
             this.chatService.setUserStatusIsPlaying(this.matchMaking[0])
             this.chatService.setUserStatusIsPlaying(this.matchMaking[1])
             //Remove both 
-//            this.matchMaking.shift();
-//            this.matchMaking.shift();
+            this.matchMaking.shift();
+            this.matchMaking.shift();
         }
     }
 
@@ -491,19 +524,22 @@ export class PongService {
     }
     
 
-    disconectPlayer(room:string, login:string) {
+    async disconectPlayer(room:string, login:string) {
         var g = this.games.get(room)
+        if (!g) return;
         if (!g.playerOne || !g.playerTwo) {return;}
-       if (g.playerOne == login){
-           g.playerOne = "";
-       }         
-       if (g.playerTwo == login){
-           g.playerTwo = "";
-       }
+    //    if (g.playerOne == login){
+    //        g.playerOne = "";
+    //    }         
+    //    if (g.playerTwo == login){
+    //        g.playerTwo = "";
+    //    }
         console.log("disconnect player: " + room)
         this.gameGateaway.removeUserFromRoom(room, login) 
         if (g.playerOne == "" && g.playerTwo == "") {
             this.games.delete(room);
+            this.chatService.deleteRoom(room);
+            this.chatService.emitUpdateUsersAndRoomsMetadata();
         }
 
 //        clearInterval(g.interval);
@@ -544,6 +580,14 @@ export class PongService {
         g.inestableBall = false;
         g.reverseMoveOne = false;
         g.reverseMoveTwo = false;
+
+        g.inestableBallUse = false;
+        g.biggerPaddleUse = false;
+        g.smallerPaddleUse = false;
+        g.slowerPaddleUse = false;
+        g.fasterPaddleUse = false;
+        g.reverseMoveUse = false;
+
         this.randomPowers(g);
     }
 
@@ -581,18 +625,20 @@ export class PongService {
         }
       }
     async inestableBall(g: GameRoom) {
-        if(g.inestableBall) {return;}
+        if(g.inestableBall || g.inestableBallUse) {return;}
         g.inestableBall = true;
-        const speeds :Array<number> = [5, 2, 7, 10, 15];
+        g.inestableBallUse = true;
+        const speeds :Array<number> = [5, 2, 7, 10];
         g.ballSpeed = speeds[Math.floor(Math.random() * speeds.length)];
         const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
 
+
         let count = 0;
-        while (count < 60) { //seconds
+        while (count < 30) { //seconds
           count++;
           await waitSeg(1);
       
-          if (count % 10 === 0) {
+          if (count % 5 === 0) {
             g.ballSpeed = speeds[Math.floor(Math.random() * speeds.length)];
             console.log("change speed " + g.ballSpeed);
           }
@@ -602,6 +648,8 @@ export class PongService {
     }
 
     async biggerPaddle(login: string, g:GameRoom){
+        if(g.biggerPaddleUse) {return;}
+        g.biggerPaddleUse = true;
         const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
         if (login == g.playerOne) {
             g.playerOneH = 100;
@@ -610,7 +658,7 @@ export class PongService {
             g.playerTwoH = 100;
         }
         let count = 0;
-        while (count < 30) { // seconds
+        while (count < 15) { // seconds
             count++;
             await waitSeg(1);
         }
@@ -623,6 +671,8 @@ export class PongService {
     }
 
     async smallerPaddle(login: string, g:GameRoom){
+        if(g.smallerPaddleUse) {return;}
+        g.smallerPaddleUse = true;
         const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
         if (login == g.playerOne) {
             g.playerTwoH = 30;
@@ -631,7 +681,7 @@ export class PongService {
             g.playerOneH = 30;
         }
         let count = 0;
-        while (count < 30) { // seconds
+        while (count < 15) { // seconds
             count++;
             await waitSeg(1);
         }
@@ -644,6 +694,8 @@ export class PongService {
     }
 
     async slowerPaddle(login: string, g:GameRoom){
+        if(g.slowerPaddleUse) {return;}
+        g.slowerPaddleUse = true;
         const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
         if (login == g.playerOne) {
             g.playerTwoS = 5;
@@ -652,7 +704,7 @@ export class PongService {
             g.playerOneS = 5;
         }
         let count = 0;
-        while (count < 30) { // seconds
+        while (count < 15) { // seconds
             count++;
             await waitSeg(1);
         }
@@ -665,6 +717,8 @@ export class PongService {
     }
 
     async fasterPaddle(login: string, g:GameRoom){
+        if(g.fasterPaddleUse) {return;}
+        g.fasterPaddleUse = true;
         const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
         if (login == g.playerOne) {
             g.playerOneS = 20;
@@ -673,7 +727,7 @@ export class PongService {
             g.playerTwoS = 20;
         }
         let count = 0;
-        while (count < 30) { // seconds
+        while (count < 15) { // seconds
             count++;
             await waitSeg(1);
         }
@@ -686,6 +740,8 @@ export class PongService {
     }
 
     async reverseMove(login: string, g:GameRoom) {
+        if(g.reverseMoveUse) {return;}
+        g.reverseMoveUse = true;
         if(g.reverseMoveOne || g.reverseMoveTwo) {return;}
         const waitSeg = (seg: number) => new Promise(resolve => setTimeout(resolve, seg * 1000));
         if (login == g.playerOne) {
@@ -695,11 +751,116 @@ export class PongService {
             g.reverseMoveOne = true;
         }
         let count = 0;
-        while (count < 15) { // seconds
+        while (count < 10) { // seconds
             count++;
             await waitSeg(1);
         }
         g.reverseMoveOne = false;
         g.reverseMoveTwo = false;
     }
+
+	gamesWhereUserWasPlaying(login: string): Array<string>{
+		if (!login) return
+		let games: Array<string> = [];
+		for (let [key, value] of this.games){
+			if(value.playerOne === login || value.playerTwo === login){
+				games.push(key);
+			}
+		}
+		return games;
+	}
+
+	pauseGame(gameName: string) {
+		let game = this.games.get(gameName)
+		if (!game) return;
+		game.pause = true;
+		this.games.set(gameName, game)
+	}
+
+	async waitForPlayerReconnect(login: string): Promise<void>{
+		let games: Array<string> = this.gamesWhereUserWasPlaying(login)
+		if (games.length == 0) return;
+
+		//delete games finished
+      	for (let game of games){
+			if (this.games.get(game).finish == true){
+					await this.chatService.deleteRoom(game)
+					await this.gameGateaway.destroyEmptyRooms(game)
+					this.games.delete(game)
+					games = games.filter(g => g != game)
+			}
+      	}
+
+        //pause games
+      	for (let game of games){
+			this.pauseGame(game)
+      	}
+
+      	let theOtherPlayers: Set<string> = new Set()
+      	for (let game of games){
+			if (this.games.get(game).playerOne == login){
+				theOtherPlayers.add(this.games.get(game).playerTwo)
+			}else{
+				theOtherPlayers.add(this.games.get(game).playerOne)
+			}
+      	}
+		this.gameGateaway.sendOtherPlayerPart(Array.from(theOtherPlayers), login)
+		//send event to the other player to show a modal
+
+		for (let i = 0; i < 10; i++){
+			for (let game of games){
+				//check whether the other player is active or not
+       			const activeUsers: Array<ChatUser> = this.gameGateaway
+        	   		.getActiveUsersInRoom(game);
+        	   	const activeLogins: Array<string> = activeUsers.map(u => u.login)
+
+//				console.log(activeLogins)
+                if(!activeLogins){}
+                else if(!this.games.get(game)){}
+				else if (!activeLogins.includes(this.games.get(game).playerOne) && 
+				!activeLogins.includes(this.games.get(game).playerTwo)){
+					await this.chatService.deleteRoom(game)
+					await this.gameGateaway.destroyEmptyRooms(game)
+					this.games.delete(game)
+					games = games.filter(g => g != game)
+					theOtherPlayers.delete(game)
+
+				}else if(activeLogins.includes(login)){
+					//send signal to two players to reactivate 
+					//if other player != ""
+					this.gameGateaway.sendOtherPlayerCameBack(Array.from(theOtherPlayers), login)
+            		this.chatService.setUserStatusIsPlaying(login)
+					//send signal to user to go to the left room??? join...
+					return ;
+				}
+        	}
+			await waitSeg(1)
+        }
+
+		for (let game of games){
+			let endGame = this.games.get(game)
+			if (!endGame) return;
+			if (endGame.playerOne == login){
+				endGame.playerOneScore = 1
+				endGame.playerTwoScore = 5
+			} else {
+				endGame.playerOneScore = 5
+				endGame.playerTwoScore = 1
+			}
+			endGame.finish = true;
+			this.chatService.saveGameResult(endGame)
+        	//end game, save results
+
+        	//delete room
+			await this.chatService.deleteRoom(game)
+			await this.gameGateaway.destroyEmptyRooms(game)
+
+			if (this.games.get(game).playerOne == login){
+            	this.chatService.setUserStatusIsActive(this.games.get(game).playerTwo)
+            } else {
+            	this.chatService.setUserStatusIsActive(this.games.get(game).playerOne)
+            }
+			this.games.delete(game)
+		}
+	}
 }
