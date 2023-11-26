@@ -21,6 +21,7 @@ export class PongService {
     public interval: any = 0;
     private matchMaking: Array<string> = new Array<string>;
 	private matchProposals: Map<string, string> = new Map()
+	private matchReplay: Map<string, string> = new Map()
     private matchMakingPlus: Array<string> = new Array<string>;
 
     constructor(
@@ -124,6 +125,26 @@ export class PongService {
         //     this.updateGame(gameGateaway)
         // }
         return (this.games.get(name));
+    }
+
+
+	async rejectReplayProposal(game: string){
+		const g = this.games.get(game)
+		this.cancelMatchProposal(g.playerOne)
+		this.cancelMatchProposal(g.playerTwo)
+		await this.chatService.deleteRoom(game)
+		await this.gameGateaway.destroyEmptyRooms(game)
+
+		if (!this.games.get(game)) return;
+       	this.chatService.setUserStatusIsActive(this.games.get(game).playerTwo)
+        this.chatService.setUserStatusIsActive(this.games.get(game).playerOne)
+		this.games.delete(game)
+	}
+
+
+    saveMatchReplayProposal(senderLogin: string, targetLogin: string){
+		this.matchReplay.set(senderLogin, targetLogin)
+		this.matchReplay.set(targetLogin, senderLogin)
     }
 
 	saveMatchProposal(senderLogin: string, targetLogin: string){
@@ -238,13 +259,15 @@ export class PongService {
             g.ballX += g.ballXVel * g.ballSpeed;
             g.ballY += g.ballYVel * g.ballSpeed;
     }
-    checkScores(g: GameRoom){
+    async checkScores(g: GameRoom){
         if (g.playerOneScore >= 5 || g.playerTwoScore >= 5){
+        	console.log("check scores")
             g.pause = true;
             g.finish = true;
             this.chatService.setUserStatusIsActive(g.playerOne)
             this.chatService.setUserStatusIsActive(g.playerTwo)
-			this.chatService.saveGameResult(g)
+			await this.chatService.saveGameResult(g)
+			if (g.playerTwo != "")this.gameGateaway.sendReplay(g.playerOne, g.playerTwo)
         }
     }
 

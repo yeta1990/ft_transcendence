@@ -116,6 +116,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.chatService.removePassOfRoom(room)
 	}
 
+	rejectReplayProposal(login: string){
+		this.chatService.rejectReplayProposal(login)
+	}
+	sendReplayProposal(login: string){
+		this.chatService.sendReplayProposal(login)
+	}
+
 	leaveRoom(room: string): void{
 		this.chatService.partFromRoom(room);	
 		this.messageList.delete(room);
@@ -233,6 +240,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				}
 				else if (payload.event === 'otherPlayerCameBack'){
 					this.modalService.closeModal()
+				}
+				else if (payload.event === 'replayGameProposal'){
+					this.replayModal(payload.data)
+//					this.modalService.closeModal()
 				}
         		this.scrollToBottom();
 			})
@@ -576,6 +587,31 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			await waitSeg(1)
 		}
 		this.modalService.closeModal()
+	}
+	waitForReplayMatchAnswerModal(login: string){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+			this.chatService.cancelMatchProposal(login)
+			console.log("cancel match proposal")
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template15', login);
+	}
+
+	replayModal(login: string): void {
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+			const wantToReplay = this.modalService.getModalData()[0];
+			console.log(wantToReplay)
+      		if (confirm){
+      			this.sendReplayProposal(login)
+				this.waitForReplayMatchAnswerModal(login)
+			}
+			else if (wantToReplay== "no"){
+				this.rejectReplayProposal(this.getCurrentRoom())
+			}
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template19', login);
 	}
 
 }

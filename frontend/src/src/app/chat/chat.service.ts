@@ -160,6 +160,11 @@ export class ChatService {
 		this.socketService.sendMessageToServer(events.KickUser, login);
 	}
 
+	rejectReplayProposal(login: string){
+		this.socketService.sendMessageToServer("rejectReplayProposal", login);
+	}
+
+
 	disconnectClient(){
 		this.socketService.disconnectClient();
 	}
@@ -241,5 +246,8 @@ export class ChatService {
 		this.socketService.sendMessageToServer("cancelOnlinePlus", "")	
 	}
 
+	sendReplayProposal(login: string){
+		this.socketService.sendMessageToServer("sendReplayProposal", login)
+	}
 
 }

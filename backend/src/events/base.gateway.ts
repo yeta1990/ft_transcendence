@@ -518,4 +518,13 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  	this.sendEventToBothPlayers(player1, player2, "acceptMatchProposal")
   }
 
+  public sendReplay(player1: string, player2:string){
+	  	this.sendEventToBothPlayers(player1, player2, "replayGameProposal")
+  }
+
+  public rejectReplay(player1: string, player2: string){
+	  	this.sendEventToBothPlayers(player1, player2, "rejectReplay")
+  }
+
+
 }
