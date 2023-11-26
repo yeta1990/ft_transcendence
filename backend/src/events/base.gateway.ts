@@ -175,6 +175,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  		  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
 		  }
 		  //cancel all match proposals
+		  console.log("hard disconenct")
 		  this.pongservice.cancelMatchProposal(login)
 		  this.pongservice.removeUserFromMatchMakingList(login)
 		  this.pongservice.waitForPlayerReconnect(login)

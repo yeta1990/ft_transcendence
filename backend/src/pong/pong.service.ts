@@ -136,8 +136,10 @@ export class PongService {
 
 	async rejectReplayProposal(game: string){
 		const g = this.games.get(game)
-		this.cancelMatchProposal(g.playerOne)
-		this.cancelMatchProposal(g.playerTwo)
+		if (g){
+			this.cancelMatchProposal(g.playerOne)
+			this.cancelMatchProposal(g.playerTwo)
+		}
 		await this.chatService.deleteRoom(game)
 		await this.gameGateaway.destroyEmptyRooms(game)
 

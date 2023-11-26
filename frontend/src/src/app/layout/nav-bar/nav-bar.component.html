@@ -1,15 +1,14 @@
 <div class="topnav">
-    <app-button class="left" dir="/home" value="Home">
-        <img src="../../../assets/cadiz.png" alt="logo"/>
-    </app-button>
-    <app-button class="left" dir="/all-users" value='Users'></app-button>
+    <button [disabled]="getUserStatus()==3" class="blue left" (click)="redirectTo('/home')" value="Home">Home
+    </button>
+    <button [disabled]="this.getUserStatus()==3" class="blue left" (click)="redirectTo('/all-users')" value='Users'>Users</button>
 
-    <button class="blue left" (click)="redirectToFriends()" value='Friends'>Friends</button>
+    <button [disabled]="this.getUserStatus()==3" class="blue left" (click)="redirectToFriends()" value='Friends'>Friends</button>
     <!--button class="blue left" (click)="redirectToGame()" value='Play'>Play</button-->
-    <button *ngIf="hasAdminPrivileges()" class="blue left" (click)="redirectToAdmin()" value='Admin'>Admin</button>
-    <button *ngIf="hasAdminPrivileges()" class="blue left" (click)="redirectToChatAdmin()" value='Chat admin'>Chat admin</button>
-    <button class="blue left" (click)="redirectToMyProfile()" value='MyProfile'>MyProfile</button>
+    <button [disabled]="this.getUserStatus()==3" *ngIf="hasAdminPrivileges()" class="blue left" (click)="redirectToAdmin()" value='Admin'>Admin</button>
+    <button [disabled]="this.getUserStatus()==3" *ngIf="hasAdminPrivileges()" class="blue left" (click)="redirectToChatAdmin()" value='Chat admin'>Chat admin</button>
+    <button [disabled]="this.getUserStatus()==3" class="blue left" (click)="redirectToMyProfile()" value='MyProfile'>MyProfile</button>
 
-    <app-button class="right" dir="/login" value='Login' *ngIf="!isUserLogged"></app-button>
+    <button [disabled]="this.getUserStatus()==3" class="right" (click)="redirectTo('/login')" value='Login' *ngIf="!isUserLogged"></button>
     <button class="blue right" value='Logout' *ngIf="isUserLogged" (click)=logout()>Logout</button>
 </div>
