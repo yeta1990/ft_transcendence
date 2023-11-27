@@ -3,9 +3,9 @@
       <h2 class="column-heading">Live game rooms</h2>
       <ul class="channel-list">
       	  <div *ngFor="let room of availableRoomsList">
-      	 	  <li *ngIf="isGameRoom(room)" [class.active]="getCurrentRoom() ===room" class="d-flex"> 
-      	 	  	  <div class="p-2 flex-grow-1 link-channel" (click)="joinUserToRoom(room, '')"(click)="joinUserToRoomAsViwer(room)">
-					{{translateGameRoomNames(room)}} <i *ngIf="isPrivateRoom(room)" class="bi bi-lock"></i>	
+      	 	  <li *ngIf="isGameRoom(room)" [class.active]="getCurrentRoom() ===room" class="d-flex" [ngClass]="{'yellow-border': isMyChallengeRoom(room)}" > 
+      	 	  	  <div class="p-2 flex-grow-1 link-channel"  (click)="joinUserToRoom(room, '')">
+					{{translateGameRoomNames(room)}}
 				  </div>
 				<div class="p-2">
 
@@ -22,7 +22,7 @@
 				  </div>
 				<div class="p-2">
 					<i class="bi bi-box-arrow-right" (click)="leaveRoom(room)"></i>
-
+ 
 				</div>
 			 </li>
       	  </div>

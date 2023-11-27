@@ -121,6 +121,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.messageList.delete(room);
 	}
 
+	isMyChallengeRoom(room: string): boolean {
+		if (!this.myUser) return false;
+		if (room.includes(this.myUser.login) && room.includes('pongRoom') && room.includes('+')){ return true;}
+		return false
+	}
+
 	//subscription to all events from the service
 	ngOnInit(): void {
 		this.chatService.forceInit();
@@ -185,7 +191,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					this.toasterService.launchToaster(ToastValues.ERROR, payload.data.message)
 				}
 				else if (payload.event === 'join'){
-					this.chatService.setCurrentRoom(payload.data.room);
+					let playing: boolean = false;
+					for (let room of this.availableRoomsList){
+						if (this.isMyChallengeRoom(room)){ playing = true}
+					}
+					if (playing == false){
+						this.chatService.setCurrentRoom(payload.data.room);
+					}
 					//check if the messageList map has space to store the room messages to prevent errors, but only 100% necessary in joinmp
 					if (!this.messageList.has(payload.data.room)){
 						this.messageList.set(this.getCurrentRoom(), new Array<ChatMessage>);
