@@ -129,6 +129,10 @@ export class SocketService {
 			.on("otherPlayerCameBack", (data:string) => {
 				this.message.next({event: "otherPlayerCameBack", data});
 			})
+			.on("replayGameProposal", (data:string) => {
+				console.log("replay? " + data)
+				this.message.next({event: "replayGameProposal", data});
+			})
 
 		}
 	}

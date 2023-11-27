@@ -72,6 +72,9 @@ export class PongComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy)) //a trick to finish subscriptions (first part)
         .subscribe((payload: SocketPayload) => {
             if (payload.event === 'gameStatus'){ 
+                this.coef = this.innerWidth / 1400
+                payload.data.canvasWidth = 700 * this.coef;
+                payload.data.canvasheight = 400 * this.coef;
 				this.pongService.setGame(payload.data)
                 this.chatService.setCurrentRoom(payload.data.room);
         		this.canvas = this.gameCanvas?.nativeElement;
@@ -100,7 +103,9 @@ export class PongComponent implements OnInit, OnDestroy {
                     payload.data.canvasheight = 400 * this.coef;
 					this.pongService.setGame(payload.data)
 					this.setGamePlayer();
-                    this.updatePowers();
+					if (payload.data.allowedPowers = true){
+                    	this.updatePowers();
+                    }
                     this.msg = "Best of (9)";
                     if (payload.data.finish){
                         this.msg = "Game has finished";
@@ -147,13 +152,15 @@ export class PongComponent implements OnInit, OnDestroy {
 	}
 
     updatePowers(): void{
-        this.buttonStates[0] = this.isPowerUsed(this.pOne[0]);
-        this.buttonStates[1] = this.isPowerUsed(this.pOne[1]);
-        this.buttonStates[2] = this.isPowerUsed(this.pOne[2]);
+    	if (this.pOne && this.pTwo){
+        	this.buttonStates[0] = this.isPowerUsed(this.pOne[0]);
+        	this.buttonStates[1] = this.isPowerUsed(this.pOne[1]);
+        	this.buttonStates[2] = this.isPowerUsed(this.pOne[2]);
 
-        this.buttonStates[3] = this.isPowerUsed(this.pTwo[0]);
-        this.buttonStates[4] = this.isPowerUsed(this.pTwo[1]);
-        this.buttonStates[5] = this.isPowerUsed(this.pTwo[2]);
+        	this.buttonStates[3] = this.isPowerUsed(this.pTwo[0]);
+        	this.buttonStates[4] = this.isPowerUsed(this.pTwo[1]);
+        	this.buttonStates[5] = this.isPowerUsed(this.pTwo[2]);
+        }
     }
     isPowerUsed(power:string):boolean{
         if (power == "InestableBall") {
@@ -289,10 +296,10 @@ export class PongComponent implements OnInit, OnDestroy {
         this.gameContext!.fillStyle = "#808080";
         this.gameContext!.fillText(pOne, posOne, 50 * this.coef);
         this.gameContext!.fillText(ptwo, posTwo, 50 * this.coef);
-        this.gameContext!.fillStyle = "#FF0000";
+        this.gameContext!.fillStyle = "#d1434f";
         if (this.pongService.getGame().playerOneScore >= 5) { //POINTS
             //this.restartScores();
-            this.gameContext!.fillStyle = "#00FF00";
+            this.gameContext!.fillStyle = "##d4da5b";
             let winner = this.pongService.getGame().playerOne + " WON!"
             this.gameContext!.fillText(winner, 250 * this.coef, 200 * this.coef);
             var again = "Press ESC for play again";
@@ -301,7 +308,7 @@ export class PongComponent implements OnInit, OnDestroy {
             this.gameContext!.fillText(again, (this.canvas.width - textWidth) / 2, 250 * this.coef);
         } else if (this.pongService.getGame().playerTwoScore >= 5) { //POINTS
             //this.restartScores();
-            this.gameContext!.fillStyle = "#FF0000";
+            this.gameContext!.fillStyle = "#d1434f";
             let winner;
             if (this.pongService.getGame().playerTwo != "") {
                 winner = this.pongService.getGame().playerTwo + " WON!"
@@ -316,7 +323,7 @@ export class PongComponent implements OnInit, OnDestroy {
         }
         //draw pause if not finish game
         if (this.pongService.getGame().pause && !this.pongService.getGame().finish) {
-            this.gameContext!.fillStyle = "#00FF00";
+            this.gameContext!.fillStyle = "#d4da5b";
             this.gameContext!.fillText("PAUSE", 290 * this.coef, 200 * this.coef);
             this.gameContext!.fillStyle = "#808080";
             var again = "Press ESC play";

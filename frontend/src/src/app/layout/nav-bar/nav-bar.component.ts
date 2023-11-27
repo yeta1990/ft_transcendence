@@ -21,14 +21,16 @@ export class NavBarComponent {
 	private modalClosedSubscription: Subscription = {} as Subscription;
 
 	private subscriptions = new Subscription();
+	userName: string = "";
    constructor(
        private authService: AuthService,
        private authGuardService: AuthGuardService,
        private router: Router,
-       private chatService: ChatService,
+      private chatService: ChatService,
 	   private modalService: ModalService,
 	   private location: Location
     ) {
+      this.userName = this.authService.getUserNameFromToken() as string;
       this.isUserLogged = authService.isLoggedIn();
 	  this.chatService.forceInit()    
 	  this.subscriptions.add(
@@ -37,6 +39,9 @@ export class NavBarComponent {
 			.subscribe((payload: SocketPayload) => {
 				if (payload.event === events.ActiveUsers){
 					this.chatService.setActiveUsers(payload.data)
+				}
+				else if (payload.event === events.ListAllRooms){
+					this.chatService.setAvailableRoomsList(payload.data.map((r:any) => r.room))
 				}
 				else if (payload.event === "sendMatchProposal"){
 					console.log("receiving match")
@@ -52,10 +57,21 @@ export class NavBarComponent {
 	  					this.router.navigateByUrl('/home');
 					}
 				}
+				else if (payload.event === 'replayGameProposal'){
+					this.replayModal(payload.data)
+//					this.modalService.closeModal()
+				}
+				else if (payload.event === 'cancelOnline'){
+					this.modalService.closeModal()
+				}
 		})
 	  )
     }
 
+
+  getUserStatus(){
+	return this.chatService.getUserStatus(this.userName)
+  }
 
   logout() {
     this.authService.logout();
@@ -67,14 +83,17 @@ export class NavBarComponent {
 
   redirectToMyProfile() {
     // Obtén el nombre de usuario del JWT
-    const userName = this.authService.getUserNameFromToken();
-    if (userName) {
-      this.router.navigate(['/user-profile', userName]);
+
+    if (this.userName) {
+      this.router.navigate(['/user-profile', this.userName]);
     } else {
 	  this.router.navigateByUrl('/home');
     }
   }
 
+  redirectTo(path: string){
+	this.router.navigateByUrl(path);
+  }
   redirectToFriends() {
 	this.router.navigateByUrl('/friends');
   }
@@ -91,6 +110,12 @@ export class NavBarComponent {
       this.router.navigateByUrl('/admin-chat');
   }
 
+	rejectReplayProposal(login: string){
+		this.chatService.rejectReplayProposal(login)
+	}
+	sendReplayProposal(login: string){
+		this.chatService.sendReplayProposal(login)
+	}
 
 
 	receiveMatchModal(login: string){
@@ -106,6 +131,31 @@ export class NavBarComponent {
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template14', login);
+	}
+	waitForReplayMatchAnswerModal(login: string){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+			this.chatService.cancelMatchProposal(login)
+			console.log("cancel match proposal")
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template15', login);
+	}
+ 
+	replayModal(login: string): void {
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+			const wantToReplay = this.modalService.getModalData()[0];
+			console.log(wantToReplay)
+      		if (confirm){
+      			this.sendReplayProposal(login)
+				this.waitForReplayMatchAnswerModal(login)
+			}
+			else if (wantToReplay== "no"){
+				this.rejectReplayProposal(this.chatService.getCurrentRoom())
+			}
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('template19', login);
 	}
 
 

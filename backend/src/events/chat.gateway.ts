@@ -416,6 +416,7 @@ export class ChatGateway extends BaseGateway {
 
   @SubscribeMessage('ban')
   async banUserOfRoom(client: Socket, payload: ChatMessage){
+	  if (payload.room.includes("pongRoom")) return
 	  const login: string = client.handshake.query.login as string;
 	  const banOk: boolean = await this
 	  	.chatService
@@ -743,6 +744,11 @@ export class ChatGateway extends BaseGateway {
 		  this.joinUserToRoom(client.id, login, room, null);
 	}
 
+@SubscribeMessage('spectatorTo')
+  	async spectatorTo(client: Socket, room: string): Promise<void>{
+  		this.handleJoinRoomGameAsViwer(client, room)
+	}
+
 @SubscribeMessage('joinGame')
   	async handleJoinRoomGame(client: Socket, roomAndPassword: string): Promise<void>{
 		let room: string = roomAndPassword.split(" ", 2)[0];
@@ -946,5 +952,22 @@ export class ChatGateway extends BaseGateway {
 		this.pongservice.cancelMatchProposal(login)
 	}
 
+	@SubscribeMessage('rejectReplayProposal')
+	rejectReplayProposal(client: Socket, game: string){
+		this.pongservice.rejectReplayProposal(game)
+	}
+	
+	@SubscribeMessage('sendReplayProposal')
+	sendReplayProposal(client: Socket, targetLogin: string){
+		const login: string = client.handshake.query.login as string;
+
+		//if the other user has already accepted, start the game
+		const validProposal: boolean = this.pongservice.isAValidProposal(login, targetLogin)
+		if (validProposal){
+			this.acceptedMatchProposal(client, targetLogin)
+		}else{
+			this.pongservice.saveMatchProposal(login, targetLogin)
+		}
+	}
 
 }
