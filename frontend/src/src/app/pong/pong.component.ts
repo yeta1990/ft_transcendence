@@ -291,7 +291,7 @@ export class PongComponent implements OnInit, OnDestroy {
             ptwo = this.pongService.getGame().playerTwoScore + " "+ this.pongService.getGame().playerTwo;
         else
             ptwo = this.pongService.getGame().playerTwoScore + " computer";
-        var posOne = ((this.canvas.width / 2) - pOne.length) / 2;
+        var posOne = (((this.canvas.width / 2) - pOne.length) / 2 ) - (5 * this.coef);
         var posTwo = (this.canvas.width / 2) + 20 * this.coef;
         this.gameContext!.fillStyle = "#808080";
         this.gameContext!.fillText(pOne, posOne, 50 * this.coef);

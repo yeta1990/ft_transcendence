@@ -738,6 +738,7 @@ export class ChatGateway extends BaseGateway {
 
 @SubscribeMessage('joinGameAsViwer')
   	async handleJoinRoomGameAsViwer(client: Socket, room: string): Promise<void>{
+		console.log("Joined as viewer to:" + room);
 		const login: string = client.handshake.query.login as string;
 		const rooms :Array<string> = this.getActiveRooms();
 		const successfulJoin = await 
