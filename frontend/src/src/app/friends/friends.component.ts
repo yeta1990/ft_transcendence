@@ -32,9 +32,8 @@ export class FriendsComponent {
 				this.allUsers.map(u => {if (u.login === this.myLogin) friendRequestsLogins = u.incomingFriendRequests})
 				this.incomingFriendRequests = this.allUsers.filter(u => friendRequestsLogins.includes(u.login))
 			})
-
 	}
-
+ 
 	getActiveUsers(): Array<ChatUser> {
 		return this.chatService.getActiveUsers()
 	}
@@ -50,6 +49,7 @@ export class FriendsComponent {
 	spectatorTo(room:string): void {
 		this.viewer = true;
 		console.log("view to --> " + room);
+        this.chatService.setCurrentRoom(room);
 		this.chatService.joinUserToRoomAsViwer(room);
 	}
 

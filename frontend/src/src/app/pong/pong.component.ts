@@ -66,6 +66,19 @@ export class PongComponent implements OnInit, OnDestroy {
           		this.playerLogin = response.login;
         });
 
+
+
+        requestAnimationFrame(this.gameLoop);
+		if (this.playerLogin == undefined || this.playerLogin.length == 0){
+       		this.myProfileService.getUserDetails()
+       			.subscribe((response: User) => {
+       			this.playerLogin = response.login;
+       	});
+		
+		}else{
+			this.setGamePlayer()	
+		}
+
         this.subscriptions.add(
         this.pongService
         .getMessage()
@@ -114,8 +127,8 @@ export class PongComponent implements OnInit, OnDestroy {
             }               
         }));
         if (!this.online && !this.contected) { 
-            this.pongService.joinUserToRoom("#pongRoom");
-            this.msg = "Connecting to room..."            
+//            this.pongService.joinUserToRoom("#pongRoom");
+            this.msg = "Settings..."            
             this.contected = true;
         }
     }
@@ -128,6 +141,13 @@ export class PongComponent implements OnInit, OnDestroy {
         g.canvasheight = 400 * this.coef;
         this.canvas = this.gameCanvas?.nativeElement;
         this.gameContext = this.canvas?.getContext('2d');
+    }
+    getWidth(){
+		return 700 * this.coef
+    }
+
+    getHeight() {
+		return 400 * this.coef
     }
 
 	getGame(): GameRoom {
@@ -191,7 +211,7 @@ export class PongComponent implements OnInit, OnDestroy {
 	getCurrentRoom(): string {
 		return this.chatService.getCurrentRoom()
 	}
-
+  
     async ngOnInit() {
         this.innerWidth = window.innerWidth;
         if (!this.pongService.getEventSubscribed()){
@@ -219,11 +239,16 @@ export class PongComponent implements OnInit, OnDestroy {
 					}
         	});
         }
+        this.canvas = this.gameCanvas?.nativeElement;
+        this.gameContext = this.canvas?.getContext('2d');
+
         this.pongService.forceInit();
+//        requestAnimationFrame(this.gameLoop);
         // if (this.online && !this.contected) {
         //     this.pongService.playOnLine(this.playerLogin);
         //     this.contected = true;
         // }
+
     }
 
     mode(m: string) {
@@ -328,6 +353,7 @@ export class PongComponent implements OnInit, OnDestroy {
             this.gameContext!.fillStyle = "#808080";
             var again = "Press ESC play";
             var textWidth = this.gameContext!.measureText(again).width;
+
             this.gameContext!.fillText(again, (this.canvas.width - textWidth) / 2, 250 * this.coef);
             var up = "UP: W / ↑"
             var textWidth = this.gameContext!.measureText(up).width;
@@ -353,6 +379,7 @@ export class PongComponent implements OnInit, OnDestroy {
     // }
     draw(){
 
+        if (!this.pongService.getGame()) return 
         this.gameContext!.fillStyle = "#000";
         this.gameContext!.fillRect(0,0,this.canvas.width, this.canvas.height);
         this.drawBoardDetails();

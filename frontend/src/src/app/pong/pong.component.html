@@ -21,7 +21,8 @@
 <button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('plus')">Plus</button> -->
 
 <div >
-    <canvas [hidden]="visibleCanvas()" #gameCanvas width={{getGame().canvasWidth}} height={{getGame().canvasheight}}></canvas>
+    <canvas [hidden]="visibleCanvas()" #gameCanvas width={{getWidth()}} height={{getHeight()}}></canvas>
+    <!--<canvas [hidden]="visibleCanvas()" #gameCanvas width={{getGame().canvasWidth}} height={{getGame().canvasheight}}></canvas>-->
     <script type="text/javascript" src="pong.component.ts"></script>
 </div>
 <!-- <h2>{{this.waitingList}}</h2> -->
