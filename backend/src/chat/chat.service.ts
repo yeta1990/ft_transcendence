@@ -417,7 +417,7 @@ export class ChatService {
 		return true;
 	}
 
-	public async silenceUserOfRoom(executorLogin: string, login: string, room: string): Promise<boolean>{
+	public async silenceUserOfRoom(executorLogin: string, login: string, room: string, time:number): Promise<boolean>{
 		//check privileges
 		if (executorLogin === login) return false;
 		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorLogin, room);

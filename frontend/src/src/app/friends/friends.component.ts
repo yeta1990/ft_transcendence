@@ -58,14 +58,12 @@ export class FriendsComponent {
 		if (room == "Isn't playing") return;
 		this.viewingTo = login;
 		this.viewer = true;
-		console.log("view to --> " + room);
         this.chatService.setCurrentRoom(room);
 		this.chatService.joinUserToRoomAsViwer(room);
 	}
 
 	getGameRoom(login: string): string {
 		const availableRoomsList: Array<string> = this.getAvailableRoomsList()
-//		console.log(availableRoomsList)
 		for (let room of availableRoomsList){
 			if (room.includes('pongRoom') && room.includes(login) && room.includes('+')){
 				return room;

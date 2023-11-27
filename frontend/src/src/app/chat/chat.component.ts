@@ -92,8 +92,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	   this.chatService.banUserFromRoom(nick, room)
    }
 
-   silenceUserFromRoom(nick: string, room: string){
-		this.chatService.silenceUserFromRoom(nick, room)
+   silenceUserFromRoom(nick: string, room: string, time: number){
+		this.chatService.silenceUserFromRoom(nick, room, time)
    }
 
    unSilenceUserFromRoom(nick: string, room: string){
@@ -483,6 +483,21 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     	});
 		this.modalService.openModal('template6', room);
 	}
+
+   	silenceUserFromRoomModal(nick: string, room: string){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm){
+      			const time = this.modalService.getModalData()[0];
+      			if (time > 0 && time <= 1000){
+					this.silenceUserFromRoom(nick, room, time)
+				}
+			}
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('silenceUserModal', room);
+
+   	}
 
 	addPassToRoomModal(room:string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {

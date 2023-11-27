@@ -167,7 +167,7 @@
 								<i *ngIf="!getMyBlockedUsers().includes(user.login)" class="bi bi-person-fill-slash" (click)="blockUserModal(user.login)">&nbsp;</i>
 								<i *ngIf="getMyBlockedUsers().includes(user.login)" class="bi bi-person-check-fill" (click)="unBlockUserModal(user.login)">&nbsp;</i>
 							    <i *ngIf="roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login && isAdmin(getCurrentRoom(), user.login)" class="bi bi-shield-minus" (click)="removeRoomAdmin(user.login, getCurrentRoom())">&nbsp;</i>	
-								<i *ngIf="(roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), user.login)) && !isSilenced(getCurrentRoom(), user.login)" class="bi bi-volume-mute" (click)="silenceUserFromRoom(user.login, getCurrentRoom())">&nbsp;</i>
+								<i *ngIf="(roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), user.login)) && !isSilenced(getCurrentRoom(), user.login)" class="bi bi-volume-mute" (click)="silenceUserFromRoomModal(user.login, getCurrentRoom())">&nbsp;</i>
 								<i *ngIf="(roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), user.login)) && isSilenced(getCurrentRoom(), user.login)" class="bi bi-volume-up" (click)="unSilenceUserFromRoom(user.login, getCurrentRoom())">&nbsp;</i>
 								<i *ngIf="roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), user.login)" class="bi bi-x-circle" (click)="banUserFromRoomModal(user.login, getCurrentRoom())"></i>
 							</div>
@@ -198,7 +198,7 @@
 								<i *ngIf="!getMyBlockedUsers().includes(user.login)" class="bi bi-person-fill-slash" (click)="blockUserModal(user.login)">&nbsp;</i>
 								<i *ngIf="getMyBlockedUsers().includes(user.login)" class="bi bi-person-check-fill" (click)="unBlockUserModal(user.login)">&nbsp;</i>
 							    <i *ngIf="roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login && !isAdmin(getCurrentRoom(), user.login)" class="bi bi-shield-plus" (click)="makeRoomAdmin(user.login, getCurrentRoom())">&nbsp;</i>	
-								<i *ngIf="(roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), user.login)) && !isSilenced(getCurrentRoom(), user.login)" class="bi bi-volume-mute" (click)="silenceUserFromRoom(user.login, getCurrentRoom())">&nbsp;</i>
+								<i *ngIf="(roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), user.login)) && !isSilenced(getCurrentRoom(), user.login)" class="bi bi-volume-mute" (click)="silenceUserFromRoomModal(user.login, getCurrentRoom())">&nbsp;</i>
 								<i *ngIf="(roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), user.login)) && isSilenced(getCurrentRoom(), user.login)" class="bi bi-volume-up" (click)="unSilenceUserFromRoom(user.login, getCurrentRoom())">&nbsp;</i>
 								<i *ngIf="roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), user.login)" class="bi bi-x-circle" (click)="banUserFromRoomModal(user.login, getCurrentRoom())"></i>
 							</div>

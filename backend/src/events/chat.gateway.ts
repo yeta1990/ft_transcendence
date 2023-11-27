@@ -499,12 +499,12 @@ export class ChatGateway extends BaseGateway {
   }
 
   @SubscribeMessage(events.SilenceUser)
-  async silenceUserOfRoom(client: Socket, payload: ChatMessage){
+  async silenceUserOfRoom(client: Socket, payload: any){
 	  const login: string = client.handshake.query.login as string;
 	  const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(payload.room);
 	  const silenceOk: boolean = await this
 	  	.chatService
-	  	.silenceUserOfRoom(login, payload.login, payload.room);
+	  	.silenceUserOfRoom(login, payload.login, payload.room, payload.time);
 	  if (silenceOk){
 		this.afterSilenceInform(login, client.id, payload.login, payload.room)
 	  }
