@@ -443,7 +443,23 @@
 			<div class="image-gallery">
 			  <div *ngFor="let image of getImages()" (click)="onImageSelect(image)" class="image-container" [class.selected-image]="selectedImage === image">
 				<img [src]="imagesBaseUrl + image" alt="Avatar Image" class="gallery-image">
-			  </div>
+			</div>
+			<img [src]="imagesBaseUrl + placeholder" alt="Avatar Image" class="gallery-image">
+			  <div class="avatar-container">
+				<div class="image-cropper-container" *ngIf="file; else placeholder" [ngClass]="{'box-shadow-avatar': !!file}" [ngStyle]="{backgroundImage: 'url(' + file + ')'}"></div>
+				<ng-template #placeholder>
+				  <div class="image-cropper-container avatar-placeholder box-shadow-avatar" *ngIf="!file"></div>
+				</ng-template>
+				<img class="image-container" [src]="imagesBaseUrl + placeholder" alt="Descripción de la imagen">
+				<label for="avatar-input-file">
+					<div class="icon-wrapper">
+						<mat-icon class="icon" fontIcon="edit"></mat-icon>
+						<label for="avatar-input-file" class="file-label">
+						  <input type="file" id="avatar-input-file" accept="image/*" (change)="onFileChange($event)" />
+						</label>
+					  </div>
+				</label>
+			</div> 
 			  <div class="upload-container" (click)="openFileInput()">
 				<div class="upload-icon">+</div>
 			  </div>
@@ -457,6 +473,7 @@
 		  </div>
 		  <br>
 		</div>
+
 	  </ng-template>
 
 

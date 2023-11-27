@@ -109,6 +109,9 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 			  console.error('Error fetching avatar images:', error);
 			}
 		  );
+		  this.imageService.selectedImage$.subscribe((selectedImage: string) => {
+			console.log('Imagen seleccionada en EditProfileComponent:', selectedImage);
+		  });
 	}
 
 	ngOnDestroy(): void {

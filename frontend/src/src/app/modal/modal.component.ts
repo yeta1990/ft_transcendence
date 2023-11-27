@@ -17,6 +17,8 @@ export class ModalComponent {
   imagesBaseUrl: string = environment.apiUrl + '/uploads/'
   selectedImage: string | null = null;
   formData: FormData = new FormData();
+  file: string | null = null;
+  placeholder: string = "placeholder.png";
 
   constructor(private modalService: ModalService) {
  	this.modalData = this.modalService.getModalData() 
@@ -95,7 +97,7 @@ export class ModalComponent {
     } else {
       this.selectedImage = selectedImage;
     }
-  }
+  } 
 
   isImageSelected(image: string): boolean {
     return this.selectedImage === image;
@@ -109,11 +111,22 @@ export class ModalComponent {
   }
 
   onFileChange(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.formData.append('image', file);
+    const files = event.target.files as FileList;
+
+    if (files.length > 0) {
+      const _file = URL.createObjectURL(files[0]);
+      console.log('_file:', _file);
+      this.file = _file;
+      this.resetInput();   
     }
   }
+
+  resetInput(){
+    const input = document.getElementById('avatar-input-file') as HTMLInputElement;
+    if(input){
+      input.value = "";
+    }
+ }
 
   clearFile(): void {
     this.formData.delete('image');
