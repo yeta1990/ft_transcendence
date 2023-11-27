@@ -55,6 +55,7 @@ export class FriendsComponent {
 	}
 
 	spectatorTo(room:string, login: string): void {
+		if (room == "Isn't playing") return;
 		this.viewingTo = login;
 		this.viewer = true;
 		console.log("view to --> " + room);

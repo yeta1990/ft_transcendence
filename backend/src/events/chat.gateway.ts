@@ -560,6 +560,7 @@ export class ChatGateway extends BaseGateway {
   async part(client: Socket, room: string): Promise<void>{
 	const login: string = client.handshake.query.login as string;
 	const socketIdsByLogin: Array<string> = this.getClientSocketIdsFromLogin(login);
+	if (room.includes('pongRoom')) return;
 
 	if (socketIdsByLogin.length === 0)
 		return generateSocketErrorResponse(room, `Error`)

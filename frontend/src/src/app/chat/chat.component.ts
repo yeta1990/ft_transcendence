@@ -169,8 +169,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 						this.chatService.setCurrentRoom("")
 					}
 					else if (!this.myJointRoomList.includes(this.getCurrentRoom())){
-						this.chatService.setCurrentRoom(this.myJointRoomList[0]);
-						this.joinUserToRoom(this.getCurrentRoom(), "")
+//						this.chatService.setCurrentRoom(this.myJointRoomList[0]);
+//						this.joinUserToRoom(this.getCurrentRoom(), "")
 					}
 				}
 				else if (payload.event === 'system'){
