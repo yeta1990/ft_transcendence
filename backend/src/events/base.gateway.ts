@@ -79,7 +79,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		this.getAllChatUsersWithNickEquivalence()
 			.then(c => this.server.emit(events.LoginNickEquivalence, c))
   }
-
+ 
   // about auth during client connection
   // https://github.com/ThomasOliver545/realtime-todo-task-management-app-nestjs-and-angular/blob/main/todo-api/src/todo/gateway/todo.gateway.ts
   async handleConnection(socket: Socket): Promise<void>{

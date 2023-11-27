@@ -57,8 +57,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.profileService.getUserDetails()
 			.subscribe(
 				(response: User) => {this.myUser= response;},
-			(error) => {console.log(error);}
-			);
+			(error) => {});
    }
 
    getCurrentRoom(): string {
@@ -122,6 +121,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.messageList.delete(room);
 	}
 
+	isMyChallengeRoom(room: string): boolean {
+		if (!this.myUser) return false;
+		if (room.includes(this.myUser.login) && room.includes('pongRoom') && room.includes('+')){ return true;}
+		return false
+	}
+
 	//subscription to all events from the service
 	ngOnInit(): void {
 		this.chatService.forceInit();
@@ -170,9 +175,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 						this.chatService.setCurrentRoom("")
 					}
 					else if (!this.myJointRoomList.includes(this.getCurrentRoom())){
-						this.chatService.setCurrentRoom(this.myJointRoomList[0]);
-						this.joinUserToRoom(this.getCurrentRoom(), "")
+//						this.chatService.setCurrentRoom(this.myJointRoomList[0]);
+//						this.joinUserToRoom(this.getCurrentRoom(), "")
 					}
+
 				}
 				else if (payload.event === 'system'){
 //					old method to log a message in the chat window
@@ -186,7 +192,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					this.toasterService.launchToaster(ToastValues.ERROR, payload.data.message)
 				}
 				else if (payload.event === 'join'){
-					this.chatService.setCurrentRoom(payload.data.room);
+					let playing: boolean = false;
+					for (let room of this.availableRoomsList){
+						if (this.isMyChallengeRoom(room)){ playing = true
+							this.chatService.setCurrentRoom(room);
+						}
+					}
+					if (playing == false){
+						this.chatService.setCurrentRoom(payload.data.room);
+					}
 					//check if the messageList map has space to store the room messages to prevent errors, but only 100% necessary in joinmp
 					if (!this.messageList.has(payload.data.room)){
 						this.messageList.set(this.getCurrentRoom(), new Array<ChatMessage>);
@@ -527,6 +541,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			return this.getNickEquivalence(login) + ' vs computer'
 		}
 		return room
+	}
+
+	enableChallengeButton(login: string): boolean{
+		if (!this.myUser) return false;
+		if (this.isUserActive(login) == 1 && this.isUserActive(this.myUser!.login) != 3)
+		{
+			return true
+		}
+		return false;
 	}
 
 }

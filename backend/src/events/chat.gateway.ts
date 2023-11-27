@@ -40,7 +40,7 @@ export class ChatGateway extends BaseGateway {
 	  if (await this.userService
 	  	  .isUserBannedFromUser(destinationLogin, emisorLogin)){
 	  	  return this.messageToClient(client.id, "system", 
-	  			generateSocketErrorResponse("", `You can't send a private message because you are banned from: ${destinationLogin}`).data);
+	  			generateSocketErrorResponse("", `You can't send a private message because you are banned`).data);
 	  }
 	  	if (await this.userService.thereIsABlock(emisorLogin, destinationLogin)){
 	  	  return this.messageToClient(client.id, "system", 
@@ -399,9 +399,7 @@ export class ChatGateway extends BaseGateway {
 			.emit("system", generateSocketInformationResponse(payload.room, 
 				`You've set a password to chat room ${payload.room} successfully`).data)
 
-		let roomMetaData: RoomMetaData = await this.roomService
-			.getRoomMetaData(payload.room)
-	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
+    	this.emit(events.ListAllRooms, await this.roomService.getAllRoomsMetaData());
 	 	}
   }
 
@@ -413,9 +411,7 @@ export class ChatGateway extends BaseGateway {
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
 				`You've made chat room ${payload.room} public`).data)
-		let roomMetaData: RoomMetaData = await this.roomService
-			.getRoomMetaData(payload.room)
-	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
+    	this.emit(events.ListAllRooms, await this.roomService.getAllRoomsMetaData());
 	  }
   }
 
@@ -560,6 +556,7 @@ export class ChatGateway extends BaseGateway {
   async part(client: Socket, room: string): Promise<void>{
 	const login: string = client.handshake.query.login as string;
 	const socketIdsByLogin: Array<string> = this.getClientSocketIdsFromLogin(login);
+	if (room.includes('pongRoom')) return;
 
 	if (socketIdsByLogin.length === 0)
 		return generateSocketErrorResponse(room, `Error`)
