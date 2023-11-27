@@ -178,6 +178,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 //						this.chatService.setCurrentRoom(this.myJointRoomList[0]);
 //						this.joinUserToRoom(this.getCurrentRoom(), "")
 					}
+
 				}
 				else if (payload.event === 'system'){
 //					old method to log a message in the chat window
@@ -193,7 +194,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				else if (payload.event === 'join'){
 					let playing: boolean = false;
 					for (let room of this.availableRoomsList){
-						if (this.isMyChallengeRoom(room)){ playing = true}
+						if (this.isMyChallengeRoom(room)){ playing = true
+							this.chatService.setCurrentRoom(room);
+						}
 					}
 					if (playing == false){
 						this.chatService.setCurrentRoom(payload.data.room);
