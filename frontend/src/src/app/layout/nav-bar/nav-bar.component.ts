@@ -134,8 +134,10 @@ export class NavBarComponent {
 	}
 	waitForReplayMatchAnswerModal(login: string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-			this.chatService.cancelMatchProposal(login)
-			console.log("cancel match proposal")
+			const wantToReplay = this.modalService.getModalData()[0];
+			if (wantToReplay == "no"){
+				this.rejectReplayProposal(this.chatService.getCurrentRoom())
+			}
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template15', login);
@@ -146,6 +148,7 @@ export class NavBarComponent {
       		const confirm: boolean = this.modalService.getConfirmationInput();
 			const wantToReplay = this.modalService.getModalData()[0];
 			console.log(wantToReplay)
+			this.modalClosedSubscription.unsubscribe();
       		if (confirm){
       			this.sendReplayProposal(login)
 				this.waitForReplayMatchAnswerModal(login)
@@ -153,7 +156,7 @@ export class NavBarComponent {
 			else if (wantToReplay== "no"){
 				this.rejectReplayProposal(this.chatService.getCurrentRoom())
 			}
-			this.modalClosedSubscription.unsubscribe();
+
     	});
 		this.modalService.openModal('template19', login);
 	}

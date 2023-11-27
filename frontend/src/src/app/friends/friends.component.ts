@@ -16,8 +16,10 @@ import { environment } from '../../environments/environment';
 })
 export class FriendsComponent {
 
+	public viewer:boolean = false;
 	friends: User[] = []
 	allUsers: User[] = []
+	viewingTo: string = "";
 	incomingFriendRequests: User[] = []
 	myLogin: string;
     imagesBaseUrl: string = environment.apiUrl + '/uploads/'
@@ -31,9 +33,15 @@ export class FriendsComponent {
 				this.allUsers.map(u => {if (u.login === this.myLogin) friendRequestsLogins = u.incomingFriendRequests})
 				this.incomingFriendRequests = this.allUsers.filter(u => friendRequestsLogins.includes(u.login))
 			})
-
 	}
-
+ 
+ 	showGame(): boolean {
+		if (this.getUserStatus(this.viewingTo) !== 3){
+			this.viewer = false
+			return false
+		}
+		return true;
+ 	}
 	getActiveUsers(): Array<ChatUser> {
 		return this.chatService.getActiveUsers()
 	}
@@ -46,8 +54,12 @@ export class FriendsComponent {
 		return this.chatService.getAvailableRoomsList()
 	}
 
-	spectatorTo(room:string): void {
-
+	spectatorTo(room:string, login: string): void {
+		this.viewingTo = login;
+		this.viewer = true;
+		console.log("view to --> " + room);
+        this.chatService.setCurrentRoom(room);
+		this.chatService.joinUserToRoomAsViwer(room);
 	}
 
 	getGameRoom(login: string): string {

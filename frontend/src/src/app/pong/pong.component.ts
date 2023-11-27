@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, OnDestroy, Inject, HostListener } from '@angular/core';
+import { Component, Input, OnInit, ElementRef, ViewChild, AfterViewInit, OnDestroy, Inject, HostListener } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { PongService } from './pong.service';
 import { Subject, Subscription, pipe } from "rxjs"
@@ -42,7 +42,8 @@ export class PongComponent implements OnInit, OnDestroy {
     private coef:number = 1;
     buttonStates: boolean[] = [false, false, false, false, false, false];
     
-
+	@Input()
+	friends: boolean = false;
     
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
     constructor(
@@ -65,6 +66,19 @@ export class PongComponent implements OnInit, OnDestroy {
        		.subscribe((response: User) => {
           		this.playerLogin = response.login;
         });
+
+
+
+        requestAnimationFrame(this.gameLoop);
+		if (this.playerLogin == undefined || this.playerLogin.length == 0){
+       		this.myProfileService.getUserDetails()
+       			.subscribe((response: User) => {
+       			this.playerLogin = response.login;
+       	});
+		
+		}else{
+			this.setGamePlayer()	
+		}
 
         this.subscriptions.add(
         this.pongService
@@ -114,8 +128,8 @@ export class PongComponent implements OnInit, OnDestroy {
             }               
         }));
         if (!this.online && !this.contected) { 
-            this.pongService.joinUserToRoom("#pongRoom");
-            this.msg = "Connecting to room..."            
+//            this.pongService.joinUserToRoom("#pongRoom");
+            this.msg = "Settings..."            
             this.contected = true;
         }
     }
@@ -128,6 +142,13 @@ export class PongComponent implements OnInit, OnDestroy {
         g.canvasheight = 400 * this.coef;
         this.canvas = this.gameCanvas?.nativeElement;
         this.gameContext = this.canvas?.getContext('2d');
+    }
+    getWidth(){
+		return 700 * this.coef
+    }
+
+    getHeight() {
+		return 400 * this.coef
     }
 
 	getGame(): GameRoom {
@@ -191,7 +212,7 @@ export class PongComponent implements OnInit, OnDestroy {
 	getCurrentRoom(): string {
 		return this.chatService.getCurrentRoom()
 	}
-
+  
     async ngOnInit() {
         this.innerWidth = window.innerWidth;
         if (!this.pongService.getEventSubscribed()){
@@ -219,11 +240,16 @@ export class PongComponent implements OnInit, OnDestroy {
 					}
         	});
         }
+        this.canvas = this.gameCanvas?.nativeElement;
+        this.gameContext = this.canvas?.getContext('2d');
+
         this.pongService.forceInit();
+//        requestAnimationFrame(this.gameLoop);
         // if (this.online && !this.contected) {
         //     this.pongService.playOnLine(this.playerLogin);
         //     this.contected = true;
         // }
+
     }
 
     mode(m: string) {
@@ -291,7 +317,7 @@ export class PongComponent implements OnInit, OnDestroy {
             ptwo = this.pongService.getGame().playerTwoScore + " "+ this.pongService.getGame().playerTwo;
         else
             ptwo = this.pongService.getGame().playerTwoScore + " computer";
-        var posOne = ((this.canvas.width / 2) - pOne.length) / 2;
+        var posOne = (((this.canvas.width / 2) - pOne.length) / 2 ) - (5 * this.coef);
         var posTwo = (this.canvas.width / 2) + 20 * this.coef;
         this.gameContext!.fillStyle = "#808080";
         this.gameContext!.fillText(pOne, posOne, 50 * this.coef);
@@ -328,6 +354,7 @@ export class PongComponent implements OnInit, OnDestroy {
             this.gameContext!.fillStyle = "#808080";
             var again = "Press ESC play";
             var textWidth = this.gameContext!.measureText(again).width;
+
             this.gameContext!.fillText(again, (this.canvas.width - textWidth) / 2, 250 * this.coef);
             var up = "UP: W / ↑"
             var textWidth = this.gameContext!.measureText(up).width;
@@ -353,6 +380,7 @@ export class PongComponent implements OnInit, OnDestroy {
     // }
     draw(){
 
+        if (!this.pongService.getGame()) return 
         this.gameContext!.fillStyle = "#000";
         this.gameContext!.fillRect(0,0,this.canvas.width, this.canvas.height);
         this.drawBoardDetails();
