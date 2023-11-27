@@ -16,6 +16,7 @@ import { environment } from '../../environments/environment';
 })
 export class FriendsComponent {
 
+	public viewer:boolean = false;
 	friends: User[] = []
 	allUsers: User[] = []
 	incomingFriendRequests: User[] = []
@@ -47,7 +48,9 @@ export class FriendsComponent {
 	}
 
 	spectatorTo(room:string): void {
-
+		this.viewer = true;
+		console.log("view to --> " + room);
+		this.chatService.joinUserToRoomAsViwer(room);
 	}
 
 	getGameRoom(login: string): string {

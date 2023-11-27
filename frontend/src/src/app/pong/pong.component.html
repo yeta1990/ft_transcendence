@@ -25,7 +25,7 @@
     <script type="text/javascript" src="pong.component.ts"></script>
 </div>
 <!-- <h2>{{this.waitingList}}</h2> -->
-  <div *ngIf="getGame().powersAllow" class="container">
+  <div *ngIf="getGame().powersAllow && !getGame().finish" class="container">
   <!-- <div class="container"> -->
     <table class="inner-container">
       <tbody>
@@ -72,8 +72,8 @@
     </table>
   </div>
 
-<h4 *ngIf="getGame().powersAllow">Power List</h4>
-  <ul *ngIf="getGame().powersAllow">
+<h4 *ngIf="getGame().powersAllow && !getGame().finish">Power List</h4>
+  <ul *ngIf="getGame().powersAllow && !getGame().finish">
     <li><strong>SmallerPaddle:</strong> Make your opponent paddle smaller.</li>
     <li><strong>BiggerPaddle:</strong> Make your own paddle bigger!</li>
     <li><strong>InestableBall:</strong> Every ten seconds the ball's speed changes.</li>
