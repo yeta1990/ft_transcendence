@@ -967,8 +967,13 @@ export class ChatGateway extends BaseGateway {
 		if (player1isAvailableToPlay && player2isAvailableToPlay){
 			//createGame
 			console.log("accepted game")
-			this.sendAcceptedGame(login, targetLogin)
-			this.pongservice.challengeGame(login, targetLogin, false)
+			if (this.pongservice.getStatus("#pongRoom_"+targetLogin+"+"+login)){
+				this.sendAcceptedGame(targetLogin, login)
+				this.pongservice.challengeGame(targetLogin, login, false)
+			}else{
+				this.sendAcceptedGame(login, targetLogin)
+				this.pongservice.challengeGame(login, targetLogin, false)
+			}
 		}else{
 	  	  this.messageToClient(client.id, "system", 
 	  			generateSocketErrorResponse("", `The other player is now busy playing, please wait until player is free again and challenge him/her`).data);
@@ -1007,6 +1012,7 @@ export class ChatGateway extends BaseGateway {
 		if (validProposal){
 			this.acceptedMatchProposal(client, targetLogin)
 		}else{
+			
 			this.pongservice.saveMatchProposal(login, targetLogin)
 		}
 	}
