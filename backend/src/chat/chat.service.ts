@@ -21,8 +21,6 @@ export class ChatService {
     private triggerSubject: BehaviorSubject<Date> = new BehaviorSubject(this.trigger);
 
 
-	@InjectRepository(Room)
-	private readonly roomRepository: Repository<Room>;
 
 	@InjectRepository(User)
 	private readonly userRepository: Repository<User>;
@@ -34,9 +32,13 @@ export class ChatService {
 				@Inject(forwardRef(() => RoomService))
 				private roomService: RoomService,
 				@Inject(forwardRef(() => ChatGateway))
-				private chatGateway: ChatGateway
-			   ) {}
-
+				private chatGateway: ChatGateway,
+				@InjectRepository(Room)
+				private readonly roomRepository: Repository<Room>
+			   ) {
+			this.deleteAllGameRooms()
+			   }
+ 
 	getUsersObservable(): Observable<Date>{
 			return this.triggerSubject
 	}
@@ -208,7 +210,12 @@ export class ChatService {
 		const isBannedOfRoom: boolean = await this.isBannedOfRoom(login, room)
 		if (isBannedOfRoom) return false;
 		const foundRoom = await this.getRoom(room);
+		if (!foundRoom) return false;
 		const foundUser = await this.userService.getUserByLogin(login);
+		if (!foundUser) return false;
+		for (let user of foundRoom.users){
+			if (user.login == login) return true;
+		}
 		foundRoom.users.push(foundUser);
 		await this.roomRepository.save(foundRoom);
 		return true;
@@ -546,6 +553,15 @@ export class ChatService {
 		return await this.roomRepository.delete(room);
 	}
 
+	public async deleteAllGameRooms(): Promise<any>{
+		return await this.roomRepository
+      		.createQueryBuilder()
+      		.delete()
+      		.from(Room)
+      		.where("name LIKE :name", { name: '%pongRoom%' })
+      		.execute();
+	}
+
 	//only for testing purposes
 	public async emptyTableRoom(): Promise<any>{
 		return await this.roomRepository.clear();
@@ -591,6 +607,8 @@ export class ChatService {
 			else if (playerOneScore < playerTwoScore) return 0
 			else return 0.5
 	}
+
+
 
 	public async saveGameResult(g: GameRoom){
 		if (g.powersAllow) return;

@@ -57,8 +57,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.profileService.getUserDetails()
 			.subscribe(
 				(response: User) => {this.myUser= response;},
-			(error) => {console.log(error);}
-			);
+			(error) => {});
    }
 
    getCurrentRoom(): string {
@@ -527,6 +526,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			return this.getNickEquivalence(login) + ' vs computer'
 		}
 		return room
+	}
+
+	enableChallengeButton(login: string): boolean{
+		if (!this.myUser) return false;
+		if (this.isUserActive(login) == 1 && this.isUserActive(this.myUser!.login) != 3)
+		{
+			return true
+		}
+		return false;
 	}
 
 }
