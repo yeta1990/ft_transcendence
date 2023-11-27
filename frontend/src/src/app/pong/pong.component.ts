@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, OnDestroy, Inject, HostListener } from '@angular/core';
+import { Component, Input, OnInit, ElementRef, ViewChild, AfterViewInit, OnDestroy, Inject, HostListener } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { PongService } from './pong.service';
 import { Subject, Subscription, pipe } from "rxjs"
@@ -42,7 +42,8 @@ export class PongComponent implements OnInit, OnDestroy {
     private coef:number = 1;
     buttonStates: boolean[] = [false, false, false, false, false, false];
     
-
+	@Input()
+	friends: boolean = false;
     
     @ViewChild('gameCanvas', { static: true }) gameCanvas?: ElementRef<HTMLCanvasElement>;
     constructor(

@@ -19,6 +19,7 @@ export class FriendsComponent {
 	public viewer:boolean = false;
 	friends: User[] = []
 	allUsers: User[] = []
+	viewingTo: string = "";
 	incomingFriendRequests: User[] = []
 	myLogin: string;
     imagesBaseUrl: string = environment.apiUrl + '/uploads/'
@@ -34,6 +35,13 @@ export class FriendsComponent {
 			})
 	}
  
+ 	showGame(): boolean {
+		if (this.getUserStatus(this.viewingTo) !== 3){
+			this.viewer = false
+			return false
+		}
+		return true;
+ 	}
 	getActiveUsers(): Array<ChatUser> {
 		return this.chatService.getActiveUsers()
 	}
@@ -46,7 +54,8 @@ export class FriendsComponent {
 		return this.chatService.getAvailableRoomsList()
 	}
 
-	spectatorTo(room:string): void {
+	spectatorTo(room:string, login: string): void {
+		this.viewingTo = login;
 		this.viewer = true;
 		console.log("view to --> " + room);
         this.chatService.setCurrentRoom(room);
