@@ -1,0 +1,239 @@
+body{
+    text-align: center;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  h2 {
+    text-align: center;
+  }
+  canvas{
+    display: block;
+    margin: 0px auto;
+    background: black;
+  }
+
+  .botones-contenedor {
+    background-color: #777; /* Fondo rojo */
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 5px 5px; /* Ajuste del padding */
+    /* height: 40px; */
+}
+
+.botones-contenedor button {
+    font-family: "Roboto", sans-serif;
+    position: relative;
+    color: white;
+    text-align: center;
+    padding: 4px 25px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: transparent;
+    border: 2px solid transparent;
+    width: 13%;
+    height: auto;
+    margin-right: 10px;
+}
+
+.botones-contenedor button:hover {
+    border: 2px solid white;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding-top: 4px;
+}
+
+.botones-contenedor button:after {
+  content: "";
+  position: absolute;
+  top: 10%;
+  right: -8px;
+  height: 80%;
+  width: 2px;
+  background-color: white;
+}
+
+.text-block {
+  background-color: #777;
+  overflow: hidden;
+}
+
+.text {
+  position: relative;
+  max-width: 80%;
+  margin: auto;
+  font-family: "Roboto", sans-serif;
+  font-size: 14px;
+  font-weight: 300; /* Ligero */
+  margin-top: 1%;
+  margin-bottom: 1%;
+}
+
+/* Puedes ajustar estos estilos según tus necesidades */
+@media screen and (max-width: 768px) {
+  .text {
+    font-size: 12px;
+  }
+}
+
+.container {
+  width: 90%;
+  max-width: 600px;
+  margin: 20px auto;
+  overflow: hidden; /* Oculta el borde del contenedor interno */
+
+}
+
+.inner-container {
+  border-collapse: collapse;
+  overflow: visible;
+  border: 3px solid gray;
+  border-radius: 10px;
+  width: 100%; /* Ocupa todo el ancho del contenedor exterior */
+  background-color: black;
+}
+
+@media (max-width: 600px) {
+  /* Estilos para pantallas pequeñas */
+  .title-row td {
+    font-size: 18px;
+  }
+
+  .player-names td {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .action-buttons button {
+    font-size: 14px;
+  }
+
+  .button-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .inner-rectangle {
+    width: 15px;
+    height: 15px;
+  }
+
+  .button-number {
+    font-size: 12px;
+  }
+
+  .button-text {
+    font-size: 12px;
+  }
+}
+
+/* Nuevos estilos para la primera fila */
+.title-row td {
+  font-family: "Roboto", sans-serif;
+  color: gray;
+  font-size: 24px;
+  letter-spacing: 1px;
+  font-weight: bold;
+  text-align: center;
+  text-transform: uppercase;
+  padding: 10px;
+
+}
+
+.player-names td {
+  font-family: "Roboto", sans-serif;
+  text-transform: uppercase;
+  color: gray; /* Texto en rojo para los nombres de los jugadores */
+  text-align: center;
+  padding: 10px;
+  width: 50%; /* Ancho fijo del 50% para cada columna */
+  min-height: 20px;
+  box-sizing: border-box; /* Incluye el padding en el ancho total */
+}
+
+/* Estilos para la segunda fila */
+.inner-container tr:nth-child(2) td {
+  border-top: 2px solid gray; /* Línea de separación */
+}
+
+/* Añade estilos para las celdas */
+.inner-container td, .inner-container th {
+  border: 2px solid gray;
+  padding: 8px;
+}
+
+.action-buttons td {
+  text-align: right;
+  padding: 10px;
+  width: 50%;
+  box-sizing: border-box;
+}
+
+.action-buttons button {
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  background-color: #d4da5b;
+  border-radius: 10px;
+  border: none;
+  padding: 10px;
+  margin: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  width: 66.66%;
+  box-sizing: border-box;
+  position: relative; /* Permite posicionar el cuadrado antes del texto */
+  height: 40px;
+}
+
+.button-icon {
+  background-color: grey;
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  position: relative;
+  margin-right: 20px;
+  margin-left: 10px;
+}
+
+.inner-rectangle {
+  width: 25px;
+  height: 25px;
+  background-color: grey;
+  border-radius: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute; /* Agrega position: absolute para que se posicione con respecto a button-icon */
+  top: 45%; /* Mueve el 50% hacia abajo desde la parte superior de button-icon */
+  left: 50%; /* Mueve el 50% hacia la derecha desde el borde izquierdo de button-icon */
+  transform: translate(-50%, -50%); /* Centra exactamente el centro de inner-rectangle en el centro de button-icon */
+}
+
+.button-number {
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  color: white;
+  border: 1px solid white;
+  border-radius: 3px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.button-text {
+  color: white;
+  font-weight: bold;
+  display: inline-block; /* Añade esto para que el texto aparezca en la misma línea */
+}
+
+.action-buttons button.active-button {
+  background-color: #d1434f;
+  position: relative;
+  right: -30%;
+}

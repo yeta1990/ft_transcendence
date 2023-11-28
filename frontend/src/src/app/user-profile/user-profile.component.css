@@ -1,0 +1,307 @@
+.background {
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-bottom: 150px;
+  }
+  
+  .profile-container {
+	background-color: #000000;
+	width: 680px;
+	height: 60%;
+	margin-top: 10%; /* Ajusta el margen superior para centrar la imagen */
+	position: relative;
+	border-radius: 4%;
+  }
+  
+  .avatar-container {
+	position: absolute;
+	top: -50px; /* Ajusta la posición vertical de la imagen */
+	left: 50%; /* Centrar la imagen horizontalmente */
+	transform: translateX(-50%);
+	width: 200px; /* Tamaño fijo de la imagen */
+	height: 200px; /* Tamaño fijo de la imagen */
+	border: 5px solid white;
+	border-radius: 5%;
+	overflow: hidden;
+  }
+  
+  .avatar {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+  }
+  
+
+.username {
+	font-family: "Roboto", sans-serif;
+	color: white;
+	font-size: 54px;
+	text-align: center;
+	margin-top: 180px; /* Ajusta el espacio entre la imagen y el nombre de usuario */
+	font-weight: bold; /* Aplicar negrita */
+  }
+
+  .edit-button {
+	font-family: "Roboto", sans-serif;
+	position: absolute;
+	top: 60px; /* Ajusta la posición vertical del botón */
+	right: 30px; /* Ajusta la posición horizontal del botón */
+	width: calc(680px / 4); /* Tamaño del botón en un tercio del ancho del rectángulo */
+	height: 50px; /* Altura del botón */
+	background-color: #d4da5b; /* Color de fondo verde */
+	color: white; /* Color del texto blanco */
+	font-size: 16px; /* Tamaño de fuente */
+	border: none; /* Quitamos el borde del botón */
+	border-radius: 15px; /* Bordes redondeados */
+	cursor: pointer; /* Cambiamos el cursor al pasar por encima */
+	font-weight: bold; /* Aplicar negrita */
+  }
+
+  .friend-button {
+	font-family: "Roboto", sans-serif;
+	position: absolute;
+	top: 130px; /* Ajusta la posición vertical del botón */
+	right: 30px; /* Ajusta la posición horizontal del botón */
+	width: calc(680px / 4); /* Tamaño del botón en un tercio del ancho del rectángulo */
+	height: 50px; /* Altura del botón */
+	background-color: #d4da5b; /* Color de fondo verde */
+	color: white; /* Color del texto blanco */
+	font-size: 16px; /* Tamaño de fuente */
+	border: none; /* Quitamos el borde del botón */
+	border-radius: 15px; /* Bordes redondeados */
+	cursor: pointer; /* Cambiamos el cursor al pasar por encima */
+	font-weight: bold; /* Aplicar negrita */
+  }
+
+  .friend2-button {
+	font-family: "Roboto", sans-serif;
+	position: absolute;
+	top: 190px; /* Ajusta la posición vertical del botón */
+	right: 30px; /* Ajusta la posición horizontal del botón */
+	width: calc(680px / 4); /* Tamaño del botón en un tercio del ancho del rectángulo */
+	height: 50px; /* Altura del botón */
+	background-color: #d4da5b; /* Color de fondo verde */
+	color: white; /* Color del texto blanco */
+	font-size: 16px; /* Tamaño de fuente */
+	border: none; /* Quitamos el borde del botón */
+	border-radius: 15px; /* Bordes redondeados */
+	cursor: pointer; /* Cambiamos el cursor al pasar por encima */
+	font-weight: bold; /* Aplicar negrita */
+  }
+
+  .close-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	transform: translate(25%, -25%);
+  }
+  
+  .close-button-inner {
+	width: 40px;
+	height: 40px;
+	background-color: #d1434f;
+	border: 1px solid white;
+	border-radius: 50%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+	overflow: hidden;
+  }
+  
+  .close-icon {
+	font-weight: bold;
+	font-size: 50px;
+	color: white;
+	margin: -7px -7px 0 0;
+	padding: 0;
+	transform: rotate(45deg); /* Aplica la rotación de 45 grados */
+  }
+  
+  /* Estilos para el contenedor de la información del usuario */
+.user-info {
+	text-align: center;
+	margin-top: 20px;
+  }
+  
+  /* Estilos para el texto de información del usuario */
+  .user-info-text {
+	font-family: "Roboto", sans-serif;
+	color: gray;
+	font-size: 18px;
+	letter-spacing: 1px; /* Ajusta este valor según tu preferencia */
+	font-weight: bold;
+	text-transform: uppercase;
+  }
+
+  /* Estilos para la línea divisoria */
+.info-divider {
+	border: none;
+	width: 90%;
+	border-top: 2px solid gray;
+	margin: 20px auto; /* Ajusta este margen según tu preferencia */
+  }
+
+  /* Estilos para la barra de progreso */
+.progress-bar {
+	width: 90%; /* Ancho de la barra */
+	height: 60px; /* Altura de la barra */
+	background-color: transparent; /* Color de relleno */
+	border-radius: 15px; /* Bordes redondeados */
+	margin: 10px auto; /* Ajusta este margen según tu preferencia */
+	position: relative; /* Permite posicionar elementos internos */
+  }
+
+  .progress-bar::before {
+	content: '';
+	display: block;
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+	width: 100%;
+	height: 60px;
+	position: absolute;
+	left: 0;
+	opacity: 0.9;
+	border-radius: 15px;
+	z-index: 1; /* Mueve la barra detrás de la imagen */
+  }
+
+	.progress-bar .trophy {
+		content: '';
+		display: block;
+		background-image: url('https://www.pngkit.com/png/full/176-1764780_star-on-a-award-trophy-silhouette-comments-trophy.png'); /* Cambia URL_DE_LA_IMAGEN por la URL real */
+		background-size: contain;
+		background-repeat: no-repeat;
+		width: 40px;
+		height: 48px;
+		position: absolute;
+		top: 5px;
+		left: 50%;
+		transform: translateX(-30%);
+		opacity: 0.45;
+		filter: invert(90%);
+		z-index: 2; /* Mueve la imagen sobre la barra */
+  }
+
+.progress-bar .wins,
+.progress-bar .losses {
+	font-family: "Roboto", sans-serif;
+  position: absolute;
+  top: 0%; /* Ajusta la posición vertical */
+  color: white;
+  font-size: 30px;
+  z-index: 2;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.progress-bar .wins {
+flex: 1;
+  left: 5%; /* Ajusta la posición horizontal */
+}
+
+.progress-bar .losses {
+	flex: 1;
+  right: 5%; /* Ajusta la posición horizontal */
+  justify-content: flex-end;
+}
+
+.progress-bar .dynamic-number {
+	font-size: 48px; /* Tamaño de fuente para los números dinámicos */
+	margin: 0 20px; /* Margen horizontal para ambos lados */
+  }
+
+.elo-rank {
+	font-family: "Roboto", sans-serif;
+	color: gray;
+	font-size: 24px;
+	letter-spacing: 1px; /* Ajusta este valor según tu preferencia */
+	font-weight: bold;
+	text-transform: uppercase;
+	text-align: center;
+	margin-top: 20px; /* Ajusta el margen superior según tus preferencias */
+  }
+  
+.elo-progress {
+	background-color: gray; /* Color de fondo gris */
+	height: 25px; /* Altura de la barra de progreso */
+	margin-top: 5px; /* Margen superior para separar del rango */
+	width: 90%; /* Ancho completo */
+	position: relative; /* Para permitir que el elemento lleno sea absoluto */
+	border-radius: 10px; /* Bordes redondeados */
+	margin: 10px auto; /* Ajusta este margen según tu preferencia */
+	z-index: 1; /* Mueve la barra detrás de la imagen */
+  }
+  
+.elo-progress-filled {
+	background-color: #d4da5b; /* Color de relleno verde */
+	height: 85%; /* La altura se ajustará automáticamente según el progreso */
+	width: var(--progress-width, 0%); /* Ancho basado en el valor de --progress-width */
+	position: absolute; /* Absoluto para llenar la barra */
+	border-radius: 10px; /* Bordes redondeados */
+	z-index: 2; /* Mueve la barra detrás de la imagen */
+  }
+  
+  .elo-value {
+	position: absolute;
+	font-family: "Roboto", sans-serif;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%); /* Centrar horizontal y verticalmente */
+	color: white;
+	font-weight: bold;
+	z-index: 3;
+  }
+
+  /* Estilos para el texto de información del usuario */
+.achievements-text {
+	font-family: "Roboto", sans-serif;
+	color: gray;
+	font-size: 14px;
+	letter-spacing: 1px;
+	font-weight: bold;
+	text-align: center;
+	text-transform: uppercase;
+	margin-top: 40px; /* Ajusta el valor según tu diseño */
+}
+
+.achievement-images {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+  }
+  
+  .hexagon {
+	position: relative;
+	width: 100px; /* ajusta el tamaño según tus necesidades */
+	height: 100px; /* ajusta el tamaño según tus necesidades */
+	margin: 14px; /* ajusta el espacio entre hexágonos */
+	clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0% 50%);
+	background-color: gray; /* color del hexágono (opcional) */
+  }
+  
+  .achievement-image {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+  }
+
+  .achieved {
+    /* Estilos adicionales para logros logrados */
+    opacity: 0.9; /* Sin transparencia */
+    background-color: #2d2d2d;
+}
+
+.not-achieved {
+    /* Estilos adicionales para logros no logrados */
+    opacity: 0.2; /* Con transparencia */
+}
+  

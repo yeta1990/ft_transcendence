@@ -1,0 +1,456 @@
+<div class="modal fade" id="exampleModal" tabindex="-1" [ngClass]="{ 'show': isModalOpen(), 'd-block': isModalOpen() }">
+<div class="modal-overlay modal-dialog modal-dialog-centered">
+  <div class="modal-content">
+    <ng-container [ngSwitch]="getCurrentModal()">
+      <!-- Template 1 -->
+      <ng-template [ngSwitchCase]="'template1'">
+        <div id="modal-content-template1">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Channel {{getModalData()}} protected by password</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          	<p>This channel is protected. To join it, introduce the password: </p>
+
+			<input type="password" class="form-control" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter password">
+   		    </div>
+
+   		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Join</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template2'">
+        <div id="modal-content-template2">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Create new channel</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+          	<form>
+				<div class="mb-3">
+    				<label for="channelName" class="form-label">New channel name:</label>
+    				<input type="text" class="form-control" id="channelName" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" name="channelName" >
+  				</div>
+  				  <div class="mb-3 form-check">
+					  <input type="checkbox" class="form-check-input" id="checkboxInput" [(ngModel)]="checkboxInput" name="checkboxInput">
+					<label class="form-check-label" for="checkboxInput">Private channel</label>
+  				  </div>
+				<div class="mb-3" *ngIf="checkboxInput">
+    				<label for="channelPass" class="form-label">Password for private channel:</label>
+    				<input type="password" class="form-control" id="channelPass" [(ngModel)]="inputValue2" (keydown.enter)="saveAndCloseModal()" name="channelPass">
+  				</div>
+			</form>
+
+   		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Create and join</button>
+      	  </div>
+        </div>
+      </ng-template>
+
+
+      <ng-template [ngSwitchCase]="'template3'">
+        <div id="modal-content-template3">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Ban &#64;{{getModalData()[0][0]}} from {{getModalData()[0][1]}}?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          	<p>Are you sure?</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template3b'">
+        <div id="modal-content-template3b">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Remove ban &#64;{{getModalData()[0][0]}} from {{getModalData()[0][1]}}?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          	<p>Are you sure?</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template4'">
+        <div id="modal-content-template4">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Block user &#64;{{getModalData()[0]}}?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>&#64;{{getModalData()[0]}} won't be able to interact with you nor see your messages in public channels. Are you sure you want to block the user?</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template5'">
+        <div id="modal-content-template5">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Unblock user &#64;{{getModalData()[0]}}?</h1>
+
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>If you unblock &#64;{{getModalData()[0]}}, both will be able to interact or see your messages in public channels. Are you sure you want to unblock the user?</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template7'">
+        <div id="modal-content-template7">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Make channel {{getModalData()[0]}} public?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>If you make the chat room {{getModalData()[0]}} public, everyone will be able to join without providing a password. Do you want to make the room public?</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template6'">
+        <div id="modal-content-template6">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Change passwordof channel {{getModalData()}}</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          	<p>This channel is already protected. If you want to change the password just type it here: </p>
+
+			<input type="password" class="form-control" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter password">
+   		    </div>
+
+   		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Change password</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'silenceUserModal'">
+        <div id="silenceUserModal">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Silence user {{getModalData()}} in this channel?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          	<p>Introduce the number of minutes you want to silence this user (between 1 and 1000): </p>
+
+			<input type="number" class="form-control" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter minutes to silence this user">
+   		    </div>
+
+   		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Silence user</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template8'">
+        <div id="modal-content-template8">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Make channel {{getModalData()}} private</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          	<p>Currently the channel is public. Only users knowing the password or users already in the channel will be able to join it. If you want to add a password just type it here: </p>
+
+			<input type="password" class="form-control" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter password">
+   		    </div>
+
+   		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Set a password</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+      <ng-template [ngSwitchCase]="'template9'">
+        <div id="modal-content-template9">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Challenge &#64;{{getModalData()[0]}} a pong match?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>If you want to play a pong match with {{getModalData()[0]}} just press the "Yes" button. Once the player accepts the proposal, the match will start.</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template10'">
+        <div id="modal-content-template10">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Grant &#64;{{getModalData()[0]}} Admin privileges?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>If you want to give {{getModalData()[0]}} Admin privileges, just press the "Yes" button.</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template11'">
+        <div id="modal-content-template11">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Remove &#64;{{getModalData()[0]}} its Admin privileges?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>If you want to remove the {{getModalData()[0]}} Admin privileges, just press the "Yes" button.</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template12'">
+        <div id="modal-content-template12">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Ban &#64;{{getModalData()[0]}} of the whole site?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>If you ban {{getModalData()[0]}}, the user won't be able to login or navigate in this site.</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template13'">
+        <div id="modal-content-template13">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Accept match with &#64;{{getModalData()[0]}}?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>Do you want to play a pong game with {{getModalData()[0]}}?</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">Cancel</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template15'">
+        <div id="modal-content-template15">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Waiting &#64;{{getModalData()[0]}} to accept the match challenge</h1>
+		  <button (click)="noButton()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>Wait until {{getModalData()[0]}} accepts.</p>
+   		    </div>
+   		    <button (click)="noButton()" type="button" class="btn btn-outline-danger">Cancel challenge</button>&nbsp;
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template16'">
+        <div id="modal-content-template16">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Waiting somebody joins</h1>
+		  <button (click)="confirmationButton()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>Wait until anybody joins the matchmaking list.</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Leave match making list</button>&nbsp;
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template14'">
+        <div id="modal-content-template14">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Accept match with &#64;{{getModalData()[0]}}?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>You have received a match challenge from {{getModalData()[0]}}, do you accept?</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="closeModal()" type="button" class="btn btn-outline-light">No</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template17'">
+        <div id="modal-content-template17">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Waiting somebody joins</h1>
+		  <button (click)="confirmationButton()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>Wait until anybody joins the matchmaking plus list.</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Leave match making plus list</button>&nbsp;
+
+      	  </div>
+        </div>
+      </ng-template>
+
+
+	  <ng-template [ngSwitchCase]="'enableMfaTemplate'">
+		<div id="enableMfaModal">
+		  <div class="modal-header">
+			<h1 class="modal-title fs-5">Recibir códigos de una app de autenticación</h1>
+			 <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<p>Cada vez que te autenticas, además de validar la cuenta de 42, tendrás que usar una app de autenticación para generar un código de un solo uso.</p>
+	  
+			<p class="font-weight-bold">Paso 1: Escanea el siguiente código QR o introduce el secreto manualmente en tu app de autenticación</p>
+	  
+			<div class="modal-body text-center"> 
+				<img [src]="getQrCodeUrl()" alt="Código QR" class="img-fluid mx-auto d-block"> 
+			</div>
+	  
+			<hr class="my-3" style="width: 60%; margin: 0 auto;">
+	  
+			<p class="font-weight-bold">Paso 2: Introducir el código de 6 dígitos que ves en la app de autenticación</p>
+	  
+			<div class="mb-3">
+			  <label for="authCodeInput" class="form-label">Código de autenticación</label>
+			  <input type="text" class="form-control" id="authCodeInput" [(ngModel)]="inputValue" name="authCodeInput">
+			</div>
+	  
+			<button type="button" class="btn btn-primary btn-block" (click)="saveAndCloseModal()">Confirmar</button>
+		  </div>
+		</div>
+	  </ng-template>
+	  
+	  <ng-template [ngSwitchCase]="'disableMfaTemplate'">
+		<div id="disableMfaModal">
+		  <div class="modal-header">
+			<h1 class="modal-title fs-5">Deshabilitar la autenticación de dos factores</h1>
+			<button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<p><strong class="text-danger">ADVERTENCIA:</strong> Deshabilitar la autenticación en dos pasos hará que tu cuenta sea menos segura. ¿Estás seguro de que quieres continuar?</p>
+			<div class="mb-3">
+			  <label for="authCodeInput" class="form-label">Código de autenticación</label>
+			  <input type="text" class="form-control" id="authCodeInput" [(ngModel)]="inputValue" name="authCodeInput">
+			</div>
+			<p style="font-style: italic; font-size: 0.875rem;">Para deshabilitar el 2FA queremos comprobar por última vez que eres tú realmente quien quiere hacerlo, por ello te pedimos que introduzcas el número una última vez.</p>
+	  
+			<div class="d-flex justify-content-between">
+			  <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+			  <button type="button" class="btn btn-danger" (click)="confirmationButton()">Deshabilitar</button>
+			</div>
+		  </div>
+		</div>
+	  </ng-template>
+	  
+
+	  <ng-template [ngSwitchCase]="'verifyMfaTemplate'">
+	  <div id="verifyMfaModal">
+		<div class="modal-header">
+		  <h1 class="modal-title fs-5">FT_TRASCENDENCE: Login</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		</div>
+		<div class="modal-body">
+		  <p class="text-center font-weight-bold">Introduce el código de seguridad para continuar</p>
+	  
+		  <p class="text-center">Parece que este es un nuevo dispositivo, navegador o localización. Por favor, introduce el código de seguridad de tu app de autenticación.
+			<a href="https://support.google.com/accounts/answer/1066447?hl=en&co=GENIE.Platform%3DAndroid" target="_blank">MÁS INFORMACIÓN.</a></p>
+	  	  
+		  <div class="mb-3 text-center">
+			<label for="authCodeInput" class="form-label">Código de seguridad</label>
+			<input type="text" class="form-control" id="authCodeInput" [(ngModel)]="inputValue" name="authCodeInput" maxlength="6" pattern="[0-9]{6}">
+		  </div>
+	  
+		  <div class="text-center">
+			<button type="button" class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+			<button type="button" class="btn btn-primary" [disabled]="inputValue.length !== 6" (click)="confirmationButton()">Continuar</button>
+		  </div>
+		</div>
+	  </div>
+	</ng-template>
+
+      <ng-template [ngSwitchCase]="'template18'">
+        <div id="modal-content-template18">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Your opponent has disconnected</h1>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>Waiting for 10 seconds for the user to reconnect to resume the game. If the opponet doesn't connect, you win the game.</p>
+   		    </div>
+
+      	  </div>
+        </div>
+      </ng-template>
+
+      <ng-template [ngSwitchCase]="'template19'">
+        <div id="modal-content-template19">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Accept replay match with &#64;{{getModalData()[0]}}?</h1>
+		  <button (click)="noButton()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          		<p>Game finished. Do you want to play again against {{getModalData()[0]}}? If the user accepts, you will be able to start again, otherwise room will be destroyed.</p>
+   		    </div>
+   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Yes</button>&nbsp;
+   		    <button (click)="noButton()" type="button" class="btn btn-outline-light">No</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+    </ng-container>
+  </div>
+</div>
+</div>

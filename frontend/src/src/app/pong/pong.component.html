@@ -1,0 +1,85 @@
+<!--app-nav-bar/-->
+<!--button (click)="mode(1)">Normal</button-->
+<!--button (click)="subscribeToRoom(false)">Play</button-->
+
+<div class="text-block" *ngIf="!friends">
+  <div class="text block">
+    <p>Welcome to the game configuration section! Here, you have the power to tailor your gaming experience to match your preferences. Feel free to explore and choose from the buttons below to customize the game type according to what suits you best. Whether it's a standard match, an exciting online duel, or an enhanced gameplay experience with additional features, the choice is yours. Click on the buttons to configure your game and embark on an adventure that aligns perfectly with your gaming style. Let the games begin!</p>
+  </div>
+  </div>
+<div class="botones-contenedor" *ngIf="!friends">
+    <button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('')">vs Computer</button>
+    <button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('on-line')">PvP (Elo mode)</button>
+    <button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('plus')">PvP (Fun mode)</button>
+</div>
+
+<br>
+<h2 *ngIf="!friends">{{this.msg}}</h2>
+<br>
+<!-- <button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('')">Play</button>
+<button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('on-line')">On-line</button>
+<button [disabled]="this.chatService.getUserStatus(this.playerLogin)==3" (click)="mode('plus')">Plus</button> -->
+
+<div >
+    <canvas [hidden]="visibleCanvas()" #gameCanvas width={{getWidth()}} height={{getHeight()}}></canvas>
+    <!--<canvas [hidden]="visibleCanvas()" #gameCanvas width={{getGame().canvasWidth}} height={{getGame().canvasheight}}></canvas>-->
+    <script type="text/javascript" src="pong.component.ts"></script>
+</div>
+<!-- <h2>{{this.waitingList}}</h2> -->
+  <div *ngIf="getGame().powersAllow && !getGame().finish" class="container">
+  <!-- <div class="container"> -->
+    <table class="inner-container">
+      <tbody>
+        <tr class="title-row">
+          <td colspan="2">Available Powers</td>
+        </tr>
+        <tr class="player-names">
+          <td>{{ getGame().playerOne }}</td>
+          <td>{{ getGame().playerTwo }}</td>
+        </tr>
+        <tr class="action-buttons">
+          <td>
+            <ng-container *ngFor="let i of [0, 1, 2]; let index = index">
+              <button
+                [ngClass]="{'active-button': buttonStates[index]}"
+                (click)="handleButtonClick(index)"
+              >
+                <div class="button-icon">
+                  <div class="inner-rectangle">
+                    <div class="button-number">{{ index + 1 }}</div>
+                  </div>
+                </div>
+                <div class="button-text">{{ pOne[index] }}</div>
+              </button>
+            </ng-container>
+          </td>
+          <td>
+            <ng-container *ngFor="let i of [3, 4, 5]; let index = index">
+              <button
+                [ngClass]="{'active-button': buttonStates[index + 3]}"
+                (click)="handleButtonClick(index + 3)"
+              >
+                <div class="button-icon">
+                  <div class="inner-rectangle">
+                    <div class="button-number">{{ index + 1 }}</div>
+                  </div>
+                </div>
+                <div class="button-text">{{ pTwo[index] }}</div>
+              </button>
+            </ng-container>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+<h4 *ngIf="getGame().powersAllow && !getGame().finish">Power List</h4>
+  <ul *ngIf="getGame().powersAllow && !getGame().finish">
+    <li><strong>SmallerPaddle:</strong> Make your opponent paddle smaller.</li>
+    <li><strong>BiggerPaddle:</strong> Make your own paddle bigger!</li>
+    <li><strong>InestableBall:</strong> Every ten seconds the ball's speed changes.</li>
+    <li><strong>FasterPaddle:</strong> You will be much faster.</li>
+    <li><strong>SlowerPaddle:</strong> Your rival will reduce the speed.</li>
+    <li><strong>ReverseMove:</strong> Other player will not know where he is going.</li>
+  </ul>
+<!--app-chat/-->

@@ -1,0 +1,78 @@
+<app-nav-bar/>
+<app-page404 *ngIf="found === false"/>
+<div class="background" *ngIf="found === true && loaded === true">
+	<div class="profile-container">
+	  <div class="avatar-container">
+	  <img class="avatar" [src]="imagesBaseUrl + user?.image" alt="User Avatar" />
+	  </div>
+	  <h1 class="username">{{ user?.nick }}</h1>
+
+	  <!-- Información sobre Estudiantes -->
+	  <div class="user-info">
+		<p class="user-info-text" *ngIf="user?.campus !== 'None' && user?.login">
+		  Campus: {{ user?.campus }} | Login: {{ user?.login }}
+		</p>
+		<p class="user-info-text" *ngIf="user?.campus === 'None'">
+		  Not a 42 student
+		</p>
+	  </div>
+	  <hr class="info-divider">
+	  <div class="progress-bar" [style.background-image]="'linear-gradient(.25turn, #d1434f ' + gradientStart + '%, #d4da5b ' + gradientEnd + '%)'">
+		<div class="trophy"></div>
+		<div class="wins"><span class="dynamic-number">{{ user?.wins }}</span> wins</div>
+  		<div class="losses">losses <span class="dynamic-number">{{ user?.losses }}</span></div>
+		</div>
+	  
+	  <!-- Elo Rank -->
+	  <div class="elo-rank">{{ userRank }}</div>
+	  <div class="elo-progress">
+		<div class="elo-progress-filled" [ngStyle]="progressStyles"></div>
+		<div class="elo-value">ELO: {{ user?.elo }}</div>
+	  </div>
+
+		<!-- Achievements -->
+		<div class="achievements">
+			<div class="achievements-text">Achievements ({{ userAchievements.length }}/{{ totalAchievements }})</div>
+			<div class="achievement-images">
+			<ng-container *ngFor="let achievement of achievementsStatus">
+				<div class="hexagon">
+				<img
+					[src]="achievement.achieved ? 'assets/achievements-images/' + achievement.name + '/achieved.png' : 'assets/achievements-images/' + achievement.name + '/not-achieved.png'"
+					[alt]="achievement.name"
+					[ngClass]="{'achieved': achievement.achieved, 'not-achieved': !achievement.achieved}"
+					class="achievement-image"
+				/>
+				</div>
+			</ng-container>
+			</div>
+		</div>
+  
+	  
+
+	  <!-- Botón de edición -->
+	  <button class="edit-button" (click)="goEdit()" *ngIf="adminPower">EDIT PROFILE</button>
+	  <span *ngIf="myLogin !== user!.login">
+	  <button class="edit-button" (click)="unBlockUser(user!.login)" *ngIf="isBlocked()">UNBLOCK</button>
+	  <button class="edit-button" (click)="blockUser(user!.login)" *ngIf="!isBlocked()">BLOCK</button>
+	  <button class="friend-button" (click)="sendFriendShipRequest(user!.login)" *ngIf="!user!.friends.includes(myLogin) && !user!.incomingFriendRequests.includes(myLogin) && !myIncomingFriendRequests.includes(user!.login)">ADD FRIEND</button>
+	 <button class="friend-button" (click)="acceptFriendShipRequest(user!.login)" *ngIf="!user!.friends.includes(myLogin) && myIncomingFriendRequests.includes(user!.login)">ACCEPT FRIENDSHIP REQUEST</button>
+	 <button class="friend2-button" (click)="rejectFriendshipRequest(user!.login)" *ngIf="!user!.friends.includes(myLogin) && myIncomingFriendRequests.includes(user!.login)">REJECT FRIENDSHIP REQUEST</button>
+	 <button class="friend-button" *ngIf="!user!.friends.includes(myLogin) && user!.incomingFriendRequests.includes(myLogin)">FRIENDSHIP REQUEST SENT</button>
+	  <button class="friend-button" (click)="removeFriendship(user!.login)" *ngIf="user!.friends.includes(myLogin)">REMOVE FRIEND</button>
+	  </span>
+	  
+	  <!-- Botón de salida -->
+	  <div class="close-button">
+		<button class="close-button-inner" (click)="goBack()">
+		  <span class="close-icon">+</span>
+		</button>
+	  <!-- Aquí irá el resto del contenido del perfil -->
+	</div>
+	Games:
+	<div *ngFor="let game of games">
+		{{game.player1}} {{game.player1Points}} - {{game.player2}} {{game.player2Points}} 
+	</div>
+
+  </div>
+
+<router-outlet>

@@ -1,0 +1,61 @@
+<app-nav-bar/>
+
+	<div class="container">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Chat rooms</th>
+        <th>live chat</th>
+        <th>owner</th>
+        <th>admins</th>
+        <th>users</th>
+        <th>banned</th>
+        <th>Destroy</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let room of rooms">
+        <td>{{ room }}</td>
+        <td>
+          <div class="scrollable-textbox p-2">
+          	  <div *ngFor="let message of getRoomsMessages(room)">{{getNickEquivalence(message.login)}} ({{message.date}}): {{ message.message}}</div>
+          </div>
+        </td>
+        <td>
+        	{{getNickEquivalence(roomsMetaData.get(room)!.owner)}}<span *ngIf="isOwner(room, roomsMetaData.get(room)!.owner)" (click)="revokeOwner(room, roomsMetaData.get(room)!.owner)"> - Revoke ownership</span>
+        </td>
+        <td>
+        	<div *ngFor="let admin of roomsMetaData.get(room)?.admins">
+        		{{admin.nick}} - <span *ngIf="isAdmin(room, admin.login) && !isOwner(room, admin.login)" (click)="revokeAdmin(room, admin.login)">Revoke admin privileges</span>
+        	</div>
+
+        </td>
+        <td>
+        	<table class="table-striped">
+        	<tr *ngFor="let user of roomsMetaData.get(room)?.users" style="border-bottom: 1px solid #ccc;">
+        		<td>{{user.nick}}</td>
+        		<td>
+        			<div *ngIf="!isAdmin(room, user.login) && !isOwner(room, user.login)" (click)="makeAdmin(room, user.login)"> - Make channel admin</div>
+        			<div *ngIf="!isAdmin(room, user.login) && !isOwner(room, user.login)" (click)="makeOwner(room, user.login)"> - Make channel owner</div>
+        			<div *ngIf="!isSilenced(room, user.login)" (click)="silenceUser(room, user.login)"> - Silence User</div>
+        			<div *ngIf="isSilenced(room,user.login)" (click)="unSilenceUser(room, user.login)"> - Remove silence</div>
+        			<div (click)="banUser(room, user.login)">- Ban user</div>
+        		</td>
+        	</tr>
+        	</table>
+        </td>
+        <td>
+        	<div *ngFor="let ban of roomsMetaData.get(room)?.banned">
+        		{{ban.nick}} - <span (click)="removeBan(room, ban.login)">Remove ban</span>
+        	</div>
+
+        </td>
+        <td>
+          <button class="btn btn-danger" (click)="destroyRoom(room)">Destruir Canal</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+

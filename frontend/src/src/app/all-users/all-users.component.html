@@ -1,0 +1,36 @@
+<style>
+   .button {
+     border: none;
+     color: white;
+     padding: 15px 32px;
+     text-align: center;
+     text-decoration: none;
+     display: inline-block;
+     font-size: 16px;
+     margin: 4px 2px;
+     cursor: pointer;
+   }
+   
+   .button1 {background-color: #4CAF50;} /* Green */
+   .button2 {background-color: #008CBA;} /* Blue */
+   </style>
+<app-nav-bar/>
+<p>Users:</p>
+<frame class="frame">
+   <ul>
+      <ul *ngFor="let u of users"><div (click)="getUserLogin(u.login)">
+         <div class="avatar_column">
+            <img class="rect avatar" [src]="imagesBaseUrl + u.image" alt=''/>
+         </div>
+         <div class ="nick_column">
+            <button class="user" (click)="getUserLogin(u.login)">{{u.nick}}
+          	  <span *ngIf="getUserStatus(u.login) === 0" class="bi bi-circle-fill" style="color: red"> Offline</span>
+          	  <span *ngIf="getUserStatus(u.login) === 1" class="bi bi-circle-fill" style="color: green"> Online</span>
+          	  <span *ngIf="getUserStatus(u.login) === 3" class="bi bi-circle-fill" style="color: yellow"> Playing</span>
+          	</button>
+         </div>
+      </div></ul>
+   </ul>
+   
+</frame>
+<router-outlet>
