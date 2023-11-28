@@ -474,12 +474,12 @@ export class ChatGateway extends BaseGateway {
 	  }
   }
 
-  async afterSilenceInform(executorLogin: string, executorSocketId: string, targetLogin: string, room: string){
+  async afterSilenceInform(executorLogin: string, executorSocketId: string, targetLogin: string, room: string, time: number){
 	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(targetLogin);
 	  	if (targetSocketIds.length){
 
 			const err: SocketPayload = generateSocketInformationResponse(room, 
-				`Information: you have been silenced from ${room}`)
+				`Information: you have been silenced from ${room} for ${time} minutes`)
 
 			for (let i = 0; i < targetSocketIds.length; i++){
 				this.server.to(targetSocketIds[i]).emit("system", err.data)
@@ -489,7 +489,7 @@ export class ChatGateway extends BaseGateway {
 		this.server.to(executorSocketId)
 			.emit("system", generateSocketInformationResponse(room, 
 				`You've silenced ${user.nick} in ${room} successfully`).data)
-	    const silenceInfo: SocketPayload = generateSocketInformationResponse(room, `user ${user.nick} has been silenced of ${room}`)
+	    const silenceInfo: SocketPayload = generateSocketInformationResponse(room, `user ${user.nick} has been silenced of ${room} for ${time} minutes`)
 		let roomMetaData: RoomMetaData = await this.roomService
 			.getRoomMetaData(room)
 	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
@@ -506,7 +506,7 @@ export class ChatGateway extends BaseGateway {
 	  	.chatService
 	  	.silenceUserOfRoom(login, payload.login, payload.room, payload.time);
 	  if (silenceOk){
-		this.afterSilenceInform(login, client.id, payload.login, payload.room)
+		this.afterSilenceInform(login, client.id, payload.login, payload.room, payload.time)
 	  }
   }
 
@@ -665,14 +665,14 @@ export class ChatGateway extends BaseGateway {
   }
 
   @SubscribeMessage(events.AdminSilenceChatUser)
-  async adminSilenceUserOfRoom(client: Socket, payload: ChatMessage){
+  async adminSilenceUserOfRoom(client: Socket, payload: any){
 	  const login: string = client.handshake.query.login as string;
 	  const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(payload.room);
 	  const silenceOk: boolean = await this
 	  	.chatAdminService
-	  	.silenceUserOfRoom(login, payload.login, payload.room);
+	  	.silenceUserOfRoom(login, payload.login, payload.room, payload.time);
 	  if (silenceOk){
-		this.afterSilenceInform(login, client.id, payload.login, payload.room)
+		this.afterSilenceInform(login, client.id, payload.login, payload.room, payload.time)
 		  this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
 	  }
   }

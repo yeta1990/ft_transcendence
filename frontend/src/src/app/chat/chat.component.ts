@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, QueryList, ElementRef, ViewChild, ViewChildren, OnDestroy} from '@angular/core';
 import { ChatService } from './chat.service';
 import { FormBuilder } from '@angular/forms';
-import { ChatMessage, SocketPayload, RoomMetaData, ToastData } from '@shared/types';
+import { ChatMessage, SocketPayload, RoomMetaData, ToastData, Silenced } from '@shared/types';
 import { events, ToastValues } from '@shared/const';
 import { waitSeg } from '@shared/functions';
 import { takeUntil } from "rxjs/operators"
@@ -329,7 +329,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	isSilenced(room:string, login:string): boolean {
 		const foundRoom  =   this.roomsMetaData.get(room)
 		if (!foundRoom) return false;
-		const silenced: Array<string> = foundRoom.silenced.map(f => f.login)
+		const silenced: Array<string> = foundRoom.silenced
 		return silenced.includes(login)
 	}
 
