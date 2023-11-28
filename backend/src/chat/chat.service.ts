@@ -12,6 +12,8 @@ import { User } from '../user/user.entity';
 import { ChatGateway } from '../events/chat.gateway'
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Game } from '../pong/game.entity'
+import {Silenced } from '@shared/types'
+import {addMinutes} from '@shared/functions'
 
 @Injectable()
 export class ChatService {
@@ -21,8 +23,6 @@ export class ChatService {
     private triggerSubject: BehaviorSubject<Date> = new BehaviorSubject(this.trigger);
 
 
-	@InjectRepository(Room)
-	private readonly roomRepository: Repository<Room>;
 
 	@InjectRepository(User)
 	private readonly userRepository: Repository<User>;
@@ -34,9 +34,13 @@ export class ChatService {
 				@Inject(forwardRef(() => RoomService))
 				private roomService: RoomService,
 				@Inject(forwardRef(() => ChatGateway))
-				private chatGateway: ChatGateway
-			   ) {}
-
+				private chatGateway: ChatGateway,
+				@InjectRepository(Room)
+				private readonly roomRepository: Repository<Room>
+			   ) {
+			this.deleteAllGameRooms()
+			   }
+ 
 	getUsersObservable(): Observable<Date>{
 			return this.triggerSubject
 	}
@@ -208,7 +212,12 @@ export class ChatService {
 		const isBannedOfRoom: boolean = await this.isBannedOfRoom(login, room)
 		if (isBannedOfRoom) return false;
 		const foundRoom = await this.getRoom(room);
+		if (!foundRoom) return false;
 		const foundUser = await this.userService.getUserByLogin(login);
+		if (!foundUser) return false;
+		for (let user of foundRoom.users){
+			if (user.login == login) return true;
+		}
 		foundRoom.users.push(foundUser);
 		await this.roomRepository.save(foundRoom);
 		return true;
@@ -410,7 +419,7 @@ export class ChatService {
 		return true;
 	}
 
-	public async silenceUserOfRoom(executorLogin: string, login: string, room: string): Promise<boolean>{
+	public async silenceUserOfRoom(executorLogin: string, login: string, room: string, time:number): Promise<boolean>{
 		//check privileges
 		if (executorLogin === login) return false;
 		const executorIsOwnerOfRoom: boolean = await this.isOwnerOfRoom(executorLogin, room);
@@ -426,15 +435,18 @@ export class ChatService {
 		//remove privileges and ban
 		const foundRoom: Room = await this.getRoom(room)
 		if (!foundRoom) return false;
-		const roomSilenced: User[] = foundRoom.silenced;
+		let roomSilenced: Silenced[] = foundRoom.silenced;
+		if (!roomSilenced) {roomSilenced = []}
 		for (let silenced of roomSilenced){
 			if (silenced.login === login) return true;
 		}
-		const userToSilence: User | undefined = await this.userService.getUserByLogin(login);
-		if (!userToSilence) return false;
+		const user: User | undefined = await this.userService.getUserByLogin(login);
+		if (!user) return false;
+		if (time < 1 || time > 1000) return false;
+		const userToSilence: Silenced = { login: login, until: addMinutes(time) }
+		if (!foundRoom.silenced) foundRoom.silenced = [] as Silenced[]
 		foundRoom.silenced.push(userToSilence);
 		await this.roomRepository.save(foundRoom)
-
 		return true;
 	}
 
@@ -449,9 +461,8 @@ export class ChatService {
 		if (!isTargetSilenced) return false;
 
 		const oldSilencedSize: number = foundRoom.users.length;
-		foundRoom.silenced = foundRoom.silenced.filter(user => {
-			return user.login != login;
-		})
+
+		foundRoom.silenced = foundRoom.silenced.filter((silenced: any) => !silenced.includes(login))
 		await this.roomRepository.save(foundRoom);
 		if (oldSilencedSize === foundRoom.silenced.length){ 
 			return false;
@@ -462,11 +473,13 @@ export class ChatService {
 	public async isSilencedOfRoom(login: string, room: string): Promise<boolean>{
 		const foundRoom: Room = await this.getRoom(room);
 		if (!foundRoom) return false;
-		const silencedOfRoom: User[] = foundRoom.silenced;
-		for (let i = 0; i < silencedOfRoom.length; i++){
-			if (silencedOfRoom[i].login === login) return true;
-		}
-		return false;
+		const silencedOfRoom: Silenced[] = foundRoom.silenced;
+		if (!silencedOfRoom) return false;
+		let silenced: boolean = false;
+		foundRoom.silenced.map((u: any) => {
+			if (JSON.parse(u).login == login && new Date(JSON.parse(u).until) > new Date()) silenced = true}
+		);
+		return silenced;
 	}
 
 	public async addPassToRoom(login: string, room: string, pass: string){
@@ -546,6 +559,15 @@ export class ChatService {
 		return await this.roomRepository.delete(room);
 	}
 
+	public async deleteAllGameRooms(): Promise<any>{
+		return await this.roomRepository
+      		.createQueryBuilder()
+      		.delete()
+      		.from(Room)
+      		.where("name LIKE :name", { name: '%pongRoom%' })
+      		.execute();
+	}
+
 	//only for testing purposes
 	public async emptyTableRoom(): Promise<any>{
 		return await this.roomRepository.clear();
@@ -591,6 +613,8 @@ export class ChatService {
 			else if (playerOneScore < playerTwoScore) return 0
 			else return 0.5
 	}
+
+
 
 	public async saveGameResult(g: GameRoom){
 		if (g.powersAllow) return;

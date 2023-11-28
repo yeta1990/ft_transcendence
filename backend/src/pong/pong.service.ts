@@ -244,13 +244,13 @@ export class PongService {
             if(g.ballX <= 0){  
                 g.ballX = g.canvasWidth / 2 - g.ballWidth / 2;
                 g.playerTwoScore += 1;
-                this.checkScores(g);
+                this.checkScores(g, room);
             }
         //check right canvas bounds
             if(g.ballX + g.ballWidth >= g.canvasWidth){
                 g.ballX = g.canvasWidth / 2 - g.ballWidth / 2;
                 g.playerOneScore += 1;
-                this.checkScores(g);
+                this.checkScores(g, room);
             }
         //check player collision
             if(g.ballX <= g.playerOneX + g.playerOneW){
@@ -267,7 +267,7 @@ export class PongService {
             g.ballX += g.ballXVel * g.ballSpeed;
             g.ballY += g.ballYVel * g.ballSpeed;
     }
-    async checkScores(g: GameRoom){
+    async checkScores(g: GameRoom, game: string){
         if (g.playerOneScore >= 5 || g.playerTwoScore >= 5){
         	console.log("check scores")
             g.pause = true;
@@ -275,10 +275,22 @@ export class PongService {
             this.chatService.setUserStatusIsActive(g.playerOne)
             this.chatService.setUserStatusIsActive(g.playerTwo)
 			await this.chatService.saveGameResult(g)
-			if (g.playerTwo != "")this.gameGateaway.sendReplay(g.playerOne, g.playerTwo)
+			if (g.playerTwo != ""){
+				this.gameGateaway.sendReplay(g.playerOne, g.playerTwo)
+				for (let i = 0; i < 10; i++){
+					if (!this.games.get(game)) return;
+					if (this.games.get(game).finish == false){
+						return ;
+					}
+					await waitSeg(1)
+				}
+				//10 seconds after finishing the game, if there isn't replay
+				//the room is destroyed
+				await this.rejectReplayProposal(game)
+			}
         }
     }
-
+ 
 
     updateComputer(g: GameRoom){ 
  
@@ -783,7 +795,8 @@ export class PongService {
 
 		//delete games finished
       	for (let game of games){
-			if (this.games.get(game).finish == true){
+			if (!this.games.get(game)) {}
+			else if (this.games.get(game).finish == true){
 					await this.chatService.deleteRoom(game)
 					await this.gameGateaway.destroyEmptyRooms(game)
 					this.games.delete(game)

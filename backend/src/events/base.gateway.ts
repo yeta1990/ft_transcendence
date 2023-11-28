@@ -79,7 +79,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		this.getAllChatUsersWithNickEquivalence()
 			.then(c => this.server.emit(events.LoginNickEquivalence, c))
   }
-
+ 
   // about auth during client connection
   // https://github.com/ThomasOliver545/realtime-todo-task-management-app-nestjs-and-angular/blob/main/todo-api/src/todo/gateway/todo.gateway.ts
   async handleConnection(socket: Socket): Promise<void>{
@@ -311,6 +311,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
   }
 
   public async createNewRoomAndJoin(clientId: string, creatorLogin: string, room: string, password: string | undefined): Promise<boolean>{
+  	  	
 		const hasPass:boolean = password != undefined ? true : false;
 		await this
 			.chatService
@@ -405,7 +406,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  	}
 
 	  	//announce the rest of the channel a new user has joined
-	  	if (hardJoin && !room.includes(':') && !room.includes('@')){
+	  	if (hardJoin && !room.includes(':') && !room.includes('@') && !room.includes('pongRoom')){
 	  		const user: User = await this.userService.getUserByLogin(login)
 	  		const socketInfo: SocketPayload = generateSocketInformationResponse(room, `user ${user.nick} has joined room ${room}`)
 			this.broadCastToRoomExceptForSomeUsers(socketInfo.event, socketInfo.data, [login])

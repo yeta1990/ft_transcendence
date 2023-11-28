@@ -30,8 +30,10 @@ export const events = {
 }
 
 export const values = {
-	forbiddenChatRoomCharacters: [':', '#', '@']
+	forbiddenChatRoomCharacters: [':', '#', '@'],
+	forbiddenNewChatRoomStrings: ['pong', 'pongRoom', '_', '+' ]
 }
+
 
 export const ToastValues = {
 	INFO: "Information",

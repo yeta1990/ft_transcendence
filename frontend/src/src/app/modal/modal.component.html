@@ -155,6 +155,25 @@
         </div>
       </ng-template>
 
+      <ng-template [ngSwitchCase]="'silenceUserModal'">
+        <div id="silenceUserModal">
+		  <div class="modal-header">
+		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Silence user {{getModalData()}} in this channel?</h1>
+		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<div class="mb-3">
+          	<p>Introduce the number of minutes you want to silence this user (between 1 and 1000): </p>
+
+			<input type="number" class="form-control" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter minutes to silence this user">
+   		    </div>
+
+   		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Silence user</button>
+
+      	  </div>
+        </div>
+      </ng-template>
+
       <ng-template [ngSwitchCase]="'template8'">
         <div id="modal-content-template8">
 		  <div class="modal-header">
@@ -262,13 +281,13 @@
         <div id="modal-content-template15">
 		  <div class="modal-header">
 		  	  <h1 class="modal-title fs-5" id="exampleModalLabel">Waiting &#64;{{getModalData()[0]}} to accept the match challenge</h1>
-		  <button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  <button (click)="noButton()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		  </div>
 		  <div class="modal-body">
 			<div class="mb-3">
           		<p>Wait until {{getModalData()[0]}} accepts.</p>
    		    </div>
-   		    <button (click)="confirmationButton()" type="button" class="btn btn-outline-danger">Cancel challenge</button>&nbsp;
+   		    <button (click)="noButton()" type="button" class="btn btn-outline-danger">Cancel challenge</button>&nbsp;
 
       	  </div>
         </div>

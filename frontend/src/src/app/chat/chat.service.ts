@@ -131,8 +131,8 @@ export class ChatService {
 		this.socketService.sendMessageToServer("ban", payloadToSend);
 	}
 
-	silenceUserFromRoom(login:string, room: string){
-		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
+	silenceUserFromRoom(login:string, room: string, time: number){
+		const payloadToSend: any = {room: room, login: login, time: time}
 		this.socketService.sendMessageToServer(events.SilenceUser, payloadToSend);
 	}
 

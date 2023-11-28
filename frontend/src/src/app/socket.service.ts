@@ -49,7 +49,7 @@ export class SocketService {
 				this.message.next({event: 'joinmp', data});
 			})
 			.on(events.ListAllRooms, (data: Array<RoomMetaData>) => {
-//				console.log("listRooms received: " + data);
+//				console.log("listRooms received: " + JSON.stringify(data));
 				this.message.next({event: events.ListAllRooms, data});
 			})
 			.on(events.ListMyJoinedRooms, (data: any) => {
@@ -72,8 +72,8 @@ export class SocketService {
 				this.message.next({event: events.AllRoomsMetaData, data})
 			})
 			.on(events.ActiveUsers, (data: Array<ChatUser>) => {
-				console.log("active users")
-				console.log(data)
+//				console.log("active users")
+//				console.log(data)
 				this.message.next({event: events.ActiveUsers, data})
 //				console.log("active users: " + JSON.stringify(data));
 			})
