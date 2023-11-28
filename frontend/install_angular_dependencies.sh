@@ -7,6 +7,4 @@ ng analytics off
 npm cache clean -force
 npm update
 npm install
-#change in evaluation
-npm run start
-#npm run build
+npm run build

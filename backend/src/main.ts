@@ -6,21 +6,28 @@ import { config }  from 'dotenv';
 config(); // to load process.env from here
 
 function isOriginAllowed(origin: string) {
-	const allowedOrigins = ['http://localhost', 'http://localhost:80','http://localhost:3000', 'http://localhost:4200'];
+	const allowedOrigins = ['http://localhost', 'http://localhost:80','http://localhost:3000', process.env.FRONTEND_IP, process.env.FRONTEND_IP2];
 	const allowedLastDigits = ['1', '2', '3', '4', '5', '6']; // Últimos dígitos permitidos
-	const portsToAllow = [':4200', ':80'];
+	const portsToAllow = [':80'];
 
 	// Verificamos si el origen es una URL válida
 	const urlPattern = /^(https?:\/\/)?([a-z\d.-]+|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:[0-9]{1,5})?([/?].*)?$/;
 	const matches = origin.match(urlPattern);
 	if (!matches) {
-	return false; // Si no es una URL válida, la rechazamos
+		return false; // Si no es una URL válida, la rechazamos
 	}
  
 	// Verificamos si el origen es localhost
 	if (allowedOrigins.includes(origin)) {
-		console.log(origin)
-		console.log("allowed origins")
+		return true;
+	}
+	for (let orig of allowedOrigins){
+		if (orig.replace(portsToAllow[0], "").includes(origin)){
+			return true
+		}
+	}
+
+	if (allowedOrigins.includes(origin.replace(portsToAllow[0], ""))){
 		return true;
 	}
 	const [, , hostname, port, path] = matches;
@@ -44,10 +51,8 @@ function isOriginAllowed(origin: string) {
 		(secondComponent === '12' && thirdComponent >= 1 && thirdComponent <= 19) ||
 		(secondComponent === '13' && thirdComponent >= 1 && thirdComponent <= 14))
 	) {
-		console.log("RET: true");
 		return true;
 	}
-	console.log("RET: false");
 	return false;
 }
 
@@ -58,9 +63,7 @@ async function bootstrap() {
 	app.enableCors({
 		
 		origin: (origin, callback) => {
-			console.log("ORIGIN: " + origin);
 			if ((!origin) || isOriginAllowed(origin)) {
-				console.log("CORS allowed");
 				callback(null, true);
 			} else {
 				callback( new Error('CORS not allowed'));
@@ -71,7 +74,6 @@ async function bootstrap() {
 	});
 
 	app.use((req, res, next) => {
-		console.log(`Solicitud CORS: ${req.method} ${req.url}`);
 		next();
 	  });
 

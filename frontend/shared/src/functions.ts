@@ -57,4 +57,16 @@ export function getEloRank(elo: number): string {
 
 export function generateRandomString(size: number){
 return Array(size).fill(0).map((elt: number) => Math.ceil(Math.random() * 35).toString(36)).join("");
+
 }
+
+export async function waitSeg(seg: number){ return new Promise(resolve => setTimeout(resolve, seg * 1000))};
+
+export function addMinutes(min: number): Date {
+  var d = new Date();
+  d.setTime(d.getTime() + min * 60 * 1000);
+  return d;
+}
+
+
+
