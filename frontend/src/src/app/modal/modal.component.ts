@@ -1,7 +1,9 @@
 // modal.component.ts
-import { Component, HostListener } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { ModalService } from './modal.service';
 import { environment } from 'src/environments/environment';
+import { ChangeDetectorRef } from '@angular/core';
+import { ImageService } from '../edit-profile/ImageService/image-service.service'
 
 @Component({
   selector: 'app-modal',
@@ -9,6 +11,9 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./modal.component.css'],
 })
 export class ModalComponent {
+
+	@ViewChild('imageToCrop', { static: false }) imageElement!: ElementRef;
+
   inputValue: string = "";
   inputValue2: string = "";
   checkboxInput: boolean = false;
@@ -18,10 +23,11 @@ export class ModalComponent {
   selectedImage: string | null = null;
   formData: FormData = new FormData();
   file: string | null = null;
-  placeholder: string = "placeholder.png";
+  placeholder: string = "phldr.jpg";
 
-  constructor(private modalService: ModalService) {
- 	this.modalData = this.modalService.getModalData() 
+  constructor(private modalService: ModalService,
+	private imageService: ImageService) {
+ 	this.modalData = this.modalService.getModalData()
   }
 
   noButton(): void {
@@ -56,7 +62,10 @@ export class ModalComponent {
   }
 
   confirmationButton(): void {
- 	this.confirmationInput = true; 
+ 	this.confirmationInput = true;
+	if (this.selectedImage) {
+		this.imageService.selectImage(this.selectedImage);
+	}
 	this.saveAndCloseModal();
   }
 
@@ -91,7 +100,7 @@ export class ModalComponent {
   }
 
   onImageSelect(selectedImage: string): void {
-    console.log('Imagen seleccionada:', selectedImage);
+    console.log('Modal: Imagen seleccionada:', selectedImage);
     if (this.selectedImage === selectedImage) {
       this.selectedImage = null;
     } else {
@@ -116,8 +125,9 @@ export class ModalComponent {
     if (files.length > 0) {
       const _file = URL.createObjectURL(files[0]);
       console.log('_file:', _file);
-      this.file = _file;
-      this.resetInput();   
+		this.file = _file;
+		this.selectedImage = this.file;
+      this.resetInput();
     }
   }
 
@@ -130,7 +140,8 @@ export class ModalComponent {
 
   clearFile(): void {
     this.formData.delete('image');
+	this.selectedImage = null;
+	this.file = null;
   }
-  
 }
 

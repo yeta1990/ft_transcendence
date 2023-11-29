@@ -50,6 +50,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 	originalFormValues: any;
 	imagesBaseUrl: string = environment.apiUrl + '/uploads/'
 	public avatarImages: string[] = [];
+	avatarImageSrc: string | null = null;
 
 	private modalClosedSubscription: Subscription = new Subscription();
 
@@ -110,7 +111,8 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 			}
 		  );
 		  this.imageService.selectedImage$.subscribe((selectedImage: string) => {
-			console.log('Imagen seleccionada en EditProfileComponent:', selectedImage);
+			this.avatarImageSrc = this.imagesBaseUrl + selectedImage;
+			this.formData.append('image', this.avatarImageSrc )
 		  });
 	}
 
@@ -263,6 +265,8 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 
 	discardChanges() {
 		this.editForm.patchValue(this.originalFormValues);
+		this.clearFile();
+		this.avatarImageSrc = null;
 	}
 
 	async uploadImage(): Promise<any> {
@@ -316,15 +320,22 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 		const modalData = {
 			images: images,
 			onSelectImage: (selectedImage: string) => {
-			  // Lógica a realizar cuando se selecciona una imagen
-			  console.log('Imagen seleccionada:', selectedImage);
-			  // Cierra el modal si es necesario
-			  // this.modalService.closeModal(); // Asegúrate de tener un método closeModal en tu servicio
+			  console.log('Edit: Imagen seleccionada:', selectedImage);
 			},
 		  };
-		
-		  // Abre el modal con la información
 		  this.modalService.openModal('imageGalleryTemplate', modalData);
+	  }
+
+	  mostrarImagenSeleccionada(): void {
+		console.log("Estoy en mostrar imagen. SelectedFile: " + this.selectedFile);
+		if (this.selectedFile) {
+		  const reader = new FileReader();
+		  reader.onload = (event: any) => {
+			this.avatarImageSrc = event.target.result;
+			console.log("avatarImageSrc: " + this.avatarImageSrc);
+		  };
+		  reader.readAsDataURL(this.selectedFile);
+		}
 	  }
 
 	// FUNCIONES RELACIONADAS CON 2FA ------------------------------------------------

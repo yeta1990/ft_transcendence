@@ -36,6 +36,7 @@
 
   /* Ajustes de estilo para el contenedor de carga */
 .upload-container {
+	position:relative;
   width: 74px;
   height: 87px;
   background-color: transparent;
@@ -43,64 +44,47 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   margin: 10px;
+  z-index: 2;
 }
+
+.upload-container.selected-image {
+	border-width: 20px;
+  }
 
 /* Ajustes de estilo para el icono de carga */
 .upload-icon {
   font-size: 24px;
   color: #d4da5b;
-}
-
-.avatar-container {
-  position: relative;
-  width: fit-content;
-}
-
-.box-shadow-avatar{
-  box-shadow: 0 10px 20px 20px #6c93001a;
+  position: absolute;
+  transform: translate(50%, 0%);
 }
 
 .image-cropper-container {
-  height: 200px;
-  width: 200px;
+	position:absolute;
+  height: 84px;
+  width: 71px;
   z-index: 1;
-  border-radius: 50%;
-  background-color: #fff;
   background-position: center;
   background-size: cover;
-  box-shadow: 0 10px 20px 20px #6c93001a;
-}
-
-.avatar-placeholder {
-  background-image: url('/usr/src/app/src/src/assets/avatar-placeholder.png');
 }
 
 .icon-wrapper {
-  position: relative;
-  height: 40px;
-  width: 40px;
-  padding: .35rem;
-  background-color: #2962FF;
-  border-radius: 50%;
+	position: absolute;
+	width: 40%;
+	height: 40%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  right: 0;
-  top: 75%;
-  z-index: 2;
+  transform: translate(-50%, -50%);
+  z-index: 1;
   cursor: pointer;
 }
 
 .icon-wrapper:hover {
   transition: all .25s;
-  background-color: #1e4e91;
+  opacity: 0.7;
+  background-color: #444;
 }
 
-.icon {
-  color: white;
-}
 
 .file-label {
   cursor: pointer;
@@ -117,3 +101,39 @@ input[type='file'] {
   z-index: 3; /* Asegúrate de que el input esté por encima del label y del icono */
 }
 
+.unselect-button {
+	font-family: "Roboto", sans-serif;
+	position: relative;
+	width: 71px;
+	height: auto;
+	background-color: #d1434f;
+	color: white;
+	font-size: 12px;
+	border: none;
+	border-radius: 15px;
+	margin-top: 100px;
+	cursor: pointer; /* Cambiamos el cursor al pasar por encima */
+	font-weight: bold;
+  }
+
+  /* Estilos para el contenedor del cropper */
+.cropper-container {
+	width: 100%; /* Ajusta el ancho según sea necesario */
+	height: auto; /* Ajusta la altura según sea necesario */
+	position: relative;
+	overflow: hidden;
+  }
+
+  .cropper-view-box {
+	display: block;
+	position: absolute;
+	outline: 1px solid #39f; /* Color del borde del área de recorte */
+  }
+  
+  /* Estilos para la imagen dentro del cropper */
+  #imageToCrop {
+	max-width: 100%; /* Ajusta el ancho máximo según sea necesario */
+	max-height: 100%; /* Ajusta la altura máxima según sea necesario */
+	display: block;
+	margin: auto;
+  }

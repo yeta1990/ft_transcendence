@@ -444,28 +444,21 @@
 			  <div *ngFor="let image of getImages()" (click)="onImageSelect(image)" class="image-container" [class.selected-image]="selectedImage === image">
 				<img [src]="imagesBaseUrl + image" alt="Avatar Image" class="gallery-image">
 			</div>
-			<img [src]="imagesBaseUrl + placeholder" alt="Avatar Image" class="gallery-image">
-			  <div class="avatar-container">
-				<div class="image-cropper-container" *ngIf="file; else placeholder" [ngClass]="{'box-shadow-avatar': !!file}" [ngStyle]="{backgroundImage: 'url(' + file + ')'}"></div>
-				<ng-template #placeholder>
-				  <div class="image-cropper-container avatar-placeholder box-shadow-avatar" *ngIf="!file"></div>
-				</ng-template>
-				<img class="image-container" [src]="imagesBaseUrl + placeholder" alt="Descripción de la imagen">
-				<label for="avatar-input-file">
-					<div class="icon-wrapper">
-						<mat-icon class="icon" fontIcon="edit"></mat-icon>
-						<label for="avatar-input-file" class="file-label">
-						  <input type="file" id="avatar-input-file" accept="image/*" (change)="onFileChange($event)" />
-						</label>
-					  </div>
-				</label>
-			</div> 
-			  <div class="upload-container" (click)="openFileInput()">
-				<div class="upload-icon">+</div>
-			  </div>
-			<input id="file" type="file" (change)="onFileChange($event)" style="display: none;">
-			<button *ngIf="formData.has('image')" type="button" class="btn btn-danger" (click)="clearFile()">Unselect</button>
-			
+				  
+				  <div class="upload-container" [class.selected-image]="file">
+					<div class="image-cropper-container" *ngIf="file" [ngStyle]="{backgroundImage: 'url(' + file + ')'}"></div>
+					<div class="image-cropper-container avatar-placeholder box-shadow-avatar" *ngIf="!file" style="background-image: url('{{ imagesBaseUrl }}phldr.jpg')"></div>
+					<label for="avatar-input-file">
+						<div class="icon-wrapper" *ngIf="!file">
+							<div class="upload-icon" *ngIf="!file">+</div>
+							<label for="avatar-input-file" class="file-label">
+								<input type="file" id="avatar-input-file" accept="image/*" (change)="onFileChange($event)" />
+							  </label>
+						</div>
+					</label>
+					<button *ngIf="file" type="button" class="unselect-button" (click)="clearFile()">Unselect</button>
+				  </div> 
+				  
 			</div>
 		  </div>
 		  <div class="text-center">
