@@ -18,7 +18,6 @@ export class ErrorInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(catchError(err => {
-      console.log(err);
       if ([401, 403].includes(err.status)) {
       	  if (err.error?.message.includes("token"))
       		{

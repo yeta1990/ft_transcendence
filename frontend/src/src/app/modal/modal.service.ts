@@ -29,6 +29,7 @@ export class ModalService {
     this.currentModal = templateId;
     this.modalData1 = data;
     this.modalStatus = true;
+    this.image = null;
   }
   closeModal(): void {
     this.modalStatus = false;

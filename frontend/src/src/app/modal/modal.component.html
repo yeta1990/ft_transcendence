@@ -464,7 +464,7 @@
 				<img [src]="imagesBaseUrl + image" alt="Avatar Image" class="gallery-image">
 			</div>
 				  
-				  <div class="upload-container" [class.selected-image]="file">
+				  <div class="upload-container" [class.selected-image]="selectedImage">
 					<div class="image-cropper-container" *ngIf="selectedImage" [ngStyle]="{backgroundImage: 'url(' + selectedImageName + ')'}"></div>
 					<div class="image-cropper-container" *ngIf="!selectedImage" style="background-image: url('{{ imagesBaseUrl }}phldr.jpg')"></div>
 					<label for="avatar-input-file">
