@@ -37,7 +37,7 @@
         		<td>
         			<div *ngIf="!isAdmin(room, user.login) && !isOwner(room, user.login)" (click)="makeAdmin(room, user.login)"> - Make channel admin</div>
         			<div *ngIf="!isAdmin(room, user.login) && !isOwner(room, user.login)" (click)="makeOwner(room, user.login)"> - Make channel owner</div>
-        			<div *ngIf="!isSilenced(room, user.login)" (click)="silenceUser(room, user.login)"> - Silence User</div>
+        			<div *ngIf="!isSilenced(room, user.login)" (click)="silenceUserFromRoomModal(room, user.login)"> - Silence User</div>
         			<div *ngIf="isSilenced(room,user.login)" (click)="unSilenceUser(room, user.login)"> - Remove silence</div>
         			<div (click)="banUser(room, user.login)">- Ban user</div>
         		</td>

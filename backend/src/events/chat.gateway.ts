@@ -678,12 +678,14 @@ export class ChatGateway extends BaseGateway {
 
   @SubscribeMessage(events.AdminSilenceChatUser)
   async adminSilenceUserOfRoom(client: Socket, payload: any){
+		console.log("adminsilence")
 	  const login: string = client.handshake.query.login as string;
 	  const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(payload.room);
 	  const silenceOk: boolean = await this
 	  	.chatAdminService
 	  	.silenceUserOfRoom(login, payload.login, payload.room, payload.time);
 	  if (silenceOk){
+	  	  console.log("yesss")
 		this.afterSilenceInform(login, client.id, payload.login, payload.room, payload.time)
 		  this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
 	  }

@@ -297,7 +297,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	getNickEquivalence(login: string): string | null{
 		return this.chatService.getNickEquivalence(login);
-			
 	}
 
 	isPrivateRoom(room: string): boolean {

@@ -4,6 +4,7 @@ import { takeUntil } from "rxjs/operators"
 import { Subject, Subscription, pipe } from "rxjs"
 import { ChatMessage, SocketPayload, RoomMetaData, RoomMessages} from '@shared/types';
 import { events } from '@shared/const';
+import { ModalService } from '../modal/modal.service'
 
 
 @Component({
@@ -21,9 +22,10 @@ export class AdminChatPageComponent implements OnInit {
 	rooms: Array<string> = []
 	messageList: Map<string, ChatMessage[]> = new Map<string, ChatMessage[]>();
 	destroy: Subject<any> = new Subject();
+	private modalClosedSubscription: Subscription = {} as Subscription;
 
 
-	constructor(private chatService: ChatService) {}
+	constructor(private chatService: ChatService, private modalService: ModalService) {}
 
 	ngOnInit(): void {
 		this.chatService.forceInit()
@@ -47,7 +49,7 @@ export class AdminChatPageComponent implements OnInit {
 							this.roomsMetaData.set(room.room, room)
 							roomSet.add(room.room)
 						}
-						this.rooms = Array.from(roomSet)
+						this.rooms = Array.from(roomSet).sort()
         				this.scrollToBottom();
 					}
 					else if (payload.event === events.MessageForWebAdmins){
@@ -107,8 +109,23 @@ export class AdminChatPageComponent implements OnInit {
 		this.chatService.adminRemoveBanOfRoom(room, login)
 	}
 
-	silenceUser(room:string, login:string) {
-		this.chatService.adminSilenceUserOfRoom(room, login)
+   	silenceUserFromRoomModal(nick: string, room: string){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm){
+      			const time = this.modalService.getModalData()[0];
+      			if (time > 0 && time <= 1000){
+					this.silenceUser(nick, room, time)
+				}
+			}
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('silenceUserModal', room);
+
+   	}
+
+	silenceUser(room:string, login:string, time: number) {
+		this.chatService.adminSilenceUserOfRoom(room, login, time)
 	}
 
 	unSilenceUser(room:string, login:string) {

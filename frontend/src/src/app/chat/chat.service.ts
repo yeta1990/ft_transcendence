@@ -207,8 +207,8 @@ export class ChatService {
 		this.socketService.sendMessageToServer(events.AdminRemoveBanChatUser, payloadToSend);
 	}
 
-	adminSilenceUserOfRoom(room: string, login: string){
-		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
+	adminSilenceUserOfRoom(room: string, login: string, time: number){
+		const payloadToSend: any = {room: room, login: login, time: time}
 		this.socketService.sendMessageToServer(events.AdminSilenceChatUser, payloadToSend);
 	}
 

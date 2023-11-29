@@ -73,7 +73,6 @@ export class ChatAdminService {
 		if (!foundRoom) return false;
 		const executorIsWebAdmin: boolean = await this.userService.hasAdminPrivileges(executorLogin)
 		if (!executorIsWebAdmin) return false;
-
 		let roomSilenced: Silenced[] = foundRoom.silenced;
 		if (!roomSilenced) {roomSilenced = []}
 		for (let silenced of roomSilenced){
@@ -86,10 +85,12 @@ export class ChatAdminService {
 		if (!foundRoom.silenced) foundRoom.silenced = [] as Silenced[]
 		foundRoom.silenced.push(userToSilence);
 		await this.roomRepository.save(foundRoom)
+
 		return true;
 	}
 
 	public async removeSilenceOfRoom(executorLogin: string, login: string, room: string): Promise<boolean>{
+		console.log("1")
 		const foundRoom: Room = await this.roomService.getRoom(room);
 		if (!foundRoom) return false;
 		const executorIsWebAdmin: boolean = await this.userService.hasAdminPrivileges(executorLogin)
@@ -97,10 +98,9 @@ export class ChatAdminService {
 
 		const isTargetSilenced: boolean = await this.chatService.isSilencedOfRoom(login, room)
 		if (!isTargetSilenced) return false;
+
 		const oldSilencedSize: number = foundRoom.users.length;
-		foundRoom.silenced = foundRoom.silenced.filter(user => {
-			return user.login != login;
-		})
+		foundRoom.silenced = foundRoom.silenced.filter((silenced: any) => !silenced.includes(login))
 		await this.roomRepository.save(foundRoom);
 		if (oldSilencedSize === foundRoom.silenced.length){ 
 			return false;
