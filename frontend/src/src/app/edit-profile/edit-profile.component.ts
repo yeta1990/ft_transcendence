@@ -110,8 +110,8 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 			  console.error('Error fetching avatar images:', error);
 			}
 		  );
-		  this.imageService.selectedImage$.subscribe((selectedImage: string) => {
-			this.avatarImageSrc = this.imagesBaseUrl + selectedImage;
+		  this.imageService.selectedImage$.subscribe((selectedImage: File) => {
+			this.avatarImageSrc = this.imagesBaseUrl + URL.createObjectURL(selectedImage);
 			this.formData.append('image', this.avatarImageSrc )
 		  });
 	}
@@ -296,6 +296,8 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 
 	onFileChange(event: any): void {
 		const file = event.target.files[0];
+		console.log("on file change")
+		console.log(file)
 		if (file) {
 		this.selectedFile = file;
 		this.editForm.patchValue({ file });
@@ -328,14 +330,17 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
       		const confirm: boolean = this.modalService.getConfirmationInput();
 			if (confirm){
 				const selectedImage = this.modalService.getImage()
-				const avatarImages = this.imageService.getAvatarImages()
-					.subscribe((imgs) => {
-						this.avatarImageSrc = selectedImage
-						if (imgs.includes(selectedImage)){
-							this.avatarImageSrc = this.imagesBaseUrl + selectedImage;
-						}
-						this.formData.append('image', this.avatarImageSrc )
-					})
+
+				if (selectedImage != undefined){
+					let selectedImageOk = selectedImage;
+					const _file = URL.createObjectURL(selectedImage);
+					this.avatarImageSrc = _file 
+					if (this.avatarImages.includes(_file)){
+						this.avatarImageSrc = this.imagesBaseUrl + _file;
+					}
+					this.formData.append('image', selectedImageOk )
+				}
+
 			}
 		})
 		this.modalService.openModal('imageGalleryTemplate', modalData);

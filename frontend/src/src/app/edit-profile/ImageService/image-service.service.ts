@@ -16,7 +16,7 @@ export class ImageService {
   private croppedImageSource = new BehaviorSubject<any>('');
   croppedImage$ = this.croppedImageSource.asObservable();
 
-  private selectedImageSource = new Subject<string>();
+  private selectedImageSource = new Subject<File>();
   selectedImage$ = this.selectedImageSource.asObservable();
 
   constructor(
@@ -39,7 +39,7 @@ export class ImageService {
   }
 
 
-  selectImage(image: string): void {
+  selectImage(image: File): void {
     this.selectedImageSource.next(image);
   }
 

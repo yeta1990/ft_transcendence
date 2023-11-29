@@ -275,6 +275,7 @@ export class UserController {
 		storage: diskStorage({
 			destination: './uploads',
 			filename: (req, file, cb) => {
+				console.log("eoo")
 				console.log(file)
 				var sanitize = require("sanitize-filename");
 				const safeFileName = sanitize(generateRandomString(16) + extname(file.originalname));
@@ -283,6 +284,7 @@ export class UserController {
 		})
 	}))
 	uploadFile(@Body() body: any, @UploadedFile() file: Express.Multer.File) {
+		console.log(file)
 		if (body.fileValidationError) {
 			return { error: body.fileValidationError };
 		  }

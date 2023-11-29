@@ -20,7 +20,7 @@
 					<button class="avatar-button-edit" (click)="onFileInputClick()"></button>
 					<img class="avatar" [src]="getUserImage()" alt="User Avatar" />
 				  </div>
-				  
+
 				<div class="user-info-row">
 					<div class="lockInputBox">
 						<input type="text" name="login" required="required" id="login" formControlName="login" placeholder="{{ user?.login }}" [readonly]="!loginEnabled" [ngStyle]="loginEnabled ? {} : { 'background': '#999' }">
