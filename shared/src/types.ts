@@ -19,15 +19,23 @@ export type SocketPayload = {
 	data: any 
 }
 
+export class Silenced {
+	constructor (
+	public login: string,
+	public until: Date
+	){}
+}
+
 export type RoomMetaData = {
 	room: string;
 	owner: string,
 	admins: Array<ChatUser>,
 	users: Array<ChatUser>,
 	banned: Array<ChatUser>,
-	silenced: Array<ChatUser>,
+	silenced: Array<string>,
 	hasPass: boolean,
 }
+
 
 // type to handle relationships between
 // client_id provided by socket.io and our identification

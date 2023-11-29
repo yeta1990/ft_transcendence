@@ -9,12 +9,13 @@
           <th>Foto</th>
           <th>Status</th>
           <th>Actions</th>
+          <th>Live game</th>
         </tr>
       </thead>
       <tbody>
         <!-- Aquí irá el *ngFor con los datos de los amigos -->
         <tr *ngFor="let friend of friends">
-          <td>{{ friend.nick}}</td>
+          	<td><a style="text-decoration:none; color: inherit;" routerLink="/user-profile/{{friend.login}}">{{ friend.nick}}</a></td>
           <td><img [src]="imagesBaseUrl + friend.image" alt="Picture of {{ friend.login }}" class="img-thumbnail"style="max-width: 100px;" ></td>
           <td>
           	  <span *ngIf="getUserStatus(friend.login) === 0" class="bi bi-circle-fill" style="color: red"> Offline</span>
@@ -22,9 +23,9 @@
           	  <span *ngIf="getUserStatus(friend.login) === 3" class="bi bi-circle-fill" style="color: yellow"> Playing</span>
           </td>
           <td>
-            <!-- Aquí irá el botón y cualquier otra acción que desees -->
 	  		<button class="btn btn-primary" (click)="removeFriendship(friend.login)">Remove friend</button>
           </td>
+          <td><button class="btn btn-primary" (click)="spectatorTo(getGameRoom(friend.login), friend.login)">{{getGameRoom(friend.login)}}</button></td>
         </tr>
       </tbody>
     </table>
@@ -38,6 +39,7 @@
           <th>Foto</th>
           <th>Status</th>
           <th>Actions</th>
+
         </tr>
       </thead>
       <tbody>
@@ -46,14 +48,14 @@
           <td><img [src]="request.image" alt="Picture of {{ request.login }}" class="img-thumbnail"style="max-width: 100px;" ></td>
           <td>status</td>
           <td>
-            <!-- Aquí irá el botón y cualquier otra acción que desees -->
 	 		<button class="btn btn-primary" (click)="acceptFriendShipRequest(request.login)">ACCEPT FRIENDSHIP REQUEST</button>
 	 		<br/>
 	 		<br/>
 	 		<button class="btn btn-primary" (click)="rejectFriendshipRequest(request.login)">REJECT FRIENDSHIP REQUEST</button>
           </td>
+
         </tr>
       </tbody>
     </table>
-
+    <app-pong *ngIf="viewer" [friends]="showGame()" />
 <router-outlet>

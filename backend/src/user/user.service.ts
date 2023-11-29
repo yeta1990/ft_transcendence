@@ -232,6 +232,13 @@ export class UserService {
 			WHERE (f."userId_2" = $1)`, [user.id]);
 	}
 
+	public async thereIsABlock(executor: string, banned: string): Promise<boolean>{
+		const usersThatHaveBannedAnother: User[] = await this.getUsersThatHaveBannedAnother(banned)
+		const loginsBlockers = usersThatHaveBannedAnother.map(u => u.login)
+		console.log(loginsBlockers)
+		return (loginsBlockers.includes(executor))
+	}
+
 	public async isUserBannedFromUser(executor: string, banned: string): Promise<boolean>{
 		const bannedUsers = await this.getBannedUsersByLogin(executor);
 		if (!bannedUsers) return false;

@@ -1,6 +1,7 @@
 import { PrimaryGeneratedColumn, Entity, Column, PrimaryColumn, ManyToOne, OneToOne, ManyToMany, OneToMany, JoinTable } from 'typeorm';
 import { User } from '../user/user.entity';
 import { ChatMessage } from './chat-message/chat-message.entity';
+import {Silenced } from '@shared/types'
 
 @Entity()
 export class Room { 
@@ -38,9 +39,8 @@ export class Room {
 	@JoinTable()
 	admins: User[];
 
-	@ManyToMany(() => User, (user) => user.silencedRooms)
-	@JoinTable()
-	silenced: User[];
+	@Column("text", { array: true, nullable: true})
+	silenced: Silenced[]
 
 	@ManyToMany(() => User, (user) => user.bannedRooms)
 	@JoinTable()

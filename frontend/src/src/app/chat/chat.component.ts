@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, QueryList, ElementRef, ViewChild, ViewChildren, OnDestroy} from '@angular/core';
 import { ChatService } from './chat.service';
 import { FormBuilder } from '@angular/forms';
-import { ChatMessage, SocketPayload, RoomMetaData, ToastData } from '@shared/types';
+import { ChatMessage, SocketPayload, RoomMetaData, ToastData, Silenced } from '@shared/types';
 import { events, ToastValues } from '@shared/const';
 import { waitSeg } from '@shared/functions';
 import { takeUntil } from "rxjs/operators"
@@ -57,8 +57,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.profileService.getUserDetails()
 			.subscribe(
 				(response: User) => {this.myUser= response;},
-			(error) => {console.log(error);}
-			);
+			(error) => {});
    }
 
    getCurrentRoom(): string {
@@ -93,8 +92,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	   this.chatService.banUserFromRoom(nick, room)
    }
 
-   silenceUserFromRoom(nick: string, room: string){
-		this.chatService.silenceUserFromRoom(nick, room)
+   silenceUserFromRoom(nick: string, room: string, time: number){
+		this.chatService.silenceUserFromRoom(nick, room, time)
    }
 
    unSilenceUserFromRoom(nick: string, room: string){
@@ -120,6 +119,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	leaveRoom(room: string): void{
 		this.chatService.partFromRoom(room);	
 		this.messageList.delete(room);
+	}
+
+	isMyChallengeRoom(room: string): boolean {
+		if (!this.myUser) return false;
+		if (room.includes(this.myUser.login) && room.includes('pongRoom') && room.includes('+')){ return true;}
+		return false
 	}
 
 	//subscription to all events from the service
@@ -156,6 +161,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 						this.chatService.setCurrentRoom("")
 //						this.myJointRoomList.filter(r => r != )
 					}
+					console.log("setting available room list " + this.availableRoomsList)
+					this.chatService.setAvailableRoomsList(this.availableRoomsList);
 				}
 				else if (payload.event === events.ListMyPrivateRooms){
 					this.myPrivateMessageRooms = Array.from(payload.data);
@@ -168,9 +175,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 						this.chatService.setCurrentRoom("")
 					}
 					else if (!this.myJointRoomList.includes(this.getCurrentRoom())){
-						this.chatService.setCurrentRoom(this.myJointRoomList[0]);
-						this.joinUserToRoom(this.getCurrentRoom(), "")
+//						this.chatService.setCurrentRoom(this.myJointRoomList[0]);
+//						this.joinUserToRoom(this.getCurrentRoom(), "")
 					}
+
 				}
 				else if (payload.event === 'system'){
 //					old method to log a message in the chat window
@@ -184,7 +192,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					this.toasterService.launchToaster(ToastValues.ERROR, payload.data.message)
 				}
 				else if (payload.event === 'join'){
-					this.chatService.setCurrentRoom(payload.data.room);
+					let playing: boolean = false;
+					for (let room of this.availableRoomsList){
+						if (this.isMyChallengeRoom(room)){ playing = true
+							this.chatService.setCurrentRoom(room);
+						}
+					}
+					if (playing == false){
+						this.chatService.setCurrentRoom(payload.data.room);
+					}
 					//check if the messageList map has space to store the room messages to prevent errors, but only 100% necessary in joinmp
 					if (!this.messageList.has(payload.data.room)){
 						this.messageList.set(this.getCurrentRoom(), new Array<ChatMessage>);
@@ -208,9 +224,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 						this.roomsMetaData.set(payload.data.room, payload.data)
 					}
 					const it = this.roomsMetaData.entries();
-					for (const el of it){
-						console.log(JSON.stringify(el))
-					}
+//					for (const el of it){
+//						console.log(JSON.stringify(el))
+//					}
 
 //					console.log(payload.data.loginNickEquivalence)
 				}
@@ -298,6 +314,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		return false
 	}
 
+	isGameRoom(room:string): boolean {
+		return room.includes("pongRoom") && !room.includes('pongRoom_undefined')
+	}
+
 	getActiveUsers() {
 		return this.chatService.getActiveUsers()
 	}
@@ -309,7 +329,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	isSilenced(room:string, login:string): boolean {
 		const foundRoom  =   this.roomsMetaData.get(room)
 		if (!foundRoom) return false;
-		const silenced: Array<string> = foundRoom.silenced.map(f => f.login)
+		const silenced: Array<string> = foundRoom.silenced
 		return silenced.includes(login)
 	}
 
@@ -464,6 +484,21 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.modalService.openModal('template6', room);
 	}
 
+   	silenceUserFromRoomModal(nick: string, room: string){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm){
+      			const time = this.modalService.getModalData()[0];
+      			if (time > 0 && time <= 1000){
+					this.silenceUserFromRoom(nick, room, time)
+				}
+			}
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('silenceUserModal', room);
+
+   	}
+
 	addPassToRoomModal(room:string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const confirm: boolean = this.modalService.getConfirmationInput();
@@ -503,6 +538,33 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 			await waitSeg(1)
 		}
 		this.modalService.closeModal()
+	}
+
+	translateGameRoomNames(room:string ): string {
+		if (this.myUser && room == '#pongRoom_' + this.myUser!.login){
+			return "You vs computer"
+		}else if (room.includes('pongRoom') && room.includes('+')){
+			const indexStart = room.indexOf('_') + 1; 
+			const indexEnd = room.indexOf('+');
+			const login1 = room.substring(indexStart, indexEnd);
+			const login2 = room.substring(room.indexOf('+') + 1);
+			return this.getNickEquivalence(login1) + ' vs ' + this.getNickEquivalence(login2)
+		}
+		else if(room.includes('#pongRoom')){
+			const indexStart = room.indexOf('_') + 1; 
+			const login = room.substring(indexStart);
+			return this.getNickEquivalence(login) + ' vs computer'
+		}
+		return room
+	}
+
+	enableChallengeButton(login: string): boolean{
+		if (!this.myUser) return false;
+		if (this.isUserActive(login) == 1 && this.isUserActive(this.myUser!.login) != 3)
+		{
+			return true
+		}
+		return false;
 	}
 
 }

@@ -6,7 +6,6 @@ import { ErrorInterceptor } from './error-interception/error.interceptor';
 import { GlobalErrorHandler } from './error-interception/global-error-handler.service';
 
 export const interceptorProviders = [
-
   {
 	provide: ErrorHandler,
 	useClass: GlobalErrorHandler,

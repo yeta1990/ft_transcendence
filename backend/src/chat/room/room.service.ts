@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Room } from '../room.entity';
 import { HttpService } from '@nestjs/axios';
 import { Repository } from 'typeorm';
-import { RoomMetaData, ChatUser } from '@shared/types';
+import { RoomMetaData, ChatUser, Silenced } from '@shared/types';
 import { ChatService } from '../chat.service';
 
 @Injectable()
@@ -29,7 +29,7 @@ export class RoomService {
 	public async getRoom(room: string): Promise<Room>{
 		const foundRoom = await this.repository
 			.findOne({
-				relations: ['owner', 'users', 'admins', 'banned', 'silenced'],
+				relations: ['owner', 'users', 'admins', 'banned'],
 				where: { name: room}
 			});
 		return foundRoom;
@@ -45,7 +45,14 @@ export class RoomService {
 		data.admins = [...new Set(roomData.admins.map(a => new ChatUser(null, a.id, a.login, a.nick, null)))];
 		data.users = [...new Set(roomData.users.map(u => new ChatUser(null, u.id, u.login, u.nick, null)))];
 		data.banned = [...new Set(roomData.banned.map(u => new ChatUser(null, u.id, u.login, u.nick, null)))];
-		data.silenced = [...new Set(roomData.silenced.map(u => new ChatUser(null, u.id, u.login, u.nick, null)))];
+		if (roomData.silenced){
+			data.silenced = [...new Set(roomData.silenced.map((u: any) => {
+				if (new Date(JSON.parse(u).until) > new Date()) return JSON.parse(u).login}
+			))];
+		}
+		else{
+			data.silenced = []
+		}
 		data.hasPass = roomData.hasPass;
 		return data;
 	}

@@ -40,7 +40,11 @@ export class ChatGateway extends BaseGateway {
 	  if (await this.userService
 	  	  .isUserBannedFromUser(destinationLogin, emisorLogin)){
 	  	  return this.messageToClient(client.id, "system", 
-	  			generateSocketErrorResponse("", `You can't send a private message because you are banned from: ${destinationLogin}`).data);
+	  			generateSocketErrorResponse("", `You can't send a private message because you are banned`).data);
+	  }
+	  	if (await this.userService.thereIsABlock(emisorLogin, destinationLogin)){
+	  	  return this.messageToClient(client.id, "system", 
+	  			generateSocketErrorResponse("", `You can't send a private message to a blocked user`).data);
 	  }
 	  const realRoomName: string = await this.chatService.generatePrivateRoomName(emisorLogin, destinationLogin)
 
@@ -130,10 +134,9 @@ export class ChatGateway extends BaseGateway {
 		for (let i = 0; i < activeWebAdmins.length; i++){
 			
 			this.messageToClient(activeWebAdmins[i].client_id, events.MessageForWebAdmins, payload)
-			console.log("enviando mensaje a webadmin")
 		}
 		await this.chatMessageService.saveMessage(payload)
-	} 
+	}
   }
 
   //return a response directly to the client
@@ -157,6 +160,11 @@ export class ChatGateway extends BaseGateway {
 	  			  return this.messageToClient(clientSocketId, "system-error", 
 	  					generateSocketErrorResponse("", `You can't open a private conversation with ${room.substr(1, room.length - 1)} because you are banned`).data);
 	      }
+	  	  if (await this.userService.thereIsABlock(login, room.substr(1, room.length - 1))){
+	  			return this.messageToClient(clientSocketId, "system-error", 
+	  					generateSocketErrorResponse("", `You can't open a private conversation with ${room.substr(1, room.length - 1)} because you blocked the user`).data);
+
+	  	  }
 	      const targetLogin: string = room.substr(1, room.length - 1)
 	      if (login === targetLogin) return false;
 		  room = await this.chatService.generatePrivateRoomName(login, targetLogin)
@@ -237,13 +245,24 @@ export class ChatGateway extends BaseGateway {
   	  if (room.length > 0 && room[0] != '#' && room[0] != '@'){
   	  	room = '#' + room;
   	  }
-	  for (const c of values.forbiddenChatRoomCharacters){
-		if (room.substr(1, room.length - 1).includes(c)){
-			this.server.to(client.id)
-				.emit("system", generateSocketErrorResponse(room, 
-					`Invalid name for the channel ${room}, try other`).data)
-			return ;
-		}
+	  const roomExists: boolean = await this.chatService.isRoomCreated(room);
+	  if (!roomExists){
+  	  	for (const invalid of values.forbiddenNewChatRoomStrings){
+			if (room.includes(invalid)){
+				this.server.to(client.id)
+					.emit("system", generateSocketErrorResponse(room, 
+						`Invalid name for the channel ${room}, try other`).data)
+				return ;
+			}
+  	  	}
+	    for (const c of values.forbiddenChatRoomCharacters){
+			if (room.substr(1, room.length - 1).includes(c)){
+				this.server.to(client.id)
+					.emit("system", generateSocketErrorResponse(room, 
+						`Invalid name for the channel ${room}, try other`).data)
+				return ;
+			}
+	  	}
 	  }
 
   	  //check if user is banned from channel
@@ -274,8 +293,11 @@ export class ChatGateway extends BaseGateway {
 	  const destinationUser = await this.userService.getUserByLogin(destinationLogin);
 	  if (!destinationUser)
 	  	  return generateSocketErrorResponse("", `User not found: ${destinationLogin}`);
-	  if (await this.userService.isUserBannedFromUser(destinationLogin, login))
+	  if (await this.userService.thereIsABlock(login, destinationLogin)){
+
+//	  	  await this.userService.isUserBannedFromUser(destinationLogin, login))
 	  	  return generateSocketErrorResponse("", `You are banned from: ${destinationLogin}`);
+	  }
 	  const privateRoomName: string = await this.chatService.generatePrivateRoomName(login, destinationLogin)
 	  const emisorSocketIds = this.getClientSocketIdsFromLogin(login);
 	  const destinationSocketIds = this.getClientSocketIdsFromLogin(destinationLogin);
@@ -362,6 +384,14 @@ export class ChatGateway extends BaseGateway {
   @SubscribeMessage(events.Pass)
   async addPassToRoom(client: Socket, payload: ChatMessage){
 	  const login: string = client.handshake.query.login as string;
+  	  	for (const invalid of values.forbiddenNewChatRoomStrings){
+			if (payload.room.includes(invalid)){
+				this.server.to(client.id)
+					.emit("system", generateSocketErrorResponse(payload.room, 
+						`Can't make a game room private${payload.room}`).data)
+				return ;
+			}
+  	  	}
 	  const passAdded: boolean = await this.chatService.addPassToRoom(login, payload.room, payload.message);
 	  if (passAdded)
 	 	{
@@ -369,9 +399,7 @@ export class ChatGateway extends BaseGateway {
 			.emit("system", generateSocketInformationResponse(payload.room, 
 				`You've set a password to chat room ${payload.room} successfully`).data)
 
-		let roomMetaData: RoomMetaData = await this.roomService
-			.getRoomMetaData(payload.room)
-	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
+    	this.emit(events.ListAllRooms, await this.roomService.getAllRoomsMetaData());
 	 	}
   }
 
@@ -383,9 +411,7 @@ export class ChatGateway extends BaseGateway {
 		this.server.to(client.id)
 			.emit("system", generateSocketInformationResponse(payload.room, 
 				`You've made chat room ${payload.room} public`).data)
-		let roomMetaData: RoomMetaData = await this.roomService
-			.getRoomMetaData(payload.room)
-	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
+    	this.emit(events.ListAllRooms, await this.roomService.getAllRoomsMetaData());
 	  }
   }
 
@@ -448,12 +474,12 @@ export class ChatGateway extends BaseGateway {
 	  }
   }
 
-  async afterSilenceInform(executorLogin: string, executorSocketId: string, targetLogin: string, room: string){
+  async afterSilenceInform(executorLogin: string, executorSocketId: string, targetLogin: string, room: string, time: number){
 	  	const targetSocketIds: Array<string> = this.getClientSocketIdsFromLogin(targetLogin);
 	  	if (targetSocketIds.length){
 
 			const err: SocketPayload = generateSocketInformationResponse(room, 
-				`Information: you have been silenced from ${room}`)
+				`Information: you have been silenced from ${room} for ${time} minutes`)
 
 			for (let i = 0; i < targetSocketIds.length; i++){
 				this.server.to(targetSocketIds[i]).emit("system", err.data)
@@ -463,7 +489,7 @@ export class ChatGateway extends BaseGateway {
 		this.server.to(executorSocketId)
 			.emit("system", generateSocketInformationResponse(room, 
 				`You've silenced ${user.nick} in ${room} successfully`).data)
-	    const silenceInfo: SocketPayload = generateSocketInformationResponse(room, `user ${user.nick} has been silenced of ${room}`)
+	    const silenceInfo: SocketPayload = generateSocketInformationResponse(room, `user ${user.nick} has been silenced of ${room} for ${time} minutes`)
 		let roomMetaData: RoomMetaData = await this.roomService
 			.getRoomMetaData(room)
 	  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
@@ -473,14 +499,14 @@ export class ChatGateway extends BaseGateway {
   }
 
   @SubscribeMessage(events.SilenceUser)
-  async silenceUserOfRoom(client: Socket, payload: ChatMessage){
+  async silenceUserOfRoom(client: Socket, payload: any){
 	  const login: string = client.handshake.query.login as string;
 	  const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(payload.room);
 	  const silenceOk: boolean = await this
 	  	.chatService
-	  	.silenceUserOfRoom(login, payload.login, payload.room);
+	  	.silenceUserOfRoom(login, payload.login, payload.room, payload.time);
 	  if (silenceOk){
-		this.afterSilenceInform(login, client.id, payload.login, payload.room)
+		this.afterSilenceInform(login, client.id, payload.login, payload.room, payload.time)
 	  }
   }
 
@@ -530,6 +556,8 @@ export class ChatGateway extends BaseGateway {
   async part(client: Socket, room: string): Promise<void>{
 	const login: string = client.handshake.query.login as string;
 	const socketIdsByLogin: Array<string> = this.getClientSocketIdsFromLogin(login);
+	if (room.includes('pongRoom')) return;
+
 	if (socketIdsByLogin.length === 0)
 		return generateSocketErrorResponse(room, `Error`)
 	const successfulPart: boolean = await this.removeUserFromRoom(room, login);
@@ -539,12 +567,16 @@ export class ChatGateway extends BaseGateway {
 	  	socketIdsByLogin.forEach(socketId => {
 		  this.server.to(socketId).emit(events.ListMyJoinedRooms, joinedRoomsByLogin);
 		  this.server.to(socketId).emit(events.ListMyPrivateRooms, privateRoomsByLogin);
-		  this.server.to(socketId).emit("system", generateSocketInformationResponse(room, `you've left ${room}`).data);
+		  if (!room.includes('pongRoom')){
+		  	this.server.to(socketId).emit("system", generateSocketInformationResponse(room, `you've left ${room}`).data);
+		  }
 	  	});
 
-   	    const user: User = await this.userService.getUserByLogin(login)
-	 	const roomInfo: SocketPayload = generateSocketInformationResponse(room, `user ${user.nick} has left room ${room}`)
-	  	this.broadCastToRoom(roomInfo.event, roomInfo.data)
+		  if (!room.includes('pongRoom')){
+   	    	const user: User = await this.userService.getUserByLogin(login)
+	 		const roomInfo: SocketPayload = generateSocketInformationResponse(room, `user ${user.nick} has left room ${room}`)
+	  		this.broadCastToRoom(roomInfo.event, roomInfo.data)
+	  	}
 	}
 	else{
 		this.server.to(client.id)
@@ -633,14 +665,14 @@ export class ChatGateway extends BaseGateway {
   }
 
   @SubscribeMessage(events.AdminSilenceChatUser)
-  async adminSilenceUserOfRoom(client: Socket, payload: ChatMessage){
+  async adminSilenceUserOfRoom(client: Socket, payload: any){
 	  const login: string = client.handshake.query.login as string;
 	  const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(payload.room);
 	  const silenceOk: boolean = await this
 	  	.chatAdminService
-	  	.silenceUserOfRoom(login, payload.login, payload.room);
+	  	.silenceUserOfRoom(login, payload.login, payload.room, payload.time);
 	  if (silenceOk){
-		this.afterSilenceInform(login, client.id, payload.login, payload.room)
+		this.afterSilenceInform(login, client.id, payload.login, payload.room, payload.time)
 		  this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
 	  }
   }
@@ -738,10 +770,16 @@ export class ChatGateway extends BaseGateway {
 
 @SubscribeMessage('joinGameAsViwer')
   	async handleJoinRoomGameAsViwer(client: Socket, room: string): Promise<void>{
+		console.log("Joined as viewer to:" + room);
 		const login: string = client.handshake.query.login as string;
 		const rooms :Array<string> = this.getActiveRooms();
 		const successfulJoin = await 
 		  this.joinUserToRoom(client.id, login, room, null);
+	}
+
+@SubscribeMessage('spectatorTo')
+  	async spectatorTo(client: Socket, room: string): Promise<void>{
+  		this.handleJoinRoomGameAsViwer(client, room)
 	}
 
 @SubscribeMessage('joinGame')
@@ -881,10 +919,18 @@ export class ChatGateway extends BaseGateway {
 
 	  	if (await this.userService
 	  	  .isUserBannedFromUser(targetLogin, login)){
+	  	  	  console.log("adfafafas")
 	  	  this.messageToClient(client.id, "system", 
-	  			generateSocketErrorResponse("", `You can't send a match challenge because you are banned from: ${targetLogin}`).data);
+	  			generateSocketErrorResponse("", `You can't send a match challenge because you are banned from the user`).data);
 		  return this.pongservice.cancelMatchProposal(login)
 	  	}
+	  	if (await this.userService.thereIsABlock(login, targetLogin)){
+	  	  this.messageToClient(client.id, "system", 
+	  			generateSocketErrorResponse("", `You can't send a match challenge to a blocked user`).data);
+
+		  return this.pongservice.cancelMatchProposal(login)
+	  	}
+
 
 		//check available
 		const isAvailableToPlay = this.chatService.isAvailableToPlay(targetLogin)
@@ -899,10 +945,9 @@ export class ChatGateway extends BaseGateway {
 			this.pongservice.removeUserFromMatchMakingList(login)
 		} else if (targetHasAnotherProposal){
 	  	  this.messageToClient(client.id, "system", 
-	  			generateSocketErrorResponse("", `${targetLogin} is waiting for another match challenge`).data);
+	  			generateSocketErrorResponse("", `The user is waiting for another match challenge`).data);
 		  this.pongservice.cancelMatchProposal(login)
 		}
-
 	}
 
 	@SubscribeMessage('acceptMatchProposal')
@@ -920,8 +965,13 @@ export class ChatGateway extends BaseGateway {
 		if (player1isAvailableToPlay && player2isAvailableToPlay){
 			//createGame
 			console.log("accepted game")
-			this.sendAcceptedGame(login, targetLogin)
-			this.pongservice.challengeGame(login, targetLogin, false)
+			if (this.pongservice.getStatus("#pongRoom_"+targetLogin+"+"+login)){
+				this.sendAcceptedGame(targetLogin, login)
+				this.pongservice.challengeGame(targetLogin, login, false)
+			}else{
+				this.sendAcceptedGame(login, targetLogin)
+				this.pongservice.challengeGame(login, targetLogin, false)
+			}
 		}else{
 	  	  this.messageToClient(client.id, "system", 
 	  			generateSocketErrorResponse("", `The other player is now busy playing, please wait until player is free again and challenge him/her`).data);
@@ -933,7 +983,6 @@ export class ChatGateway extends BaseGateway {
 		//remove from matchmaking list
 		this.pongservice.removeUserFromMatchMakingList(login)
 		this.pongservice.removeUserFromMatchMakingList(targetLogin)
-
 	}
 
 	@SubscribeMessage('cancelMatchProposal')
@@ -961,6 +1010,7 @@ export class ChatGateway extends BaseGateway {
 		if (validProposal){
 			this.acceptedMatchProposal(client, targetLogin)
 		}else{
+			
 			this.pongservice.saveMatchProposal(login, targetLogin)
 		}
 	}
