@@ -176,20 +176,39 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 		});
 	}
 
+	// FUNCIONES PARA LA VALIDACIÓN -------------------------------------------------------------
+
+	subscribeToInputs() : void {
+		this.editForm.get('firstName')?.valueChanges.subscribe((name: string | null) => {
+			if (name !== null) {
+				this.validateName(name);
+			} else {
+				console.log('El valor de name es nulo');
+			}
+		});
+		this.editForm.get('nick')?.valueChanges.subscribe((newNick: string | null) => {
+			if (newNick !== null) {
+				this.validateNick(newNick);
+			} else {
+				console.log('El valor de nick es nulo');
+			}
+		});
+	}
+
 	validateNick(newNick: string | null): void {
 		if (newNick !== null) {
-			this.validationService.checkNickAvailability({ nick: newNick }).subscribe(
-				(response) => {
-					if (response == true || newNick === this.user?.nick) {
-						this.editForm.get('nick')?.setErrors(null);
-					} else {
-						this.editForm.get('nick')?.setErrors({ notAvailable: true });
-					}
-				},
-				(error) => {
-				console.error('Error al verificar el nick:', error);
-				}
-			);
+			const ret = this.validationService.checkNick(newNick);
+			if (ret.success) {
+				this.editForm.get('nick')?.setErrors(null);
+			} else {
+				this.editForm.get('nick')?.setErrors({ notAvailable: true });
+			}
+		}
+	}
+
+	validateName( name: string | null ) : void {
+		if ( name !== null ) {
+			const ret = this.validationService.checkName(name);
 		}
 	}
 
