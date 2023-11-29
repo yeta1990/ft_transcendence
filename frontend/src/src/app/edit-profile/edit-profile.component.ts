@@ -47,6 +47,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 	isAdmin = false;
 	editEnabled = false;
 	loginEnabled = false;
+	selectedStandardAvatar: string | null = null
 	originalFormValues: any;
 	imagesBaseUrl: string = environment.apiUrl + '/uploads/'
 	public avatarImages: string[] = [];
@@ -261,6 +262,9 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 				console.error('Error al subir la imagen:', error);
 			}
 		}
+		else if (this.selectedStandardAvatar){
+			this.newUser.image = this.selectedStandardAvatar	
+		}
 		this.sendEditedUser();
 	}
 
@@ -330,6 +334,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
       		const confirm: boolean = this.modalService.getConfirmationInput();
 			if (confirm){
 				const selectedImage = this.modalService.getImage()
+				this.selectedStandardAvatar = this.modalService.getModalData()[0]
 
 				if (selectedImage != undefined){
 					let selectedImageOk = selectedImage;
@@ -340,7 +345,9 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 					}
 					this.formData.append('image', selectedImageOk )
 				}
-
+				else if (this.selectedStandardAvatar){
+					this.avatarImageSrc = this.imagesBaseUrl + this.selectedStandardAvatar
+				}
 			}
 		})
 		this.modalService.openModal('imageGalleryTemplate', modalData);

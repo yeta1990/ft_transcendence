@@ -441,7 +441,7 @@
 		  <div class="modal-body">
 			<p class="text-center font-weight-bold">Selecciona una imagen</p>
 			<div class="image-gallery">
-			  <div *ngFor="let image of getImages()" (click)="onImageSelect(image)" class="image-container" [class.selected-image]="selectedImageName === image">
+			  <div *ngFor="let image of getImages()" (click)="onImageSelect(image)" class="image-container" [class.selected-image]="inputValue === image">
 				<img [src]="imagesBaseUrl + image" alt="Avatar Image" class="gallery-image">
 			</div>
 				  
@@ -462,7 +462,7 @@
 			</div>
 		  </div>
 		  <div class="text-center">
-			<button type="button" class="btn btn-primary" [disabled]="!selectedImageName" (click)="saveAndCloseModal()">Continuar</button>
+			<button type="button" class="btn btn-primary" [disabled]="!inputValue && !selectedImage" (click)="saveAndCloseModal()">Continuar</button>
 		  </div>
 		  <br>
 		</div>

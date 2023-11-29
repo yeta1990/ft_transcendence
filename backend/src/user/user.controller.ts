@@ -58,19 +58,16 @@ export class UserController {
 	@Get('default-images')
 	public getAllAvatarImages(): any {
 	  const avatarImages: { images: string[] } = { images: [] };
-	  console.log("Entré en la ruta defaultImages");
 	  try {
 		const files = fs.readdirSync(this.defaultImagesPath);
 		var i = 0;
 		files.forEach((file) => {
 		  if (file.startsWith('Avatar_')) {
 			i += 1;
-			console.log("Number of avatars: " + i);
 			avatarImages.images.push(file);
 		  }
 		});
 	  } catch (error) {
-		console.error('Error reading default images:', error);
 	  }
 	
 	  return avatarImages;
@@ -258,8 +255,6 @@ export class UserController {
 		return { isValid: isValidDB };
 	}
 
-
-	
 	@UseGuards(AuthGuard)
 	@Post('upload')
 	@UseInterceptors(FileInterceptor('image', {
@@ -275,8 +270,6 @@ export class UserController {
 		storage: diskStorage({
 			destination: './uploads',
 			filename: (req, file, cb) => {
-				console.log("eoo")
-				console.log(file)
 				var sanitize = require("sanitize-filename");
 				const safeFileName = sanitize(generateRandomString(16) + extname(file.originalname));
 				cb(null, safeFileName);

@@ -16,6 +16,25 @@ export class EditProfileService {
 
     constructor(private httpService: HttpService, private chatService: ChatService) {}
 
+	private readonly defaultImagesPath = './uploads';
+
+	private getAllAvatarImages(): any {
+	  const avatarImages: { images: string[] } = { images: [] };
+	  try {
+		const files = fs.readdirSync(this.defaultImagesPath);
+		var i = 0;
+		files.forEach((file) => {
+		  if (file.startsWith('Avatar_')) {
+			i += 1;
+			avatarImages.images.push(file);
+		  }
+		});
+	  } catch (error) {
+	  }
+	
+	  return avatarImages;
+	}
+
     private deleteImage(filename: string){
     	const imagePath = path.join(__dirname, '../../../..', 'uploads', filename);
     	console.log("deleting image")
@@ -31,7 +50,10 @@ export class EditProfileService {
             })
 
         const oldImage = user.image
-		if (oldImage !== "avatar.png" && oldImage !== newUser.image) this.deleteImage(oldImage)
+		
+		const avatarImages = this.getAllAvatarImages().images
+		
+		if (!avatarImages.includes(oldImage) && oldImage !== newUser.image) this.deleteImage(oldImage)
 
         let userUpdate = await this.repository
             .createQueryBuilder()
@@ -41,6 +63,7 @@ export class EditProfileService {
             .execute()
         this.chatService.editActiveUser(newUser)
         console.log(newUser)
+	   
         return this.repository.save(newUser);
     }  
 }
