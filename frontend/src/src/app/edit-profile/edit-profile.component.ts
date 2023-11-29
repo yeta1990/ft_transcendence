@@ -111,9 +111,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 			}
 		  );
 		  this.imageService.selectedImage$.subscribe((selectedImage: string) => {
-//			console.log(this.avatarImageSrc)
 			this.avatarImageSrc = this.imagesBaseUrl + selectedImage;
-//			console.log(this.avatarImageSrc)
 			this.formData.append('image', this.avatarImageSrc )
 		  });
 	}
@@ -258,6 +256,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 				if (uploadResponse && uploadResponse.image) {
 				this.newUser.image = uploadResponse.image;
 				}
+				
 			} catch (error) {
 				console.error('Error al subir la imagen:', error);
 			}
@@ -272,6 +271,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 	}
 
 	async uploadImage(): Promise<any> {
+		console.log(this.formData)
 		try {
 			const response = await this.httpClient.post<any>(environment.apiUrl + '/user/upload', this.formData).toPromise();
 			console.log('Imagen subida:', response);
@@ -296,9 +296,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 
 	onFileChange(event: any): void {
 		const file = event.target.files[0];
-		console.log("on file change")
 		if (file) {
-			console.log("fasdfas")
 		this.selectedFile = file;
 		this.editForm.patchValue({ file });
 		this.formData.append('image', file)
@@ -317,7 +315,6 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 	async onFileInputClick(): Promise<void> {
 		const images = await lastValueFrom(this.imageService.getAvatarImages());
 		this.openImageModal(images);
-		console.log(images);
 	  }
 	
 	  openImageModal(images: string[]): void {
@@ -359,7 +356,8 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 	 */ 
 	getUserImage(): string{
 		console.log(this.avatarImageSrc)
-		if (this.avatarImageSrc) return this.avatarImageSrc;
+		if (this.avatarImageSrc && this.avatarImageSrc.includes('blob') && this.avatarImageSrc.substr(0,4) != "http") return this.avatarImageSrc;
+		if (this.avatarImageSrc && !this.avatarImageSrc.includes('blob')) return this.avatarImageSrc
 		if (this.user?.image) return this.imagesBaseUrl + this.user?.image
 		return this.imagesBaseUrl + 'phldr.jpg' 
 	
