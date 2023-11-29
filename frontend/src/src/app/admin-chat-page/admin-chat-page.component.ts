@@ -22,7 +22,8 @@ export class AdminChatPageComponent implements OnInit {
 	messageList: Map<string, ChatMessage[]> = new Map<string, ChatMessage[]>();
 	destroy: Subject<any> = new Subject();
 
-	constructor(private chatService: ChatService, ) {}
+
+	constructor(private chatService: ChatService) {}
 
 	ngOnInit(): void {
 		this.chatService.forceInit()

@@ -57,17 +57,11 @@ export class PongComponent implements OnInit, OnDestroy {
         //window.location.reload();
         this.online = this.route.snapshot.data['online'];
         this.online = this.pongService.onlineBoolean;
-        //console.log("ONLINE-->" + this.online);
-        //this.pongService.getGame().gameMode = 0;
-        console.log("Try subscribe");
-        //this.pongService.joinUserToRoom("#pongRoom");
 
 		this.myProfileService.getUserDetails()
        		.subscribe((response: User) => {
           		this.playerLogin = response.login;
         });
-
-
 
         requestAnimationFrame(this.gameLoop);
 		if (this.playerLogin == undefined || this.playerLogin.length == 0){
@@ -93,10 +87,8 @@ export class PongComponent implements OnInit, OnDestroy {
                 this.chatService.setCurrentRoom(payload.data.room);
         		this.canvas = this.gameCanvas?.nativeElement;
         		this.gameContext = this.canvas?.getContext('2d');
-//        		this.canvas.hidden = true;
                 this.msg = "Best of (9)"
                 this.waitingList = "";
-                //this.updatePowers();
                 requestAnimationFrame(this.gameLoop);
 
 				if (this.playerLogin == undefined || this.playerLogin.length == 0){
@@ -129,7 +121,7 @@ export class PongComponent implements OnInit, OnDestroy {
         }));
         if (!this.online && !this.contected) { 
 //            this.pongService.joinUserToRoom("#pongRoom");
-            this.msg = "Settings..."            
+            this.msg = "First choose a game mode or simply chat..."            
             this.contected = true;
         }
     }
@@ -311,10 +303,10 @@ export class PongComponent implements OnInit, OnDestroy {
         //draw scores and check end game
         var fontSize = 36 * this.coef;
         this.gameContext!.font = fontSize + 'px Arial';
-        var pOne = this.pongService.getGame().playerOne + " " + this.pongService.getGame().playerOneScore;
+        var pOne = this.chatService.getNickEquivalence(this.pongService.getGame().playerOne) + " " + this.pongService.getGame().playerOneScore;
         var ptwo: string;
         if (this.pongService.getGame().playerTwo)
-            ptwo = this.pongService.getGame().playerTwoScore + " "+ this.pongService.getGame().playerTwo;
+            ptwo = this.pongService.getGame().playerTwoScore + " "+ this.chatService.getNickEquivalence(this.pongService.getGame().playerTwo);
         else
             ptwo = this.pongService.getGame().playerTwoScore + " computer";
         var posOne = (((this.canvas.width / 2) - pOne.length) / 2 ) - (5 * this.coef);
@@ -326,7 +318,7 @@ export class PongComponent implements OnInit, OnDestroy {
         if (this.pongService.getGame().playerOneScore >= 5) { //POINTS
             //this.restartScores();
             this.gameContext!.fillStyle = "##d4da5b";
-            let winner = this.pongService.getGame().playerOne + " WON!"
+            let winner = this.chatService.getNickEquivalence(this.pongService.getGame().playerOne) + " WON!"
             this.gameContext!.fillText(winner, 250 * this.coef, 200 * this.coef);
             var again = "Press ESC for play again";
             var textWidth = this.gameContext!.measureText(again).width;
@@ -337,7 +329,7 @@ export class PongComponent implements OnInit, OnDestroy {
             this.gameContext!.fillStyle = "#d1434f";
             let winner;
             if (this.pongService.getGame().playerTwo != "") {
-                winner = this.pongService.getGame().playerTwo + " WON!"
+                winner = this.chatService.getNickEquivalence(this.pongService.getGame().playerTwo) + " WON!"
             } else{
                 winner =  "Computer WON!"
             }

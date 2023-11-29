@@ -77,7 +77,10 @@ export class UserController {
 	@UseGuards(AuthGuard)
 	@Post('grant-admin')
 	public async grantAdmin(@Query('login') login: string, @UserId() id: number): Promise<User[]>{
-		const hasExecutorPrivileges: boolean = (await this.service.getUser(id)).userRole >= 5 ? true : false
+		const executor: User = await this.service.getUser(id)
+		if (!executor) return;
+		if (executor.login == login) return [] as User[];
+		const hasExecutorPrivileges: boolean = executor.userRole >= 5 ? true : false
 		if (!hasExecutorPrivileges) return [] as User[]
 		const target: User = await this.service.getUserByLogin(login)
 		const isTargetOwner: boolean = target.userRole >= 6 ? true : false
@@ -90,7 +93,10 @@ export class UserController {
 	@UseGuards(AuthGuard)
 	@Post('remove-admin')
 	public async removeAdmin(@UserId() id: number, @Query('login') login: string): Promise<User[]>{
-		const hasExecutorPrivileges: boolean = (await this.service.getUser(id)).userRole >= 5 ? true : false
+		const executor: User = await this.service.getUser(id)
+		if (!executor) return;
+		if (executor.login == login) return [] as User[];
+		const hasExecutorPrivileges: boolean = executor.userRole >= 5 ? true : false
 		if (!hasExecutorPrivileges) return [] as User[]
 		const isTargetOwner: boolean = (await this.service.getUserByLogin(login)).userRole >= 6 ? true : false
 		if (isTargetOwner) return [] as User[]
@@ -100,7 +106,10 @@ export class UserController {
 	@UseGuards(AuthGuard)
 	@Post('ban')
 	public async banUserFromWebsite(@UserId() id: number, @Query('login') login: string): Promise<User[]>{
-		const hasExecutorPrivileges: boolean = (await this.service.getUser(id)).userRole >= 5 ? true : false
+		const executor: User = await this.service.getUser(id)
+		if (!executor) return;
+		if (executor.login == login) return [] as User[];
+		const hasExecutorPrivileges: boolean = executor.userRole >= 5 ? true : false
 		if (!hasExecutorPrivileges) return [] as User[]
 		const isTargetOwner: boolean = (await this.service.getUserByLogin(login)).userRole >= 6 ? true : false
 		if (isTargetOwner) return [] as User[]
@@ -110,7 +119,10 @@ export class UserController {
 	@UseGuards(AuthGuard)
 	@Post('unban')
 	public async removeBanUserFromWebsite(@UserId() id: number, @Query('login') login: string): Promise<User[]>{
-		const hasExecutorPrivileges: boolean = (await this.service.getUser(id)).userRole >= 5 ? true : false
+		const executor: User = await this.service.getUser(id)
+		if (!executor) return;
+		if (executor.login == login) return [] as User[];
+		const hasExecutorPrivileges: boolean = executor.userRole >= 5 ? true : false
 		if (!hasExecutorPrivileges) return [] as User[]
 		const isTargetOwner: boolean = (await this.service.getUserByLogin(login)).userRole >= 6 ? true : false
 		if (isTargetOwner) return [] as User[]

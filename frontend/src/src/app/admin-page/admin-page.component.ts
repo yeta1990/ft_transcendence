@@ -6,6 +6,7 @@ import { ToasterService } from '../toaster/toaster.service'
 import { ModalService } from '../modal/modal.service'
 import { AdminPageService} from './admin-page.service' 
 import { ChatService } from '../chat/chat.service'
+import { MyProfileService } from '../my-profile/my-profile.service';
   
 @Component({
   selector: 'app-admin-page',
@@ -14,17 +15,24 @@ import { ChatService } from '../chat/chat.service'
 })
 export class AdminPageComponent {
 	allUsers: User[] = [];	
+	myUser: User | undefined;
 	private modalClosedSubscription: Subscription = {} as Subscription;
 	constructor(private allUsersService: AllUsersService, 
 				private adminPageService: AdminPageService,
 		private modalService: ModalService,
 		private toasterService: ToasterService,
-		private chatService: ChatService
+		private chatService: ChatService,
+		private profileService: MyProfileService
 			   ) {
  
 		this.allUsersService.getUsers()
 			.subscribe(
 				(response:User[]) => {this.allUsers = response; console.log(response)})
+		this.profileService.getUserDetails()
+			.subscribe(
+				(response: User) => {this.myUser= response;},
+			(error) => {});
+
 		this.chatService.forceInit()
 	}
 

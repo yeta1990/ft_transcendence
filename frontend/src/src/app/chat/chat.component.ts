@@ -296,13 +296,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	}
 
 	getNickEquivalence(login: string): string | null{
-		const loginEquivalence: Array<any> | undefined = this.chatService.getLoginNickEquivalence()
-		if (loginEquivalence){
-			const foundUser = loginEquivalence.find(u => u.login === login)
-			//console.log(foundUser)
-			if (foundUser) return foundUser.nick
-		}
-		return login;
+		return this.chatService.getNickEquivalence(login);
 			
 	}
 

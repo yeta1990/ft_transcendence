@@ -125,7 +125,6 @@ export class ChatGateway extends BaseGateway {
 			.filter(u => !(bannedUsersBySender.includes(u.login)))
 			.filter(u => !(receiversThatHaveBannedSender.includes(u.login)))
 
-			console.log(activeUsersInRoom)
 
 		for (let i = 0; i < activeUsersInRoom.length; i++){
 			this.messageToClient(activeUsersInRoom[i].client_id, "message", payload)
@@ -245,6 +244,20 @@ export class ChatGateway extends BaseGateway {
   	  if (room.length > 0 && room[0] != '#' && room[0] != '@'){
   	  	room = '#' + room;
   	  }
+	  if (room.substr(1, room.length - 1).length < 1 ){
+			this.server.to(client.id)
+				.emit("system", generateSocketErrorResponse(room, 
+					`Invalid name for the channel ${room}: min 1 character`).data)
+			return ;
+	  }
+	  if (!room.includes('pongRoom') && room.substr(1, room.length - 1).length > 8 ){
+			this.server.to(client.id)
+				.emit("system", generateSocketErrorResponse(room, 
+					`Invalid name for the channel ${room}: max 8 characters`).data)
+			return ;
+	  }
+
+
 	  const roomExists: boolean = await this.chatService.isRoomCreated(room);
 	  if (!roomExists){
   	  	for (const invalid of values.forbiddenNewChatRoomStrings){
@@ -468,7 +481,6 @@ export class ChatGateway extends BaseGateway {
   async removeBanOfRoom(client: Socket, payload: ChatMessage){
 	  const login: string = client.handshake.query.login as string;
 	  const banRemoved: boolean = await this.chatService.removeBanOfRoom(login, payload.login, payload.room);
-	  console.log(banRemoved)
 	  if (banRemoved){
 	  	  await this.afterNoBanInform(client.id, payload.login, payload.room)
 	  }
@@ -770,7 +782,6 @@ export class ChatGateway extends BaseGateway {
 
 @SubscribeMessage('joinGameAsViwer')
   	async handleJoinRoomGameAsViwer(client: Socket, room: string): Promise<void>{
-		console.log("Joined as viewer to:" + room);
 		const login: string = client.handshake.query.login as string;
 		const rooms :Array<string> = this.getActiveRooms();
 		const successfulJoin = await 
@@ -796,7 +807,6 @@ export class ChatGateway extends BaseGateway {
 				this.server.to(client.id)
 					.emit("system", generateSocketErrorResponse(room, 
 					`Invalid name for the channel ${room}, try other`).data)
-					console.log("Error joining");
 
 				return ;
 			} 
@@ -809,7 +819,6 @@ export class ChatGateway extends BaseGateway {
 		if (online == 'alone')
 			room +=  "_" + login;
 		const originalRoom = room;
-		console.log("Try join..");
   		const wasUserAlreadyActiveInRoom: boolean = await this.isUserAlreadyActiveInRoomGame(clientSocketId, room);
 		  const rooms :Array<string> = this.getActiveRooms();
   		const successfulJoin = await 
@@ -818,13 +827,10 @@ export class ChatGateway extends BaseGateway {
   		if (successfulJoin){
 			//const response: ChatMessage = generateJoinResponse(originalRoom);
 			var userInRoom = this.getActiveUsersInRoom(room);
-			console.log("login " + login);
 			const response: GameRoom = this.pongservice.initGame(room, this, userInRoom.length, login, allowedPowers);
 			//var userInRoom = this.getActiveUsersInRoom('#pongRoom');
 			this.pongservice.setPlayer(room, login);
-			console.log("Join succed to: " + response.room);
 			
-//			console.log(response)
 			this.messageToClient(clientSocketId, 'gameStatus', response);
  
 			//sending old messages of the room, except for those of users that banned
@@ -867,7 +873,6 @@ export class ChatGateway extends BaseGateway {
 	@SubscribeMessage('on-line')
 	  handleOnLine(client: Socket, login: string){
 		const loginBack: string = client.handshake.query.login as string;
-		console.log("On-line: " + login + " - " + loginBack);
 		this.pongservice.addUserToList(loginBack)
 	  }
 
@@ -886,7 +891,6 @@ export class ChatGateway extends BaseGateway {
 	@SubscribeMessage('plus')
 	  handleOnLinePlus(client: Socket, login: string){
 		const loginBack: string = client.handshake.query.login as string;
-		console.log("On-linePlus: " + login + " - " + loginBack);
 		this.pongservice.addUserToListPlus(loginBack)
 	}
 
@@ -919,7 +923,6 @@ export class ChatGateway extends BaseGateway {
 
 	  	if (await this.userService
 	  	  .isUserBannedFromUser(targetLogin, login)){
-	  	  	  console.log("adfafafas")
 	  	  this.messageToClient(client.id, "system", 
 	  			generateSocketErrorResponse("", `You can't send a match challenge because you are banned from the user`).data);
 		  return this.pongservice.cancelMatchProposal(login)
@@ -964,7 +967,6 @@ export class ChatGateway extends BaseGateway {
 		const player2isAvailableToPlay = this.chatService.isAvailableToPlay(targetLogin)
 		if (player1isAvailableToPlay && player2isAvailableToPlay){
 			//createGame
-			console.log("accepted game")
 			if (this.pongservice.getStatus("#pongRoom_"+targetLogin+"+"+login)){
 				this.sendAcceptedGame(targetLogin, login)
 				this.pongservice.challengeGame(targetLogin, login, false)

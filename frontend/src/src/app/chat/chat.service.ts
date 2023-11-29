@@ -82,6 +82,16 @@ export class ChatService {
 	getLoginNickEquivalence(): Array<any> {
 		return this.loginNickEquivalence
 	}
+
+	getNickEquivalence(login: string): string {
+		const loginEquivalence: Array<any> | undefined = this.getLoginNickEquivalence()
+		if (loginEquivalence){
+			const foundUser = loginEquivalence.find(u => u.login === login)
+			//console.log(foundUser)
+			if (foundUser) return foundUser.nick
+		}
+		return login;
+	}
 	
 	setLoginNickEquivalence(data: Array<any>) {
 		this.loginNickEquivalence = data;
