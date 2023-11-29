@@ -1,8 +1,93 @@
 <app-nav-bar/>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="edit-profile.component.css">
+    <title>Configuración General</title>
+</head>
+<body>
+	<div class="background">
+		<div class="profile-container">
+			<h1 class="title01">Configuración General</h1>
+			<p class="subtitle">Administra los detalles de la cuenta de usuario que has compartido con Ft_Trascendence, incluyendo tu nombre, información de contacto y más datos.</p>
+            <form [formGroup]="editForm" class="form-container">
+				<h1 class="title02">Información de cuenta</h1>
+				<p class="subtitle2">ID: <span class="user-id">{{ user?.id }}</span></p>
+				<div class="avatar-container">
+					<button class="avatar-button-edit" (click)="onFileInputClick()"></button>
+					<img class="avatar" [src]="getUserImage()" alt="User Avatar" />
+				  </div>
+
+				<div class="user-info-row">
+					<div class="lockInputBox">
+						<input type="text" name="login" required="required" id="login" formControlName="login" placeholder="{{ user?.login }}" [readonly]="!loginEnabled" [ngStyle]="loginEnabled ? {} : { 'background': '#999' }">
+						<span>Login</span>
+					</div>
+					<button (click)="editLogin()" [ngClass]="isAdmin ? 'button-edit' : 'button-no-edit'"></button>
+					<div class="lockInputBox">
+						<input type="text" name="email" required="required" id="email" formControlName="email" placeholder="{{ user?.email }}" [readonly]="!editEnabled" [ngStyle]="editEnabled ? {} : { 'background': '#999' }">
+						<span>Email</span>
+					</div>
+					<button (click)="editEmail()" class="button-edit"></button>
+				</div>
+				<h1 class="title02">Detalles personales</h1>
+				<p class="subtitle">Administra tu nombre e información de contacto. Estos detalles personales son privados y no se mostrarán a otros usuarios.</p>
+				<div class="user-info-row">
+					<div class="inputBox">
+						<input type="text" name="firstName" required="required" id="firstName" formControlName="firstName" placeholder="{{ user?.firstName }}">
+						<span>Nombre</span>
+					</div>
+					<div class="inputBox">
+						<input type="text" name="lastName" required="required" id="lastName" formControlName="lastName" placeholder="{{ user?.lastName }}">
+						<span>Apellidos</span>
+					</div>
+				</div>
+				<div class="user-info-row">
+					<div class="inputBox">
+						<input type="text" name="nick" required="required" id="nick" formControlName="nick" placeholder="{{ user?.nick }}">
+						<span>Apodo</span>
+					</div>
+					<div class="inputBox">
+						<select formControlName="campus" class="selectBox">
+							<option value="" selected disabled>Selecciona tu campus</option>
+							<option class="select-option" *ngFor="let option of campusesTypes" [value]="option">{{ option }}</option>
+						</select>
+						<span>Campus</span>
+					</div>
+				</div>
+				<div class="user-info-row">
+					<div *ngIf="editForm.get('nick')?.hasError('notAvailable')" class="error-message">
+						Este apodo no es correcto o ya está en uso.
+					</div>
+				</div>
+				<div></div>
+				<div class="button-row">
+					<button class="discard-button" (click)="discardChanges()">Discard Changes</button>
+					<button class="button" (click)="saveChanges()">Save</button>
+				</div>
+			</form>
+			<hr>
+			<h1 class="title01">Autenticación Doble-Factor</h1>
+			<p class="subtitle">La autenticación de doble factor (2FA) es una capa adicional de seguridad diseñada para proteger tu cuenta contra accesos no autorizados. Esta función requiere la introducción de un código de seguridad adicional al iniciar sesión en la página. Descubre cómo configurarla viendo este video o siguiendo los pasos detallados en este artículo.</p>
+			<div class="mfa-button-container">
+				<button *ngIf="!mfaActivated" class="mfa-button" (click)="connectMfa()">Enable Authenticator APP</button>
+				<button *ngIf="mfaActivated" class="mfa-button" (click)="disconnectMfa()">Disable Authenticator APP</button>
+			</div>
+			<div class="finish-block"></div>
+        </div>
+    </div>
+</body>
+</html>
 <div class="container mt-4">
 	<h2>Edit Profile</h2>
-	<form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+	<form [formGroup]="editForm">
+		<div class="form-group">
+			<label for="name">Login</label>
+			<input id="login" type="text" class="form-control" readonly formControlName="login" placeholder="{{ user?.login }}">
+		</div>
 		<div class="form-group">
 			<label for="name">Name</label>
 			<input id="name" type="text" class="form-control" formControlName="firstName" placeholder="{{ user?.firstName }}">

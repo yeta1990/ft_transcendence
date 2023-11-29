@@ -1,0 +1,199 @@
+body {
+	margin: 0;
+	padding: 0;
+	background-color: #000000;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+  }
+  
+  .profile-container {
+	background-color: #333333;
+	width: 80%;
+	max-width: 400px;
+	min-height: fit-content;
+	padding: 20px;
+	margin: 20px auto;
+	border-radius: 4%;
+	position: relative;
+	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+  }
+  
+  .app-title {
+	font-family: "Roboto", sans-serif;
+	color: white;
+	font-size: 24px;
+	font-weight: bold;
+	text-align: center;
+	margin-top: 20px;
+  }
+
+  .login-button {
+	width: 80%;
+	max-width: 400px;
+	height: 60px;
+	background-color: #333333;
+	border-radius: 10px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 20px;
+	cursor: pointer;
+	border: none;
+  }
+  
+  .login-icon {
+	width: 50px;
+	height: 50px;
+  }
+
+  .oauth42-button {
+	width: 80%;
+	max-width: 400px;
+	height: 50px;
+	background-color: #d4da5b;
+	color: white;
+	border: none;
+	border-radius: 10px;
+	font-size: 14px;
+	text-transform: uppercase;
+	margin-top: 20px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+  }
+  
+  .oauth42-button:hover {
+	background-color: #b3bf40;
+  }
+  
+  .oauth42-logo {
+	width: 50px;
+	height: 50px;
+	margin-right: 10px;
+  }
+  
+  .auth-text-upper,
+.auth-text-lower {
+  font-family: "Roboto", sans-serif;
+  color: white;
+  font-size: 14px;
+  text-align: left;
+  position: absolute;
+}
+
+.auth-text-upper {
+  top: 50%;
+  transform: translateY(-50%);
+  left: 10%;
+}
+
+.auth-text-lower {
+  top: 65%;
+  left: 10%;
+}
+
+.username-input {
+	width: 80%;
+	max-width: 400px;
+	height: 40px;
+	background-color: #444444;
+	border: none;
+	border-radius: 5px;
+	padding: 10px;
+	margin-top: 20px;
+	color: #777777;
+	transition: background-color 0.3s ease;
+  
+  }
+  
+  .username-input:focus {
+	background-color: #555555;
+  }
+  
+  .password-input {
+	width: 80%;
+	max-width: 400px;
+	height: 40px;
+	background-color: #444444;
+	border: none;
+	border-radius: 5px;
+	padding: 10px;
+	margin-top: 20px;
+	color: #777777;
+	transition: background-color 0.3s ease;
+  }
+  
+  .password-input:focus {
+	background-color: #555555;
+  }
+  
+  .warning-text {
+	color: white;
+	font-size: 10px;
+	margin-top: 5px;
+	width: 80%;
+	max-width: 400px;
+  }
+
+  .remember-toggle {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	color: #777777;
+	margin-top: 10px;
+	cursor: not-allowed;
+  }
+  
+  .toggle-label {
+	margin-right: 10px;
+  }
+  
+  .toggle-switch {
+	align-self:flex-start;
+	width: 40px;
+	height: 20px;
+	background-color: #555555;
+	border-radius: 10px;
+  }
+
+  .access-button {
+	width: 80%;
+	max-width: 400px;
+	height: 50px;
+	background-color: #444444;
+	color: #777777;
+	border: none;
+	border-radius: 10px;
+	font-size: 14px;
+	text-transform: uppercase;
+	margin-top: 20px;
+	cursor: not-allowed;
+	transition: background-color 0.3s ease;
+  }
+  
+  .access-button:hover {
+	background-color: #555555;
+  }
+  
+  .register-section {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 20px;
+  }
+  
+  .no-account-text {
+	color: #777777;
+	font-size: 14px;
+	margin-right: 5px;
+  }
+  
+  .signup-link {
+	color: white;
+	font-size: 14px;
+	text-decoration: underline;
+  }
