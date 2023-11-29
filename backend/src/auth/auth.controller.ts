@@ -17,14 +17,8 @@ export class AuthController {
 	@Post('login')
 	login(@Body() body: LoginBody)
 	{
-		console.log("He llegado a auth.controller");
 		return this.authService.signIn(body.code);
 	}
-	/*
-	signIn(@Body() signInDto: User) {
-		return this.authService.signIn(signInDto.nick, signInDto.email);
-	}
-	*/
 
 /*
  * El objeto Request "req" tiene un campo user que contiene el usuario autenticado. 
