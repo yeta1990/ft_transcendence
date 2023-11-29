@@ -127,6 +127,20 @@ export class UserService {
 		return -1
 	}
 
+	public async isNickAvailable(nick: string): Promise<boolean> {
+		console.log("IN isnickavailable i got: " + nick);
+		const user = await this.repository.findOne({
+			where: {
+			nick: nick,
+			},
+		})
+		if (user) {
+			return false ;
+		} else {
+			return true ;
+		}
+	}
+
 	//____________________________ WEB ADMIN ________________________________
 
 	public async isUserBannedFromWebsite(login: string): Promise<boolean> {

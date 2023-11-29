@@ -133,7 +133,7 @@ export class AdminChatPageComponent implements OnInit {
 	isSilenced(room:string, login:string): boolean {
 		const foundRoom  =   this.roomsMetaData.get(room)
 		if (!foundRoom) return false;
-		const silenced: Array<string> = foundRoom.silenced.map(f => f.login)
+		const silenced: Array<string> = foundRoom.silenced
 		return silenced.includes(login)
 	}
 

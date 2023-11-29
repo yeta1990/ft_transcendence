@@ -83,9 +83,9 @@ export class NavBarComponent {
 
   redirectToMyProfile() {
     // Obtén el nombre de usuario del JWT
-
-    if (this.userName) {
-      this.router.navigate(['/user-profile', this.userName]);
+    const userName = this.authService.getUserNameFromToken();
+    if (userName) {
+      this.router.navigate(['/user-profile/' + userName]);
     } else {
 	  this.router.navigateByUrl('/home');
     }

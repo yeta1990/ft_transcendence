@@ -7,6 +7,8 @@ import { Repository } from 'typeorm';
 import { Room } from '../room.entity';
 import { RoomService } from '../room/room.service';
 import {ChatService} from '../chat.service'
+import {Silenced } from '@shared/types'
+import {addMinutes} from '@shared/functions'
 
 @Injectable()
 export class ChatAdminService {
@@ -64,7 +66,7 @@ export class ChatAdminService {
 		return true;
 	}
 
-	public async silenceUserOfRoom(executorLogin: string, login: string, room: string): Promise<boolean>{
+	public async silenceUserOfRoom(executorLogin: string, login: string, room: string, time: number): Promise<boolean>{
 		const targetIsWebOwner: boolean = await this.userService.isWebOwner(login)
 		if (targetIsWebOwner) return false;
 		const foundRoom: Room = await this.roomService.getRoom(room);
@@ -72,12 +74,16 @@ export class ChatAdminService {
 		const executorIsWebAdmin: boolean = await this.userService.hasAdminPrivileges(executorLogin)
 		if (!executorIsWebAdmin) return false;
 
-		const roomSilenced: User[] = foundRoom.silenced;
+		let roomSilenced: Silenced[] = foundRoom.silenced;
+		if (!roomSilenced) {roomSilenced = []}
 		for (let silenced of roomSilenced){
 			if (silenced.login === login) return true;
 		}
-		const userToSilence: User | undefined = await this.userService.getUserByLogin(login);
-		if (!userToSilence) return false;
+		const user: User | undefined = await this.userService.getUserByLogin(login);
+		if (!user) return false;
+		if (time < 1 || time > 1000) return false;
+		const userToSilence: Silenced = { login: login, until: addMinutes(time) }
+		if (!foundRoom.silenced) foundRoom.silenced = [] as Silenced[]
 		foundRoom.silenced.push(userToSilence);
 		await this.roomRepository.save(foundRoom)
 		return true;

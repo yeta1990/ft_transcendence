@@ -1,5 +1,296 @@
-.tab {
-    display: inline-block;
-    width: 150px;
-    text-align: right;
+/* Estilos generales para el fondo */
+.background {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-bottom: 150px;
+    overflow: auto;
+}
+
+/* Estilos generales para el contenedor del perfil */
+.profile-container {
+    background-color: #000000;
+    width: 50%;
+	height: fit-content;
+    margin-top: 2%;
+    position: relative;
+    border-radius: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Estilos generales para el contenedor del formulario */
+.form-container {
+    top: 0;
+    left: 0;
+    height: fit-content + 50px;
+	min-height: 60vh;
+    background-color: transparent;
+
+}
+
+/* Estilos para los títulos */
+.title01,
+.title02 {
+    font-family: "Roboto", sans-serif;
+    color: white;
+    font-size: 25px;
+    text-align: left;
+    margin-left: 5%;
+    text-transform: uppercase;
+}
+
+.title01 {
+    margin-top: 5%;
+}
+
+
+.title02 {
+    margin-top: 8%;
+}
+
+.avatar-container {
+	position: relative;
+	top: -50px; /* Ajusta la posición vertical de la imagen */
+	left: 50%; /* Centrar la imagen horizontalmente */
+	transform: translateX(-50%);
+	width: 200px; /* Tamaño fijo de la imagen */
+	height: 200px; /* Tamaño fijo de la imagen */
+	border: 5px solid white;
+	border-radius: 5%;
+	overflow: hidden;
+	position: relative;
+  }
+  
+  .avatar {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+  }
+  
+/* Estilos para los subtítulos */
+.subtitle,
+.subtitle2 {
+    font-family: "Roboto", sans-serif;
+    text-align: left;
+    margin-left: 5%;
+	word-wrap: break-word;
+	line-break: auto;
+	max-width: 90%;
+}
+
+.subtitle {
+    color: #999;
+    font-size: 14px;
+    margin-top: 30px;
+}
+
+.subtitle2 {
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    margin-left: 7%;
+    margin-top: 30px;
+}
+
+.user-id {
+    font-family: "Roboto", sans-serif;
+    color: white;
+	font-weight: lighter;
+	margin-left: 0.5em;
+}
+
+.user-info-row {
+	margin-top: 2%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height:fit-content;
+	flex-direction: row;
+	gap: 1%;
+}
+
+.lockInputBox {
+	position: relative;
+	width:39%;
+}
+
+.inputBox {
+	position: relative;
+	width:45%;
+	margin-top: 3em;
+}
+
+.lockInputBox input,
+.inputBox input {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #444;
+	background : white;
+	border-radius: 5px;
+	outline: none;
+	color:#444;
+	font: 1em;
+}
+
+.inputBox span {
+	position: absolute;
+	left: 0;
+	padding: 10px;
+	pointer-events: none;
+	font-size: 1em;
+	color: white;
+	text-transform: uppercase;
+	transition: 0.5s;
+}
+
+.lockInputBox span,
+.lockInputBox span {
+	position: absolute;
+	left: 0;
+	pointer-events: none;
+	text-transform: uppercase;
+	color: white;
+	transform: translateX(15px) translateY(-9px);
+	font-size: 0.8em;
+	font-weight: bold;
+	padding: 0 10px;
+	background: #d4da5b;
+	border-radius: 5px;
+	align-items: center;
+}
+
+.inputBox :valid ~ span,
+.inputBox :focus ~ span {
+	color: white;
+	transform: translateX(15px) translateY(-9px);
+	font-size: 0.8em;
+	font-weight: bold;
+	padding: 0 10px;
+	background: #d4da5b;
+	border-radius: 5px;
+	align-items: center;
+}
+
+.button-edit,
+.button-no-edit,
+.avatar-button-edit {
+	width: 2.7em;
+    height: 2.7em;
+    background-color: #d4da5b;
+    border: none;
+    padding: 0.5em 1em;
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/0/00/OOjs_UI_icon_edit-ltr-invert.svg');
+	background-size: 60%;
+    background-position: center;
+	background-repeat: no-repeat;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.avatar-button-edit {
+	position: absolute;
+	top: 5px; /* Ajusta la posición vertical del botón */
+	right: 5px; /* Ajusta la posición horizontal del botón */
+	padding: 5px;
+	cursor: pointer;
+  }
+
+/* Estilos específicos para el botón de edición */
+.button-no-edit {
+    background-color: #ccc;
+	background-image: url('https://upload.wikimedia.org/wikipedia/commons/8/8b/OOjs_UI_icon_lock-ltr-invert.svg');
+}
+
+.selectBox {
+    width: 100%;
+    padding: 10px;
+    border: 3px solid white;
+    background: white;
+    border-radius: 5px;
+    outline: none;
+    color: #444;
+    font: 1em;
+}
+
+  .selectBox:focus {
+    border-radius: 5px;
+    border-color: #d4da5b;
+    background: #fff;
+    outline: none;
+  }
+
+.error-message {
+	position: absolute;
+    color: #d1434f;
+    font-size: 14px;
+    margin-top: 5%;
+}
+
+.button-row {
+	display: flex;
+	justify-content: left;
+	margin: auto 4.5%;
+	min-height:fit-content;
+	flex-direction: row;
+	gap: 2%;
+}
+
+.button,
+.discard-button {
+	font-family: "Roboto", sans-serif;
+	position: relative;
+	top: 60px;
+	align-content: left;
+	width: calc(50% / 2);
+	height: 2.7em;
+	background-color: #d4da5b;
+	color: white;
+	font-size: 16px;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	font-weight: bold;
+}
+
+.discard-button {
+	background-color: #777;
+}
+
+hr {
+	position:relative;
+	width: 93%;
+	margin: 12% auto;
+}
+
+.mfa-button-container {
+	position: relative;
+	flex-direction: row;
+	width: 35%;
+	margin: 5% 4.5%;
+ }
+
+.mfa-button {
+	font-family: "Roboto", sans-serif;
+	height: 2.7em;
+	background-color: #d4da5b;
+	color: white;
+	font-size: 16px;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	font-weight: bold;
+	width: 100%;
+ }
+
+.finish-block {
+	color: transparent;
+	margin: 5% auto;
 }

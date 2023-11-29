@@ -9,6 +9,7 @@ export class ModalService {
   private modalStatus = false;
   private modalData1: any;
   private modalData2: any;
+  private image: File | null = null
   private currentModal: string = "";
   private confirmationInput: boolean = false;
   private modalCloseSubject: Subject<void> = new Subject<void>();
@@ -34,6 +35,7 @@ export class ModalService {
     this.confirmationInput = false;
     this.modalData1 = "";
     this.modalData2 = "";
+	this.image = null;
 	this.modalCloseSubject.next();
   }
 
@@ -42,14 +44,20 @@ export class ModalService {
 	this.modalCloseSubject.next();
   }
 
-  setModalData(data1: any, data2: any, data3: boolean): void {
+  setModalData(data1: any, data2: any, data3: boolean, image: File | null): void {
     this.modalData1 = data1;
     this.modalData2 = data2;
 	this.confirmationInput = data3;
+	this.image = image;
   }
 
   getModalData(): Array<any>{
     return [this.modalData1, this.modalData2];
+  }
+ 
+  getImage(): File | null {
+	if (this.image == undefined) return null
+ 	return this.image 
   }
 
   getConfirmationInput(): boolean {

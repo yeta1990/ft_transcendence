@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, QueryList, ElementRef, ViewChild, ViewChildren, OnDestroy} from '@angular/core';
 import { ChatService } from './chat.service';
 import { FormBuilder } from '@angular/forms';
-import { ChatMessage, SocketPayload, RoomMetaData, ToastData } from '@shared/types';
+import { ChatMessage, SocketPayload, RoomMetaData, ToastData, Silenced } from '@shared/types';
 import { events, ToastValues } from '@shared/const';
 import { waitSeg } from '@shared/functions';
 import { takeUntil } from "rxjs/operators"
@@ -92,8 +92,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	   this.chatService.banUserFromRoom(nick, room)
    }
 
-   silenceUserFromRoom(nick: string, room: string){
-		this.chatService.silenceUserFromRoom(nick, room)
+   silenceUserFromRoom(nick: string, room: string, time: number){
+		this.chatService.silenceUserFromRoom(nick, room, time)
    }
 
    unSilenceUserFromRoom(nick: string, room: string){
@@ -329,7 +329,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	isSilenced(room:string, login:string): boolean {
 		const foundRoom  =   this.roomsMetaData.get(room)
 		if (!foundRoom) return false;
-		const silenced: Array<string> = foundRoom.silenced.map(f => f.login)
+		const silenced: Array<string> = foundRoom.silenced
 		return silenced.includes(login)
 	}
 
@@ -483,6 +483,21 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     	});
 		this.modalService.openModal('template6', room);
 	}
+
+   	silenceUserFromRoomModal(nick: string, room: string){
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+      		if (confirm){
+      			const time = this.modalService.getModalData()[0];
+      			if (time > 0 && time <= 1000){
+					this.silenceUserFromRoom(nick, room, time)
+				}
+			}
+			this.modalClosedSubscription.unsubscribe();
+    	});
+		this.modalService.openModal('silenceUserModal', room);
+
+   	}
 
 	addPassToRoomModal(room:string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
