@@ -43,7 +43,9 @@ export class AdminChatPageComponent implements OnInit {
 						})
         				this.scrollToBottom();
 					}
-					else if (payload.event === events.AllRoomsMetaData){
+					//events.ListAllRooms
+					else if (payload.event === events.AllRoomsMetaData || payload.event == events.ListAllRooms){
+						console.log(payload.data)
 						const roomSet: Set<string> = new Set()
 						for (const room of payload.data){
 							this.roomsMetaData.set(room.room, room)

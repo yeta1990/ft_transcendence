@@ -458,7 +458,7 @@ export class ChatService {
 		const executorIsAdminOfRoom: boolean = await this.isAdminOfRoom(executorLogin, room);
 		if (!executorIsOwnerOfRoom && !executorIsAdminOfRoom) return false;
 		const isTargetSilenced: boolean = await this.isSilencedOfRoom(login, room)
-		if (!isTargetSilenced) return false;
+		if (!isTargetSilenced) return true;
 
 		const oldSilencedSize: number = foundRoom.users.length;
 

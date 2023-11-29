@@ -90,14 +90,13 @@ export class ChatAdminService {
 	}
 
 	public async removeSilenceOfRoom(executorLogin: string, login: string, room: string): Promise<boolean>{
-		console.log("1")
 		const foundRoom: Room = await this.roomService.getRoom(room);
 		if (!foundRoom) return false;
 		const executorIsWebAdmin: boolean = await this.userService.hasAdminPrivileges(executorLogin)
 		if (!executorIsWebAdmin) return false;
 
 		const isTargetSilenced: boolean = await this.chatService.isSilencedOfRoom(login, room)
-		if (!isTargetSilenced) return false;
+		if (!isTargetSilenced) return true;
 
 		const oldSilencedSize: number = foundRoom.users.length;
 		foundRoom.silenced = foundRoom.silenced.filter((silenced: any) => !silenced.includes(login))
@@ -152,7 +151,6 @@ export class ChatAdminService {
 	  const foundRoom: Room = await this.chatService.getRoom(room)
 	  if (!foundRoom || !foundRoom.owner) return false;
 	  const targetIsWebOwner: boolean = await this.userService.isWebOwner(foundRoom.owner.login)
-	  console.log(targetIsWebOwner)
 	  if (targetIsWebOwner && foundRoom.owner.login != executorLogin) return ;
 	  const executorIsWebAdmin: boolean = await this.userService.hasAdminPrivileges(executorLogin)
 	  if (!executorIsWebAdmin) return ;
