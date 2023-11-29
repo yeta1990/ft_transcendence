@@ -250,7 +250,7 @@ export class ChatGateway extends BaseGateway {
 					`Invalid name for the channel ${room}: min 1 character`).data)
 			return ;
 	  }
-	  if (!room.includes('pongRoom') && room.substr(1, room.length - 1).length > 8 ){
+	  if (!room.includes('pongRoom') && !room.includes('@') && room.substr(1, room.length - 1).length > 8 ){
 			this.server.to(client.id)
 				.emit("system", generateSocketErrorResponse(room, 
 					`Invalid name for the channel ${room}: max 8 characters`).data)
@@ -461,6 +461,12 @@ export class ChatGateway extends BaseGateway {
 	  	.chatService
 	  	.banUserOfRoom(login, payload.login, payload.room);
 	  if (banOk){
+	    const socketIdsByLogin: Array<string> = this.getClientSocketIdsFromLogin(payload.login);
+  	  	//unsubscribe user from socket service
+  	  	for (const clientId of socketIdsByLogin){
+	    	this.server.in(clientId).socketsLeave(payload.room);
+	    	this.server.in(clientId).emit("banned", payload.room)
+	    }
 		await this.afterBanInform(login, client.id, payload.login, payload.room)
   	  	await this.destroyEmptyRooms(payload.room);
   	  }
@@ -678,14 +684,12 @@ export class ChatGateway extends BaseGateway {
 
   @SubscribeMessage(events.AdminSilenceChatUser)
   async adminSilenceUserOfRoom(client: Socket, payload: any){
-		console.log("adminsilence")
 	  const login: string = client.handshake.query.login as string;
 	  const activeUsersInRoom: Array<ChatUser> = this.getActiveUsersInRoom(payload.room);
 	  const silenceOk: boolean = await this
 	  	.chatAdminService
 	  	.silenceUserOfRoom(login, payload.login, payload.room, payload.time);
 	  if (silenceOk){
-	  	  console.log("yesss")
 		this.afterSilenceInform(login, client.id, payload.login, payload.room, payload.time)
 		  this.server.to(client.id).emit(events.AllRoomsMetaData, await this.roomService.getAllRoomsMetaData())
 	  }

@@ -61,21 +61,16 @@ export class SocketService {
 				this.message.next({event: events.ListMyPrivateRooms, data});
 			})
 			.on('listRoomUsers', (data: any) => {
-//				console.log("get users in this room: " + data);
 				this.message.next({event: 'listRooms', data});
 			})
 			.on(events.RoomMetaData, (data: RoomMetaData) => {
-//				console.log(data.loginNickEquivalence)
 				this.message.next({event: events.RoomMetaData, data})
 			})
 			.on(events.AllRoomsMetaData, (data: Array<RoomMetaData>) => {
 				this.message.next({event: events.AllRoomsMetaData, data})
 			})
 			.on(events.ActiveUsers, (data: Array<ChatUser>) => {
-//				console.log("active users")
-//				console.log(data)
 				this.message.next({event: events.ActiveUsers, data})
-//				console.log("active users: " + JSON.stringify(data));
 			})
 			.on(events.BlockedUsers, (data: Array<string>) => {
 				this.message.next({event: events.BlockedUsers, data})
@@ -96,7 +91,6 @@ export class SocketService {
 				console.log("direction: " + data);	
 			})
 			.on('gameStatus', (data: GameRoom) => {
-				//console.log("join received: " + JSON.stringify(data.room));
 				this.message.next({event: 'gameStatus', data});
 			})
 			.on('getStatus', (data: GameRoom) => {
@@ -130,8 +124,10 @@ export class SocketService {
 				this.message.next({event: "otherPlayerCameBack", data});
 			})
 			.on("replayGameProposal", (data:string) => {
-				console.log("replay? " + data)
 				this.message.next({event: "replayGameProposal", data});
+			})
+			.on("banned", (data:string) => {
+				this.message.next({event: "banned", data});
 			})
 
 		}
@@ -160,7 +156,6 @@ export class SocketService {
   }
 
   disconnectClient(){
-  	  console.log("sending disconnect")
 	if (this.socket) this.socket.emit(events.SoftDisconnect);
   }
 

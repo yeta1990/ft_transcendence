@@ -248,6 +248,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 				else if (payload.event === 'otherPlayerCameBack'){
 					this.modalService.closeModal()
 				}
+				else if (payload.event === 'banned'){
+					if (this.chatService.getCurrentRoom() == payload.data) this.chatService.setCurrentRoom("")
+				}
         		this.scrollToBottom();
 			})
 		);
@@ -258,6 +261,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 		//a trick to finish subscriptions (second part)
 		this.destroy.next("");
 		this.destroy.complete();
+		this.chatService.setCurrentRoom("")
 
 		//this is a soft disconnect, not a real disconnect
   		//when the chat component disappears (bc user has clicked
