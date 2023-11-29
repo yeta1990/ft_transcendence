@@ -111,7 +111,9 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 			}
 		  );
 		  this.imageService.selectedImage$.subscribe((selectedImage: string) => {
+//			console.log(this.avatarImageSrc)
 			this.avatarImageSrc = this.imagesBaseUrl + selectedImage;
+//			console.log(this.avatarImageSrc)
 			this.formData.append('image', this.avatarImageSrc )
 		  });
 	}
@@ -294,7 +296,9 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 
 	onFileChange(event: any): void {
 		const file = event.target.files[0];
+		console.log("on file change")
 		if (file) {
+			console.log("fasdfas")
 		this.selectedFile = file;
 		this.editForm.patchValue({ file });
 		this.formData.append('image', file)
@@ -320,12 +324,27 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 		const modalData = {
 			images: images,
 			onSelectImage: (selectedImage: string) => {
-			  console.log('Edit: Imagen seleccionada:', selectedImage);
+			console.log('Edit: Imagen seleccionada:', selectedImage);
 			},
-		  };
-		  this.modalService.openModal('imageGalleryTemplate', modalData);
+		};
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+			if (confirm){
+				const selectedImage = this.modalService.getImage()
+				const avatarImages = this.imageService.getAvatarImages()
+					.subscribe((imgs) => {
+						this.avatarImageSrc = selectedImage
+						if (imgs.includes(selectedImage)){
+							this.avatarImageSrc = this.imagesBaseUrl + selectedImage;
+						}
+						this.formData.append('image', this.avatarImageSrc )
+					})
+			}
+		})
+		this.modalService.openModal('imageGalleryTemplate', modalData);
 	  }
 
+	  /*
 	  mostrarImagenSeleccionada(): void {
 		console.log("Estoy en mostrar imagen. SelectedFile: " + this.selectedFile);
 		if (this.selectedFile) {
@@ -337,6 +356,14 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 		  reader.readAsDataURL(this.selectedFile);
 		}
 	  }
+	 */ 
+	getUserImage(): string{
+		console.log(this.avatarImageSrc)
+		if (this.avatarImageSrc) return this.avatarImageSrc;
+		if (this.user?.image) return this.imagesBaseUrl + this.user?.image
+		return this.imagesBaseUrl + 'phldr.jpg' 
+	
+	}
 
 	// FUNCIONES RELACIONADAS CON 2FA ------------------------------------------------
 

@@ -35,7 +35,7 @@ export class ModalComponent {
 	this.inputValue2 = "";
 	this.checkboxInput = false;
 	this.confirmationInput = false;
-    this.modalService.setModalData(this.inputValue, this.inputValue2, this.confirmationInput);
+    this.modalService.setModalData(this.inputValue, this.inputValue2, this.confirmationInput, null);
     this.modalService.closeModalWithData();
 	this.inputValue = "";
 	this.inputValue2 = "";
@@ -53,19 +53,20 @@ export class ModalComponent {
 
   saveAndCloseModal(): void {
  	this.confirmationInput = true; 
-    this.modalService.setModalData(this.inputValue, this.inputValue2, this.confirmationInput);
+	if (this.selectedImage) {
+		this.imageService.selectImage(this.selectedImage);
+	}
+    this.modalService.setModalData(this.inputValue, this.inputValue2, this.confirmationInput, this.selectedImage);
     this.modalService.closeModalWithData();
 	this.inputValue = "";
 	this.inputValue2 = "";
+	this.selectedImage = null;
 	this.checkboxInput = false;
 	this.confirmationInput = false;
   }
 
   confirmationButton(): void {
  	this.confirmationInput = true;
-	if (this.selectedImage) {
-		this.imageService.selectImage(this.selectedImage);
-	}
 	this.saveAndCloseModal();
   }
 
