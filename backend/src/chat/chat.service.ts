@@ -523,17 +523,16 @@ export class ChatService {
 
 	public async banUser2User(emisorLogin: string, targetLogin: string): Promise<boolean>{
 
+		if (emisorLogin == targetLogin) return false;
 		const bannedUsers = await this.userService.getBannedUsersByLogin(emisorLogin)
 		// check if user is already banned
 		for (let i = 0; i < bannedUsers.length; i++){
 			if (bannedUsers[i].login == targetLogin) return true;
 		}
 		const foundEmisor = await this.userService.getUserByLogin(emisorLogin);
-		if (foundEmisor === undefined) 
-			return false
+		if (foundEmisor === undefined) return false
 		const foundTarget = await this.userService.getUserByLogin(targetLogin);
-		if (foundTarget === undefined)
-			return false
+		if (foundTarget === undefined) return false
 		foundEmisor.bannedUsers.push(foundTarget)
 		await this.userRepository.save(foundEmisor)
 		await this.chatGateway.sendBlockedUsers(emisorLogin)

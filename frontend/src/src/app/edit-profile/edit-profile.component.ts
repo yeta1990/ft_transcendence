@@ -186,9 +186,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 			}
 		});
 		this.editForm.get('nick')?.valueChanges.subscribe((newNick: string | null) => {
-				console.log("validate nick")
 			if (newNick !== null) {
-				console.log("validate nick")
 				this.validateNick(newNick);
 			} else {
 			}
@@ -196,7 +194,6 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 	}
 
 	async validateNick(newNick: string | null): Promise<void> {
-		console.log("val")
 		if (newNick !== null) {
 			const ret = await this.validationService.checkNick(newNick);
 			if(newNick == this.user?.nick){
@@ -284,7 +281,6 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 				}
 				
 			} catch (error) {
-				console.error('Error al subir la imagen:', error);
 			}
 		}
 		else if (this.selectedStandardAvatar){

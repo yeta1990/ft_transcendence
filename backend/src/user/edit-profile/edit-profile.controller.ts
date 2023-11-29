@@ -21,9 +21,7 @@ export class EditProfileController {
     @UseGuards(AuthGuard)
     @Post('check-nick')
     async checkNickAvailability(@Body() data: { nick: string }): Promise<any> {
-        console.log('Received request with data:', data);
         const isAvailable = await this.userService.isNickAvailable(data.nick);
-        console.log('Nick availability checked successfully');
         return isAvailable;
     }
 }

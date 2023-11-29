@@ -55,7 +55,8 @@ export class UserService {
 	//____________________________ GETTERS ________________________________
 
 	public async getUser(id: number) : Promise<User | undefined> {
-		const user = await this.repository.findOne({
+		const user =  await this.repository.findOne({
+			relations: ['ownedRooms', 'bannedUsers', 'achievements'],
 			where: {
 				id: id,
 			},
@@ -106,10 +107,8 @@ export class UserService {
 			.where("user.id = :id", { id: id })
 			.getOne();
 		if (user) {
-			console.log("User Achievements:", user.achievements);
 			return user.achievements;
 		} else {
-			console.log("User not found.");
 			return [] as Achievement[];
 		}
 	}
@@ -128,7 +127,6 @@ export class UserService {
 	}
 
 	public async isNickAvailable(nick: string): Promise<boolean> {
-		console.log("IN isnickavailable i got: " + nick);
 		const user = await this.repository.findOne({
 			where: {
 			nick: nick,
@@ -150,7 +148,6 @@ export class UserService {
 	}
 
 		public async grantAdmin(login: string): Promise<User[]>{
-		console.log(login)
 		const user: User = await this.getUserByLogin(login)
 		user.userRole = UserRole.ADMIN
 		await this.saveUser(user)
@@ -235,7 +232,6 @@ export class UserService {
 	public async thereIsABlock(executor: string, banned: string): Promise<boolean>{
 		const usersThatHaveBannedAnother: User[] = await this.getUsersThatHaveBannedAnother(banned)
 		const loginsBlockers = usersThatHaveBannedAnother.map(u => u.login)
-		console.log(loginsBlockers)
 		return (loginsBlockers.includes(executor))
 	}
 
@@ -284,6 +280,9 @@ export class UserService {
 		if (senderLogin === targetLogin) return false;
 		const sender: User = await this.getUserByLogin(senderLogin)
 		if (!sender) return false;
+		if (sender.friends.includes(targetLogin)){
+			return false;
+		}
 		if (sender.incomingFriendRequests.includes(targetLogin)){
 			await this.acceptFriendship(senderLogin, targetLogin)
 			return true;
@@ -324,7 +323,6 @@ export class UserService {
 	}
 
 	public async removeFriendship(friend1: string, friend2: string): Promise<Array<string>>{
-		console.log(friend1+friend2)
 		if (friend1 === friend2) return null;
 		const user1: User = await this.getUserByLogin(friend1)
 		const user2: User = await this.getUserByLogin(friend2)
@@ -333,8 +331,6 @@ export class UserService {
 		user2.friends = user2.friends.filter(f => f != friend1)
 		await this.repository.save(user1)
 		await this.repository.save(user2)
-		console.log(user1.friends)
-		console.log(user2.friends)
 		return user1.friends;
 	}
 

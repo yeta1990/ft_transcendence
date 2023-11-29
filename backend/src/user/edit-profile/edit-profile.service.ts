@@ -38,13 +38,10 @@ export class EditProfileService {
 
     private deleteImage(filename: string){
     	const imagePath = path.join(__dirname, '../../../..', 'uploads', filename);
-    	console.log("deleting image")
-    	console.log(imagePath)
 		if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
     }
 
     public async editProfile(newUser: User, id: number) : Promise<User | boolean> {
-    	console.log(newUser)
         const user =  await this.repository.findOne({
                 where: {
                     id: id,
