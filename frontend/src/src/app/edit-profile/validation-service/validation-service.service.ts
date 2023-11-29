@@ -12,8 +12,10 @@ export class ValidationService {
     private http: HttpClient,
     private validationFunctions: ValidationFunctions ) {}
 
-  checkNickAvailability(data: { nick: string }): void {
-    if (!this.http.post(environment.apiUrl + '/edit-profile/check-nick', data)) {
+  async checkNickAvailability(data: { nick: string }): Promise<void> {
+
+    const check = await (this.http.post(environment.apiUrl + '/edit-profile/check-nick', data).toPromise())
+    if (!check){
         throw new Error('Nick not available');
     }
   }
@@ -52,11 +54,11 @@ export class ValidationService {
     }
   }
 
-    checkNick( nick : string ) : { success: boolean, message?: string } {
+    async checkNick( nick : string ) : Promise<{ success: boolean, message?: string }> {
     try {
       this.validationFunctions.ValidateLength(nick, 'Nick', 8, 8);
       this.validationFunctions.ValidateNickAlpha(nick);
-      this.checkNickAvailability({ nick: nick });
+      await this.checkNickAvailability({ nick: nick });
       return { success: true };
     } catch (error : any) {
       return { success: false, message: error.message };

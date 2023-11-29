@@ -49,6 +49,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 	loginEnabled = false;
 	selectedStandardAvatar: string | null = null
 	originalFormValues: any;
+	errorMessage: string | undefined = undefined;
 	imagesBaseUrl: string = environment.apiUrl + '/uploads/'
 	public avatarImages: string[] = [];
 	avatarImageSrc: string | null = null;
@@ -185,19 +186,28 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 			}
 		});
 		this.editForm.get('nick')?.valueChanges.subscribe((newNick: string | null) => {
+				console.log("validate nick")
 			if (newNick !== null) {
+				console.log("validate nick")
 				this.validateNick(newNick);
 			} else {
 			}
 		});
 	}
 
-	validateNick(newNick: string | null): void {
+	async validateNick(newNick: string | null): Promise<void> {
+		console.log("val")
 		if (newNick !== null) {
-			const ret = this.validationService.checkNick(newNick);
-			if (ret.success) {
+			const ret = await this.validationService.checkNick(newNick);
+			if(newNick == this.user?.nick){
+				this.errorMessage = undefined;
+				this.editForm.get('nick')?.setErrors(null);
+			}
+			else if (ret.success) {
+				this.errorMessage = undefined;
 				this.editForm.get('nick')?.setErrors(null);
 			} else {
+				this.errorMessage = ret.message;
 				this.editForm.get('nick')?.setErrors({ notAvailable: true });
 			}
 		}
@@ -265,7 +275,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 		this.newUser.lastName = this.editForm.get('lastName')?.value!;
 		this.newUser.nick = this.editForm.get('nick')?.value!;
 		this.newUser.email = this.editForm.get('email')?.value!;
-	
+
 		if (this.formData.has('image')) {
 			try {
 				const uploadResponse = await this.uploadImage();
@@ -295,7 +305,6 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 			return response;
 		} catch (error) {
 			this.handleUploadError(error);
-			throw error;
 		}
 	}
 

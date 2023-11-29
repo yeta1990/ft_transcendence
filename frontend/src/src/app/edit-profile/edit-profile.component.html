@@ -39,19 +39,19 @@
 				<div class="user-info-row">
 					<div class="inputBox">
 						<input type="text" name="nick" required="required" id="nick" formControlName="nick" placeholder="{{ user?.nick }}">
-						<span>Apodo</span>
+						<span>Nick</span>
 					</div>
 					<div class="inputBox">
 						<select formControlName="campus" class="selectBox">
-							<option value="" selected disabled>Selecciona tu campus</option>
-							<option class="select-option" *ngFor="let option of campusesTypes" [value]="option">{{ option }}</option>
+							<option value="" selected disabled>No puedes cambiar tu campus</option>
+							<option select disabled class="select-option" *ngFor="let option of campusesTypes" [value]="option">{{ option }}</option>
 						</select>
 						<span>Campus</span>
 					</div>
 				</div>
 				<div class="user-info-row">
 					<div *ngIf="editForm.get('nick')?.hasError('notAvailable')" class="error-message">
-						Este apodo no es correcto o ya está en uso.
+						<span *ngIf="errorMessage">{{errorMessage}}</span>
 					</div>
 				</div>
 				<div></div>

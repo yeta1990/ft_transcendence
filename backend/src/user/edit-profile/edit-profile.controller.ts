@@ -14,8 +14,7 @@ export class EditProfileController {
 
 	@UseGuards(AuthGuard)
     @Post('user/edit')
-    public edit(@Body() user: User, @UserId() id: number): Promise<User> {
-        console.log("user image: " + user.image);
+    public edit(@Body() user: User, @UserId() id: number): Promise<User | boolean> {
         return(this.editProfileService.editProfile(user, id));
     } 
 

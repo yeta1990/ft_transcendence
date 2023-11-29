@@ -70,13 +70,11 @@ export class ChatService {
   
 	setUserStatusIsPlaying(login: string):void {
 		this.users.forEach((chatUser: ChatUser, key: string) => {
-			console.log(chatUser)
   			if (chatUser.login === login) {
     			chatUser.status = UserStatus.PLAYING;
   			}
 		});
 
-		console.log(JSON.stringify(this.users))
 		this.chatGateway.emitUpdateUsersAndRoomsMetadata() 
 	}
 
@@ -105,7 +103,6 @@ export class ChatService {
 				available = true;
   			}
 		});
-		console.log(available)
 		return available;
 	}
 
@@ -589,10 +586,8 @@ export class ChatService {
 		const kFactor = 32;
 
 		if (isNaN(eloJugador1) || isNaN(eloJugador2) || isNaN(resultadoJugador1)) {
-			console.log('Los parámetros deben ser números válidos');
 		  }
 		  if (resultadoJugador1 < 0 || resultadoJugador1 > 1) {
-			console.log('El resultado debe ser un número entre 0 y 1');
 		  }
 
 		const expectedPlayer1 = 1 / (1 + Math.pow(10, (eloJugador2 - eloJugador1) / 400))
@@ -602,7 +597,6 @@ export class ChatService {
 		const nuevoEloJugador2 = Math.round(eloJugador2 + kFactor * ((1 - resultadoJugador1) - expectedPlayer2))
 
 		if (isNaN(nuevoEloJugador1) || isNaN(nuevoEloJugador2)) {
-			console.log('Hubo un error al calcular el nuevo Elo');
 		  }
 
 		return {nuevoEloJugador1, nuevoEloJugador2}
@@ -629,10 +623,7 @@ export class ChatService {
 		}
 		await this.gameRepository.save(result)
 		const resultForelo = this.calculateResultForelo(g.playerOneScore, g.playerTwoScore)
-		console.log("USER1 ELO: " + user1.elo + "\nUSER2 ELO: " + user2.elo + "\nRESULTFORELO: " + resultForelo);
 		const newElos = this.calcularNuevoElo(user1.elo, user2.elo, resultForelo)
-		console.log(newElos) 
-		console.log(newElos.nuevoEloJugador1)
 		user1.elo = newElos.nuevoEloJugador1
 		user2.elo = newElos.nuevoEloJugador2
 

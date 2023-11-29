@@ -43,7 +43,6 @@ export class ChatService {
 	}
 
 	setAvailableRoomsList(roomList: Array<string>): void {
-		console.log("setting " + roomList) 
 		this.availableRoomsList = roomList
 	}
 
@@ -56,7 +55,6 @@ export class ChatService {
 	} 
 
 	getActiveUsers(){
-		console.log(this.activeUsers)
 		return this.activeUsers;
 	}
 
@@ -87,7 +85,6 @@ export class ChatService {
 		const loginEquivalence: Array<any> | undefined = this.getLoginNickEquivalence()
 		if (loginEquivalence){
 			const foundUser = loginEquivalence.find(u => u.login === login)
-			//console.log(foundUser)
 			if (foundUser) return foundUser.nick
 		}
 		return login;
