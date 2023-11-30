@@ -1,282 +1,387 @@
-import { Component, OnInit, } from '@angular/core'; 
+// Angular Core Modules
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormControl } from '@angular/forms';
-import { EditProfileService } from './edit-profile.service';
+import { HttpClient } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AuthService } from '../auth/auth.service';
-import { User } from '../user';
-import { UserProfileService } from '../user-profile/user-profile.service';
-import { HttpHeaders, HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { UserRole } from '@shared/enum';
-import { ToastValues } from '@shared/const';
 import { Location } from '@angular/common'
-import { forkJoin, of, Observable } from 'rxjs';
-import { switchMap, takeUntil, tap } from 'rxjs/operators';
+
+// Angular Forms, HTTP, Router
+import { switchMap } from 'rxjs/operators';
+
+// Servicios Propios
+import { TwoFactorAuthService } from './two-factor-auth-service/two-factor-auth-service.service';
+import { AuthService } from '../auth/auth.service';
+import { UserProfileService } from '../user-profile/user-profile.service';
 import { ModalService } from '../modal/modal.service';
-import { Subscription } from "rxjs"
 import { ToasterService } from '../toaster/toaster.service';
+import { ValidationService } from './validation-service/validation-service.service';
+import { ImageService } from './ImageService/image-service.service';
+
+// Enums, Constantes o Tipos Compartidos
+import { User } from '../user';
+import { ToastValues } from '@shared/const';
+import { Campuses, UserRole } from '@shared/enum';
+
+// Librerías de Terceros
+import { lastValueFrom, of, Subscription } from 'rxjs';
 
 
 @Component({
-  selector: 'app-edit-profile',
-  templateUrl: './edit-profile.component.html',
-  styleUrls: ['./edit-profile.component.css']
+	selector: 'app-edit-profile',
+	templateUrl: './edit-profile.component.html',
+	styleUrls: ['./edit-profile.component.css']
 })
-export class EditProfileComponent implements  OnInit {
+export class EditProfileComponent implements  OnInit, OnDestroy {
 
-  user: User | undefined;
-  newUser: User | undefined;
-  editingField: string | null = null;
-  editedFields: { [key: string]: any } = {};
-  showMfaModal = false;
-  mfaActivated : boolean = false;
-  selectedFile: File | null = null;
-  formData = new FormData();
+	user: User | undefined;
+	newUser: User | undefined;
+	editingField: string | null = null;
+	editedFields: { [key: string]: any } = {};
+	showMfaModal = false;
+	mfaActivated : boolean = false;
+	tokenId: number = 0;
+	selectedFile: File | null = null;
+	campusesTypes = Object.keys(Campuses);
+	formData = new FormData();
+	isAdmin = false;
+	editEnabled = false;
+	loginEnabled = false;
+	selectedStandardAvatar: string | null = null
+	originalFormValues: any;
+	errorMessage: string | undefined = undefined;
+	imagesBaseUrl: string = environment.apiUrl + '/uploads/'
+	public avatarImages: string[] = [];
+	avatarImageSrc: string | null = null;
 
-  private modalClosedSubscription: Subscription = {} as Subscription;
+	private modalClosedSubscription: Subscription = new Subscription();
 
-  editForm = this.editBuilder.group({
-		firstName: '',
-    lastName: '',
-		nick: '',
-		email: '',
-    mfa: false,
-		file: ''
-	});
+	editForm = this.editBuilder.group({
+		login:'',
+			firstName: '',
+		lastName: '',
+			nick: '',
+			email: '',
+			campus: new FormControl(this.campusesTypes[0]),
+		mfa: false,
+			file: ''
+		});
 
-  constructor(
+	constructor(
 		private editBuilder: FormBuilder,
-		private editProfileService: EditProfileService,
 		private router: Router,
 		private authService: AuthService,
-    private profileService: UserProfileService,
-    private httpClient: HttpClient,
-    private location: Location,
-    private activatedRoute: ActivatedRoute,
-    private modalService: ModalService,
-    private toasterService: ToasterService
-	){
-  }
+		private profileService: UserProfileService,
+		private httpClient: HttpClient,
+		private location: Location,
+		private activatedRoute: ActivatedRoute,
+		private modalService: ModalService,
+		private toasterService: ToasterService,
+		private readonly validationService: ValidationService,
+		private twoFactorAuthService: TwoFactorAuthService,
+		private imageService: ImageService,
+		){
+	}
 
-  sendEditedUser():void {
-    this.httpClient.post<any>(environment.apiUrl + '/edit-profile/user/edit', this.newUser)
-    .subscribe(
-    	(response: User) => {console.log(response)},
+	// CICLO DE VIDA DEL COMPONENTE --------------------------------------------
 
-    	error => console.log(error))
-		console.log(this.newUser);
-    this.router.navigateByUrl(`/user-profile/${this.user?.login}`);
+	ngOnInit(): void {
+		this.activatedRoute.paramMap.pipe(
+			switchMap(paramMap => {
+			const login = paramMap.get('login');
+			if (login !== null) {
+				return this.profileService.getUserIDByLogin(login);
+			}
+			return of(null);
+			})
+		).subscribe((userId: number | null) => {
+			if (userId !== null) {
+			this.getUserProfileData(userId);
+			} else {
+			// this.router.navigate(['/error-page']);
+			}
+		});
+		this.twoFactorAuthService.getMfaActivatedObservable().subscribe((mfaActivated: boolean) => {
+			this.mfaActivated = mfaActivated;
+		});
+		this.imageService.getAvatarImages().subscribe(
+			(images) => {
+			  this.avatarImages = images;
+			},
+			(error) => {
+			}
+		  );
+//		  this.imageService.selectedImage$.subscribe((selectedImage: File) => {
+//			this.avatarImageSrc = this.imagesBaseUrl + URL.createObjectURL(selectedImage);
+//			this.formData.append('image', this.avatarImageSrc )
+//		  });
+	}
 
-  }
-  
-  async onSubmit(): Promise<void> {
-    this.newUser = this.user;
-	if (!this.newUser) return;
+	ngOnDestroy(): void {
+		this.modalClosedSubscription.unsubscribe();
+	}
 
-    this.newUser.firstName = this.editForm.get('firstName')?.value!;
-    this.newUser.lastName = this.editForm.get('lastName')?.value!;
-    this.newUser.nick = this.editForm.get('nick')?.value!;
-    this.newUser.email = this.editForm.get('email')?.value!;
+	// FUNCIONES RELACIONADAS CON EL PERFIL DEL USUARIO  --------------------------------------------
 
-	//in case of new image: first save image, get image name and then change the
-	//value in newUser.image
-	if (this.formData.has('image')){
-    	this.httpClient.post<any>(environment.apiUrl + '/user/upload', this.formData)
-    		.subscribe(response => {
-    			
-    			this.newUser!.image = response.image
-
-    			console.log(this.newUser)
-    			console.log("save user")
-    			this.sendEditedUser()
-    		},
-    		error => console.log(error))
-    }
-    //otherwise, send the payload as it's
-    else {
-    	this.sendEditedUser()
-    }
+	getUserProfileData(userId: number | null): void {
+		if (userId !== null) {
+		this.profileService.getUserProfile(userId).subscribe(
+			(userProfile: User) => {
+				this.user = userProfile;
+				this.checkUserPermissions();
+				this.configureUserForm();
+				this.originalFormValues = { ...this.editForm.value };
+			},
+			(error: any) => {
+				this.handleProfileError(error);
+			}
+		);
+		} else {
+			// this.router.navigate(['/error-page']);
+		}
+	}
 	
+	handleProfileError(error: any): void {
+		let errorMessage = 'Se produjo un error al obtener el perfil del usuario.';
+	
+		if (error && error.status === 404) {
+			errorMessage = 'El perfil del usuario no fue encontrado.';
+		}
+		this.toasterService.launchToaster(ToastValues.ERROR, errorMessage);
+		// this.router.navigate(['/error-page']);
+	}
 
-  }
-  
+	configureUserForm(): void {
+		if (!this.user) return;
 
-  onFileChange(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedFile = file;
-      this.editForm.patchValue({ file });
-      this.formData.append('image', file)
-    }
-  }
-
-  clearFile(): void{
-  	  this.editForm.get('file')?.setValue(null)
-  	  const fileInput = document.getElementById('file') as HTMLInputElement
-  	  if (fileInput){
-  	  	  fileInput.value = ''
-  	  }
-	 this.formData.delete('image')
-  }
-
-  ngOnInit(): void {
-    this.activatedRoute.paramMap.pipe(
-      switchMap(paramMap => {
-        const login = paramMap.get('login');
-        if (login !== null) {
-          return this.profileService.getUserIDByLogin(login);
-        }
-        return of(null);
-      })
-    ).subscribe((userId: number | null) => {
-      if (userId !== null) {
-        forkJoin([
-          this.profileService.getUserProfile(userId)
-        ]).subscribe(([userProfile]: [User]) => {
-          console.log("User ID dentro dentro es: " + userId);
-          this.user = userProfile;
-          
-          // Obtener el ID del usuario desde el token JWT
-          const token = this.authService.getDecodedAccessToken(this.authService.getUserToken() ?? '');
-          const id = token?.id;
-  
-          // Verificar si el usuario tiene un rol de administrador o si es el propio usuario conectado
-          if (id !== null && (id === this.user?.id || this.user?.userRole == UserRole.ADMIN)) {
-            this.editForm.controls['firstName'].setValue(this.user!.firstName);
-            this.editForm.controls['lastName'].setValue(this.user!.lastName);
-            this.editForm.controls['nick'].setValue(this.user!.nick);
-            this.editForm.controls['email'].setValue(this.user!.email);
-            this.mfaActivated = this.user?.mfa || false;
-          } else {
-            // El usuario no tiene permiso para editar el perfil, redirige a la página anterior.
-            const message : string = "Este usuario no puede editar";
-            this.toasterService.launchToaster(ToastValues.ERROR, message);
-            this.location.back();
-          }
-        });
-      } else {
-        // Maneja el caso en el que no se obtuvo un userId, por ejemplo, redirigiendo o mostrando un mensaje de error.
-      }
-    });
-  }
-
-  editProfile() {
+		this.editForm.patchValue({
+			login: this.user.login,
+			firstName: this.user.firstName,
+			lastName: this.user.lastName,
+			nick: this.user.nick || '',
+			email: this.user.email,
+		});
 		
-  }
+		const selectedCampus = this.user!.campus || '';
+		const numberCampus = Object.values(Campuses).indexOf(selectedCampus);
+		this.editForm.controls['campus'].setValue(this.campusesTypes[numberCampus]);
 
-  	
-    saveField(fieldName: string): void {
-      // Aquí debes implementar la lógica para guardar los cambios en el backend
-      console.log(`Guardando campo ${fieldName}: ${this.editedFields[fieldName]}`);
-      this.cancelEdit();
+		this.editForm.get('nick')?.valueChanges.subscribe((newNick: string | null) => {
+			if (newNick !== null) {
+				this.validateNick(newNick);
+			} else {
+			}
+		});
+	}
+
+	// FUNCIONES PARA LA VALIDACIÓN -------------------------------------------------------------
+
+	subscribeToInputs() : void {
+		this.editForm.get('firstName')?.valueChanges.subscribe((name: string | null) => {
+			if (name !== null) {
+				this.validateName(name);
+			} else {
+			}
+		});
+		this.editForm.get('nick')?.valueChanges.subscribe((newNick: string | null) => {
+			if (newNick !== null) {
+				this.validateNick(newNick);
+			} else {
+			}
+		});
+	}
+
+	async validateNick(newNick: string | null): Promise<void> {
+		if (newNick !== null) {
+			const ret = await this.validationService.checkNick(newNick);
+			if(newNick == this.user?.nick){
+				this.errorMessage = undefined;
+				this.editForm.get('nick')?.setErrors(null);
+			}
+			else if (ret.success) {
+				this.errorMessage = undefined;
+				this.editForm.get('nick')?.setErrors(null);
+			} else {
+				this.errorMessage = ret.message;
+				this.editForm.get('nick')?.setErrors({ notAvailable: true });
+			}
+		}
+	}
+
+	validateName( name: string | null ) : void {
+		if ( name !== null ) {
+			const ret = this.validationService.checkName(name);
+		}
+	}
+
+	checkUserPermissions(): void {
+		const token = this.authService.getDecodedAccessToken(this.authService.getUserToken() ?? '');
+		this.tokenId = token?.id;
+
+		if (this.tokenId !== null && (this.tokenId === this.user?.id || this.user?.userRole == UserRole.ADMIN)) {
+			if (this.user?.userRole == UserRole.ADMIN) {
+				this.isAdmin = true;
+			}
+			this.mfaActivated = this.user?.mfa || false;
+		} else {
+			this.handleUnauthorizedUser();
+		}
+	}
+
+	handleUnauthorizedUser(): void {
+		const message: string = "Este usuario no puede editar";
+		this.toasterService.launchToaster(ToastValues.ERROR, message);
+		this.location.back();
+		}
+
+	// FUNCIONES RELACIONADAS CON LA EDICIÓN DEL PERFIL ----------------------------------
+
+	editLogin() {
+		if (this.isAdmin) {
+			this.loginEnabled = true;
+		}
+	}
+
+	editEmail() {
+		if (this.user!.id === this.tokenId || this.isAdmin ) {
+			this.editEnabled = true;
+		}
+	}
+
+	sendEditedUser(): void {
+	this.httpClient.post<any>(environment.apiUrl + '/edit-profile/user/edit', this.newUser)
+		.subscribe(
+		(response: User) => {
+		},
+		(error) => {
+			this.toasterService.launchToaster(ToastValues.ERROR, 'Error al editar el usuario');
+		}
+		);
+		this.router.navigateByUrl(`/user-profile/${this.user?.login}`);
+	}
+
+	async saveChanges(): Promise<void> {
+		this.newUser = this.user;
+		if (!this.newUser) return;
+	
+		this.newUser.login = this.editForm.get('login')?.value!;
+		this.newUser.firstName = this.editForm.get('firstName')?.value!;
+		this.newUser.lastName = this.editForm.get('lastName')?.value!;
+		this.newUser.nick = this.editForm.get('nick')?.value!;
+		this.newUser.email = this.editForm.get('email')?.value!;
+
+		if (this.formData.has('image')) {
+			try {
+				const uploadResponse = await this.uploadImage();
+				if (uploadResponse && uploadResponse.image) {
+				this.newUser.image = uploadResponse.image;
+				}
+				
+			} catch (error) {
+			}
+		}
+		else if (this.selectedStandardAvatar){
+			this.newUser.image = this.selectedStandardAvatar	
+		}
+		this.sendEditedUser();
+	}
+
+	discardChanges() {
+		this.editForm.patchValue(this.originalFormValues);
+		this.clearFile();
+		this.avatarImageSrc = null;
+	}
+
+	async uploadImage(): Promise<any> {
+		try {
+			const response = await this.httpClient.post<any>(environment.apiUrl + '/user/upload', this.formData).toPromise();
+			return response;
+		} catch (error) {
+			this.handleUploadError(error);
+		}
+	}
+
+	handleUploadError(error: any): void {
+		let errorMessage = 'Se produjo un error al cargar la imagen.';
+	  
+		if (error && error.error && error.error.error) {
+		  errorMessage = error.error.error;
+		} else if (error && error.error && error.error.message) {
+		  errorMessage = error.error.message;
+		}
+	  
+		this.toasterService.launchToaster(ToastValues.ERROR, 'Error al cargar imagen');
+	  }
+
+
+	clearFile(): void{
+		this.editForm.get('file')?.setValue(null)
+		const fileInput = document.getElementById('file') as HTMLInputElement
+		if (fileInput){
+			fileInput.value = ''
+		}
+		this.formData.delete('image')
+	}
+
+	async onFileInputClick(): Promise<void> {
+		const images = await lastValueFrom(this.imageService.getAvatarImages());
+		this.openImageModal(images);
 	  }
 	
-	  cancelEdit() {
-      this.editingField = null;
-      this.editedFields = {};
+	  openImageModal(images: string[]): void {
+		const modalData = {
+			images: images,
+			onSelectImage: (selectedImage: string) => {
+			},
+		};
+		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
+      		const confirm: boolean = this.modalService.getConfirmationInput();
+			if (confirm){
+				const selectedImage = this.modalService.getImage()
+				this.selectedStandardAvatar = this.modalService.getModalData()[0]
+
+				if (selectedImage != undefined){
+					let selectedImageOk = selectedImage;
+					const _file = URL.createObjectURL(selectedImage);
+					this.avatarImageSrc = _file 
+					if (this.avatarImages.includes(_file)){
+						this.avatarImageSrc = this.imagesBaseUrl + _file;
+					}
+					this.formData.append('image', selectedImageOk )
+				}
+				else if (this.selectedStandardAvatar){
+					this.avatarImageSrc = this.imagesBaseUrl + this.selectedStandardAvatar
+				}
+			}
+		})
+		this.modalService.openModal('imageGalleryTemplate', modalData);
 	  }
 
-    connectMfa(): void {
-      this.generateQRCode(this.user?.id!).subscribe(
-        (qrCodeBlob: Blob) => {
-          const qrURL = URL.createObjectURL(qrCodeBlob);
-          this.SubscribeTo2faInput(this.user?.id!, true);
-          this.modalService.openModal('enableMfaTemplate', { qrURL });
-        },
-        (error) => {
-          console.error('ERROR: Error al generar el código QR:', error);
-        }
-      )
-    }
+	getUserImage(): string{
+		if (this.avatarImageSrc && this.avatarImageSrc.includes('blob') && this.avatarImageSrc.substr(0,4) != "http") return this.avatarImageSrc;
+		if (this.avatarImageSrc && !this.avatarImageSrc.includes('blob')) return this.avatarImageSrc
+		if (this.user?.image) return this.imagesBaseUrl + this.user?.image
+		return this.imagesBaseUrl + 'phldr.jpg' 
+	
+	}
 
-    disconnectMfa(): void {
-      this.SubscribeTo2faInput(this.user?.id!, false);
-      this.modalService.openModal('disableMfaTemplate');
-    }
+	// FUNCIONES RELACIONADAS CON 2FA ------------------------------------------------
 
-    disable2FA(Id: number, code2fa: string) {
-      const userId = Id;
-      const loginCode = code2fa;
-      const message = 'Token to validate code';
 
-      const body = { userId, loginCode, message };
+	connectMfa(): void {
+	this.twoFactorAuthService.generateQRCode(this.user?.id!).subscribe(
+		(qrCodeBlob: Blob) => {
+			const qrURL = URL.createObjectURL(qrCodeBlob);
+			this.twoFactorAuthService.SubscribeTo2faInput(this.user?.id!, true);
+			this.modalService.openModal('enableMfaTemplate', { qrURL });
+		},
+		(error) => {
+		}
+	)
+	}
 
-      console.log(body);
-      return this.httpClient.post(environment.apiUrl + '/2fa/turn-off', body, { responseType: 'text' })
-        .pipe(
-          tap(() => {
-            this.mfaActivated = false;
-        })
-      );
-    }
-
-    enable2FA(Id: number, code2fa: string) {
-      const userId = Id;
-      const loginCode = code2fa;
-      const message = 'Token to validate code';
-
-      const body = { userId, loginCode, message };
-
-      console.log(body);
-      return this.httpClient.post(environment.apiUrl + '/2fa/turn-on', body, { responseType: 'text' })
-        .pipe(
-          tap(() => {
-            this.mfaActivated = true;
-        })
-      );
-    }
-
-    generateQRCode(Id: number): Observable<Blob> {
-      const userId = Id;
-      const loginCode = 'None';
-      const message = 'This is the request token';
-
-      const body = { userId, loginCode, message };
-
-      console.log(body);
-      return this.httpClient.post(environment.apiUrl + '/2fa/generate', body, { responseType: 'blob' });
-    }
-
-    SubscribeTo2faInput(userId: number, enable: boolean) {
-      let code = '';
-      this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
-        const confirm: boolean = this.modalService.getConfirmationInput();
-        if (confirm){
-          const receivedData = this.modalService.getModalData();
-          code = receivedData[0];
-          const regex = /^\d{6}$/;
-          if (regex.test(code)) {
-            if (enable) {
-              this.modalClosedSubscription.unsubscribe();
-              this.enable2FA(userId, code).subscribe(
-                response => {
-                  this.toasterService.launchToaster(ToastValues.INFO, response);
-                },
-                error => {
-					this.toasterService.launchToaster(ToastValues.ERROR, 'El código proporcionado no es correcto');
-                }
-              );
-            } else {
-              this.modalClosedSubscription.unsubscribe();
-              this.disable2FA(userId, code).subscribe(
-                response => {
-                  this.toasterService.launchToaster(ToastValues.INFO, response);
-                },
-                error => {
-					this.toasterService.launchToaster(ToastValues.ERROR, 'El código proporcionado no es correcto');
-                }
-              );
-            }
-            
-          } else {
-            this.modalClosedSubscription.unsubscribe();
-            const message : string = "Error en la introducción del código. El código debe tener 6 dígitos."
-            this.toasterService.launchToaster(ToastValues.ERROR, message);
-          }
-        } else {
-          console.log("El cierre del modal no está confirmado");
-        }
-    
-    });
-    }
+	disconnectMfa(): void {
+		this.twoFactorAuthService.SubscribeTo2faInput(this.user?.id!, false);
+		this.modalService.openModal('disableMfaTemplate');
+	}
 }

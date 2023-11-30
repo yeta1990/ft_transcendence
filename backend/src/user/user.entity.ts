@@ -73,7 +73,7 @@ export class User {
 	// PERSONALIZACION -------------------------------------
 
 	@Column({
-		default: 'avatar.png' //Poner ruta de imagen por defecto
+		default: 'Avatar_1.png' //Poner ruta de imagen por defecto
 	})
 	image: string;
 

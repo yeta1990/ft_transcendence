@@ -73,7 +73,6 @@ export class ChatAdminService {
 		if (!foundRoom) return false;
 		const executorIsWebAdmin: boolean = await this.userService.hasAdminPrivileges(executorLogin)
 		if (!executorIsWebAdmin) return false;
-
 		let roomSilenced: Silenced[] = foundRoom.silenced;
 		if (!roomSilenced) {roomSilenced = []}
 		for (let silenced of roomSilenced){
@@ -86,6 +85,7 @@ export class ChatAdminService {
 		if (!foundRoom.silenced) foundRoom.silenced = [] as Silenced[]
 		foundRoom.silenced.push(userToSilence);
 		await this.roomRepository.save(foundRoom)
+
 		return true;
 	}
 
@@ -96,11 +96,10 @@ export class ChatAdminService {
 		if (!executorIsWebAdmin) return false;
 
 		const isTargetSilenced: boolean = await this.chatService.isSilencedOfRoom(login, room)
-		if (!isTargetSilenced) return false;
+		if (!isTargetSilenced) return true;
+
 		const oldSilencedSize: number = foundRoom.users.length;
-		foundRoom.silenced = foundRoom.silenced.filter(user => {
-			return user.login != login;
-		})
+		foundRoom.silenced = foundRoom.silenced.filter((silenced: any) => !silenced.includes(login))
 		await this.roomRepository.save(foundRoom);
 		if (oldSilencedSize === foundRoom.silenced.length){ 
 			return false;
@@ -152,7 +151,6 @@ export class ChatAdminService {
 	  const foundRoom: Room = await this.chatService.getRoom(room)
 	  if (!foundRoom || !foundRoom.owner) return false;
 	  const targetIsWebOwner: boolean = await this.userService.isWebOwner(foundRoom.owner.login)
-	  console.log(targetIsWebOwner)
 	  if (targetIsWebOwner && foundRoom.owner.login != executorLogin) return ;
 	  const executorIsWebAdmin: boolean = await this.userService.hasAdminPrivileges(executorLogin)
 	  if (!executorIsWebAdmin) return ;

@@ -30,6 +30,7 @@ import * as Joi from 'joi';
 import { config } from 'process';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { ScheduleModule } from '@nestjs/schedule';
  
 @Module({
   imports: [
@@ -46,8 +47,9 @@ import { join } from 'path';
 	}),
 	ServeStaticModule.forRoot({
 		rootPath: join(__dirname, '../..', 'uploads'),
-		serveRoot: '/uploads',
+		serveRoot: '/uploads/',
 	}),
+	ScheduleModule.forRoot(),
 	AuthModule,
 	UserModule,
 	TypeOrmModule.forRootAsync({

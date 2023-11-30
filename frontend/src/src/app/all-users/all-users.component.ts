@@ -31,7 +31,6 @@ export class AllUsersComponent {
 			});
 	}
 	getUserLogin(login: string): any {
-		console.log("Login: " + login);
 		this.router.navigateByUrl('/user-profile/' + login);
 		return login;
 	}

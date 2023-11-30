@@ -21,7 +21,6 @@ export class SocketService {
 	constructor(@Optional() private location: Location  ) {	}
 
 	initializeSocket(namespace: string = "") {
-		console.log(this.location.path())
 		if (this.location.path().includes('callback') || this.location.path() === '/login' || this.location.path() === ''){
         } else if (this.socket == undefined){
 
@@ -37,45 +36,34 @@ export class SocketService {
 		this.messageObservable = from(this.message);
 		this.socket
 			.on('message', (data: ChatMessage) => {
-//				console.log("message received: " + JSON.stringify(data));
 				this.message.next({event: 'message', data});
 			})
 			.on('join', (data: any) => {
-//				console.log("join received: " + JSON.stringify(data));
 				this.message.next({event: 'join', data});
 			})
 			.on('joinmp', (data: any) => {
-//				console.log("join private message received: " + JSON.stringify(data));
 				this.message.next({event: 'joinmp', data});
 			})
 			.on(events.ListAllRooms, (data: Array<RoomMetaData>) => {
-//				console.log("listRooms received: " + JSON.stringify(data));
 				this.message.next({event: events.ListAllRooms, data});
 			})
 			.on(events.ListMyJoinedRooms, (data: any) => {
-//				console.log("listMyJoinedRooms received: " + data);
 				this.message.next({event: events.ListMyJoinedRooms, data});
 			})
 			.on(events.ListMyPrivateRooms, (data: any) => {
-//				console.log("listMyPrivateRooms: " + data);
 				this.message.next({event: events.ListMyPrivateRooms, data});
 			})
 			.on('listRoomUsers', (data: any) => {
-//				console.log("get users in this room: " + data);
 				this.message.next({event: 'listRooms', data});
 			})
 			.on(events.RoomMetaData, (data: RoomMetaData) => {
-//				console.log(data.loginNickEquivalence)
 				this.message.next({event: events.RoomMetaData, data})
 			})
 			.on(events.AllRoomsMetaData, (data: Array<RoomMetaData>) => {
 				this.message.next({event: events.AllRoomsMetaData, data})
 			})
 			.on(events.ActiveUsers, (data: Array<ChatUser>) => {
-//				console.log("active users")
-//				console.log(data)
 				this.message.next({event: events.ActiveUsers, data})
-//				console.log("active users: " + JSON.stringify(data));
 			})
 			.on(events.BlockedUsers, (data: Array<string>) => {
 				this.message.next({event: events.BlockedUsers, data})
@@ -93,10 +81,8 @@ export class SocketService {
 			})
 			.on('getSignal', (data: number) => {				
 				this.message.next({event: 'direction', data});
-				console.log("direction: " + data);	
 			})
 			.on('gameStatus', (data: GameRoom) => {
-				//console.log("join received: " + JSON.stringify(data.room));
 				this.message.next({event: 'gameStatus', data});
 			})
 			.on('getStatus', (data: GameRoom) => {
@@ -130,8 +116,10 @@ export class SocketService {
 				this.message.next({event: "otherPlayerCameBack", data});
 			})
 			.on("replayGameProposal", (data:string) => {
-				console.log("replay? " + data)
 				this.message.next({event: "replayGameProposal", data});
+			})
+			.on("banned", (data:string) => {
+				this.message.next({event: "banned", data});
 			})
 
 		}
@@ -160,7 +148,6 @@ export class SocketService {
   }
 
   disconnectClient(){
-  	  console.log("sending disconnect")
 	if (this.socket) this.socket.emit(events.SoftDisconnect);
   }
 

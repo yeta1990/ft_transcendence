@@ -31,6 +31,7 @@ import { Page404Component } from './page404/page404.component'
 import { PaddleComponent } from './pong/paddle/paddle.component';
 import { EntityComponent } from './pong/entity/entity.component';
 import { RoomComponent } from './pong/room/room.component'
+import { MatIconModule } from '@angular/material/icon';
 
 
 @NgModule({
@@ -64,7 +65,8 @@ import { RoomComponent } from './pong/room/room.component'
     ReactiveFormsModule,
     AppRoutingModule,
     LayoutModule,
-    Page404Component
+    Page404Component,
+    MatIconModule
   ],
   providers: [
 	interceptorProviders,

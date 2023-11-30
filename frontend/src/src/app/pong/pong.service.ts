@@ -42,18 +42,11 @@ export class PongService {
 	}
 
   sendSignal(type: string, room: string, key: number) {
-    //const date: Date = new Date();
-		//const payloadToSend: ChatMessage = { room, message, nick: "", date}
-    //const payloadToSend: GameRoom = { room:room }
-//      	console.log(type)
-//      	console.log(room)
-//      	console.log(key)
 		this.socketService.sendMove(type, room, key);
 	}
 
   joinUserToRoom(room: string){
     room += " alone"; //alone for know play alone
-		//console.log(room)
 		this.socketService.sendMessageToServer("joinGame", room);
 	}
 
@@ -70,7 +63,6 @@ export class PongService {
 	}
 
   playOnLine(type:string, login: string) {
-    console.log("TYPE: " + type);
     this.socketService.sendMessageToServer(type, login);
   }
 

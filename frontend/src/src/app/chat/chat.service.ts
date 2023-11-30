@@ -43,7 +43,6 @@ export class ChatService {
 	}
 
 	setAvailableRoomsList(roomList: Array<string>): void {
-		console.log("setting " + roomList) 
 		this.availableRoomsList = roomList
 	}
 
@@ -56,7 +55,6 @@ export class ChatService {
 	} 
 
 	getActiveUsers(){
-		console.log(this.activeUsers)
 		return this.activeUsers;
 	}
 
@@ -81,6 +79,15 @@ export class ChatService {
 
 	getLoginNickEquivalence(): Array<any> {
 		return this.loginNickEquivalence
+	}
+
+	getNickEquivalence(login: string): string {
+		const loginEquivalence: Array<any> | undefined = this.getLoginNickEquivalence()
+		if (loginEquivalence){
+			const foundUser = loginEquivalence.find(u => u.login === login)
+			if (foundUser) return foundUser.nick
+		}
+		return login;
 	}
 	
 	setLoginNickEquivalence(data: Array<any>) {
@@ -197,8 +204,8 @@ export class ChatService {
 		this.socketService.sendMessageToServer(events.AdminRemoveBanChatUser, payloadToSend);
 	}
 
-	adminSilenceUserOfRoom(room: string, login: string){
-		const payloadToSend: ChatMessage = { room: room, message: "" , login: login, date: new Date() }
+	adminSilenceUserOfRoom(room: string, login: string, time: number){
+		const payloadToSend: any = {room: room, login: login, time: time}
 		this.socketService.sendMessageToServer(events.AdminSilenceChatUser, payloadToSend);
 	}
 

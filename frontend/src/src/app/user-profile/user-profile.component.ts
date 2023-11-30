@@ -52,68 +52,44 @@ export class UserProfileComponent implements OnInit {
 		this.myLogin = this.authService.getDecodedAccessToken(this.authService.getUserToken()!).login;
 		const currentID = this.authService.getDecodedAccessToken(this.authService.getUserToken()!).id;
 		this.profileService.getMyIncomingFriendRequests(currentID).subscribe((fr: User) => this.myIncomingFriendRequests = fr.incomingFriendRequests)
-
-		const login = this.activateroute.snapshot.paramMap.get('login');
-		if ( login !== null ){
-			this.profileService.getUserIDByLogin(login).subscribe((userId: number) => {
-				if (userId === -1) {
-					this.found = false;
-					return ;
-				}
-				forkJoin([
-					this.profileService.getUserProfile(userId),
-					this.profileService.getUserAchievements(userId),
-					this.profileService.getMyBlockedUsers(),
-					this.profileService.getGamesOfUser(login)
-				]).subscribe(([userProfile, userAchievements, blockedUsers, games]: [User, Achievement[], Array<any>, any]) => {
-					this.user = userProfile;
-					this.userAchievements = userAchievements;
-					console.log('User:', this.user);
-					console.log('User Achievements:', this.userAchievements);
-					this.calculateProgressStyles(this.user);
-					this.achievementsStatus = this.getAchievementsStatus();
-					console.log('ALL Achievements:', this.achievementsStatus);
-				    this.chatService.setMyBlockedUsers(blockedUsers);
-					this.check_admin_level(userId);
-					this.loaded = true;
-					this.games = games
-				});
-
-//				this.profileService.getMyBlockedUsers().subscribe(users =>this.chatService.setMyBlockedUsers(users))
-
-			});
-
-		}
 	}
 
 	allUsers(): void {
-		console.log("All users login list:");
 		this.router.navigateByUrl('/all-users');
 	}
 
 	ngOnInit() {
+		this.activateroute.paramMap.subscribe(params => {
+			const login = params.get('login');
+			if (login !== null) {
+			  this.loadUserData(login);
+			}
+		  });
+	  }
 
-		/*
-		const login = this.activateroute.snapshot.paramMap.get('login');
-		if ( login !== null ){
-			this.profileService.getUserIDByLogin(login).subscribe((userId: number) => {
-				forkJoin([
-					this.profileService.getUserProfile(userId),
-					this.profileService.getUserAchievements(userId)
-				]).subscribe(([userProfile, userAchievements]: [User, Achievement[]]) => {
-					this.user = userProfile;
-					this.userAchievements = userAchievements;
-					console.log('User:', this.user);
-					console.log('User Achievements:', this.userAchievements);
-					this.calculateProgressStyles(this.user);
-					this.achievementsStatus = this.getAchievementsStatus();
-					console.log('ALL Achievements:', this.achievementsStatus);
-				});
-				this.check_admin_level(userId);
-			});
-			this.profileService.getMyBlockedUsers().subscribe(users =>this.chatService.setMyBlockedUsers(users))
-		}
-		*/
+
+	  loadUserData(login: string) {
+		this.profileService.getUserIDByLogin(login).subscribe((userId: number) => {
+		  if (userId === -1) {
+			this.found = false;
+			return;
+		  }
+		  forkJoin([
+			this.profileService.getUserProfile(userId),
+			this.profileService.getUserAchievements(userId),
+			this.profileService.getMyBlockedUsers(),
+			this.profileService.getGamesOfUser(login)
+		]).subscribe(([userProfile, userAchievements, blockedUsers, games]: [User, Achievement[], Array<any>, any]) => {
+			this.user = userProfile;
+			this.userAchievements = userAchievements;
+			this.calculateProgressStyles(this.user);
+			this.achievementsStatus = this.getAchievementsStatus();
+			this.chatService.setMyBlockedUsers(blockedUsers);
+			this.check_admin_level(userId);
+			this.loaded = true;
+			this.games = games
+		});
+		});
 	  }
 
 	  check_admin_level(userId: number) {
@@ -165,7 +141,6 @@ export class UserProfileComponent implements OnInit {
 		this.gradientEnd = Math.min(100, loosePercentage + 10); // Limitando entre 0 y 100;
 
 		this.userRank = getEloRank(user.elo);
-		console.log('ELO Rank:', this.userRank);
 
 		const minElo = EloRank.Principiante;
 		const maxElo = EloRank.Maestro;
@@ -175,7 +150,6 @@ export class UserProfileComponent implements OnInit {
 		 const minProgressPercentage = 10;
 		 const finalProgressPercentage = Math.max(minProgressPercentage, progressPercentage);
 
-		 console.log(finalProgressPercentage);
 		this.progressStyles = {
 			'--progress-width': `${finalProgressPercentage}%`
 		  };
@@ -183,7 +157,6 @@ export class UserProfileComponent implements OnInit {
 
 	  getAchievementsStatus(): any[] {
 		const achievementsStatus = [];
-		console.log(AchievementsData);
 		for (const achievement of AchievementsData) {
 		  const hasAchievement = this.userAchievements.some(userAchievement => userAchievement.name === achievement.name);
 		  achievementsStatus.push({ name: achievement.name, achieved: hasAchievement });
@@ -194,7 +167,6 @@ export class UserProfileComponent implements OnInit {
 	  goEdit(): void {
 		if (this.user) {
 		  const login = this.user.login; // Obtén el login del usuario actual
-		  console.log("Going to: '/user-profile/" + login + "/edit'");
 		  this.router.navigate(['/user-profile', login, 'edit']); // Carga la URL ":login/edit"
 		}
 	  }

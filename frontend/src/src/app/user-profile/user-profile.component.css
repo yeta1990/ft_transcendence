@@ -174,7 +174,7 @@
 	.progress-bar .trophy {
 		content: '';
 		display: block;
-		background-image: url('https://www.pngkit.com/png/full/176-1764780_star-on-a-award-trophy-silhouette-comments-trophy.png'); /* Cambia URL_DE_LA_IMAGEN por la URL real */
+		background-image: url('/assets/trophy.png'); /* Cambia URL_DE_LA_IMAGEN por la URL real */
 		background-size: contain;
 		background-repeat: no-repeat;
 		width: 40px;

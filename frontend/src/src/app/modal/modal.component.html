@@ -450,6 +450,46 @@
       	  </div>
         </div>
       </ng-template>
+
+	<ng-template [ngSwitchCase]="'imageGalleryTemplate'">
+		<div id="imageGalleryTemplate">
+		  <div class="modal-header">
+			<h1 class="modal-title fs-5">FT_TRASCENDENCE: Gallery</h1>
+			<button (click)="closeModal()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		  </div>
+		  <div class="modal-body">
+			<p class="text-center font-weight-bold">Selecciona una imagen</p>
+			<div class="image-gallery">
+			  <div *ngFor="let image of getImages()" (click)="onImageSelect(image)" class="image-container" [class.selected-image]="inputValue === image">
+				<img [src]="imagesBaseUrl + image" alt="Avatar Image" class="gallery-image">
+			</div>
+				  
+				  <div class="upload-container" [class.selected-image]="selectedImage">
+					<div class="image-cropper-container" *ngIf="selectedImage" [ngStyle]="{backgroundImage: 'url(' + selectedImageName + ')'}"></div>
+					<div class="image-cropper-container" *ngIf="!selectedImage" style="background-image: url('{{ imagesBaseUrl }}phldr.jpg')"></div>
+					<label for="avatar-input-file">
+						<div class="icon-wrapper" *ngIf="!selectedImage">
+							<div class="upload-icon" *ngIf="!selectedImage">+</div>
+							<label for="avatar-input-file" class="file-label">
+								<input type="file" id="avatar-input-file" accept="image/*" (change)="onFileChange($event)" />
+							  </label>
+						</div>
+					</label>
+					<button *ngIf="selectedImage" type="button" class="unselect-button" (click)="clearFile()">Unselect</button>
+				  </div> 
+				  
+			</div>
+		  </div>
+		  <div class="text-center">
+			<button type="button" class="btn btn-primary" [disabled]="!inputValue && !selectedImage" (click)="saveAndCloseModal()">Continuar</button>
+		  </div>
+		  <br>
+		</div>
+
+	  </ng-template>
+
+
+
     </ng-container>
   </div>
 </div>

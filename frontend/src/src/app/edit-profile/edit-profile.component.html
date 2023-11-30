@@ -1,47 +1,73 @@
 <app-nav-bar/>
 
-<div class="container mt-4">
-	<h2>Edit Profile</h2>
-	<form [formGroup]="editForm" (ngSubmit)="onSubmit()">
-		<div class="form-group">
-			<label for="name">Name</label>
-			<input id="name" type="text" class="form-control" formControlName="firstName" placeholder="{{ user?.firstName }}">
-		</div>
+	<div class="background">
+		<div class="profile-container">
+			<h1 class="title01">Configuración General</h1>
+			<p class="subtitle">Administra los detalles de la cuenta de usuario que has compartido con Ft_Trascendence, incluyendo tu nombre, información de contacto y más datos.</p>
+            <form [formGroup]="editForm" class="form-container">
+				<h1 class="title02">Información de cuenta</h1>
+				<p class="subtitle2">ID: <span class="user-id">{{ user?.id }}</span></p>
+				<div class="avatar-container">
+					<button class="avatar-button-edit" (click)="onFileInputClick()"></button>
+					<img class="avatar" [src]="getUserImage()" alt="User Avatar" />
+				  </div>
 
-		<div class="form-group">
-			<label for="lastName">Last Name</label>
-			<input id="lastName" type="text" class="form-control" formControlName="lastName" placeholder="{{ user?.lastName }}">
-		</div>
-
-		<div class="form-group">
-			<label for="nick">Nick</label>
-			<input id="nick" type="text" class="form-control" formControlName="nick" placeholder="{{ user?.nick }}">
-		</div>
-
-		<div class="form-group">
-			<label for="email">Email</label>
-			<input id="email" type="text" class="form-control" formControlName="email" placeholder="{{ user?.email }}">
-		</div>
-
-		<br>
-
-		<!-- Botón para activar/desactivar MFA -->
-		<div *ngIf="!mfaActivated">
-			<button class="btn btn-success" type="button" (click)="connectMfa()">Enable Two-Factor Authentication (MFA)</button>
-		</div>
-		<!-- Botón para desconectar MFA -->
-		<div *ngIf="mfaActivated">
-			<button class="btn btn-danger" type="button" (click)="disconnectMfa()">Disconnect Two-Factor Authentication (MFA)</button>
-		</div>
-        <br />
-	    <br />
-	    <label class="tab" for="file">Change profile picture&emsp;</label>
-	    <input id="file" type="file" (change)="onFileChange($event)" >
-        <button *ngIf="formData.has('image')" type="button" class="btn btn-danger" (click)="clearFile()">Unselect</button>
-        <br />
-        <br />
-		<button class="btn btn-primary mt-3" type="submit">Submit</button>
-		<app-modal></app-modal>
-	</form>
-</div>
+				<div class="user-info-row">
+					<div class="lockInputBox">
+						<input type="text" name="login" required="required" id="login" formControlName="login" placeholder="{{ user?.login }}" [readonly]="!loginEnabled" [ngStyle]="loginEnabled ? {} : { 'background': '#999' }">
+						<span>Login</span>
+					</div>
+					<button (click)="editLogin()" class="button-no-edit"></button>
+					<div class="lockInputBox">
+						<input type="text" name="email" autocomplete="no" required="required" id="email" formControlName="email" placeholder="{{ user?.email }}" [readonly]="!editEnabled" [ngStyle]="editEnabled ? {} : { 'background': '#999' }">
+						<span>Email</span>
+					</div>
+					<button class="button-no-edit"></button>
+				</div>
+				<h1 class="title02">Detalles personales</h1>
+				<p class="subtitle">Administra tu nombre e información de contacto. Estos detalles personales son privados y no se mostrarán a otros usuarios.</p>
+				<div class="user-info-row">
+					<div class="inputBox">
+						<input type="text" name="firstName" required="required" id="firstName" formControlName="firstName" placeholder="{{ user?.firstName }}">
+						<span>Nombre</span>
+					</div>
+					<div class="inputBox">
+						<input type="text" name="lastName" required="required" id="lastName" formControlName="lastName" placeholder="{{ user?.lastName }}">
+						<span>Apellidos</span>
+					</div>
+				</div>
+				<div class="user-info-row">
+					<div class="inputBox">
+						<input type="text" name="nick" required="required" id="nick" formControlName="nick" placeholder="{{ user?.nick }}">
+						<span>Nick</span>
+					</div>
+					<div class="inputBox">
+						<select id="asdfafasvbbbbb" formControlName="campus" class="selectBox">
+							<option value="" selected disabled>No puedes cambiar tu campus</option>
+							<option select disabled class="select-option" *ngFor="let option of campusesTypes" [value]="option">{{ option }}</option>
+						</select>
+						<span>Campus</span>
+					</div>
+				</div>
+				<div class="user-info-row">
+					<div *ngIf="editForm.get('nick')?.hasError('notAvailable')" class="error-message">
+						<span *ngIf="errorMessage">{{errorMessage}}</span>
+					</div>
+				</div>
+				<div></div>
+				<div class="button-row">
+					<button class="discard-button" (click)="discardChanges()">Discard Changes</button>
+					<button class="button" (click)="saveChanges()">Save</button>
+				</div>
+			</form>
+			<hr>
+			<h1 class="title01">Autenticación Doble-Factor</h1>
+			<p class="subtitle">La autenticación de doble factor (2FA) es una capa adicional de seguridad diseñada para proteger tu cuenta contra accesos no autorizados. Esta función requiere la introducción de un código de seguridad adicional al iniciar sesión en la página. Descubre cómo configurarla viendo este video o siguiendo los pasos detallados en este artículo.</p>
+			<div class="mfa-button-container">
+				<button *ngIf="!mfaActivated" class="mfa-button" (click)="connectMfa()">Enable Authenticator APP</button>
+				<button *ngIf="mfaActivated" class="mfa-button" (click)="disconnectMfa()">Disable Authenticator APP</button>
+			</div>
+			<div class="finish-block"></div>
+        </div>
+    </div>
 	

@@ -16,12 +16,13 @@ import {AuthService} from '../auth/auth.service'
 import {PongService} from '../pong/pong.service'
 import {Game} from '../pong/game.entity'
 import {Achievement} from '../user/achievement/achievement.entity'
+import { TasksService } from './tasks/tasks.service';
  
 @Module({
 	
 	imports: [TypeOrmModule.forFeature([Room, User, ChatMessage, Game, Achievement]), HttpModule, forwardRef(() => UserModule), EventsModule],
 	exports: [RoomService, ChatService, PongService ],
-	providers: [BaseGateway, ChatService, PongService, HashService, RoomService, ChatMessageService, ChatAdminService, AuthService]
+	providers: [BaseGateway, ChatService, PongService, HashService, RoomService, ChatMessageService, ChatAdminService, AuthService, TasksService]
 })
 export class ChatModule {
 

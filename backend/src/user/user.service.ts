@@ -55,7 +55,8 @@ export class UserService {
 	//____________________________ GETTERS ________________________________
 
 	public async getUser(id: number) : Promise<User | undefined> {
-		const user = await this.repository.findOne({
+		const user =  await this.repository.findOne({
+			relations: ['ownedRooms', 'bannedUsers', 'achievements'],
 			where: {
 				id: id,
 			},
@@ -63,7 +64,8 @@ export class UserService {
 		if (user) {
 			return user;
 		}
-		throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+		return ;
+//		throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 	}
 
 	public async getUserByLogin(login: string): Promise<User | undefined>{
@@ -88,7 +90,8 @@ export class UserService {
 		if (user) {
 			return user;
 		}
-		throw new HttpException('User with this email does not exist', HttpStatus.NOT_FOUND);
+		return
+//		throw new HttpException('User with this email does not exist', HttpStatus.NOT_FOUND);
 	}
 
 	public async getAllUsers(): Promise<User[]> {
@@ -106,10 +109,8 @@ export class UserService {
 			.where("user.id = :id", { id: id })
 			.getOne();
 		if (user) {
-			console.log("User Achievements:", user.achievements);
 			return user.achievements;
 		} else {
-			console.log("User not found.");
 			return [] as Achievement[];
 		}
 	}
@@ -127,6 +128,19 @@ export class UserService {
 		return -1
 	}
 
+	public async isNickAvailable(nick: string): Promise<boolean> {
+		const user = await this.repository.findOne({
+			where: {
+			nick: nick,
+			},
+		})
+		if (user) {
+			return false ;
+		} else {
+			return true ;
+		}
+	}
+
 	//____________________________ WEB ADMIN ________________________________
 
 	public async isUserBannedFromWebsite(login: string): Promise<boolean> {
@@ -136,7 +150,6 @@ export class UserService {
 	}
 
 		public async grantAdmin(login: string): Promise<User[]>{
-		console.log(login)
 		const user: User = await this.getUserByLogin(login)
 		user.userRole = UserRole.ADMIN
 		await this.saveUser(user)
@@ -194,7 +207,8 @@ export class UserService {
 		if (user) {
 			return user;
 		}
-		throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+		return 
+//		throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 	}
 
 	//____________________________ BAN USER2USER ________________________________
@@ -221,7 +235,6 @@ export class UserService {
 	public async thereIsABlock(executor: string, banned: string): Promise<boolean>{
 		const usersThatHaveBannedAnother: User[] = await this.getUsersThatHaveBannedAnother(banned)
 		const loginsBlockers = usersThatHaveBannedAnother.map(u => u.login)
-		console.log(loginsBlockers)
 		return (loginsBlockers.includes(executor))
 	}
 
@@ -239,7 +252,8 @@ export class UserService {
 	async set2FASecret( secret: string, userId: number ) {
 		const existingUser = await this.getUser(userId);
 		if (!existingUser) {
-			throw new Error('User with ID ${userId} not found');
+			return 
+//			throw new Error('User with ID ${userId} not found');
 		}
 		return await this.repository.update(userId, {
 			mfaSecret: secret
@@ -249,7 +263,8 @@ export class UserService {
 	async turnOn2fa ( userId: number ) {
 		const existingUser = await this.getUser(userId);
 		if (!existingUser) {
-			throw new Error('User with ID ${userId} not found');
+			return 
+//			throw new Error('User with ID ${userId} not found');
 		}
 		return await this.repository.update( userId, {
 			mfa: true
@@ -259,7 +274,8 @@ export class UserService {
 	async turnOff2FA(userId: number): Promise<void> {
 		const existingUser = await this.getUser(userId);
 		if (!existingUser) {
-			throw new Error('User with ID ${userId} not found');
+			return 
+//			throw new Error('User with ID ${userId} not found');
 		}
 		await this.repository.update( userId, {
 			mfa: false
@@ -270,6 +286,9 @@ export class UserService {
 		if (senderLogin === targetLogin) return false;
 		const sender: User = await this.getUserByLogin(senderLogin)
 		if (!sender) return false;
+		if (sender.friends.includes(targetLogin)){
+			return false;
+		}
 		if (sender.incomingFriendRequests.includes(targetLogin)){
 			await this.acceptFriendship(senderLogin, targetLogin)
 			return true;
@@ -310,7 +329,6 @@ export class UserService {
 	}
 
 	public async removeFriendship(friend1: string, friend2: string): Promise<Array<string>>{
-		console.log(friend1+friend2)
 		if (friend1 === friend2) return null;
 		const user1: User = await this.getUserByLogin(friend1)
 		const user2: User = await this.getUserByLogin(friend2)
@@ -319,8 +337,6 @@ export class UserService {
 		user2.friends = user2.friends.filter(f => f != friend1)
 		await this.repository.save(user1)
 		await this.repository.save(user2)
-		console.log(user1.friends)
-		console.log(user2.friends)
 		return user1.friends;
 	}
 

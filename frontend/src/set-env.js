@@ -17,11 +17,22 @@ const envConfigFile = `export const environment = {
 //console.log('The file `environment.ts` will be written with the following content: \n');
 //console.log(envConfigFile);
 //
-fs.outputFile(targetPath, envConfigFile, function (err) {
-   if (err) {
-   	   console.log(err)
-//       throw console.error(err);
-   } else {
-       console.log(`Angular environment.ts file generated correctly at ${targetPath} \n`);
+
+async function generateEnvironmentFile() {
+   try {
+       await fs.outputFile(targetPath, envConfigFile);
+       console.log(`Angular environment.ts file generated correctly at ${targetPath}\n`);
+   } catch (err) {
+       console.error(err);
    }
-});
+}
+
+generateEnvironmentFile();
+// fs.outputFile(targetPath, envConfigFile, function (err) {
+//    if (err) {
+//    	   console.log(err)
+// //       throw console.error(err);
+//    } else {
+//        console.log(`Angular environment.ts file generated correctly at ${targetPath} \n`);
+//    }
+// });

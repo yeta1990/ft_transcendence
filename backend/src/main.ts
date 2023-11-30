@@ -44,8 +44,6 @@ function isOriginAllowed(origin: string) {
 	const thirdComponent = parseInt(ipComponents[2]);
 	const lastComponent = ipComponents[3];
 
-	//console.log("PORT: " + port + "\nPORT TO ALLOW: " + portToAllow + "\nHOSTNAME_PARTS: " + firstComponent + ", " + secondComponent + ", " + thirdComponent + ", " + lastComponent + ".")
-
 	if (portsToAllow.includes(port) && allowedLastDigits.includes(lastComponent) && firstComponent === '10' &&
 		((secondComponent === '11' && thirdComponent >= 1 && thirdComponent <= 17) ||
 		(secondComponent === '12' && thirdComponent >= 1 && thirdComponent <= 19) ||
@@ -66,7 +64,7 @@ async function bootstrap() {
 			if ((!origin) || isOriginAllowed(origin)) {
 				callback(null, true);
 			} else {
-				callback( new Error('CORS not allowed'));
+				callback(null);
 			}
 		}
 		//methods: 'GET,PUT,POST,DELETE',
