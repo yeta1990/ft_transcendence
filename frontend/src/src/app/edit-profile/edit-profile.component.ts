@@ -109,7 +109,6 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 			  this.avatarImages = images;
 			},
 			(error) => {
-			  console.error('Error fetching avatar images:', error);
 			}
 		  );
 //		  this.imageService.selectedImage$.subscribe((selectedImage: File) => {
@@ -134,7 +133,6 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 				this.originalFormValues = { ...this.editForm.value };
 			},
 			(error: any) => {
-				console.error('Error al obtener el perfil del usuario:', error);
 				this.handleProfileError(error);
 			}
 		);
@@ -256,7 +254,6 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 		(response: User) => {
 		},
 		(error) => {
-			console.error('Error al editar el usuario:', error);
 			this.toasterService.launchToaster(ToastValues.ERROR, 'Error al editar el usuario');
 		}
 		);
@@ -379,7 +376,6 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 			this.modalService.openModal('enableMfaTemplate', { qrURL });
 		},
 		(error) => {
-			console.error('ERROR: Error al generar el código QR:', error);
 		}
 	)
 	}

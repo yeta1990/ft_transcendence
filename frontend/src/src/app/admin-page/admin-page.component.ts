@@ -27,7 +27,7 @@ export class AdminPageComponent {
  
 		this.allUsersService.getUsers()
 			.subscribe(
-				(response:User[]) => {this.allUsers = response; console.log(response)})
+				(response:User[]) => {this.allUsers = response; })
 		this.profileService.getUserDetails()
 			.subscribe(
 				(response: User) => {this.myUser= response;},
@@ -76,24 +76,24 @@ export class AdminPageComponent {
     	if (userRole < 5){
 			this.adminPageService.grantAdminPrivileges(login)
 			.subscribe(
-				(response:User[]) => {this.allUsers = response; console.log(response)})
+				(response:User[]) => {this.allUsers = response; })
 		} else if (userRole === 5){
 			this.adminPageService.removeAdminPrivileges(login)
 			.subscribe(
-				(response:User[]) => {this.allUsers = response; console.log(response)})
+				(response:User[]) => {this.allUsers = response; })
 		}
 	}
 
 	banUser(login: string) {
 		this.adminPageService.banUser(login)
 			.subscribe(
-				(response:User[]) => {this.allUsers = response; console.log(response)})
+				(response:User[]) => {this.allUsers = response; })
 		this.chatService.kickUser(login)
 	}
 
 	removeBanUser(login: string) {
 		this.adminPageService.removeBanUser(login)
 			.subscribe(
-				(response:User[]) => {this.allUsers = response; console.log(response)})
+				(response:User[]) => {this.allUsers = response; })
 	}
 }

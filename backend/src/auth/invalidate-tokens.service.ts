@@ -34,13 +34,10 @@ export class InvalidateTokensService {
 		if (user == undefined) return true;
 		const realPrivileges: string | undefined = UserRole[user.userRole]
 
-//		console.log(UserRole[tokenPrivileges] + ","+ UserRole[realPrivileges])
-//		console.log(tokenPrivileges +  "," + realPrivileges)
 		if (tokenPrivileges != realPrivileges){ 
 			await this.invalidateToken(token)
 			return false;
 		}
-		console.log(true)
 		return true 
 	}
 }

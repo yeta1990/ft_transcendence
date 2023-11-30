@@ -161,15 +161,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 						this.chatService.setCurrentRoom("")
 //						this.myJointRoomList.filter(r => r != )
 					}
-					console.log("setting available room list " + this.availableRoomsList)
 					this.chatService.setAvailableRoomsList(this.availableRoomsList);
 				}
 				else if (payload.event === events.ListMyPrivateRooms){
 					this.myPrivateMessageRooms = Array.from(payload.data);
 				}
 				else if (payload.event === events.ListMyJoinedRooms){
-//					console.log("My joined rooms")
-//					console.log(payload.data)
 					this.myJointRoomList = Array.from(payload.data)	
 					if (this.myJointRoomList.length == 0){
 						this.chatService.setCurrentRoom("")
@@ -185,7 +182,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 //					this.messageList.get(this.currentRoom)!.push(payload.data);
 
 //					new method to log a message in a toaster
-					console.log(payload.data)
 					this.toasterService.launchToaster(ToastValues.INFO, payload.data.message)
 				}
 				else if (payload.event === 'system-error'){
@@ -216,19 +212,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 					this.chatService.setActiveUsers(payload.data)
 				}
 				else if (payload.event === events.RoomMetaData){
-					console.log("-------rooms metadata--------")
-					console.log(payload.data)
 					if (payload.data.room.includes(":")){
 						this.roomsMetaData.set('@'+payload.data.users.filter((v: string) => v!== this.myUser?.login)[0], payload.data)
 					} else {
 						this.roomsMetaData.set(payload.data.room, payload.data)
 					}
-					const it = this.roomsMetaData.entries();
-//					for (const el of it){
-//						console.log(JSON.stringify(el))
-//					}
 
-//					console.log(payload.data.loginNickEquivalence)
 				}
 				else if (payload.event === events.BlockedUsers){
 					this.chatService.setMyBlockedUsers(payload.data)
@@ -296,7 +285,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	}
 
 	goToChatRoom(room: string): void{
-		console.log("go to chat room " + room);
 	}
 
 	getNickEquivalence(login: string): string | null{
@@ -382,7 +370,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       		if (confirm){
       			const challengeConfirmation = this.modalService.getModalData()[0];
 				this.chatService.sendMatchProposal(login)
-				console.log("match challenge")
 				this.modalClosedSubscription.unsubscribe();
 				this.waitForMatchAnswerModal(login)
 				return ;
@@ -396,7 +383,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	waitForMatchAnswerModal(login: string){
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
 			this.chatService.cancelMatchProposal(login)
-			console.log("cancel match proposal")
 			this.modalClosedSubscription.unsubscribe();
     	});
 		this.modalService.openModal('template15', login);
@@ -406,7 +392,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 	createChannelModal() {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const confirm: boolean = this.modalService.getConfirmationInput();
-      		console.log(confirm)
       		if (confirm){
 				const receivedData = this.modalService.getModalData();
 				const room = receivedData[0]

@@ -32,7 +32,6 @@ export class ErrorInterceptor implements HttpInterceptor {
       }
       //Add here future catch errors if...()
 
-//		console.log("Catched HTTP error!");
       const error = err.error?.message || err.statusText;
 
 

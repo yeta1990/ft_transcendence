@@ -11,7 +11,6 @@ export class TasksService {
 	@Interval(30000)
 	handleInterval() {
 		this.chatService.emitUpdateUsersAndRoomsMetadata()
-		console.log(new Date());
 	}
 
 

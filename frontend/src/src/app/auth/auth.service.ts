@@ -22,7 +22,6 @@ export class AuthService {
   private authToken: any;
 
 	login(code: string){
-		console.log("He llegado a login");
 		return this.http.post<any>(environment.apiUrl + '/auth/login', {code})
 			.pipe(
 				map((res: any) => {
@@ -52,16 +51,13 @@ export class AuthService {
 		.pipe(
 			map(response =>{
 				if (response) {
-					console.log("El codigo está bien");
 					this.setSession(this.authToken);
 					this.redirectToHome();
 					return true;
 				}
-				console.log("He recibido respuesta");
 				return false;
 			}),
 			catchError((error) => {
-				console.error('Error en la validación MFA:', error);
 				return of(false);
 			})
 		);
@@ -72,8 +68,6 @@ export class AuthService {
     }
 
 	private setSession(authResult: any) {
-		console.log("Consigo entrar en setSession");
-		console.log(authResult);
 		if (!authResult) return;
         localStorage.setItem("access_token", authResult.access_token);
         localStorage.setItem("expires_at", authResult.expires_at);
@@ -121,8 +115,6 @@ export class AuthService {
 
 	getUserNameFromToken(): string | null {
 		const token = this.getUserToken();
-		console.log("I have a token");
-		console.log(token);
 		if (token) {
 		  const decodedToken = this.getDecodedAccessToken(token);
 		  if (!decodedToken) return null;

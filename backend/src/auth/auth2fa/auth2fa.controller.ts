@@ -40,12 +40,10 @@ export class Auth2faController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
   async turnOn2fA(@Body() request: RequestWithUser) {
-    console.log('Estoy en turnON');
     const isCodeValid = await this.auth2faService.is2fACodeValid(
       request.loginCode,
       request.userId,
     );
-    console.log('turnOff2fa isCodeValid: ' + isCodeValid);
     if (!isCodeValid) {
       throw new UnauthorizedException('Wrong authentication code');
     }
@@ -61,7 +59,6 @@ export class Auth2faController {
       request.loginCode,
       request.userId,
     );
-    console.log('turnOff2fa isCodeValid: ' + isCodeValid);
     if (!isCodeValid) {
       throw new UnauthorizedException('Wrong authentication code');
     }
@@ -76,7 +73,6 @@ export class Auth2faController {
       request.loginCode,
       request.userId,
     );
-    console.log('Lo que devuelve isCodeValid es: ' + isCodeValid);
     if (!isCodeValid) {
       throw new UnauthorizedException('Wrong authentication code');
     } else {

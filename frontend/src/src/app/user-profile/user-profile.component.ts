@@ -55,7 +55,6 @@ export class UserProfileComponent implements OnInit {
 	}
 
 	allUsers(): void {
-		console.log("All users login list:");
 		this.router.navigateByUrl('/all-users');
 	}
 
@@ -83,11 +82,8 @@ export class UserProfileComponent implements OnInit {
 		]).subscribe(([userProfile, userAchievements, blockedUsers, games]: [User, Achievement[], Array<any>, any]) => {
 			this.user = userProfile;
 			this.userAchievements = userAchievements;
-			console.log('User:', this.user);
-			console.log('User Achievements:', this.userAchievements);
 			this.calculateProgressStyles(this.user);
 			this.achievementsStatus = this.getAchievementsStatus();
-			console.log('ALL Achievements:', this.achievementsStatus);
 			this.chatService.setMyBlockedUsers(blockedUsers);
 			this.check_admin_level(userId);
 			this.loaded = true;
@@ -145,7 +141,6 @@ export class UserProfileComponent implements OnInit {
 		this.gradientEnd = Math.min(100, loosePercentage + 10); // Limitando entre 0 y 100;
 
 		this.userRank = getEloRank(user.elo);
-		console.log('ELO Rank:', this.userRank);
 
 		const minElo = EloRank.Principiante;
 		const maxElo = EloRank.Maestro;
@@ -155,7 +150,6 @@ export class UserProfileComponent implements OnInit {
 		 const minProgressPercentage = 10;
 		 const finalProgressPercentage = Math.max(minProgressPercentage, progressPercentage);
 
-		 console.log(finalProgressPercentage);
 		this.progressStyles = {
 			'--progress-width': `${finalProgressPercentage}%`
 		  };

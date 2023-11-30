@@ -21,7 +21,6 @@ export class SocketService {
 	constructor(@Optional() private location: Location  ) {	}
 
 	initializeSocket(namespace: string = "") {
-		console.log(this.location.path())
 		if (this.location.path().includes('callback') || this.location.path() === '/login' || this.location.path() === ''){
         } else if (this.socket == undefined){
 
@@ -37,27 +36,21 @@ export class SocketService {
 		this.messageObservable = from(this.message);
 		this.socket
 			.on('message', (data: ChatMessage) => {
-//				console.log("message received: " + JSON.stringify(data));
 				this.message.next({event: 'message', data});
 			})
 			.on('join', (data: any) => {
-//				console.log("join received: " + JSON.stringify(data));
 				this.message.next({event: 'join', data});
 			})
 			.on('joinmp', (data: any) => {
-//				console.log("join private message received: " + JSON.stringify(data));
 				this.message.next({event: 'joinmp', data});
 			})
 			.on(events.ListAllRooms, (data: Array<RoomMetaData>) => {
-//				console.log("listRooms received: " + JSON.stringify(data));
 				this.message.next({event: events.ListAllRooms, data});
 			})
 			.on(events.ListMyJoinedRooms, (data: any) => {
-//				console.log("listMyJoinedRooms received: " + data);
 				this.message.next({event: events.ListMyJoinedRooms, data});
 			})
 			.on(events.ListMyPrivateRooms, (data: any) => {
-//				console.log("listMyPrivateRooms: " + data);
 				this.message.next({event: events.ListMyPrivateRooms, data});
 			})
 			.on('listRoomUsers', (data: any) => {
@@ -88,7 +81,6 @@ export class SocketService {
 			})
 			.on('getSignal', (data: number) => {				
 				this.message.next({event: 'direction', data});
-				console.log("direction: " + data);	
 			})
 			.on('gameStatus', (data: GameRoom) => {
 				this.message.next({event: 'gameStatus', data});

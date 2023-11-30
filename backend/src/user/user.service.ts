@@ -64,7 +64,8 @@ export class UserService {
 		if (user) {
 			return user;
 		}
-		throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+		return ;
+//		throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 	}
 
 	public async getUserByLogin(login: string): Promise<User | undefined>{
@@ -89,7 +90,8 @@ export class UserService {
 		if (user) {
 			return user;
 		}
-		throw new HttpException('User with this email does not exist', HttpStatus.NOT_FOUND);
+		return
+//		throw new HttpException('User with this email does not exist', HttpStatus.NOT_FOUND);
 	}
 
 	public async getAllUsers(): Promise<User[]> {
@@ -205,7 +207,8 @@ export class UserService {
 		if (user) {
 			return user;
 		}
-		throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+		return 
+//		throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 	}
 
 	//____________________________ BAN USER2USER ________________________________
@@ -249,7 +252,8 @@ export class UserService {
 	async set2FASecret( secret: string, userId: number ) {
 		const existingUser = await this.getUser(userId);
 		if (!existingUser) {
-			throw new Error('User with ID ${userId} not found');
+			return 
+//			throw new Error('User with ID ${userId} not found');
 		}
 		return await this.repository.update(userId, {
 			mfaSecret: secret
@@ -259,7 +263,8 @@ export class UserService {
 	async turnOn2fa ( userId: number ) {
 		const existingUser = await this.getUser(userId);
 		if (!existingUser) {
-			throw new Error('User with ID ${userId} not found');
+			return 
+//			throw new Error('User with ID ${userId} not found');
 		}
 		return await this.repository.update( userId, {
 			mfa: true
@@ -269,7 +274,8 @@ export class UserService {
 	async turnOff2FA(userId: number): Promise<void> {
 		const existingUser = await this.getUser(userId);
 		if (!existingUser) {
-			throw new Error('User with ID ${userId} not found');
+			return 
+//			throw new Error('User with ID ${userId} not found');
 		}
 		await this.repository.update( userId, {
 			mfa: false

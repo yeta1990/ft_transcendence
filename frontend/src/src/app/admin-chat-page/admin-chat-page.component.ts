@@ -45,7 +45,6 @@ export class AdminChatPageComponent implements OnInit {
 					}
 					//events.ListAllRooms
 					else if (payload.event === events.AllRoomsMetaData || payload.event == events.ListAllRooms){
-						console.log(payload.data)
 						const roomSet: Set<string> = new Set()
 						for (const room of payload.data){
 							this.roomsMetaData.set(room.room, room)

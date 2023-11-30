@@ -20,9 +20,6 @@ const MatchPassword : ValidatorFn = (control : AbstractControl) : ValidationErro
 		return null;
 	  }
 
-	  console.log('Password is ' + passwordControl?.value);
-	  console.log('cPassword is ' + confirmPasswordControl?.value);
-
 	  if (passwordControl.value !== confirmPasswordControl.value) {
 		confirmPasswordControl.setErrors({ ['passwordMismatch']: true });
 	  } else {
@@ -91,14 +88,10 @@ export class FormComponent implements OnInit {
 	}
 
 	signIn(): void{
-		console.log("Idiot, this is signIn");
 	}
 
 	onSubmit(): void {
-		console.log('Hey, Idiot');
-		console.warn(this.profileForm.value);
 		if (this.profileForm.invalid) {
-			console.log('Idiot, this is not valid');
 			return;
 		  }
 		
@@ -111,18 +104,13 @@ export class FormComponent implements OnInit {
 		this.newCPassword = this.profileForm.value.cPassword;
 		
 		
-		console.log("submit form ", this.profileForm.value);
 		this.formService.addUser( this.profileForm.value as User)
 			.subscribe(
 	        response => {
-	          console.log('Usuario creado:', response);
 	        },
 	        error => {
-	          console.error('Error al crear el usuario:', error);
 	        },
 	        () => {
-				console.log('Completado');
-				console.log(this.newUser);
 				this.router.navigateByUrl('/login');
 	        }
 		);

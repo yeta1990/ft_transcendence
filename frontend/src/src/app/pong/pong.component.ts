@@ -149,11 +149,9 @@ export class PongComponent implements OnInit, OnDestroy {
 
 	setGamePlayer(): void {
     	if (this.pongService.getGame().playerOne == this.playerLogin){
-//       		console.log("Player ONE " + this.playerLogin);
            this.playerOne = true;
             
 		} else if (this.pongService.getGame().playerTwo == this.playerLogin){
-//            console.log("Player TWO");
             this.playerTwo = true;
             
         }
@@ -245,21 +243,17 @@ export class PongComponent implements OnInit, OnDestroy {
     }
 
     mode(m: string) {
-        console.log("STATUS " + this.chatService.getUserStatus(this.playerLogin));
         if (m == "on-line"){
-            console.log(this.playerLogin + " join match making list ");
             this.pongService.playOnLine(m,  this.playerLogin);
 			this.waitForMatchAnswerModal()
             this.waitingList = "Waiting for other player";
         }
         else if (m == "plus"){
-            console.log(this.playerLogin + " join match making plus list ");
             this.pongService.playOnLine(m, this.playerLogin);
 			this.waitForMatchAnswerModalPlus()
             this.waitingList = "Waiting for other player";
         }
         else{
-        	console.log("joining")
         	if (this.chatService.getCurrentRoom() != "#pongService_" + this.playerLogin) this.pongService.joinUserToRoom("#pongRoom");
         }
     }
@@ -431,7 +425,6 @@ export class PongComponent implements OnInit, OnDestroy {
       }
 
     ngOnDestroy() {
-		console.log("destroy")
         this.subscriptions.unsubscribe();
 		//a trick to finish subscriptions (second part)
 		this.destroy.next("");
@@ -442,7 +435,6 @@ export class PongComponent implements OnInit, OnDestroy {
   		//in other section of the site)
   		//this way we force the server to send the historial of each joined room
   		//in case the component appears again in the client
-        //console.log("DISCONECT");
 		this.pongService.disconnectClient();
 	}
 
