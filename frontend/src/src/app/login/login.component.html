@@ -17,7 +17,7 @@
       </button>      
      <form>
     <input type="username" class="username-input" placeholder="Correo electrónico" [(ngModel)]="username" (input)="onUsernameInput()" id="asdfas">
-    <input type="password" autocomplete="on" class="password-input" placeholder="Contraseña" [(ngModel)]="password" (input)="onPasswordInput()" id="bbb123">
+    <input type="password" class="password-input" placeholder="Contraseña" [(ngModel)]="password" (input)="onPasswordInput()" id="bbb123">
     <p class="warning-text" *ngIf="showWarning">La funcionalidad de autenticación por contraseña no está habilitada. Por favor, accede a través del botón de Outh42.</p>
     <div class="remember-toggle">
         <span class="toggle-label">Recuérdame</span>

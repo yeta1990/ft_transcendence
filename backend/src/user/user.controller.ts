@@ -307,6 +307,7 @@ export class UserController {
 	@UseInterceptors(FileInterceptor('image', {
 		limits:{ fileSize: 1048576},
 		fileFilter: (req:any , file:any, cb:any) => {
+			console.log(file)
 			const allowedMimeTypes = ['image/jpeg', 'image/png'];
 			if (!allowedMimeTypes.includes(file.mimetype)) {
 				req.fileValidationError = 'Formato de archivo no permitido';
@@ -324,6 +325,7 @@ export class UserController {
 		})
 	}))
 	uploadFile(@Body() body: any, @UploadedFile() file: Express.Multer.File) {
+		console.log(file)
 		if (!file) return false;
 		if (body.fileValidationError) {
 			return { error: body.fileValidationError };

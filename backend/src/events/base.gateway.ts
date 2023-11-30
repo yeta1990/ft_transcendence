@@ -88,6 +88,7 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	if (isUserVerified){
 		const login = this.authService.getLoginFromJwt(socket.handshake.auth.token)
 		const user: User = await this.userService.getUserByLogin(login)
+		if (!user) return 
   	    const isHardConnect: boolean = this.getClientSocketIdsFromLogin(login).length > 0 ? false : true
 		this.setLogin(socket);
 		this.logger.log(`Socket client connected: ${socket.id}`)
