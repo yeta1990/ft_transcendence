@@ -15,8 +15,7 @@
         <img src="https://42.fr/wp-content/uploads/2021/05/42-Final-sigle-seul.svg" alt="42 Logo" class="oauth42-logo">
         Acceda con Oauth42
       </button>      
-     <form>
-    <input type="username" class="username-input" placeholder="Correo electrónico" [(ngModel)]="username" (input)="onUsernameInput()" id="asdfas">
+    <input type="username" class="username-input" placeholder="Correo electrónico" [(ngModel)]="username" (ngModelChange)="onUsernameInput()" id="asdfas">
     <input type="password" autocomplete="on" class="password-input" placeholder="Contraseña" [(ngModel)]="password" (input)="onPasswordInput()" id="bbb123">
     <p class="warning-text" *ngIf="showWarning">La funcionalidad de autenticación por contraseña no está habilitada. Por favor, accede a través del botón de Outh42.</p>
     <div class="remember-toggle">
@@ -24,7 +23,6 @@
         <div class="toggle-switch"></div>
       </div>
     <button class="access-button" [disabled]="!passwordEnabled">Acceda ahora</button>
-     </form>
     <div class="register-section">
         <p class="no-account-text">¿No tienes una cuenta de 42?, 
           <a href="https://candidatura.42madrid.com/users/sign_up" target="_blank" class="signup-link">Apúntate</a>

@@ -271,6 +271,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 		this.newUser.email = this.editForm.get('email')?.value!;
 
 		if (this.formData.has('image')) {
+			
 			try {
 				const uploadResponse = await this.uploadImage();
 				if (uploadResponse && uploadResponse.image) {
@@ -347,12 +348,15 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 					if (this.avatarImages.includes(_file)){
 						this.avatarImageSrc = this.imagesBaseUrl + _file;
 					}
+					this.formData.delete('image')
 					this.formData.append('image', selectedImageOk )
 				}
 				else if (this.selectedStandardAvatar){
 					this.avatarImageSrc = this.imagesBaseUrl + this.selectedStandardAvatar
+					this.formData.delete('image')
 				}
 			}
+			this.modalClosedSubscription.unsubscribe();
 		})
 		this.modalService.openModal('imageGalleryTemplate', modalData);
 	  }
