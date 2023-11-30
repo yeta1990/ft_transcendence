@@ -47,7 +47,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 	}),
 	ServeStaticModule.forRoot({
 		rootPath: join(__dirname, '../..', 'uploads'),
-		serveRoot: '/uploads',
+		serveRoot: '/uploads/',
 	}),
 	ScheduleModule.forRoot(),
 	AuthModule,
