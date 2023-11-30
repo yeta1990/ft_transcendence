@@ -19,8 +19,6 @@ function isOriginAllowed(origin: string) {
  
 	// Verificamos si el origen es localhost
 	if (allowedOrigins.includes(origin)) {
-		console.log(origin)
-		console.log("allowed origins")
 		return true;
 	}
 	const [, , hostname, port, path] = matches;
@@ -37,17 +35,13 @@ function isOriginAllowed(origin: string) {
 	const thirdComponent = parseInt(ipComponents[2]);
 	const lastComponent = ipComponents[3];
 
-	//console.log("PORT: " + port + "\nPORT TO ALLOW: " + portToAllow + "\nHOSTNAME_PARTS: " + firstComponent + ", " + secondComponent + ", " + thirdComponent + ", " + lastComponent + ".")
-
 	if (portsToAllow.includes(port) && allowedLastDigits.includes(lastComponent) && firstComponent === '10' &&
 		((secondComponent === '11' && thirdComponent >= 1 && thirdComponent <= 17) ||
 		(secondComponent === '12' && thirdComponent >= 1 && thirdComponent <= 19) ||
 		(secondComponent === '13' && thirdComponent >= 1 && thirdComponent <= 14))
 	) {
-		console.log("RET: true");
 		return true;
 	}
-	console.log("RET: false");
 	return false;
 }
 
@@ -58,12 +52,10 @@ async function bootstrap() {
 	app.enableCors({
 		
 		origin: (origin, callback) => {
-			console.log("ORIGIN: " + origin);
 			if ((!origin) || isOriginAllowed(origin)) {
-				console.log("CORS allowed");
 				callback(null, true);
 			} else {
-				callback( new Error('CORS not allowed'));
+				callback(null);
 			}
 		}
 		//methods: 'GET,PUT,POST,DELETE',
@@ -71,7 +63,6 @@ async function bootstrap() {
 	});
 
 	app.use((req, res, next) => {
-		console.log(`Solicitud CORS: ${req.method} ${req.url}`);
 		next();
 	  });
 

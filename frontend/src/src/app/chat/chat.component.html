@@ -161,15 +161,14 @@
 								
 							</div>
 							<div class="p-2" *ngIf="myUser?.login !== user.login">
-								<i class="bi bi-controller">&nbsp;</i>
 								<i *ngIf="enableChallengeButton(user.login)" class="bi bi-controller" (click)="challengeMatchModal(user.login)">&nbsp;</i>
 								<i class="bi bi-chat-left-text" (click)="joinUserToRoom('@'+user.login, '')">&nbsp;</i>
 								<i *ngIf="!getMyBlockedUsers().includes(user.login)" class="bi bi-person-fill-slash" (click)="blockUserModal(user.login)">&nbsp;</i>
 								<i *ngIf="getMyBlockedUsers().includes(user.login)" class="bi bi-person-check-fill" (click)="unBlockUserModal(user.login)">&nbsp;</i>
-							    <i *ngIf="roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login && isAdmin(getCurrentRoom(), user.login)" class="bi bi-shield-minus" (click)="removeRoomAdmin(user.login, getCurrentRoom())">&nbsp;</i>	
-								<i *ngIf="(roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), user.login)) && !isSilenced(getCurrentRoom(), user.login)" class="bi bi-volume-mute" (click)="silenceUserFromRoomModal(user.login, getCurrentRoom())">&nbsp;</i>
-								<i *ngIf="(roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), user.login)) && isSilenced(getCurrentRoom(), user.login)" class="bi bi-volume-up" (click)="unSilenceUserFromRoom(user.login, getCurrentRoom())">&nbsp;</i>
-								<i *ngIf="roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), user.login)" class="bi bi-x-circle" (click)="banUserFromRoomModal(user.login, getCurrentRoom())"></i>
+							    <i *ngIf="roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login" class="bi bi-shield-minus" (click)="removeRoomAdmin(user.login, getCurrentRoom())">&nbsp;</i>	
+								<i *ngIf="(roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), myUser!.login)) && !isSilenced(getCurrentRoom(), user.login)" class="bi bi-volume-mute" (click)="silenceUserFromRoomModal(user.login, getCurrentRoom())">&nbsp;</i>
+								<i *ngIf="(roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), myUser!.login)) && isSilenced(getCurrentRoom(), user.login)" class="bi bi-volume-up" (click)="unSilenceUserFromRoom(user.login, getCurrentRoom())">&nbsp;</i>
+								<i *ngIf="roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), myUser!.login)" class="bi bi-x-circle" (click)="banUserFromRoomModal(user.login, getCurrentRoom())"></i>
 							</div>
 						</li>
 				</div>
@@ -197,10 +196,10 @@
 								<i class="bi bi-chat-left-text" (click)="joinUserToRoom('@'+user.login, '')">&nbsp;</i>
 								<i *ngIf="!getMyBlockedUsers().includes(user.login)" class="bi bi-person-fill-slash" (click)="blockUserModal(user.login)">&nbsp;</i>
 								<i *ngIf="getMyBlockedUsers().includes(user.login)" class="bi bi-person-check-fill" (click)="unBlockUserModal(user.login)">&nbsp;</i>
-							    <i *ngIf="roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login && !isAdmin(getCurrentRoom(), user.login)" class="bi bi-shield-plus" (click)="makeRoomAdmin(user.login, getCurrentRoom())">&nbsp;</i>	
-								<i *ngIf="(roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), user.login)) && !isSilenced(getCurrentRoom(), user.login)" class="bi bi-volume-mute" (click)="silenceUserFromRoomModal(user.login, getCurrentRoom())">&nbsp;</i>
-								<i *ngIf="(roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), user.login)) && isSilenced(getCurrentRoom(), user.login)" class="bi bi-volume-up" (click)="unSilenceUserFromRoom(user.login, getCurrentRoom())">&nbsp;</i>
-								<i *ngIf="roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), user.login)" class="bi bi-x-circle" (click)="banUserFromRoomModal(user.login, getCurrentRoom())"></i>
+							    <i *ngIf="roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login && !isAdmin(getCurrentRoom(), myUser!.login)" class="bi bi-shield-plus" (click)="makeRoomAdmin(user.login, getCurrentRoom())">&nbsp;</i>	
+								<i *ngIf="(roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), myUser!.login)) && !isSilenced(getCurrentRoom(), user.login)" class="bi bi-volume-mute" (click)="silenceUserFromRoomModal(user.login, getCurrentRoom())">&nbsp;</i>
+								<i *ngIf="(roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), myUser!.login)) && isSilenced(getCurrentRoom(), user.login)" class="bi bi-volume-up" (click)="unSilenceUserFromRoom(user.login, getCurrentRoom())">&nbsp;</i>
+								<i *ngIf="roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), myUser!.login)" class="bi bi-x-circle" (click)="banUserFromRoomModal(user.login, getCurrentRoom())"></i>
 							</div>
 						</li>
 				</div>
@@ -226,8 +225,8 @@
 								<i *ngIf="enableChallengeButton(user.login)" class="bi bi-controller" (click)="challengeMatchModal(user.login)">&nbsp;</i>
 								<i class="bi bi-chat-left-text" (click)="joinUserToRoom('@'+user.login, '')">&nbsp;</i>
 								<i *ngIf="!getMyBlockedUsers().includes(user.login)" class="bi bi-person-fill-slash" (click)="blockUserModal(user.login)">&nbsp;</i>
-								<i *ngIf="getMyBlockedUsers().includes(user.login)" class="bi bi-person-check-fill" (click)="unBlockUserModal(user.login)">&nbsp;</i>
-								<i *ngIf="roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), user.login)" class="bi bi-check-circle" (click)="unBanUserFromRoomModal(user.login, getCurrentRoom())"></i>
+								<i *ngIf="getMyBlockedUsers().includes(user.login)" class="bi bi-person-check-fill" (click)="unBlockUserModal(myUser!.login)">&nbsp;</i>
+								<i *ngIf="roomsMetaData.get(getCurrentRoom())?.owner === myUser?.login || isAdmin(getCurrentRoom(), myUser!.login)" class="bi bi-check-circle" (click)="unBanUserFromRoomModal(user.login, getCurrentRoom())"></i>
 							</div>
 						</li>
 				</div>

@@ -27,7 +27,6 @@ export class ImageService {
   getAvatarImages(): Observable<string[]> {
     return this.httpClient.get<{ images: string[] }>(`${this.apiUrl}`).pipe(
       catchError((error) => {
-        console.error('Error fetching avatar images:', error);
         return [];
       }),
       map((response) => response.images || [])

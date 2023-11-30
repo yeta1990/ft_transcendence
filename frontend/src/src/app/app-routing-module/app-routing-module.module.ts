@@ -48,9 +48,6 @@ const routes: Routes = [
 			logCheck: true
 		},
 	},
-	{	path: 'signup',
-		component: FormComponent
-	} ,
 	{	
 		path: 'chat', 
 		component: ChatComponent, 
@@ -87,24 +84,6 @@ const routes: Routes = [
 		  bothCheck: true
 		},
 	  },
-	{
-		path: 'play',
-		component: PongComponent,
-		canActivate: [AuthGuard],
-		data: {
-			logCheck: true,
-			online: false
-		  },
-	},
-	{
-		path: 'on-line',
-		component: PongComponent,
-		canActivate: [AuthGuard],
-		data: {
-			logCheck: true,
-			online: true
-		  },
-	},
 	{
 		path: 'admin',
 		component: AdminPageComponent,

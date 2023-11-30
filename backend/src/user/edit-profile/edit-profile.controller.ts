@@ -14,16 +14,14 @@ export class EditProfileController {
 
 	@UseGuards(AuthGuard)
     @Post('user/edit')
-    public edit(@Body() user: User, @UserId() id: number): Promise<User> {
+    public edit(@Body() user: User, @UserId() id: number): Promise<User | boolean> {
         return(this.editProfileService.editProfile(user, id));
     } 
 
     @UseGuards(AuthGuard)
     @Post('check-nick')
     async checkNickAvailability(@Body() data: { nick: string }): Promise<any> {
-        console.log('Received request with data:', data);
         const isAvailable = await this.userService.isNickAvailable(data.nick);
-        console.log('Nick availability checked successfully');
         return isAvailable;
     }
 }

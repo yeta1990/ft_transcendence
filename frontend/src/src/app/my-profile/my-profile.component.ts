@@ -23,10 +23,8 @@ export class MyProfileComponent implements OnInit {
 			.subscribe(
 				(response: User) => { //so subscribe waits for the async call to the backend
 				this.user = response;
-				//console.log(response);
 			},
 			(error) => {
-				console.log(error);
 			}
 			);
 	}
@@ -36,14 +34,12 @@ export class MyProfileComponent implements OnInit {
 	}
 	ngOnInit(): void {	
 		const userName = this.authService.getUserNameFromToken();
-		console.log("The username is: " + userName);
 		if (userName) {
 			this.router.navigate(['/user-profile', userName]);
 		}
 	}
 
 	allUsers(): void {
-		console.log("All users login list:");
 		this.router.navigateByUrl('/all-users');
 	}
 }

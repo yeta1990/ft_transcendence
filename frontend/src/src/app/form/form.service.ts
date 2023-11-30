@@ -21,7 +21,6 @@ export class FormService {
 
 	errorMessage: string = '';
 	private handleError(error: HttpErrorResponse, user: User) {
-		console.error('An error ocurred:', error.error);
 		throw new Error();
 	}
 

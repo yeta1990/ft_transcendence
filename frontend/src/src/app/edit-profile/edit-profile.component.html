@@ -1,14 +1,5 @@
 <app-nav-bar/>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="edit-profile.component.css">
-    <title>Configuración General</title>
-</head>
-<body>
 	<div class="background">
 		<div class="profile-container">
 			<h1 class="title01">Configuración General</h1>
@@ -48,19 +39,19 @@
 				<div class="user-info-row">
 					<div class="inputBox">
 						<input type="text" name="nick" required="required" id="nick" formControlName="nick" placeholder="{{ user?.nick }}">
-						<span>Apodo</span>
+						<span>Nick</span>
 					</div>
 					<div class="inputBox">
 						<select formControlName="campus" class="selectBox">
-							<option value="" selected disabled>Selecciona tu campus</option>
-							<option class="select-option" *ngFor="let option of campusesTypes" [value]="option">{{ option }}</option>
+							<option value="" selected disabled>No puedes cambiar tu campus</option>
+							<option select disabled class="select-option" *ngFor="let option of campusesTypes" [value]="option">{{ option }}</option>
 						</select>
 						<span>Campus</span>
 					</div>
 				</div>
 				<div class="user-info-row">
 					<div *ngIf="editForm.get('nick')?.hasError('notAvailable')" class="error-message">
-						Este apodo no es correcto o ya está en uso.
+						<span *ngIf="errorMessage">{{errorMessage}}</span>
 					</div>
 				</div>
 				<div></div>
@@ -79,54 +70,4 @@
 			<div class="finish-block"></div>
         </div>
     </div>
-</body>
-</html>
-<div class="container mt-4">
-	<h2>Edit Profile</h2>
-	<form [formGroup]="editForm">
-		<div class="form-group">
-			<label for="name">Login</label>
-			<input id="login" type="text" class="form-control" readonly formControlName="login" placeholder="{{ user?.login }}">
-		</div>
-		<div class="form-group">
-			<label for="name">Name</label>
-			<input id="name" type="text" class="form-control" formControlName="firstName" placeholder="{{ user?.firstName }}">
-		</div>
-
-		<div class="form-group">
-			<label for="lastName">Last Name</label>
-			<input id="lastName" type="text" class="form-control" formControlName="lastName" placeholder="{{ user?.lastName }}">
-		</div>
-
-		<div class="form-group">
-			<label for="nick">Nick</label>
-			<input id="nick" type="text" class="form-control" formControlName="nick" placeholder="{{ user?.nick }}">
-		</div>
-
-		<div class="form-group">
-			<label for="email">Email</label>
-			<input id="email" type="text" class="form-control" formControlName="email" placeholder="{{ user?.email }}">
-		</div>
-
-		<br>
-
-		<!-- Botón para activar/desactivar MFA -->
-		<div *ngIf="!mfaActivated">
-			<button class="btn btn-success" type="button" (click)="connectMfa()">Enable Two-Factor Authentication (MFA)</button>
-		</div>
-		<!-- Botón para desconectar MFA -->
-		<div *ngIf="mfaActivated">
-			<button class="btn btn-danger" type="button" (click)="disconnectMfa()">Disconnect Two-Factor Authentication (MFA)</button>
-		</div>
-        <br />
-	    <br />
-	    <label class="tab" for="file">Change profile picture&emsp;</label>
-	    <input id="file" type="file" (change)="onFileChange($event)" >
-        <button *ngIf="formData.has('image')" type="button" class="btn btn-danger" (click)="clearFile()">Unselect</button>
-        <br />
-        <br />
-		<button class="btn btn-primary mt-3" type="submit">Submit</button>
-		<app-modal></app-modal>
-	</form>
-</div>
 	

@@ -33,7 +33,6 @@ export class CallbackComponent implements OnInit {
 
 	ngOnInit() {
 		try {
-			console.log("Estoy en Callback!!");
 			this.route.queryParams.subscribe(params => {
 				this.code = params['code'];
 				this.authenticate(this.code);
@@ -45,7 +44,6 @@ export class CallbackComponent implements OnInit {
 
 	authenticate(code: string) {
 		if (code && this.validateCode(code)) {
-			console.log("HE validado el código");
 			this.authService.login(code)
 			.subscribe(
 				(response) => {
@@ -53,7 +51,6 @@ export class CallbackComponent implements OnInit {
 						this.SubscribeTo2faInput(response.userId); 
 						this.modalService.openModal('verifyMfaTemplate');
 					} else {
-						console.log("User is logged in");
 						const login: any = this.authService.getUserNameFromToken()
 						if (!login) return;
 						this.userProfileService
@@ -73,7 +70,6 @@ export class CallbackComponent implements OnInit {
 				}
 			);
 		} else {
-			console.error("El código recibido no es un hash SHA-256 válido.");
 		}
 	}
 
@@ -95,7 +91,6 @@ export class CallbackComponent implements OnInit {
 						}
 					},
 					(error) => {
-						console.error('HTTP Error:', error);
 						this.toasterService.launchToaster(ToastValues.ERROR, error);
 					});
 			} else {
@@ -104,7 +99,6 @@ export class CallbackComponent implements OnInit {
 			  this.toasterService.launchToaster(ToastValues.ERROR, message);
 			}
 		  } else {
-			console.log("El cierre del modal no está confirmado");
 			this.router.navigateByUrl('/login')
 		  }
 	  

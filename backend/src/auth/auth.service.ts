@@ -50,13 +50,11 @@ export class AuthService {
 
 	async signIn(code: string ): Promise<any> {
 		let data: authData42;
-		console.log("He llegado al signIn");
 		try{
 			data = await this.confirmAuthFrom42(code);
 		}
 		catch(error){
-			console.log(error)
-			throw new UnauthorizedException();
+			return false;
 		}
 
 		const allUserData42 = await this.userService.whoAmI(data.access_token);

@@ -30,7 +30,6 @@ export class TwoFactorAuthService {
 		const message = 'Token to validate code';
 
 		const body = { userId, loginCode, message };
-		console.log(body);
 		return this.httpClient.post(environment.apiUrl + '/2fa/turn-off', body, { responseType: 'text' })
 			.pipe(
 				tap(() => {
@@ -45,7 +44,6 @@ export class TwoFactorAuthService {
 		const message = 'Token to validate code';
 
 		const body = { userId, loginCode, message };
-		console.log(body);
 		return this.httpClient.post(environment.apiUrl + '/2fa/turn-on', body, { responseType: 'text' })
 			.pipe(
 			tap(() => {
@@ -60,7 +58,6 @@ export class TwoFactorAuthService {
 		const message = 'This is the request token';
 
 		const body = { userId, loginCode, message };
-		console.log(body);
 		return this.httpClient.post(environment.apiUrl + '/2fa/generate', body, { responseType: 'blob' });
 	}
 
@@ -70,7 +67,6 @@ export class TwoFactorAuthService {
 			if (confirm) {
 				this.handleConfirmation(userId, enable);
 			} else {
-				console.log("El cierre del modal no está confirmado");
 			}
 		});
 	}
@@ -96,7 +92,6 @@ export class TwoFactorAuthService {
 				this.toasterService.launchToaster(ToastValues.INFO, response);
 			},
 			(error) => {
-				console.log(error);
 				this.toasterService.launchToaster(ToastValues.ERROR, 'El código proporcionado no es correcto');
 			}
 		);

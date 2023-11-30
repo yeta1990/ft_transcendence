@@ -464,18 +464,18 @@
 				<img [src]="imagesBaseUrl + image" alt="Avatar Image" class="gallery-image">
 			</div>
 				  
-				  <div class="upload-container" [class.selected-image]="file">
-					<div class="image-cropper-container" *ngIf="file" [ngStyle]="{backgroundImage: 'url(' + file + ')'}"></div>
-					<div class="image-cropper-container avatar-placeholder box-shadow-avatar" *ngIf="!file" style="background-image: url('{{ imagesBaseUrl }}phldr.jpg')"></div>
+				  <div class="upload-container" [class.selected-image]="selectedImage">
+					<div class="image-cropper-container" *ngIf="selectedImage" [ngStyle]="{backgroundImage: 'url(' + selectedImageName + ')'}"></div>
+					<div class="image-cropper-container" *ngIf="!selectedImage" style="background-image: url('{{ imagesBaseUrl }}phldr.jpg')"></div>
 					<label for="avatar-input-file">
-						<div class="icon-wrapper" *ngIf="!file">
-							<div class="upload-icon" *ngIf="!file">+</div>
+						<div class="icon-wrapper" *ngIf="!selectedImage">
+							<div class="upload-icon" *ngIf="!selectedImage">+</div>
 							<label for="avatar-input-file" class="file-label">
 								<input type="file" id="avatar-input-file" accept="image/*" (change)="onFileChange($event)" />
 							  </label>
 						</div>
 					</label>
-					<button *ngIf="file" type="button" class="unselect-button" (click)="clearFile()">Unselect</button>
+					<button *ngIf="selectedImage" type="button" class="unselect-button" (click)="clearFile()">Unselect</button>
 				  </div> 
 				  
 			</div>

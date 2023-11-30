@@ -21,10 +21,8 @@ export class ModalComponent {
   modalData: any;
   imagesBaseUrl: string = environment.apiUrl + '/uploads/'
   selectedImage: File | null = null;
-  selectedAvatar: string | null = null;
   selectedImageName: string | null = null;
   formData: FormData = new FormData();
-  file: string | null = null;
   placeholder: string = "phldr.jpg";
 
   constructor(private modalService: ModalService,
@@ -50,6 +48,7 @@ export class ModalComponent {
 	this.inputValue2 = "";
 	this.checkboxInput = false;
 	this.confirmationInput = false;
+	this.selectedImage = null;
     this.modalService.closeModal();
   }
 
@@ -103,19 +102,10 @@ export class ModalComponent {
   }
 
   onImageSelect(selectedImage: string): void {
-    console.log('Modal: Imagen seleccionada:', selectedImage);
-    if (this.selectedImage?.name === selectedImage) {
-      this.selectedImage = null;
-    } else {
-//      this.selectedImage = selectedImage;
 	  this.inputValue = selectedImage;
-//	  this.selectedAvatar = selectedImage
-    }
+      this.selectedImage = null;
   } 
 
-//  isImageSelected(image: string): boolean {
-//    return this.selectedImage === image;
-//  }
 
   openFileInput(): void {
     const fileInput = document.getElementById('file');
@@ -127,12 +117,9 @@ export class ModalComponent {
   onFileChange(event: any): void {
     const files = event.target.files as FileList;
 
-	console.log(files[0])
     if (files.length > 0) {
-//      const _file = URL.createObjectURL(files[0]);
-//      console.log('_file:', _file);
-//		this.file = _file;
 		this.selectedImage = files[0];
+		this.inputValue = ""
 		this.selectedImageName = URL.createObjectURL(this.selectedImage)
       this.resetInput();
     }
@@ -148,7 +135,6 @@ export class ModalComponent {
   clearFile(): void {
     this.formData.delete('image');
 	this.selectedImage = null;
-	this.file = null;
   }
 }
 

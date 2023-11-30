@@ -32,7 +32,6 @@ export class UserProfileService {
     return this.httpClient.get<Achievement[]>(environment.apiUrl + '/user/' + id + '/achievements')
       .pipe(
         catchError((error: any) => {
-          console.error('Error getting user achievements:', error);
           return of([]); // Return an empty array in case of error
         })
       );

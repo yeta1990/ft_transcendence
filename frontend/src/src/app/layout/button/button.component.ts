@@ -18,11 +18,9 @@ export class ButtonComponent {
 		private router: Router
 	){}
    goTo(): void{
-    console.log("Go to: " + this.dir);
 		this.router.navigateByUrl(this.dir);
   }
   logout(): void {
-		console.log("log out");
 		this.authService.logout();
 		this.router.navigateByUrl('/login');
 	}

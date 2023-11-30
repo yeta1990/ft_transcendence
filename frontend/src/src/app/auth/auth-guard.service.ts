@@ -21,29 +21,23 @@ export class AuthGuardService  {
 
 	canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> {
 		
-		console.log("Estoy intentando ver si puedes entrar");
 
 		if (route.data && route.data['bothCheck']) {
-			console.log("Me has pedido que compruebe ambos");
 			return this.checkBothPermissions(route);
 		}
 
 		if (route.data && route.data['adminCheck']) {
-			console.log("Me has pedido que compruebe adminCheck");
 			return this.checkAdminPermissions();
 		}
 		
 		if (route.data && route.data['userCheck']) {
-			console.log("Me has pedido que compruebe userCheck");
 			return this.checkUserPermissions(route);
 		}
 
 		if (route.data && route.data['logCheck']) {
-			console.log("Me has pedido que compruebe si el usuario está loggeado");
 			if (this.auth.isLoggedIn()) {
 				return of(true);
 			} else {
-				console.log("OJO! el usuario no está identificado");
 				return of(this.router.createUrlTree(['/login']));
 			}
 		}

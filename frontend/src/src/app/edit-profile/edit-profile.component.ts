@@ -49,6 +49,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 	loginEnabled = false;
 	selectedStandardAvatar: string | null = null
 	originalFormValues: any;
+	errorMessage: string | undefined = undefined;
 	imagesBaseUrl: string = environment.apiUrl + '/uploads/'
 	public avatarImages: string[] = [];
 	avatarImageSrc: string | null = null;
@@ -108,13 +109,12 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 			  this.avatarImages = images;
 			},
 			(error) => {
-			  console.error('Error fetching avatar images:', error);
 			}
 		  );
-		  this.imageService.selectedImage$.subscribe((selectedImage: File) => {
-			this.avatarImageSrc = this.imagesBaseUrl + URL.createObjectURL(selectedImage);
-			this.formData.append('image', this.avatarImageSrc )
-		  });
+//		  this.imageService.selectedImage$.subscribe((selectedImage: File) => {
+//			this.avatarImageSrc = this.imagesBaseUrl + URL.createObjectURL(selectedImage);
+//			this.formData.append('image', this.avatarImageSrc )
+//		  });
 	}
 
 	ngOnDestroy(): void {
@@ -133,7 +133,6 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 				this.originalFormValues = { ...this.editForm.value };
 			},
 			(error: any) => {
-				console.error('Error al obtener el perfil del usuario:', error);
 				this.handleProfileError(error);
 			}
 		);
@@ -171,25 +170,47 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 			if (newNick !== null) {
 				this.validateNick(newNick);
 			} else {
-				console.log('El valor de nick es nulo');
 			}
 		});
 	}
 
-	validateNick(newNick: string | null): void {
+	// FUNCIONES PARA LA VALIDACIÓN -------------------------------------------------------------
+
+	subscribeToInputs() : void {
+		this.editForm.get('firstName')?.valueChanges.subscribe((name: string | null) => {
+			if (name !== null) {
+				this.validateName(name);
+			} else {
+			}
+		});
+		this.editForm.get('nick')?.valueChanges.subscribe((newNick: string | null) => {
+			if (newNick !== null) {
+				this.validateNick(newNick);
+			} else {
+			}
+		});
+	}
+
+	async validateNick(newNick: string | null): Promise<void> {
 		if (newNick !== null) {
-			this.validationService.checkNickAvailability({ nick: newNick }).subscribe(
-				(response) => {
-					if (response == true || newNick === this.user?.nick) {
-						this.editForm.get('nick')?.setErrors(null);
-					} else {
-						this.editForm.get('nick')?.setErrors({ notAvailable: true });
-					}
-				},
-				(error) => {
-				console.error('Error al verificar el nick:', error);
-				}
-			);
+			const ret = await this.validationService.checkNick(newNick);
+			if(newNick == this.user?.nick){
+				this.errorMessage = undefined;
+				this.editForm.get('nick')?.setErrors(null);
+			}
+			else if (ret.success) {
+				this.errorMessage = undefined;
+				this.editForm.get('nick')?.setErrors(null);
+			} else {
+				this.errorMessage = ret.message;
+				this.editForm.get('nick')?.setErrors({ notAvailable: true });
+			}
+		}
+	}
+
+	validateName( name: string | null ) : void {
+		if ( name !== null ) {
+			const ret = this.validationService.checkName(name);
 		}
 	}
 
@@ -231,10 +252,8 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 	this.httpClient.post<any>(environment.apiUrl + '/edit-profile/user/edit', this.newUser)
 		.subscribe(
 		(response: User) => {
-			console.log('Edición exitosa:', response);
 		},
 		(error) => {
-			console.error('Error al editar el usuario:', error);
 			this.toasterService.launchToaster(ToastValues.ERROR, 'Error al editar el usuario');
 		}
 		);
@@ -250,7 +269,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 		this.newUser.lastName = this.editForm.get('lastName')?.value!;
 		this.newUser.nick = this.editForm.get('nick')?.value!;
 		this.newUser.email = this.editForm.get('email')?.value!;
-	
+
 		if (this.formData.has('image')) {
 			try {
 				const uploadResponse = await this.uploadImage();
@@ -259,7 +278,6 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 				}
 				
 			} catch (error) {
-				console.error('Error al subir la imagen:', error);
 			}
 		}
 		else if (this.selectedStandardAvatar){
@@ -275,14 +293,11 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 	}
 
 	async uploadImage(): Promise<any> {
-		console.log(this.formData)
 		try {
 			const response = await this.httpClient.post<any>(environment.apiUrl + '/user/upload', this.formData).toPromise();
-			console.log('Imagen subida:', response);
 			return response;
 		} catch (error) {
 			this.handleUploadError(error);
-			throw error;
 		}
 	}
 
@@ -298,16 +313,6 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 		this.toasterService.launchToaster(ToastValues.ERROR, 'Error al cargar imagen');
 	  }
 
-	onFileChange(event: any): void {
-		const file = event.target.files[0];
-		console.log("on file change")
-		console.log(file)
-		if (file) {
-		this.selectedFile = file;
-		this.editForm.patchValue({ file });
-		this.formData.append('image', file)
-		}
-	}
 
 	clearFile(): void{
 		this.editForm.get('file')?.setValue(null)
@@ -327,7 +332,6 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 		const modalData = {
 			images: images,
 			onSelectImage: (selectedImage: string) => {
-			console.log('Edit: Imagen seleccionada:', selectedImage);
 			},
 		};
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
@@ -353,21 +357,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 		this.modalService.openModal('imageGalleryTemplate', modalData);
 	  }
 
-	  /*
-	  mostrarImagenSeleccionada(): void {
-		console.log("Estoy en mostrar imagen. SelectedFile: " + this.selectedFile);
-		if (this.selectedFile) {
-		  const reader = new FileReader();
-		  reader.onload = (event: any) => {
-			this.avatarImageSrc = event.target.result;
-			console.log("avatarImageSrc: " + this.avatarImageSrc);
-		  };
-		  reader.readAsDataURL(this.selectedFile);
-		}
-	  }
-	 */ 
 	getUserImage(): string{
-		console.log(this.avatarImageSrc)
 		if (this.avatarImageSrc && this.avatarImageSrc.includes('blob') && this.avatarImageSrc.substr(0,4) != "http") return this.avatarImageSrc;
 		if (this.avatarImageSrc && !this.avatarImageSrc.includes('blob')) return this.avatarImageSrc
 		if (this.user?.image) return this.imagesBaseUrl + this.user?.image
@@ -386,7 +376,6 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 			this.modalService.openModal('enableMfaTemplate', { qrURL });
 		},
 		(error) => {
-			console.error('ERROR: Error al generar el código QR:', error);
 		}
 	)
 	}

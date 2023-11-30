@@ -175,7 +175,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	  		  	this.broadCastToRoom(events.RoomMetaData, roomMetaData);
 		  }
 		  //cancel all match proposals
-		  console.log("hard disconenct")
 		  this.pongservice.cancelMatchProposal(login)
 		  this.pongservice.removeUserFromMatchMakingList(login)
 		  this.pongservice.waitForPlayerReconnect(login)
@@ -190,7 +189,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	const roomsRaw: any = adapter.rooms;
 
 	if (roomsRaw){
-//		console.log(roomsRaw)
 		return (Array.from(roomsRaw.keys()).filter(x => x[0] == '#') as Array<string>);
 	}
 	return ([]);
@@ -245,8 +243,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 				if (isWebAdmin) return u;
 			})))
 			.filter(u => u !== undefined)
-			//console.log(activeWebAdminsInServer)
-
 
 		const usersArray = Array.from(this.chatService.getAllChatUsers());
 		const usersWithCompleteData: Array<ChatUser> = 
@@ -264,13 +260,11 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 
 	if (!roomIds) return [];
 	const usersRaw: Array<string> = Array.from(roomIds);
-	//console.log("users raw")
 	//onsole.log(usersRaw)
 	let usersWithCompleteData: Array<ChatUser> = new Array();
 	usersRaw.forEach(x => {
 		usersWithCompleteData.push(this.chatService.getAllChatUsers().get(x));
 	});
-	//console.log(usersWithCompleteData)
     return (usersWithCompleteData);
   }
 
@@ -351,7 +345,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 		let hardJoin: boolean = true; //login wasn't in channel with other client
 	  	const roomExists: boolean = await this.chatService.isRoomCreated(room);
 		if (!roomExists){
-			console.log("password + ", password)
 			const successfulCreatedAndJoin: boolean = await this.createNewRoomAndJoin(clientId, login, room, password)
 			if (!successfulCreatedAndJoin) return false;
 		}
@@ -448,7 +441,6 @@ export class BaseGateway implements OnGatewayInit, OnGatewayDisconnect {
 	    const socketIdsByLogin: Array<string> = this.getClientSocketIdsFromLogin(login);
   	  	//unsubscribe user from socket service
   	  	for (const clientId of socketIdsByLogin){
-  	  		//console.log(clientId)
   		  	if (bannedUsers && bannedUsers.length > 0) {
 				const blockedUsersByLogin: Array<string> =  bannedUsers
 				.map(m => m.login)

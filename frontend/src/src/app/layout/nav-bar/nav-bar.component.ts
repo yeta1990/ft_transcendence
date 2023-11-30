@@ -44,11 +44,9 @@ export class NavBarComponent {
 					this.chatService.setAvailableRoomsList(payload.data.map((r:any) => r.room))
 				}
 				else if (payload.event === "sendMatchProposal"){
-					console.log("receiving match")
 					this.receiveMatchModal(payload.data)	
 				}
 				else if (payload.event === "cancelMatchProposal"){
-					console.log("cancel match")
 					this.modalService.closeModal();
 				}
 				else if (payload.event === "acceptMatchProposal"){
@@ -147,7 +145,6 @@ export class NavBarComponent {
 		this.modalClosedSubscription = this.modalService.modalClosed$.subscribe(() => {
       		const confirm: boolean = this.modalService.getConfirmationInput();
 			const wantToReplay = this.modalService.getModalData()[0];
-			console.log(wantToReplay)
 			this.modalClosedSubscription.unsubscribe();
       		if (confirm){
       			this.sendReplayProposal(login)
