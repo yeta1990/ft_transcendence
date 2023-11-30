@@ -8,6 +8,17 @@ body {
 	height: 100vh;
   }
   
+.myprettyform {
+	align-items: center;
+	margin: 20px auto;
+	flex-direction: column;
+	display: flex;
+	width: 100%;
+	max-width: 400px;
+	position:relative;
+	
+}
+
   .profile-container {
 	background-color: #333333;
 	width: 80%;

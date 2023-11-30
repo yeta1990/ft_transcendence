@@ -45,7 +45,7 @@
       <tbody>
     	<tr *ngFor="let request of incomingFriendRequests">
           <td>{{ request.nick}}</td>
-          <td><img [src]="request.image" alt="Picture of {{ request.login }}" class="img-thumbnail"style="max-width: 100px;" ></td>
+          <td><img [src]="imagesBaseUrl + request.image" alt="Picture of {{ request.login }}" class="img-thumbnail"style="max-width: 100px;" ></td>
           <td>status</td>
           <td>
 	 		<button class="btn btn-primary" (click)="acceptFriendShipRequest(request.login)">ACCEPT FRIENDSHIP REQUEST</button>
