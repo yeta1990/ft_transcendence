@@ -16,6 +16,7 @@ import {
 } from '@nestjs/common';
 
 import { AuthGuard } from '../auth/auth.guard';
+import * as path from 'path';
 import {FileInterceptor} from '@nestjs/platform-express'
 import { UserService } from './user.service';
 import { CreateUserDto } from './user.dto';
@@ -302,6 +303,29 @@ export class UserController {
 		return { isValid: isValidDB };
 	}
 
+	isPNG(fileBuffer) {
+	  const pngMagicNumber = fileBuffer.toString('hex', 0, 8);
+	  return pngMagicNumber == '89504e470d0a1a0a';
+	}
+
+	isJPEG(fileBuffer) {
+	  const jpegMagicNumber = fileBuffer.toString('hex', 0, 4);
+	  return jpegMagicNumber == 'ffd8ffe0';
+	}
+
+	isApple(fileBuffer) {
+	  const jpegMagicNumber = fileBuffer.toString('hex', 0, 4);
+	  return jpegMagicNumber == 'ffd8ffe1';
+	}
+
+	isJPEG2000(fileBuffer) {
+  		const jp2MagicNumber = fileBuffer.toString('hex', 4, 12);
+  		return jp2MagicNumber == '6a5020200d0a870a';
+	}
+	isTIFF(fileBuffer) {
+  		const tiffMagicNumber = fileBuffer.toString('hex', 0, 4);
+  	return tiffMagicNumber == '49492a00' || tiffMagicNumber == '4d4d002a';
+	}
 	@UseGuards(AuthGuard)
 	@Post('upload')
 	@UseInterceptors(FileInterceptor('image', {
@@ -325,6 +349,18 @@ export class UserController {
 	}))
 	uploadFile(@Body() body: any, @UploadedFile() file: Express.Multer.File) {
 		if (!file) return false;
+    	const imagePath = path.join(__dirname, '../../..', 'uploads', file.filename);
+		if (fs.existsSync(imagePath)){
+			const fileBuffer = fs.readFileSync(imagePath);
+			if (!this.isPNG(fileBuffer) && !this.isJPEG(fileBuffer) &&
+					!this.isTIFF(fileBuffer) && !this.isJPEG2000(fileBuffer) &&
+						!this.isApple(fileBuffer)
+			   ){
+				//tourists go home!!!
+				fs.unlinkSync(imagePath);
+				return { error: "Magic number error"};
+			}
+		}
 		if (body.fileValidationError) {
 			return { error: body.fileValidationError };
 		  }
