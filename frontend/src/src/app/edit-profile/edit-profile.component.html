@@ -17,12 +17,12 @@
 						<input type="text" name="login" required="required" id="login" formControlName="login" placeholder="{{ user?.login }}" [readonly]="!loginEnabled" [ngStyle]="loginEnabled ? {} : { 'background': '#999' }">
 						<span>Login</span>
 					</div>
-					<button (click)="editLogin()" [ngClass]="isAdmin ? 'button-edit' : 'button-no-edit'"></button>
+					<button (click)="editLogin()" class="button-no-edit"></button>
 					<div class="lockInputBox">
-						<input type="text" name="email" required="required" id="email" formControlName="email" placeholder="{{ user?.email }}" [readonly]="!editEnabled" [ngStyle]="editEnabled ? {} : { 'background': '#999' }">
+						<input type="text" name="email" autocomplete="no" required="required" id="email" formControlName="email" placeholder="{{ user?.email }}" [readonly]="!editEnabled" [ngStyle]="editEnabled ? {} : { 'background': '#999' }">
 						<span>Email</span>
 					</div>
-					<button (click)="editEmail()" class="button-edit"></button>
+					<button class="button-no-edit"></button>
 				</div>
 				<h1 class="title02">Detalles personales</h1>
 				<p class="subtitle">Administra tu nombre e información de contacto. Estos detalles personales son privados y no se mostrarán a otros usuarios.</p>
@@ -42,7 +42,7 @@
 						<span>Nick</span>
 					</div>
 					<div class="inputBox">
-						<select formControlName="campus" class="selectBox">
+						<select id="asdfafasvbbbbb" formControlName="campus" class="selectBox">
 							<option value="" selected disabled>No puedes cambiar tu campus</option>
 							<option select disabled class="select-option" *ngFor="let option of campusesTypes" [value]="option">{{ option }}</option>
 						</select>

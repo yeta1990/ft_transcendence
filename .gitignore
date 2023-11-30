@@ -3,12 +3,10 @@
 backend/uploads/*
 backend/node_modules
 backend/dist
-backend/.env
 backend/package-lock.json
 backend/src/node_modules
 backend/src/npm-debug.log
 backend/src/yarn-error.log
-frontend/.env
 frontend/src/.git
 frontend/src/.git/*
 frontend/src/.vscode/

@@ -356,13 +356,17 @@ export class PongService {
             } else {
                 g.playerOneVel = 0;
             }
+            console.log(g.playerOnePowers)
             if (key === 49 && g.powersAllow){ //1
+            	console.log("49")
                 var power = g.playerOnePowers[0];
                 this.throwPower(power, nick, g);
             }else if (key === 50 && g.powersAllow){ //2
+            	console.log("50")
                 var power = g.playerOnePowers[1];
                 this.throwPower(power, nick, g);
             }else if (key === 51 && g.powersAllow){ //3
+            	console.log("51")
                 var power = g.playerOnePowers[2];
                 this.throwPower(power, nick, g);
             }
@@ -382,13 +386,17 @@ export class PongService {
             } else {
                 g.playerTwoVel = 0;
             }
+            console.log(g.playerTwoPowers)
             if (key === 49 && g.powersAllow){ //1
+            	console.log("49")
                 var power = g.playerTwoPowers[0];
                 this.throwPower(power, nick, g);
             }else if (key === 50 && g.powersAllow){ //2
+            	console.log("50")
                 var power = g.playerTwoPowers[1];
                 this.throwPower(power, nick, g);
             }else if (key === 51 && g.powersAllow){ //3
+            	console.log("51")
                 var power = g.playerTwoPowers[2];
                 this.throwPower(power, nick, g);
             }
@@ -552,7 +560,7 @@ export class PongService {
             this.fasterPaddle(login, g);
         }
         else if(power =="SlowerPaddle"){
-            this.fasterPaddle(login, g);
+            this.slowerPaddle(login, g);
         }
         else if(power =="ReverseMove"){
             this.reverseMove(login, g);
@@ -624,7 +632,7 @@ export class PongService {
           count++;
           await waitSeg(1);
       
-          if (count % 5 === 0) {
+          if (count % 5 === 0 && g.inestableBall == true) {
             g.ballSpeed = speeds[Math.floor(Math.random() * speeds.length)];
           }
         }

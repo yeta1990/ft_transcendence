@@ -112,9 +112,9 @@
  		 <div class="row">
  		   	<form class="col d-flex align-items-center" [formGroup]="messageToChat" (ngSubmit)="processMessageToSend()" class="col d-flex">
  		    <div class="me-2 d-flex align-items-center">
-				<label class="m-0">{{myUser?.nick}}:</label>
+				<span class="m-0">{{myUser?.nick}}:</span>
 			</div>
- 		   	<input class="form-control flex-grow-1 me-2" type="text" formControlName="newMessage" placeholder="Send new message...">
+ 		   	<input class="form-control flex-grow-1 me-2" type="text" formControlName="newMessage" placeholder="Send new message..." id="190920">
  		     <button type="submit" class="btn btn-outline-light">Enviar</button>
  		  </form>
  		 </div>
@@ -237,6 +237,5 @@
   </div>
 
 <br>
--------------------
 <br>
 <br>
