@@ -40,6 +40,8 @@ export class Auth2faController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
   async turnOn2fA(@Body() request: RequestWithUser) {
+  	  if (!request) throw new UnauthorizedException('Wrong authentication code');
+  	  if (!request.userId || !request.loginCode) throw new UnauthorizedException('Wrong authentication code');
     const isCodeValid = await this.auth2faService.is2fACodeValid(
       request.loginCode,
       request.userId,
@@ -55,6 +57,8 @@ export class Auth2faController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
   async turnOff2fA(@Body() request: RequestWithUser) {
+  	  if (!request) throw new UnauthorizedException('Wrong authentication code');
+  	  if (!request.userId || !request.loginCode) throw new UnauthorizedException('Wrong authentication code');
     const isCodeValid = await this.auth2faService.is2fACodeValid(
       request.loginCode,
       request.userId,
@@ -69,6 +73,8 @@ export class Auth2faController {
   @Post('auth')
   @HttpCode(HttpStatus.OK)
   async authenticate(@Body() request: RequestWithUser) {
+  	  if (!request) throw new UnauthorizedException('Wrong authentication code');
+  	  if (!request.userId || !request.loginCode) throw new UnauthorizedException('Wrong authentication code');
     const isCodeValid = await this.auth2faService.is2fACodeValid(
       request.loginCode,
       request.userId,
