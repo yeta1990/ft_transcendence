@@ -378,6 +378,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 			const qrURL = URL.createObjectURL(qrCodeBlob);
 			this.twoFactorAuthService.SubscribeTo2faInput(this.user?.id!, true);
 			this.modalService.openModal('enableMfaTemplate', { qrURL });
+			this.modalClosedSubscription.unsubscribe();
 		},
 		(error) => {
 		}
