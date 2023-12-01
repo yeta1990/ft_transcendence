@@ -8,7 +8,7 @@
 				<h1 class="title02">Información de cuenta</h1>
 				<p class="subtitle2">ID: <span class="user-id">{{ user?.id }}</span></p>
 				<div class="avatar-container">
-					<button class="avatar-button-edit" (click)="onFileInputClick()"></button>
+					<button type="button" class="avatar-button-edit" (click)="onFileInputClick()"></button>
 					<img class="avatar" [src]="getUserImage()" alt="User Avatar" />
 				  </div>
 
@@ -17,12 +17,12 @@
 						<input type="text" name="login" required="required" id="login" formControlName="login" placeholder="{{ user?.login }}" [readonly]="!loginEnabled" [ngStyle]="loginEnabled ? {} : { 'background': '#999' }">
 						<span>Login</span>
 					</div>
-					<button (click)="editLogin()" class="button-no-edit"></button>
+					<button type="button" (click)="editLogin()" class="button-no-edit"></button>
 					<div class="lockInputBox">
 						<input type="text" name="email" autocomplete="no" required="required" id="email" formControlName="email" placeholder="{{ user?.email }}" [readonly]="!editEnabled" [ngStyle]="editEnabled ? {} : { 'background': '#999' }">
 						<span>Email</span>
 					</div>
-					<button class="button-no-edit"></button>
+					<button type="button" class="button-no-edit"></button>
 				</div>
 				<h1 class="title02">Detalles personales</h1>
 				<p class="subtitle">Administra tu nombre e información de contacto. Estos detalles personales son privados y no se mostrarán a otros usuarios.</p>
@@ -56,16 +56,16 @@
 				</div>
 				<div></div>
 				<div class="button-row">
-					<button class="discard-button" (click)="discardChanges()">Discard Changes</button>
-					<button class="button" (click)="saveChanges()">Save</button>
+					<button type="button" class="discard-button" (click)="discardChanges()">Discard Changes</button>
+					<button type="button" class="button" (click)="saveChanges()">Save</button>
 				</div>
 			</form>
 			<hr>
 			<h1 class="title01">Autenticación Doble-Factor</h1>
 			<p class="subtitle">La autenticación de doble factor (2FA) es una capa adicional de seguridad diseñada para proteger tu cuenta contra accesos no autorizados. Esta función requiere la introducción de un código de seguridad adicional al iniciar sesión en la página. Descubre cómo configurarla viendo este video o siguiendo los pasos detallados en este artículo.</p>
 			<div class="mfa-button-container">
-				<button *ngIf="!mfaActivated" class="mfa-button" (click)="connectMfa()">Enable Authenticator APP</button>
-				<button *ngIf="mfaActivated" class="mfa-button" (click)="disconnectMfa()">Disable Authenticator APP</button>
+				<button type="button" *ngIf="!mfaActivated" class="mfa-button" (click)="connectMfa()">Enable Authenticator APP</button>
+				<button type="button" *ngIf="mfaActivated" class="mfa-button" (click)="disconnectMfa()">Disable Authenticator APP</button>
 			</div>
 			<div class="finish-block"></div>
         </div>
