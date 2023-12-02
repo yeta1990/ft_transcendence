@@ -16,6 +16,7 @@ import { AuthGuard } from '../auth.guard';
 import { RequestWithUser } from '../auth.interface';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from '../auth.service';
+import { UserId } from '../../user/user.decorator';
 
 @Controller('2fa')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -28,10 +29,13 @@ export class Auth2faController {
 
   @Post('generate')
   @UseGuards(AuthGuard)
-  async register(@Res() response: Response, @Body() request: RequestWithUser) {
-    const { otpauthURL } = await this.auth2faService.generate2FASecret(
+  async register(@UserId() id: number, @Res() response: Response, @Body() request: RequestWithUser) {
+  	if (!request || !request.userId) return false;
+  	if(id != request.userId) throw new UnauthorizedException('Wrong id');
+    const { otpauthURL, message } = await this.auth2faService.generate2FASecret(
       request.userId,
     );
+    if (message != "OK") throw new UnauthorizedException('Already activated MFA');
     response.setHeader('content-type', 'image/png');
     return this.auth2faService.createQRCode(response, otpauthURL);
   }
@@ -39,9 +43,10 @@ export class Auth2faController {
   @Post('turn-on')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  async turnOn2fA(@Body() request: RequestWithUser) {
+  async turnOn2fA(@UserId() id: number, @Body() request: RequestWithUser) {
   	  if (!request) throw new UnauthorizedException('Wrong authentication code');
   	  if (!request.userId || !request.loginCode) throw new UnauthorizedException('Wrong authentication code');
+  	if(id != request.userId) throw new UnauthorizedException('Wrong id');
     const isCodeValid = await this.auth2faService.is2fACodeValid(
       request.loginCode,
       request.userId,
@@ -56,9 +61,10 @@ export class Auth2faController {
   @Post('turn-off')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  async turnOff2fA(@Body() request: RequestWithUser) {
-  	  if (!request) throw new UnauthorizedException('Wrong authentication code');
-  	  if (!request.userId || !request.loginCode) throw new UnauthorizedException('Wrong authentication code');
+  async turnOff2fA(@UserId() id: number, @Body() request: RequestWithUser) {
+  	if (!request) throw new UnauthorizedException('Wrong authentication code');
+  	if (!request.userId || !request.loginCode) throw new UnauthorizedException('Wrong authentication code');
+  	if(id != request.userId) throw new UnauthorizedException('Wrong id');
     const isCodeValid = await this.auth2faService.is2fACodeValid(
       request.loginCode,
       request.userId,
