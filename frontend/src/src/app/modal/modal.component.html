@@ -13,7 +13,7 @@
 			<div class="mb-3">
           	<p>This channel is protected. To join it, introduce the password: </p>
 
-			<input type="password" class="form-control" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter password">
+			<input type="text" class="form-control" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter password">
    		    </div>
 
    		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Join</button>
@@ -40,7 +40,7 @@
   				  </div>
 				<div class="mb-3" *ngIf="checkboxInput">
     				<label for="channelPass" class="form-label">Password for private channel:</label>
-    				<input type="password" class="form-control" id="channelPass" [(ngModel)]="inputValue2" (keydown.enter)="saveAndCloseModal()" name="channelPass">
+    				<input type="text" class="form-control" id="channelPass" [(ngModel)]="inputValue2" (keydown.enter)="saveAndCloseModal()" name="channelPass">
   				</div>
 			</form>
 
@@ -146,7 +146,7 @@
 			<div class="mb-3">
           	<p>This channel is already protected. If you want to change the password just type it here: </p>
 
-			<input type="password" class="form-control" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter password">
+			<input type="text" class="form-control" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter password">
    		    </div>
 
    		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Change password</button>
@@ -184,7 +184,7 @@
 			<div class="mb-3">
           	<p>Currently the channel is public. Only users knowing the password or users already in the channel will be able to join it. If you want to add a password just type it here: </p>
 
-			<input type="password" class="form-control" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter password">
+			<input type="text" class="form-control" [(ngModel)]="inputValue" (keydown.enter)="saveAndCloseModal()" placeholder="Enter password">
    		    </div>
 
    		    <button (click)="saveAndCloseModal()" type="button" class="btn btn-outline-light">Set a password</button>

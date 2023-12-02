@@ -38,14 +38,14 @@
 	<span class="form-error" *ngIf="profileForm?.get('email')?.touched && profileForm?.get('email')?.errors?.['email']">
 		Enter a valid email address
 	</span>
-	<input type="password" placeholder="Password*" formControlName="password" class="form-input" required>
+	<input type="text" placeholder="Password*" formControlName="password" class="form-input" required>
 	<span class="form-error" *ngIf="(profileForm?.get('password')?.touched || submitted)  && profileForm?.get('password')?.errors?.['required']">
 		Password is required
 	</span>
 	<span class="form-error" *ngIf="(profileForm?.get('password')?.touched && profileForm?.get('password')?.value) && profileForm?.get('password')?.errors?.['invalidPattern']">
 		Password should have minimum 8 characters, at least 1 uppercase letter, 1 lowercase letter and 1 number
 	</span>
-	<input type="password" placeholder="Confirm Password*" formControlName="cPassword" class="form-input" required>
+	<input type="text" placeholder="Confirm Password*" formControlName="cPassword" class="form-input" required>
 	<span class="form-error" *ngIf="(profileForm?.get('cPassword')?.touched || submitted)  && profileForm?.get('cPassword')?.errors?.['required']">
 		Confirm password is required
 	</span>
