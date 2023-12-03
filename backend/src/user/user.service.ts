@@ -271,6 +271,7 @@ export class UserService {
 		});
 	}
 
+
 	async turnOff2FA(userId: number): Promise<void> {
 		const existingUser = await this.getUser(userId);
 		if (!existingUser) {
@@ -278,7 +279,8 @@ export class UserService {
 //			throw new Error('User with ID ${userId} not found');
 		}
 		await this.repository.update( userId, {
-			mfa: false
+			mfa: false,
+			mfaSecret: null
 		});
 	  }
 

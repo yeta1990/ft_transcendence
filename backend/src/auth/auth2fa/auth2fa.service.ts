@@ -1,16 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { authenticator } from 'otplib';
 import { UserService } from '../../user/user.service';
 import { ConfigService } from '@nestjs/config';
 import { toFileStream } from 'qrcode';
 import { Response } from 'express';
 import { Validator } from '@shared/validation';
+import { HashService } from '../../hash/hash.service';
 
 @Injectable()
 export class Auth2faService {
   constructor(
     private readonly userService: UserService,
     private readonly configService: ConfigService,
+  	private hashService: HashService
   ) {}
 
   public async generate2FASecret(userId: number) {
@@ -23,11 +25,15 @@ export class Auth2faService {
           'ft_trascendence',
           secret,
         );
-        await this.userService.set2FASecret(secret, user.id);
+		
+
+		const encryptedPass = await this.hashService.encrypt(secret);
+        await this.userService.set2FASecret(encryptedPass, user.id);
 
         return {
           secret,
           otpauthURL,
+          message: "OK"
         };
       } else {
         return {
@@ -42,6 +48,7 @@ export class Auth2faService {
   }
 
   public async is2fACodeValid(code2fa: string, userId: number) {
+
     if (Validator.isValid2faCode(code2fa)) {
       {
         const user = await this.userService.getUser(userId);
@@ -49,7 +56,7 @@ export class Auth2faService {
           try {
             const isValid = await authenticator.verify({
               token: code2fa,
-              secret: user.mfaSecret,
+              secret: this.hashService.decrypt(user.mfaSecret)
             });
             return isValid;
           } catch (error) {

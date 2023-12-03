@@ -322,10 +322,6 @@ export class UserController {
   		const jp2MagicNumber = fileBuffer.toString('hex', 4, 12);
   		return jp2MagicNumber == '6a5020200d0a870a';
 	}
-	isTIFF(fileBuffer) {
-  		const tiffMagicNumber = fileBuffer.toString('hex', 0, 4);
-  	return tiffMagicNumber == '49492a00' || tiffMagicNumber == '4d4d002a';
-	}
 	@UseGuards(AuthGuard)
 	@Post('upload')
 	@UseInterceptors(FileInterceptor('image', {
@@ -353,7 +349,7 @@ export class UserController {
 		if (fs.existsSync(imagePath)){
 			const fileBuffer = fs.readFileSync(imagePath);
 			if (!this.isPNG(fileBuffer) && !this.isJPEG(fileBuffer) &&
-					!this.isTIFF(fileBuffer) && !this.isJPEG2000(fileBuffer) &&
+					!this.isJPEG2000(fileBuffer) &&
 						!this.isApple(fileBuffer)
 			   ){
 				//tourists go home!!!

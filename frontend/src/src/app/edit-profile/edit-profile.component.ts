@@ -373,7 +373,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 
 
 	connectMfa(): void {
-	this.twoFactorAuthService.generateQRCode(this.user?.id!).subscribe(
+	this.modalClosedSubscription = this.twoFactorAuthService.generateQRCode(this.user?.id!).subscribe(
 		(qrCodeBlob: Blob) => {
 			const qrURL = URL.createObjectURL(qrCodeBlob);
 			this.twoFactorAuthService.SubscribeTo2faInput(this.user?.id!, true);
@@ -381,6 +381,7 @@ export class EditProfileComponent implements  OnInit, OnDestroy {
 			this.modalClosedSubscription.unsubscribe();
 		},
 		(error) => {
+			this.modalClosedSubscription.unsubscribe();
 		}
 	)
 	}

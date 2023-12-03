@@ -67,6 +67,7 @@ export class TwoFactorAuthService {
 			if (confirm) {
 				this.handleConfirmation(userId, enable);
 			} else {
+				this.modalClosedSubscription.unsubscribe();
 			}
 		});
 	}
@@ -85,6 +86,7 @@ export class TwoFactorAuthService {
 
 	private handleValidCode(userId: number, enable: boolean, code: string) {
 		this.modalClosedSubscription.unsubscribe();
+		
 
 		const subscription = enable ? this.enable2FA(userId, code) : this.disable2FA(userId, code);
 			subscription.subscribe(
